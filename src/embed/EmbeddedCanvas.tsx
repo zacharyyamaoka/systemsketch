@@ -20,6 +20,8 @@ import {
   installDefinitionLinking,
 } from '../blocks'
 import { CalloutAddLeaderTool, CalloutTool } from '../callout'
+import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from '../code'
+import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from '../behaviorTree'
 import { BlockContextMenu } from '../blocks/ui'
 import {
   BranchArmShapeUtil,
@@ -83,10 +85,13 @@ import {
   parseLegacyPyblocksSystemSketch,
 } from '../import/legacyPyblocksSystemSketch'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
+import {
+  installSystemSketchWheelZoom,
+  SYSTEMSKETCH_EDITOR_OPTIONS,
+} from '../canvasCamera'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
-const SYSTEMSKETCH_EDITOR_OPTIONS = { maxPages: 1 }
 
 function EmbeddedSystemSketchSurfaceHost() {
   return (
@@ -124,10 +129,13 @@ const EMBEDDED_SHAPE_UTILS = [
   BlockShapeUtil,
   BranchShapeUtil,
   BranchArmShapeUtil,
+  BehaviorTreeShapeUtil,
+  BtControlShapeUtil,
+  CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
@@ -187,6 +195,7 @@ function EmbeddedSurface({
 
   const onMount = useCallback((editor: Editor) => {
     editorRef.current = editor
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     onCompatibilityCopyAvailable(false)
     if (openDocument.readOnly) editor.updateInstanceState({ isReadonly: true })
     const core = decodeDocumentText(openDocument.text)
@@ -241,7 +250,9 @@ function EmbeddedSurface({
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
+    const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -335,13 +346,16 @@ function EmbeddedSurface({
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBehaviorTreeRegions()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopCodeClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+      stopWheelZoom()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 

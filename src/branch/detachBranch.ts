@@ -18,7 +18,7 @@ import {
 	type TLDefaultColorStyle,
 } from 'tldraw'
 
-import { DETACH_FORMAT_VERSION } from '../blocks/detach/detachModel'
+import { DETACH_FORMAT_VERSION, toJsonSafe } from '../blocks/detach/detachModel'
 import { portTldrawColor } from '../blocks/ui/portPalette'
 import { branchLayout, isBranchShape, type BranchShape } from './branchModel'
 import { unwrapBranchArmFrames } from './branchArmFrames'
@@ -171,7 +171,7 @@ export function detachBranchToPrimitives(
 			})
 		}
 		chrome.push(branchText(primitiveParentId, control.port.name,
-			control.label, { color: 'grey', scale: 13 / 18 }))
+			control.label, { color: 'grey', font: 'mono', scale: 13 / 18 }))
 	}
 	for (const row of layout.arms) {
 		if (row.dividerY !== null) chrome.push(branchLine(primitiveParentId, row.dividerY, layout.w, 'm'))
@@ -223,7 +223,9 @@ export function detachBranchToPrimitives(
 			systemSketch: {
 				kind: 'branch',
 				version: DETACH_FORMAT_VERSION,
-				props: structuredClone(branch.props),
+				// WHY: `meta` is `T.jsonValue`; a present-but-undefined optional
+				// prop is legal in `props` and fatal here. See `toJsonSafe`.
+				props: toJsonSafe(structuredClone(branch.props)),
 			},
 		},
 	})

@@ -1,6 +1,7 @@
 import {
 	Editor,
 	createTLStore,
+	createShapeId,
 	defaultBindingUtils,
 	defaultAddFontsFromNode,
 	defaultShapeTools,
@@ -29,16 +30,19 @@ import {
 import {
 	BranchArmShapeUtil,
 	BranchShapeUtil,
-	isBranchShape,
 } from '../branch'
-import { LoopShapeUtil, detachLoopToPrimitives, isLoopShape } from '../loop'
+import { LoopShapeUtil } from '../loop'
 import {
-	CONNECTION_SHAPE_TYPE,
+	BehaviorTreeShapeUtil,
+	BtControlShapeUtil,
+} from '../behaviorTree'
+import { CodeShapeUtil } from '../code'
+import {
 	blockConnectionBindingUtils,
 	blockConnectionShapeUtils,
 } from '../blocks/connections'
-import { detachBlockToPrimitives, detachConnectionToArrow, type DetachResult } from '../blocks/detach'
-import { detachBranchToPrimitives } from '../branch/detachBranch'
+import { type DetachResult } from '../blocks/detach'
+import { DETACHABLE_KINDS, allDetachableIds, runDetachSweep } from '../detach'
 import { SYSTEMSKETCH_COMMENT_RECORDS } from '../comments'
 import {
 	SYSTEMSKETCH_ROUNDED_RECT_GEO,
@@ -68,6 +72,9 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		BranchShapeUtil,
 		BranchArmShapeUtil,
 		LoopShapeUtil,
+		BehaviorTreeShapeUtil,
+		BtControlShapeUtil,
+		CodeShapeUtil,
 		...blockConnectionShapeUtils,
 	],
 )
@@ -88,10 +95,6 @@ const PORTABLE_COLOR_FALLBACKS: Readonly<Record<string, string>> = {
 	'light-yellow': 'yellow',
 	'light-teal': 'light-green',
 	'light-pink': 'light-violet',
-}
-
-function blockDepth(editor: Editor, shape: TLShape): number {
-	return editor.getShapeAncestors(shape).filter(isBlockShape).length
 }
 
 /** The text actually painted by a Value-view Block before the clone mutates. */
@@ -245,34 +248,29 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 
 		for (const page of exportEditor.getPages()) {
 			exportEditor.setCurrentPage(page.id)
-			const blocks = exportEditor.getCurrentPageShapes()
-				.filter(isBlockShape)
-				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))
+			// One registry-driven sweep lowers every custom visual on the page —
+			// regions before their leaves is the sweep's own phase ordering, not
+			// this exporter's concern.
+			const detachableIds = allDetachableIds(exportEditor)
 			// WHY: a portable board must preserve the same authored literal as its
 			// source. A cable is a relationship, not permission to derive a second
-			// pill label while detaching semantic edges to stock arrows.
-			const valuePillLabels = new Map(blocks.map((block) => [
-				block.id,
-				portableValuePillText(block),
-			]))
-			for (const block of blocks) {
-				const result = detachBlockToPrimitives(exportEditor, block.id, { mark: false })
-				const label = valuePillLabels.get(block.id)
-				if (result && label !== null && label !== undefined) {
-					freezeDetachedValuePill(exportEditor, result, label)
-				}
+			// pill label while detaching semantic edges to stock arrows. Labels are
+			// read for authored Blocks only — a region's projected pills are the
+			// region's own occurrences and keep their full detached form.
+			const valuePillLabels = new Map<string, string | null>()
+			for (const id of detachableIds) {
+				const shape = exportEditor.getShape(id)
+				if (isBlockShape(shape)) valuePillLabels.set(id, portableValuePillText(shape))
 			}
-
-			for (const shape of [...exportEditor.getCurrentPageShapes()]) {
-				if (shape.type === CONNECTION_SHAPE_TYPE) {
-					detachConnectionToArrow(exportEditor, shape as never)
-				}
-			}
-			for (const branch of exportEditor.getCurrentPageShapes().filter(isBranchShape)) {
-				detachBranchToPrimitives(exportEditor, branch.id)
-			}
-			for (const loop of exportEditor.getCurrentPageShapes().filter(isLoopShape)) {
-				detachLoopToPrimitives(exportEditor, loop.id)
+			const sweep = runDetachSweep(exportEditor, detachableIds, DETACHABLE_KINDS, {
+				mark: false,
+				select: false,
+			})
+			for (const [id, lowered] of sweep.lowered) {
+				const label = valuePillLabels.get(id)
+				const result = lowered.detail as DetachResult | undefined
+				if (label === null || label === undefined || !result) continue
+				freezeDetachedValuePill(exportEditor, result, label)
 			}
 			normalizeCustomGeometries(exportEditor)
 		}

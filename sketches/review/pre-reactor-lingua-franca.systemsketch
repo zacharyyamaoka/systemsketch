@@ -1,0 +1,3281 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "connection": 17,
+      "frame": 5,
+      "block": 22,
+      "text": 11,
+      "geo": 4,
+      "arrow": 1
+    },
+    "bindings": {
+      "connection": 34,
+      "arrow": 2
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 6,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 480,
+      "y": 1724,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-success",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aJWsE",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 1104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:panel-b",
+      "type": "frame",
+      "props": {
+        "w": 1580,
+        "h": 580,
+        "name": "B · Generated Pre reactor · paper Fig. 7d · the delay is this Block",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aPJ2Q",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-mut-wire-s",
+      "type": "connection",
+      "fromId": "shape:leg-mut-wire",
+      "toId": "shape:leg-mut-src",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 56,
+      "y": 160,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-tick",
+      "type": "block",
+      "parentId": "shape:panel-c",
+      "props": {
+        "w": 240,
+        "h": 154,
+        "title": "tick()",
+        "description": "",
+        "blockType": "source",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ueyk1v-wnBbGw6zPXyLfm",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "definitionKey": "tick"
+      },
+      "index": "a9UhT",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 1724,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:panel-c",
+      "type": "frame",
+      "props": {
+        "w": 1580,
+        "h": 500,
+        "name": "C · SystemSketch compact · Pre compiled onto a z⁻¹ cable",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aQcAv",
+      "typeName": "shape"
+    },
+    {
+      "x": 56,
+      "y": 48,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-tick",
+      "type": "block",
+      "parentId": "shape:panel-b",
+      "props": {
+        "w": 240,
+        "h": 154,
+        "title": "tick()",
+        "description": "",
+        "blockType": "source",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ueyk1v-wnBbGw6zPXyLfm",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "definitionKey": "tick"
+      },
+      "index": "aD0pE",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 2264,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:panel-d",
+      "type": "frame",
+      "props": {
+        "w": 1580,
+        "h": 520,
+        "name": "D · Not Pre · latest-value observation vs named write",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aRbyA",
+      "typeName": "shape"
+    },
+    {
+      "x": 780,
+      "y": 346,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-delay-src",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 300,
+        "h": 154,
+        "title": "Writer",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "Dvk5ac6TTr0QA1M1kHEt6",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Writer"
+      },
+      "index": "aG7PCS",
+      "typeName": "shape"
+    },
+    {
+      "x": 56,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-tick",
+      "type": "block",
+      "parentId": "shape:panel-a",
+      "props": {
+        "w": 240,
+        "h": 154,
+        "title": "tick()",
+        "description": "",
+        "blockType": "source",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ueyk1v-wnBbGw6zPXyLfm",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "definitionKey": "tick"
+      },
+      "index": "a9d0v",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-async-wire-e",
+      "type": "connection",
+      "fromId": "shape:leg-async-wire",
+      "toId": "shape:leg-async-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 1220,
+      "y": 346,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-delay-dst",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 280,
+        "h": 154,
+        "title": "Reader",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "60KXvr1-iuUj6-fC_8ktu",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "Reader"
+      },
+      "index": "aG9JXZ",
+      "typeName": "shape"
+    },
+    {
+      "x": 48,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-rule-cap",
+      "type": "text",
+      "parentId": "shape:panel-d",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 1480,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Neither dashed observation nor a mut write is a time machine. Only Pre / z⁻¹ may go backwards in time."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a9jnU",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 1144,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 200,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Select Pre. Store this tick's x; emit it when start fires again. Output x is ordinary this-tick data. z⁻¹ is the Block, not a backward cable."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aTTuX",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:d-async-s",
+      "type": "connection",
+      "fromId": "shape:d-async",
+      "toId": "shape:d-camera",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 2304,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 220,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN the legend's four cables are distinct, Pre has no solid reverse data cable, C's back edge is dotted with a z⁻¹ pill, and D's dashed / mut cables are clearly not delay."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aVMNU",
+      "typeName": "shape"
+    },
+    {
+      "x": 2140,
+      "y": 1804,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 180,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "C's back edge is Temporal → Delayed: dotted cable + z⁻¹ pill. Same Pre semantics on the edge. Never a solid reverse data cable."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aU9rQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 420,
+      "y": 88,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-timeline",
+      "type": "text",
+      "parentId": "shape:panel-b",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 1100,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "tick t: start → Pre emits x[t-1] (absent on the first tick) → Reader → Writer writes 42 → Pre stores 42."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "tick t+1: start → Pre emits 42 → Reader prints 42. Forward writers on the same tick still override this stored value."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aHd4f",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:d-mut-e",
+      "type": "connection",
+      "fromId": "shape:d-mut",
+      "toId": "shape:d-apply",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-start-reader-e",
+      "type": "connection",
+      "fromId": "shape:b-start-reader",
+      "toId": "shape:b-reader",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 400,
+      "y": 140,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-reader",
+      "type": "block",
+      "parentId": "shape:panel-c",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Reader",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "kiw4XyrkeaauVSr9M2aYJ",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Reader_draft_3",
+        "draftOrdinal": 3
+      },
+      "index": "aAxhU",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 24,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend",
+      "type": "frame",
+      "props": {
+        "w": 1580,
+        "h": 600,
+        "name": "Legend · four cables, four meanings",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aN03z",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-reader",
+      "type": "block",
+      "parentId": "shape:panel-b",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Reader",
+        "description": "print previous x",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "pPEMWlykJ341gP8m5rT8m",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Reader_draft_2",
+        "draftOrdinal": 2
+      },
+      "index": "aFt92",
+      "typeName": "shape"
+    },
+    {
+      "x": 48,
+      "y": 160,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-camera",
+      "type": "block",
+      "parentId": "shape:panel-d",
+      "props": {
+        "w": 280,
+        "h": 154,
+        "title": "camera",
+        "description": "",
+        "blockType": "source",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "vpyzaIIB6-dz57KB0ULcc",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "definitionKey": "camera_draft_1",
+        "draftOrdinal": 1
+      },
+      "index": "a8miDV",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 24,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-delay-wire",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "curved",
+        "curve": {
+          "dx": 0,
+          "dy": 28
+        },
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "authored",
+        "temporal": "delayed",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a9OUY",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-store-s",
+      "type": "connection",
+      "fromId": "shape:b-store",
+      "toId": "shape:b-writer",
+      "props": {
+        "portId": "out_2",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:a-start-s",
+      "type": "connection",
+      "fromId": "shape:a-start",
+      "toId": "shape:a-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 268,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-data-cap",
+      "type": "text",
+      "parentId": "shape:legend",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 716,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "solid · within-tick value"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aFX9yt",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:a-success-s",
+      "type": "connection",
+      "fromId": "shape:a-success",
+      "toId": "shape:a-writer",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 860,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-reader",
+      "type": "block",
+      "parentId": "shape:panel-a",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Reader",
+        "description": "print(x) if present",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "NdsBBqIPEly70_hXO6TLZ",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Reader_draft_1",
+        "draftOrdinal": 1
+      },
+      "index": "aBMU9",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-success-s",
+      "type": "connection",
+      "fromId": "shape:b-success",
+      "toId": "shape:b-reader",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-delay-wire-s",
+      "type": "connection",
+      "fromId": "shape:leg-delay-wire",
+      "toId": "shape:leg-delay-src",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:b-pre",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.2474747474747475
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:c-start-s",
+      "type": "connection",
+      "fromId": "shape:c-start",
+      "toId": "shape:c-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 538,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-async-cap",
+      "type": "text",
+      "parentId": "shape:legend",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 716,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dashed · latest published value"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aG6Klh",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 2264,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-mut",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aMUik",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 1724,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-back",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "curved",
+        "curve": {
+          "dx": 0,
+          "dy": 120
+        },
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "authored",
+        "temporal": "delayed",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aK9dE",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:c-success-s",
+      "type": "connection",
+      "fromId": "shape:c-success",
+      "toId": "shape:c-reader",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 780,
+      "y": 96,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-mut-src",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 300,
+        "h": 154,
+        "title": "setattr",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "jhOm60nzlzt-Bp4lnv15x",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.55
+          }
+        ],
+        "definitionKey": "setattr"
+      },
+      "index": "aFfLCG",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-emit-e",
+      "type": "connection",
+      "fromId": "shape:b-emit",
+      "toId": "shape:b-reader",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-data-wire-e",
+      "type": "connection",
+      "fromId": "shape:leg-data-wire",
+      "toId": "shape:leg-data-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 1220,
+      "y": 48,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-mut-dst",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 280,
+        "h": 154,
+        "title": "apply",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "X-jfDNzZ2TLF-IcEnngy4",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "apply"
+      },
+      "index": "aFjaxG",
+      "typeName": "shape"
+    },
+    {
+      "x": 1120,
+      "y": 88,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-apply",
+      "type": "block",
+      "parentId": "shape:panel-d",
+      "props": {
+        "w": 260,
+        "h": 154,
+        "title": "apply()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ViaN83sbVqgHb4myZ7wSy",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "apply"
+      },
+      "index": "a9UYuV",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:c-back-s",
+      "type": "connection",
+      "fromId": "shape:c-back",
+      "toId": "shape:c-writer",
+      "props": {
+        "portId": "out_2",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 48,
+      "y": 16,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-cap",
+      "type": "text",
+      "parentId": "shape:panel-a",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 1480,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Reader sits after Writer in the sequence. x is produced and consumed at the same start tick, same LF tag. Solid data cable. No Pre."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8T62",
+      "typeName": "shape"
+    },
+    {
+      "x": 420,
+      "y": 16,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-cap",
+      "type": "text",
+      "parentId": "shape:panel-b",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 1100,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Reader runs before Writer, so this tick cannot see this tick's x. A solid Writer.x → Reader.x would be a causality cycle. Pre stores the write and re-emits it on the next start. Wires around Pre are ordinary this-tick data; z⁻¹ lives in the Block."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aCVIr",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 24,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-async-wire",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.55,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a8ptb",
+      "typeName": "shape"
+    },
+    {
+      "x": 720,
+      "y": 16,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-mut-cap",
+      "type": "text",
+      "parentId": "shape:panel-d",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 480,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "mut cable: a named write to state.camera. The new value exists because of the assignment, not because time stepped."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a92NUd",
+      "typeName": "shape"
+    },
+    {
+      "x": 48,
+      "y": 16,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-cap",
+      "type": "text",
+      "parentId": "shape:panel-c",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 1480,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Same graph, Pre compiled away. The back edge is Temporal → Delayed. Dotted cable + z⁻¹ pill. Still not a solid backward data cable. Use this when the tick is already a Loop iteration; keep an explicit Pre Block when the tick is an external start."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8uQj",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:a-x-e",
+      "type": "connection",
+      "fromId": "shape:a-x",
+      "toId": "shape:a-reader",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-start-pre-e",
+      "type": "connection",
+      "fromId": "shape:b-start-pre",
+      "toId": "shape:b-pre",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-async-wire-s",
+      "type": "connection",
+      "fromId": "shape:leg-async-wire",
+      "toId": "shape:leg-async-src",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 780,
+      "y": 538,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-delay-cap",
+      "type": "text",
+      "parentId": "shape:legend",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 716,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "z⁻¹ · previous tick only"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aGE42",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 24,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-data-wire",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.55,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a6dPA",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-mut-wire-e",
+      "type": "connection",
+      "fromId": "shape:leg-mut-wire",
+      "toId": "shape:leg-mut-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 480,
+      "y": 1104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-start-reader",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aDt4U",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 664,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-x",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aCJdE",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:d-mut-s",
+      "type": "connection",
+      "fromId": "shape:d-mut",
+      "toId": "shape:d-write",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-start-reader-s",
+      "type": "connection",
+      "fromId": "shape:b-start-reader",
+      "toId": "shape:b-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 480,
+      "y": 1104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-start-pre",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aEyUy",
+      "typeName": "shape"
+    },
+    {
+      "x": 900,
+      "y": 140,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-writer",
+      "type": "block",
+      "parentId": "shape:panel-c",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Writer",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "dJdurfJbrrOkwFrUK-avJ",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Writer_draft_3",
+        "draftOrdinal": 3
+      },
+      "index": "aBSU3",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:d-async-e",
+      "type": "connection",
+      "fromId": "shape:d-async",
+      "toId": "shape:d-observe",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 480,
+      "y": 1104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-emit",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aHxdv",
+      "typeName": "shape"
+    },
+    {
+      "x": 1000,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-writer",
+      "type": "block",
+      "parentId": "shape:panel-b",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Writer",
+        "description": "x.set(42)",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "zEGcPF8x_LxtKG08jVi2L",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Writer_draft_2",
+        "draftOrdinal": 2
+      },
+      "index": "aGGbU",
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-writer",
+      "type": "block",
+      "parentId": "shape:panel-a",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Writer",
+        "description": "x.set(42)",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "wX49_ADKPED9b_zZY13FU",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Writer_draft_1",
+        "draftOrdinal": 1
+      },
+      "index": "aAGcQ",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-store-e",
+      "type": "connection",
+      "fromId": "shape:b-store",
+      "toId": "shape:b-pre",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 76,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-data-src",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 300,
+        "h": 154,
+        "title": "Writer",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "Dvk5ac6TTr0QA1M1kHEt6",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Writer"
+      },
+      "index": "aFOda8",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:a-start-e",
+      "type": "connection",
+      "fromId": "shape:a-start",
+      "toId": "shape:a-writer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 24,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-intro",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 220,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Lingua Franca BT paper (ICSE 2024): a Reader before a Writer on channel x cannot take a same-tick cable. The compiler inserts Pre, gated by start, because BT ticks are not a fixed after delay."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aSbRn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-emit-s",
+      "type": "connection",
+      "fromId": "shape:b-emit",
+      "toId": "shape:b-pre",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 780,
+      "y": 268,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-mut-cap",
+      "type": "text",
+      "parentId": "shape:legend",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 716,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "mut · named write"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aFvhfV",
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 160,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-observe",
+      "type": "block",
+      "parentId": "shape:panel-d",
+      "props": {
+        "w": 280,
+        "h": 154,
+        "title": "observe",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "cXJsZ8WH4owo25LuVPlRS",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "observe"
+      },
+      "index": "a8zrBG",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-data-wire-s",
+      "type": "connection",
+      "fromId": "shape:leg-data-wire",
+      "toId": "shape:leg-data-src",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Pre reactor",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "x": 480,
+      "y": 2264,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-async",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aLyzN",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 76,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-data-dst",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 280,
+        "h": 154,
+        "title": "Reader",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "60KXvr1-iuUj6-fC_8ktu",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "Reader"
+      },
+      "index": "aFURU4",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:a-success-e",
+      "type": "connection",
+      "fromId": "shape:a-success",
+      "toId": "shape:a-reader",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 2560,
+        "h": 2832
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 40,
+      "y": 346,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-async-src",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 300,
+        "h": 154,
+        "title": "camera",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "_JzlEQeHEQxWoM9vOg1Dh",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "definitionKey": "camera"
+      },
+      "index": "aG1Hbx",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:leg-delay-wire-e",
+      "type": "connection",
+      "fromId": "shape:leg-delay-wire",
+      "toId": "shape:leg-delay-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:c-start-e",
+      "type": "connection",
+      "fromId": "shape:c-start",
+      "toId": "shape:c-reader",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-success-e",
+      "type": "connection",
+      "fromId": "shape:b-success",
+      "toId": "shape:b-writer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 480,
+      "y": 346,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-async-dst",
+      "type": "block",
+      "parentId": "shape:legend",
+      "props": {
+        "w": 280,
+        "h": 154,
+        "title": "observe",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "cXJsZ8WH4owo25LuVPlRS",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "observe"
+      },
+      "index": "aG28vx",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:c-success-e",
+      "type": "connection",
+      "fromId": "shape:c-success",
+      "toId": "shape:c-writer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:F_s9JtJJ9lX8rezvS68uv",
+      "typeName": "user"
+    },
+    {
+      "x": 480,
+      "y": 1104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-store",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "curved",
+        "curve": {
+          "dx": 0,
+          "dy": 90
+        },
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "authored",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aGDF2",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 664,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-start",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aAcoU",
+      "typeName": "shape"
+    },
+    {
+      "x": 720,
+      "y": 200,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-write",
+      "type": "block",
+      "parentId": "shape:panel-d",
+      "props": {
+        "w": 320,
+        "h": 198,
+        "title": "setattr",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "H_-Cpgk_1H2H6TY5PqydH",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state",
+            "type": "State",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.62
+          }
+        ],
+        "definitionKey": "setattr_draft_1",
+        "draftOrdinal": 1
+      },
+      "index": "a9HfKl",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:a-x-s",
+      "type": "connection",
+      "fromId": "shape:a-x",
+      "toId": "shape:a-writer",
+      "props": {
+        "portId": "out_2",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:b-start-pre-s",
+      "type": "connection",
+      "fromId": "shape:b-start-pre",
+      "toId": "shape:b-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 480,
+      "y": 664,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a-success",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aBIIX",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 24,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:leg-mut-wire",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.55,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a7Eyn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:c-back-e",
+      "type": "connection",
+      "fromId": "shape:c-back",
+      "toId": "shape:c-reader",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 48,
+      "y": 16,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:d-async-cap",
+      "type": "text",
+      "parentId": "shape:panel-d",
+      "props": {
+        "color": "grey",
+        "size": "s",
+        "w": 480,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Dashed async: observe whatever camera last published. No promise it is this Writer's previous x, and no start-gated store."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8a7sG",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 1104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-success",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aFO6U",
+      "typeName": "shape"
+    },
+    {
+      "x": 440,
+      "y": 1244,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 96,
+          "y": 189
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aTw97V",
+      "typeName": "shape"
+    },
+    {
+      "x": 56,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:b-pre",
+      "type": "block",
+      "parentId": "shape:panel-b",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Pre",
+        "description": "z⁻¹ until next start",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "u6K5Vu5l1AtBfd9mV0XHl",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Pre"
+      },
+      "index": "aEOuM",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 1724,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c-start",
+      "type": "connection",
+      "parentId": "page:page",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aIw9I",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 664,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:panel-a",
+      "type": "frame",
+      "props": {
+        "w": 1580,
+        "h": 400,
+        "name": "A · Forward, same tick · paper Fig. 7b",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aO5Qr",
+      "typeName": "shape"
+    }
+  ]
+}

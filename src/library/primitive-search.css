@@ -90,13 +90,12 @@
   font: 8.5px/1 var(--tl-font-mono, ui-monospace, monospace);
 }
 
+/* Scrolling and the thin themed bar come from `.ss-scroll`. */
 .systemsketch-primitive-search__results {
   max-height: 258px;
   margin: 0;
   padding: 4px;
-  overflow-y: auto;
   list-style: none;
-  overscroll-behavior: contain;
 }
 
 .systemsketch-primitive-search__result {
@@ -152,6 +151,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.systemsketch-primitive-search__aliases {
+  margin-left: 7px;
+  color: var(--ss-accent);
+  font-family: var(--tl-font-mono, ui-monospace, monospace);
+}
+
+.systemsketch-primitive-search__aliases > span {
+  margin-right: 3px;
+  font-family: var(--tl-font-sans, ui-sans-serif, sans-serif);
 }
 
 .systemsketch-primitive-search__copy strong {

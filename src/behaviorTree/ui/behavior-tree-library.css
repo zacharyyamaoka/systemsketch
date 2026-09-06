@@ -1,0 +1,160 @@
+/* The Behaviors panel, in the left popout's column. It borrows the Shapes
+ * library's section toggle (`.systemsketch-library-section-toggle`) rather
+ * than restating it, so the two surfaces stay one idiom; only the row differs,
+ * because a behavior is a labelled line with a glyph, not a picture tile. */
+
+.systemsketch-behavior-library {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.systemsketch-behavior-library .bt-library__search {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: calc(100% - 28px);
+  height: 30px;
+  margin: 0 14px 4px;
+  padding: 0 9px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  font: inherit;
+  font-size: 12px;
+}
+
+.systemsketch-behavior-library .bt-library__search::placeholder {
+  color: var(--ss-text-faint);
+}
+
+.systemsketch-behavior-library .bt-library__search:focus-visible {
+  border-color: var(--ss-accent);
+  outline: none;
+}
+
+.bt-library__where {
+  flex: 0 0 auto;
+  margin: 0 14px 6px;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.bt-library__body {
+  flex: 1;
+  padding: 2px 14px 15px;
+}
+
+.bt-library__body section h3 {
+  margin: 11px 0 6px;
+}
+
+.bt-library__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bt-library__row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: grab;
+  font: inherit;
+  text-align: left;
+}
+
+.bt-library__row:hover {
+  background: var(--ss-surface-hover);
+}
+
+.bt-library__row:active {
+  cursor: grabbing;
+}
+
+.bt-library__rowGlyph {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
+}
+
+.bt-library__rowCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bt-library__rowCopy strong {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bt-library__rowCopy small {
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bt-library__notice {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 8px 14px 10px;
+  border-top: 1px solid var(--ss-border);
+  color: var(--ss-text-muted);
+  font-size: 10px;
+}
+
+/* --- the Shapes / Behaviors switcher -------------------------------------
+ * It sits BELOW `.systemsketch-popout__header` on purpose: that header styles
+ * every `button` inside it as a 30×30 icon square, which would squash a tab
+ * into an unreadable chip. */
+
+.systemsketch-popout__surfaces {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 8px 14px 6px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-popout__surfaces button {
+  min-height: 26px;
+  flex: 1;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ss-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.systemsketch-popout__surfaces button:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-popout__surfaces button[aria-selected='true'] {
+  color: var(--ss-text);
+  background: var(--ss-surface-active);
+}

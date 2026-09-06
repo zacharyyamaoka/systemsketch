@@ -1,0 +1,1778 @@
+{
+  "feature": "Pre reactor \u00b7 Lingua Franca BT in SystemSketch",
+  "viewport": {
+    "width": 2560,
+    "height": 2832
+  },
+  "pages": [
+    {
+      "id": "review",
+      "name": "Pre reactor"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "legend",
+      "type": "frame",
+      "x": 480,
+      "y": 24,
+      "props": {
+        "name": "Legend \u00b7 four cables, four meanings",
+        "w": 1580,
+        "h": 600
+      }
+    },
+    {
+      "id": "panel-a",
+      "type": "frame",
+      "x": 480,
+      "y": 664,
+      "props": {
+        "name": "A \u00b7 Forward, same tick \u00b7 paper Fig. 7b",
+        "w": 1580,
+        "h": 400
+      }
+    },
+    {
+      "id": "panel-b",
+      "type": "frame",
+      "x": 480,
+      "y": 1104,
+      "props": {
+        "name": "B \u00b7 Generated Pre reactor \u00b7 paper Fig. 7d \u00b7 the delay is this Block",
+        "w": 1580,
+        "h": 580
+      }
+    },
+    {
+      "id": "panel-c",
+      "type": "frame",
+      "x": 480,
+      "y": 1724,
+      "props": {
+        "name": "C \u00b7 SystemSketch compact \u00b7 Pre compiled onto a z\u207b\u00b9 cable",
+        "w": 1580,
+        "h": 500
+      }
+    },
+    {
+      "id": "panel-d",
+      "type": "frame",
+      "x": 480,
+      "y": 2264,
+      "props": {
+        "name": "D \u00b7 Not Pre \u00b7 latest-value observation vs named write",
+        "w": 1580,
+        "h": 520
+      }
+    },
+    {
+      "id": "leg-data-src",
+      "type": "block",
+      "x": 40,
+      "y": 76,
+      "parentId": "legend",
+      "props": {
+        "title": "Writer",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "leg-data-dst",
+      "type": "block",
+      "x": 480,
+      "y": 76,
+      "parentId": "legend",
+      "props": {
+        "title": "Reader",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "leg-data-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "legend",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.55,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "leg-data-cap",
+      "type": "text",
+      "x": 40,
+      "y": 268,
+      "parentId": "legend",
+      "text": "solid \u00b7 within-tick value",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 716,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "leg-mut-src",
+      "type": "block",
+      "x": 780,
+      "y": 96,
+      "parentId": "legend",
+      "props": {
+        "title": "setattr",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.55
+          }
+        ]
+      }
+    },
+    {
+      "id": "leg-mut-dst",
+      "type": "block",
+      "x": 1220,
+      "y": 48,
+      "parentId": "legend",
+      "props": {
+        "title": "apply",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "leg-mut-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "legend",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.55,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "leg-mut-cap",
+      "type": "text",
+      "x": 780,
+      "y": 268,
+      "parentId": "legend",
+      "text": "mut \u00b7 named write",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 716,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "leg-async-src",
+      "type": "block",
+      "x": 40,
+      "y": 346,
+      "parentId": "legend",
+      "props": {
+        "title": "camera",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "leg-async-dst",
+      "type": "block",
+      "x": 480,
+      "y": 346,
+      "parentId": "legend",
+      "props": {
+        "title": "observe",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "leg-async-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "legend",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.55,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "leg-async-cap",
+      "type": "text",
+      "x": 40,
+      "y": 538,
+      "parentId": "legend",
+      "text": "dashed \u00b7 latest published value",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 716,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "leg-delay-src",
+      "type": "block",
+      "x": 780,
+      "y": 346,
+      "parentId": "legend",
+      "props": {
+        "title": "Writer",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "leg-delay-dst",
+      "type": "block",
+      "x": 1220,
+      "y": 346,
+      "parentId": "legend",
+      "props": {
+        "title": "Reader",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "leg-delay-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "legend",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "curved",
+        "curve": {
+          "dx": 0,
+          "dy": 28
+        },
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "delayed",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "authored",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "leg-delay-cap",
+      "type": "text",
+      "x": 780,
+      "y": 538,
+      "parentId": "legend",
+      "text": "z\u207b\u00b9 \u00b7 previous tick only",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 716,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "a-cap",
+      "type": "text",
+      "x": 48,
+      "y": 16,
+      "parentId": "panel-a",
+      "text": "Reader sits after Writer in the sequence. x is produced and consumed at the same start tick, same LF tag. Solid data cable. No Pre.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 1480,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "a-tick",
+      "type": "block",
+      "x": 56,
+      "y": 120,
+      "parentId": "panel-a",
+      "props": {
+        "title": "tick()",
+        "description": "",
+        "blockType": "source",
+        "view": "port",
+        "w": 240,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a-writer",
+      "type": "block",
+      "x": 400,
+      "y": 120,
+      "parentId": "panel-a",
+      "props": {
+        "title": "Writer",
+        "description": "x.set(42)",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a-reader",
+      "type": "block",
+      "x": 860,
+      "y": 120,
+      "parentId": "panel-a",
+      "props": {
+        "title": "Reader",
+        "description": "print(x) if present",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a-start",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-a",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "a-success",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-a",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "a-x",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-a",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "b-cap",
+      "type": "text",
+      "x": 420,
+      "y": 16,
+      "parentId": "panel-b",
+      "text": "Reader runs before Writer, so this tick cannot see this tick's x. A solid Writer.x \u2192 Reader.x would be a causality cycle. Pre stores the write and re-emits it on the next start. Wires around Pre are ordinary this-tick data; z\u207b\u00b9 lives in the Block.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 1100,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "b-tick",
+      "type": "block",
+      "x": 56,
+      "y": 48,
+      "parentId": "panel-b",
+      "props": {
+        "title": "tick()",
+        "description": "",
+        "blockType": "source",
+        "view": "port",
+        "w": 240,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "b-pre",
+      "type": "block",
+      "x": 56,
+      "y": 280,
+      "parentId": "panel-b",
+      "props": {
+        "title": "Pre",
+        "description": "z\u207b\u00b9 until next start",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "b-reader",
+      "type": "block",
+      "x": 520,
+      "y": 280,
+      "parentId": "panel-b",
+      "props": {
+        "title": "Reader",
+        "description": "print previous x",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "b-writer",
+      "type": "block",
+      "x": 1000,
+      "y": 280,
+      "parentId": "panel-b",
+      "props": {
+        "title": "Writer",
+        "description": "x.set(42)",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "b-timeline",
+      "type": "text",
+      "x": 420,
+      "y": 88,
+      "parentId": "panel-b",
+      "text": "tick t: start \u2192 Pre emits x[t-1] (absent on the first tick) \u2192 Reader \u2192 Writer writes 42 \u2192 Pre stores 42.\ntick t+1: start \u2192 Pre emits 42 \u2192 Reader prints 42. Forward writers on the same tick still override this stored value.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 1100,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "b-start-reader",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-b",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "b-start-pre",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-b",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "b-success",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-b",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "b-emit",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-b",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "b-store",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-b",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "curved",
+        "curve": {
+          "dx": 0,
+          "dy": 90
+        },
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "authored",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "c-cap",
+      "type": "text",
+      "x": 48,
+      "y": 16,
+      "parentId": "panel-c",
+      "text": "Same graph, Pre compiled away. The back edge is Temporal \u2192 Delayed. Dotted cable + z\u207b\u00b9 pill. Still not a solid backward data cable. Use this when the tick is already a Loop iteration; keep an explicit Pre Block when the tick is an external start.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 1480,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "c-tick",
+      "type": "block",
+      "x": 56,
+      "y": 160,
+      "parentId": "panel-c",
+      "props": {
+        "title": "tick()",
+        "description": "",
+        "blockType": "source",
+        "view": "port",
+        "w": 240,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "c-reader",
+      "type": "block",
+      "x": 400,
+      "y": 140,
+      "parentId": "panel-c",
+      "props": {
+        "title": "Reader",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "c-writer",
+      "type": "block",
+      "x": 900,
+      "y": 140,
+      "parentId": "panel-c",
+      "props": {
+        "title": "Writer",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "start",
+            "type": "Tick",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "success",
+            "type": "Status",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "x",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "c-start",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-c",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "c-success",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-c",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "c-back",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-c",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "curved",
+        "curve": {
+          "dx": 0,
+          "dy": 120
+        },
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "delayed",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "authored",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "d-async-cap",
+      "type": "text",
+      "x": 48,
+      "y": 16,
+      "parentId": "panel-d",
+      "text": "Dashed async: observe whatever camera last published. No promise it is this Writer's previous x, and no start-gated store.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 480,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "d-camera",
+      "type": "block",
+      "x": 48,
+      "y": 160,
+      "parentId": "panel-d",
+      "props": {
+        "title": "camera",
+        "description": "",
+        "blockType": "source",
+        "view": "port",
+        "w": 280,
+        "h": 154,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "d-observe",
+      "type": "block",
+      "x": 400,
+      "y": 160,
+      "parentId": "panel-d",
+      "props": {
+        "title": "observe",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "d-async",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-d",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "d-mut-cap",
+      "type": "text",
+      "x": 720,
+      "y": 16,
+      "parentId": "panel-d",
+      "text": "mut cable: a named write to state.camera. The new value exists because of the assignment, not because time stepped.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 480,
+        "autoSize": false
+      }
+    },
+    {
+      "id": "d-write",
+      "type": "block",
+      "x": 720,
+      "y": 200,
+      "parentId": "panel-d",
+      "props": {
+        "title": "setattr",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state",
+            "type": "State",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.62
+          }
+        ]
+      }
+    },
+    {
+      "id": "d-apply",
+      "type": "block",
+      "x": 1120,
+      "y": 88,
+      "parentId": "panel-d",
+      "props": {
+        "title": "apply()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 260,
+        "h": 154,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "state.camera",
+            "type": "Camera",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "d-mut",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "parentId": "panel-d",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "d-rule-cap",
+      "type": "text",
+      "x": 48,
+      "y": 430,
+      "parentId": "panel-d",
+      "text": "Neither dashed observation nor a mut write is a time machine. Only Pre / z\u207b\u00b9 may go backwards in time.",
+      "props": {
+        "size": "s",
+        "color": "grey",
+        "font": "sans",
+        "w": 1480,
+        "autoSize": false
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "leg-data-wire-s",
+      "type": "connection",
+      "fromId": "leg-data-wire",
+      "toId": "leg-data-src",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-data-wire-e",
+      "type": "connection",
+      "fromId": "leg-data-wire",
+      "toId": "leg-data-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-mut-wire-s",
+      "type": "connection",
+      "fromId": "leg-mut-wire",
+      "toId": "leg-mut-src",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-mut-wire-e",
+      "type": "connection",
+      "fromId": "leg-mut-wire",
+      "toId": "leg-mut-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-async-wire-s",
+      "type": "connection",
+      "fromId": "leg-async-wire",
+      "toId": "leg-async-src",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-async-wire-e",
+      "type": "connection",
+      "fromId": "leg-async-wire",
+      "toId": "leg-async-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-delay-wire-s",
+      "type": "connection",
+      "fromId": "leg-delay-wire",
+      "toId": "leg-delay-src",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "leg-delay-wire-e",
+      "type": "connection",
+      "fromId": "leg-delay-wire",
+      "toId": "leg-delay-dst",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a-start-s",
+      "type": "connection",
+      "fromId": "a-start",
+      "toId": "a-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a-start-e",
+      "type": "connection",
+      "fromId": "a-start",
+      "toId": "a-writer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a-success-s",
+      "type": "connection",
+      "fromId": "a-success",
+      "toId": "a-writer",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a-success-e",
+      "type": "connection",
+      "fromId": "a-success",
+      "toId": "a-reader",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a-x-s",
+      "type": "connection",
+      "fromId": "a-x",
+      "toId": "a-writer",
+      "props": {
+        "portId": "out_2",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a-x-e",
+      "type": "connection",
+      "fromId": "a-x",
+      "toId": "a-reader",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-start-reader-s",
+      "type": "connection",
+      "fromId": "b-start-reader",
+      "toId": "b-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-start-reader-e",
+      "type": "connection",
+      "fromId": "b-start-reader",
+      "toId": "b-reader",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-start-pre-s",
+      "type": "connection",
+      "fromId": "b-start-pre",
+      "toId": "b-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-start-pre-e",
+      "type": "connection",
+      "fromId": "b-start-pre",
+      "toId": "b-pre",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-success-s",
+      "type": "connection",
+      "fromId": "b-success",
+      "toId": "b-reader",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-success-e",
+      "type": "connection",
+      "fromId": "b-success",
+      "toId": "b-writer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-store-s",
+      "type": "connection",
+      "fromId": "b-store",
+      "toId": "b-writer",
+      "props": {
+        "portId": "out_2",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-store-e",
+      "type": "connection",
+      "fromId": "b-store",
+      "toId": "b-pre",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-emit-s",
+      "type": "connection",
+      "fromId": "b-emit",
+      "toId": "b-pre",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b-emit-e",
+      "type": "connection",
+      "fromId": "b-emit",
+      "toId": "b-reader",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c-start-s",
+      "type": "connection",
+      "fromId": "c-start",
+      "toId": "c-tick",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c-start-e",
+      "type": "connection",
+      "fromId": "c-start",
+      "toId": "c-reader",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c-success-s",
+      "type": "connection",
+      "fromId": "c-success",
+      "toId": "c-reader",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c-success-e",
+      "type": "connection",
+      "fromId": "c-success",
+      "toId": "c-writer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c-back-s",
+      "type": "connection",
+      "fromId": "c-back",
+      "toId": "c-writer",
+      "props": {
+        "portId": "out_2",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c-back-e",
+      "type": "connection",
+      "fromId": "c-back",
+      "toId": "c-reader",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "d-async-s",
+      "type": "connection",
+      "fromId": "d-async",
+      "toId": "d-camera",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "d-async-e",
+      "type": "connection",
+      "fromId": "d-async",
+      "toId": "d-observe",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "d-mut-s",
+      "type": "connection",
+      "fromId": "d-mut",
+      "toId": "d-write",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "d-mut-e",
+      "type": "connection",
+      "fromId": "d-mut",
+      "toId": "d-apply",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "intro",
+      "kind": "note",
+      "text": "Lingua Franca BT paper (ICSE 2024): a Reader before a Writer on channel x cannot take a same-tick cable. The compiler inserts Pre, gated by start, because BT ticks are not a fixed after delay.",
+      "x": 40,
+      "y": 24,
+      "w": 400,
+      "h": 220
+    },
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Select Pre. Store this tick's x; emit it when start fires again. Output x is ordinary this-tick data. z\u207b\u00b9 is the Block, not a backward cable.",
+      "x": 40,
+      "y": 1144,
+      "w": 400,
+      "h": 200,
+      "target": {
+        "shapeId": "b-pre",
+        "anchor": "left",
+        "dy": -50
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "note",
+      "text": "C's back edge is Temporal \u2192 Delayed: dotted cable + z\u207b\u00b9 pill. Same Pre semantics on the edge. Never a solid reverse data cable.",
+      "x": 2140,
+      "y": 1804,
+      "w": 400,
+      "h": 180
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the legend's four cables are distinct, Pre has no solid reverse data cable, C's back edge is dotted with a z\u207b\u00b9 pill, and D's dashed / mut cables are clearly not delay.",
+      "x": 40,
+      "y": 2304,
+      "w": 400,
+      "h": 220
+    }
+  ]
+}

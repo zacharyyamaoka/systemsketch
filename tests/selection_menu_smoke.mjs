@@ -56,6 +56,20 @@ const EPSILON = 1.2
 
 const EMPTY_CANVAS = { x: 200, y: 820 }
 
+/** A frame big enough to engulf the viewport, for the camera scenarios below. */
+const OVERSIZED_FRAME = 'shape:selection-menu-oversized-frame'
+/**
+ * A lone Frame shows no selection menu at all — nothing about it (no colour
+ * style, no Block, no wrap target pair) satisfies `hasVisibleActions` in
+ * `SystemSketchChrome.tsx`. This tiny rectangle rides alongside it purely to
+ * make `canWrapSelection()` true so the menu mounts. It sits outside the
+ * frame's own bounds (so tldraw does not auto-adopt it as a child, which
+ * would collapse the selection back down to the frame alone) but spans the
+ * same y-range as the frame, so it only nudges the selection's *left* edge —
+ * the frame's own top and bottom stay the selection's top and bottom.
+ */
+const FRAME_COMPANION = 'shape:selection-menu-frame-companion'
+
 /**
  * One reading of everything the spec talks about, all in viewport space so the
  * numbers can be compared to each other directly.
@@ -129,14 +143,73 @@ function centreOffset({ menu, shape }) {
 }
 
 /**
- * Zoom with ctrl+wheel — the gesture a person uses, and the only one that does
- * not depend on tldraw's shortcut layer receiving a virtual key code.
+ * The true selection bounds in viewport space, computed from raw shape page
+ * bounds and the camera transform — not from `editor.getSelectionRotatedScreenBounds()`,
+ * which is what the placement code itself reads. Going back to
+ * `getShapePageBounds` + `pageToScreen` keeps this an independent check that
+ * the right geometry reaches the placement rule, not just that the rule's
+ * arithmetic is self-consistent.
+ */
+async function unionScreenRect(page, ids) {
+  return JSON.parse(await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const origin = document.querySelector('.tl-container').getBoundingClientRect()
+    const boxes = ${JSON.stringify(ids)}.map((id) => editor.getShapePageBounds(id))
+    const minX = Math.min(...boxes.map((b) => b.minX))
+    const minY = Math.min(...boxes.map((b) => b.minY))
+    const maxX = Math.max(...boxes.map((b) => b.maxX))
+    const maxY = Math.max(...boxes.map((b) => b.maxY))
+    const topLeft = editor.pageToScreen({ x: minX, y: minY })
+    const bottomRight = editor.pageToScreen({ x: maxX, y: maxY })
+    return JSON.stringify({
+      x: +(topLeft.x - origin.x).toFixed(1), y: +(topLeft.y - origin.y).toFixed(1),
+      w: +(bottomRight.x - topLeft.x).toFixed(1), h: +(bottomRight.y - topLeft.y).toFixed(1),
+    })
+  })()`))
+}
+
+/**
+ * Re-implements the horizontal half of `placeSelectionMenu`'s rule in plain
+ * JS, deliberately not imported from the TS source: an oversized selection
+ * centres on its intersection with the viewport, not its own true centre.
+ * Checking against the documented rule this way, rather than calling the
+ * module under test, is what makes this a real oracle instead of a tautology.
+ */
+function expectedCentreX(union, viewportW) {
+  return union.w > viewportW
+    ? (Math.max(union.x, 0) + Math.min(union.x + union.w, viewportW)) / 2
+    : union.x + union.w / 2
+}
+
+function expectedMenuX(union, viewportW, menuW) {
+  const raw = expectedCentreX(union, viewportW) - menuW / 2
+  return Math.min(Math.max(raw, MARGIN), viewportW - menuW - MARGIN)
+}
+
+/**
+ * Zoom with a plain wheel — the gesture a person uses on this product, and
+ * the only one that does not depend on tldraw's shortcut layer receiving a
+ * virtual key code.
+ *
+ * WHY plain wheel and not ctrl+wheel: `src/canvasCamera.ts` sets tldraw's
+ * `wheelBehavior: 'zoom'` for every SystemSketch board — a plain wheel scroll
+ * is already the zoom gesture here, not the usual browser/trackpad pan. In
+ * tldraw's own wheel handler (`Editor.js`, the `"wheel"` case), holding ctrl
+ * *inverts* whatever `wheelBehavior` is configured
+ * (`if (info.ctrlKey) behavior = wheelBehavior === "pan" ? "zoom" : "pan"`),
+ * so ctrl+wheel on this product's default camera options pans instead of
+ * zooming — confirmed by reading `editor.getCamera()` after the old gesture:
+ * `z` stayed at 1 while `y` moved. Direction follows the product's other
+ * default, `scrollDownZoomsIn: true` (`src/settings/appearancePreferences.ts`),
+ * which is why a positive `deltaY` (scroll down) is "zoom in" — the same
+ * convention already proven out in `tests/wheel_zoom_smoke.mjs` and
+ * `tests/wheel_zoom_fixture_smoke.mjs`.
  */
 async function zoomBy(page, steps, at = { x: 700, y: 460 }) {
   for (let step = 0; step < Math.abs(steps); step += 1) {
     await page.send('Input.dispatchMouseEvent', {
       type: 'mouseWheel', x: at.x, y: at.y, deltaX: 0,
-      deltaY: steps > 0 ? -120 : 120, modifiers: 2,
+      deltaY: steps > 0 ? 120 : -120, modifiers: 0,
     })
     await delay(90)
   }
@@ -259,18 +332,21 @@ async function main() {
     await frame(page, 'clamped')
     pass('pushed into the gutter the menu clamps to the 20px margin instead of leaving the viewport')
 
-    // 5. The bottom toolbar is an obstacle, not the window edge.
+    // 5. Selection's top edge scrolled off above the viewport: pin to the top
+    // margin. This used to clamp the menu down against the bottom toolbar —
+    // the bug this rule fixes, not a regression in what this check asserts.
     await clearBoard(page)
     await drawAndSelectRect(page, { x: 500, y: 300 }, { x: 940, y: 620 })
     await zoomBy(page, 26)
     const engulfed = await readMenu(page)
     assert.ok(engulfed.shape.y < 0 && engulfed.shape.y + engulfed.shape.h > engulfed.viewport.h,
       'this check needs a selection taller than the viewport')
-    assert.ok(Math.abs((engulfed.menu.y + engulfed.menu.h) - (engulfed.beltTop - MARGIN)) <= EPSILON,
-      `a menu with nowhere to go should rest ${MARGIN}px above the tool belt at ${engulfed.beltTop}, `
-      + `was ${engulfed.menu.y + engulfed.menu.h}`)
+    assert.equal(engulfed.side, 'pinned',
+      'a selection scrolled off above the viewport must pin, not clamp to the floor')
+    assert.ok(Math.abs(engulfed.menu.y - MARGIN) <= EPSILON,
+      `a pinned menu should sit ${MARGIN}px from the top, was ${engulfed.menu.y}`)
     await frame(page, 'engulfed')
-    pass('a selection larger than the viewport parks the menu above the tool belt, not at the window edge')
+    pass('a selection larger than the viewport pins the menu to the top margin, not the bottom toolbar')
 
     // 6. Direct manipulation: gone for the gesture, back and re-anchored after.
     await shortcut(page, '0', 'Digit0', 8)
@@ -309,9 +385,15 @@ async function main() {
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))
 
     // 8. Panned off screen: invisible *and* out of the way of the pointer.
+    // WHY ctrl held: same product-wide wheel contract as `zoomBy` above — a
+    // plain wheel is already the zoom gesture here (`src/canvasCamera.ts`),
+    // so a plain horizontal scroll's `dy` is 0 and tldraw's zoom branch reads
+    // no delta at all (confirmed: the camera did not move without ctrl).
+    // Holding ctrl inverts `wheelBehavior` back to 'pan', which is what
+    // actually moves the camera on `dx`/`dy`.
     for (let step = 0; step < 14; step += 1) {
       await page.send('Input.dispatchMouseEvent', {
-        type: 'mouseWheel', x: 700, y: 400, deltaX: -180, deltaY: 0,
+        type: 'mouseWheel', x: 700, y: 400, deltaX: -180, deltaY: 0, modifiers: 2,
       })
       await delay(90)
     }
@@ -322,6 +404,102 @@ async function main() {
       'a hidden menu must not answer hit tests — an invisible menu that still '
       + 'swallows clicks is the failure this locks down')
     pass('panning the selection off screen hides the menu and stops it answering hit tests')
+
+    // 9. Camera scenarios with a stock Frame: the placement rule has to hold
+    // when the oversized selection is a real region the camera moves through,
+    // not just a shape stretched by zoom (check 5, above).
+    await clearBoard(page)
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.createShape({
+        id: ${JSON.stringify(OVERSIZED_FRAME)}, type: 'frame', x: 0, y: 0,
+        props: { name: 'Oversized', w: 6000, h: 6000 },
+      })
+      editor.createShape({
+        id: ${JSON.stringify(FRAME_COMPANION)}, type: 'geo', x: -50, y: 3000,
+        props: { geo: 'rectangle', w: 10, h: 10 },
+      })
+      editor.select(${JSON.stringify(OVERSIZED_FRAME)}, ${JSON.stringify(FRAME_COMPANION)})
+    })()`)
+    const SELECTION_IDS = [OVERSIZED_FRAME, FRAME_COMPANION]
+
+    // 9a. Viewport entirely inside the frame: pinned to the top margin.
+    await evaluate(page, `(window.__systemsketch.editor.setCamera({ x: -2000, y: -2000, z: 1 }), null)`)
+    await waitFor(page,
+      `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.visible === 'true'`,
+      'the selection menu for the oversized frame')
+    await delay(200)
+    const pinned = await readMenu(page)
+    const pinnedUnion = await unionScreenRect(page, SELECTION_IDS)
+    assert.ok(pinnedUnion.y < 0 && pinnedUnion.y + pinnedUnion.h > pinned.viewport.h,
+      'this check needs a frame taller than the viewport on both sides')
+    assert.equal(pinned.side, 'pinned',
+      'a viewport sitting entirely inside a taller-than-screen frame must pin the menu, not clamp it')
+    assert.ok(Math.abs(pinned.menu.y - MARGIN) <= EPSILON,
+      `a pinned menu should sit ${MARGIN}px from the top, was ${pinned.menu.y}`)
+    assert.ok(
+      Math.abs(pinned.menu.x - expectedMenuX(pinnedUnion, pinned.viewport.w, pinned.menu.w)) <= EPSILON,
+      'the pinned menu should still centre on the visible-portion intersection, not the true selection centre',
+    )
+    pass('a viewport entirely inside an oversized frame pins the menu to the top margin')
+
+    // 9b. Pan so the frame's top edge is visible again, near mid-screen:
+    // there is room above once more, so this must fall back to the ordinary
+    // 'above' placement rather than staying pinned.
+    await evaluate(page, `(window.__systemsketch.editor.setCamera({ x: -2000, y: 350, z: 1 }), null)`)
+    await waitFor(page,
+      `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.side === 'above'`,
+      'the selection menu to flip back to above')
+    await delay(200)
+    const midScreen = await readMenu(page)
+    const midScreenUnion = await unionScreenRect(page, SELECTION_IDS)
+    assert.ok(midScreenUnion.y > 0 && midScreenUnion.y < midScreen.viewport.h / 2 + 150,
+      "this check needs the frame's top edge visible near mid-screen")
+    assert.equal(midScreen.side, 'above')
+    assert.ok(
+      Math.abs(clearance({ menu: midScreen.menu, shape: midScreenUnion, side: 'above' }) - GAP) <= EPSILON,
+      `the menu should clear the frame's top edge by ${GAP}px, was `
+      + `${clearance({ menu: midScreen.menu, shape: midScreenUnion, side: 'above' })}`,
+    )
+    pass("a frame with its top edge visible near mid-screen gets the ordinary 'above' placement")
+
+    // 9c. Pan the camera 600px sideways: the frame stays wider than the
+    // viewport throughout, with only its left edge on screen, so the
+    // visible-portion centre must move with the pan — the horizontal half of
+    // the same rule as 9a and 9b's vertical branches.
+    await evaluate(page, `(window.__systemsketch.editor.setCamera({ x: 750, y: 350, z: 1 }), null)`)
+    await waitFor(page,
+      `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.side === 'above'`,
+      'the selection menu before the sideways pan')
+    await delay(200)
+    const beforePan = await readMenu(page)
+    const beforeUnion = await unionScreenRect(page, SELECTION_IDS)
+    assert.ok(beforeUnion.x > 0 && beforeUnion.x < beforePan.viewport.w
+      && beforeUnion.x + beforeUnion.w > beforePan.viewport.w,
+      "this check needs the frame's left edge on screen and its right edge off screen")
+
+    await evaluate(page, `(window.__systemsketch.editor.setCamera({ x: 150, y: 350, z: 1 }), null)`)
+    await delay(200)
+    const afterPan = await readMenu(page)
+    const afterUnion = await unionScreenRect(page, SELECTION_IDS)
+    assert.ok(afterUnion.x > 0 && afterUnion.x < afterPan.viewport.w
+      && afterUnion.x + afterUnion.w > afterPan.viewport.w,
+      'the left edge must still be on screen after the pan, or this is not testing the tracking edge')
+
+    const centreBefore = beforePan.menu.x + beforePan.menu.w / 2
+    const centreAfter = afterPan.menu.x + afterPan.menu.w / 2
+    assert.ok(
+      Math.abs(centreBefore - expectedCentreX(beforeUnion, beforePan.viewport.w)) <= EPSILON,
+      'the menu centre before the pan should match the visible-portion intersection',
+    )
+    assert.ok(
+      Math.abs(centreAfter - expectedCentreX(afterUnion, afterPan.viewport.w)) <= EPSILON,
+      'the menu centre after the pan should match the visible-portion intersection',
+    )
+    assert.ok(Math.abs((centreBefore - centreAfter) - 300) <= EPSILON,
+      `a 600px pan moving one tracked edge should shift the centre by half that (300px), was `
+      + `${centreBefore - centreAfter}`)
+    pass('panning the camera 600px sideways moves the visible-portion centre with it')
 
     assert.deepEqual(localConsoleErrors(page), [])
     pass('the physical journey produced zero local console errors')

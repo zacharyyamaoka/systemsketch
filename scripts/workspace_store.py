@@ -103,6 +103,7 @@ def _resolve_inside_root(
     files_root: Path,
     *,
     additional_roots: tuple[Path, ...] = (),
+    allow_any_path: bool = False,
 ) -> Path:
     if not isinstance(raw_path, str) or not raw_path.strip():
         raise WorkspacePathError("path must be a non-empty string")
@@ -110,6 +111,13 @@ def _resolve_inside_root(
     if not candidate.is_absolute():
         raise WorkspacePathError("path must be absolute")
     resolved = candidate.resolve()
+    # WHY: "Allow opening files anywhere" (Settings > General, off by
+    # default — see release_lib.FileAccessSettings) is an explicit, durable
+    # opt-out of this fence, not a bigger allowlist. It still requires an
+    # absolute path above; it only drops the requirement that the path sit
+    # under files_root/additional_roots.
+    if allow_any_path:
+        return resolved
     roots = (files_root.resolve(), *(root.resolve() for root in additional_roots))
     if not any(resolved == root or root in resolved.parents for root in roots):
         allowed = ", ".join(str(root) for root in roots)
@@ -117,8 +125,8 @@ def _resolve_inside_root(
     return resolved
 
 
-def resolve_directory(raw_path: object, files_root: Path) -> Path:
-    return _resolve_inside_root(raw_path, files_root)
+def resolve_directory(raw_path: object, files_root: Path, *, allow_any_path: bool = False) -> Path:
+    return _resolve_inside_root(raw_path, files_root, allow_any_path=allow_any_path)
 
 
 def resolve_document_path(
@@ -126,11 +134,13 @@ def resolve_document_path(
     files_root: Path,
     *,
     additional_roots: tuple[Path, ...] = (),
+    allow_any_path: bool = False,
 ) -> Path:
     resolved = _resolve_inside_root(
         raw_path,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     if document_suffix(resolved.name) is None:
         raise WorkspacePathError(
@@ -261,9 +271,15 @@ def _is_legacy_pyblocks_document(source: str) -> bool:
     )
 
 
-def create_directory(raw_parent: object, raw_name: object, files_root: Path) -> dict[str, str]:
+def create_directory(
+    raw_parent: object,
+    raw_name: object,
+    files_root: Path,
+    *,
+    allow_any_path: bool = False,
+) -> dict[str, str]:
     """Create one visible workspace folder without guessing at the requested name."""
-    parent = resolve_directory(raw_parent, files_root)
+    parent = resolve_directory(raw_parent, files_root, allow_any_path=allow_any_path)
     if not parent.exists():
         raise WorkspacePathError(f"parent folder does not exist: {parent}")
     if not parent.is_dir():
@@ -283,7 +299,7 @@ def create_directory(raw_parent: object, raw_name: object, files_root: Path) -> 
     destination = parent / name
     # Resolve before mkdir so a symlinked parent cannot lead the operation out
     # of the configured workspace root between path composition and creation.
-    resolved = _resolve_inside_root(str(destination), files_root)
+    resolved = _resolve_inside_root(str(destination), files_root, allow_any_path=allow_any_path)
     try:
         resolved.mkdir(exist_ok=False)
     except FileExistsError as error:
@@ -333,10 +349,15 @@ def _metadata(
     }
 
 
-def list_documents(raw_dir: object, files_root: Path) -> dict[str, Any]:
+def list_documents(
+    raw_dir: object,
+    files_root: Path,
+    *,
+    allow_any_path: bool = False,
+) -> dict[str, Any]:
     root = files_root.resolve()
     directory = (
-        resolve_directory(raw_dir, files_root)
+        resolve_directory(raw_dir, files_root, allow_any_path=allow_any_path)
         if raw_dir is not None
         else default_workspace_dir(files_root)
     )
@@ -386,11 +407,13 @@ def load_document(
     files_root: Path,
     *,
     additional_roots: tuple[Path, ...] = (),
+    allow_any_path: bool = False,
 ) -> dict[str, Any]:
     path = resolve_document_path(
         raw_path,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     source, stat, digest = _read_identity(path)
     # IDE hosts seed a new custom-editor target as a zero-byte file. Standalone
@@ -413,11 +436,13 @@ def stat_document(
     files_root: Path,
     *,
     additional_roots: tuple[Path, ...] = (),
+    allow_any_path: bool = False,
 ) -> dict[str, Any]:
     path = resolve_document_path(
         raw_path,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     source, stat, digest = _read_identity(path)
     return _metadata(path, source, stat, digest=digest)
@@ -551,11 +576,13 @@ def save_document(
     base_digest: str | None = None,
     force: bool = False,
     lock_root: Path,
+    allow_any_path: bool = False,
 ) -> dict[str, Any]:
     path = resolve_document_path(
         raw_path,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     rendered = normalize_document_source(source, suffix=document_suffix(path.name))
     rendered_bytes = rendered.encode("utf-8")
@@ -676,16 +703,19 @@ def rename_document(
     additional_roots: tuple[Path, ...] = (),
     base_digest: str,
     lock_root: Path,
+    allow_any_path: bool = False,
 ) -> dict[str, Any]:
     path = resolve_document_path(
         raw_path,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     destination = resolve_document_path(
         raw_destination,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     if path.parent != destination.parent:
         raise WorkspacePathError("rename must keep the document in its current folder")
@@ -739,12 +769,14 @@ def trash_document(
     additional_roots: tuple[Path, ...] = (),
     base_digest: str,
     lock_root: Path,
+    allow_any_path: bool = False,
 ) -> dict[str, object]:
     """Move a document to the desktop trash after checking its exact revision."""
     path = resolve_document_path(
         raw_path,
         files_root,
         additional_roots=additional_roots,
+        allow_any_path=allow_any_path,
     )
     with document_locks(lock_root, path):
         _source, stat, digest = _read_identity(path)

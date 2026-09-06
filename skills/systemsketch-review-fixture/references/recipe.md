@@ -88,11 +88,42 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 }
 ```
 
-For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`.
+### Code block
+
+Code is a normal resizable canvas shape with an authored literal. Seed the
+actual CodeMirror-facing props — do not substitute a stock Text shape — so the
+reviewer can exercise the selected-object ribbon and edit transaction:
+
+```json
+{
+  "id": "code-subject",
+  "type": "code",
+  "x": 540,
+  "y": 350,
+  "props": {
+    "w": 566,
+    "h": 220,
+    "code": "const ready = true",
+    "language": "javascript",
+    "fontSize": 16,
+    "showLineNumbers": true,
+    "characterWidth": 48
+  }
+}
+```
+
+`characterWidth` is the readable line measure: the selected Code ribbon
+offers common presets and a custom number, while a free tldraw resize updates
+the same value and shows its live `ch` readout. Code is presentation and an
+authored literal only; never seed execution, lint, or inferred-program records.
+
+For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. Child `x` must clear the parent's left-edge port-label column (~160px), not just sit inside the frame: Expanded ports are vertically centred in the body, so extra top-inset alone leaves `poses` / `list[Pose]` buried under the child. Keep children below the 48px header as well.
 
 **`parentId` is the only thing that makes a child a child.** `Editor.createShapes` does not adopt by geometry, so a shape merely placed inside a Frame, an Expanded Block, a Branch or a Loop is a sibling that overlaps: drag the container and it is left behind, and only a manual nudge makes tldraw's frame drop claim it. Once a shape has a `parentId`, its `x`/`y` are **parent-local** — subtract the container's position when converting. The helper fails the build if a shape's bounds sit inside a container that is not one of its ancestors.
 
 For a Loop region, the Blocks of the loop body take the Loop's shorthand id as `parentId`; the producers and consumers outside it stay on the page. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
+
+A Block port has one physical edge and two binding faces. The `inner` face reverses the edge normal: for example, a top-edge effect port on an Expanded Block must be approached from below by a nested cable, while the same port's `outer` cable leaves upward. Preserve the real `face: "inner"` binding and let the app route it; never hand-route the nested cable above the parent header.
 
 For an edge-tunnel review, set `tunnel: true` and give `tunnelLayer` a readable name such as `Diagnostics` on the real `connection` shape. The live app derives its reusable Layers chip from those persisted connection props; do not seed a fake layer card or a second metadata record. Also seed at least one other long semantic connection outside that layer. Leave the named cable idle so its endpoint stubs and outlined mouths are visible before the first gesture. Hover must restore its complete run while keeping both mouths visible; focusing the layer must remove the mouths from its member edge and tunnel every other long connection.
 
@@ -111,3 +142,25 @@ For a Branch, seed only the semantic `branch` and its ordinary direct children, 
 - Keep the full scene inside the declared viewport with margin. `zoomToFit` is not permission to place a card partly outside the screenshot.
 - Inspect the PNG for text clipping, edge cropping, crossings, and arrow approach angles. For changes to the generator itself, run `scripts/create_layout_sweep.mjs` on the same seed before/after and once more on a fresh seed.
 - Keep the saved board small enough that `zoomToFit` leaves labels legible.
+
+## Behavior Tree region
+
+A `behaviorTree` shape is authored by its XML alone. Give it `props.xml` (a
+BT.CPP v4 document), the presentation choices (`projection`, `orientation`,
+`nodeFace`, `controlFace`, `edgeStyle`, `dataLens`, `blackboardLayout`), and
+any `w`/`h`; the region resizes itself to its content. Do **not** author its
+child Blocks, control cards, pills or cables: the app projects them from the
+XML the moment the region exists and stamps each one with `meta.btRegion`,
+and the helper leaves those derived records out of the authored inventory.
+Target callouts at the region itself, never at a projected child, because a
+child's id is minted at load.
+
+```json
+{
+  "id": "subject",
+  "type": "behaviorTree",
+  "x": 520,
+  "y": 300,
+  "props": { "title": "PickAndPlace", "projection": "tree", "orientation": "down", "xml": "<root BTCPP_format=\"4\">…</root>" }
+}
+```

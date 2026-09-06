@@ -140,6 +140,19 @@ export const ASYNC_PACKET_DASHARRAY = `${ASYNC_CARRIER_PX} ${ASYNC_PACKET_GAP_PX
 export const ASYNC_CADENCE_PX = ASYNC_CARRIER_PX + ASYNC_PACKET_GAP_PX * 2 + ASYNC_PACKET_PX
 
 /**
+ * WHY: Zach named React Flow's homepage marching-ants line as the literal v1
+ * spec for a plain `data` cable, values read straight off that page's own
+ * computed styles (`stroke-dasharray: 5px`, `stroke-linecap: butt`, a 0.5s
+ * linear infinite `dashdraw` animating `stroke-dashoffset` from one full
+ * dash-plus-gap down to zero — see app.css's `systemsketch-data-cable-march`
+ * keyframes, keep its `10` in sync with `2x` this if it ever changes). He
+ * explicitly waved off this looking like the `async`/`delayed` dash
+ * conventions right above — that disambiguation is deferred, not solved here.
+ */
+export const DATA_CABLE_MARCH_DASH_PX = 5
+export const DATA_CABLE_MARCH_DASHARRAY = `${DATA_CABLE_MARCH_DASH_PX}`
+
+/**
  * Normal and long cables start V1 at phase zero. Below one full cadence there
  * is not enough path to reach both micro-gaps, so phase just that short run to
  * centre one complete gap–packet–gap mark. The cadence itself never changes.
@@ -209,8 +222,8 @@ export function splitDashArrays(lengthPx: number, t: number): SplitDashArrays {
 export const DELAY_PILL_GLYPH = 'z⁻¹'
 export const EFFECT_PILL_GLYPH = 'mut'
 export const DELAY_PILL_HEIGHT = 18
-/** Approximate advance of the pill's 12px monospace glyphs. */
-const PILL_GLYPH_ADVANCE = 7.4
+/** Approximate advance of the pill's 12px SystemSketch-chrome sans glyphs. */
+const PILL_GLYPH_ADVANCE = 6.8
 const PILL_PADDING = 16
 
 export interface CablePillFacts {

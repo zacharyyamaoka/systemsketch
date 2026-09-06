@@ -10,6 +10,7 @@ import {
 	getBlockConnectionPorts,
 	getBlockPortDotAtPoint,
 	getBlockPortDotsNear,
+	portElbowSideForFace,
 } from './blockPorts'
 
 function portView() {
@@ -56,6 +57,29 @@ function pureEditor(shapes: BlockShape[], size = { w: 360, h: 230 }): Editor {
 }
 
 describe('Block connection ports', () => {
+	it('points each face along the correct edge normal', () => {
+		const base = portView()
+		const props = {
+			...base,
+			outputs: [...base.outputs, {
+				id: 'effect:in_a', name: 'a', type: 'list[Pose]', visible: true, effect: true,
+			}],
+		}
+		const ports = getBlockConnectionPorts(props)
+		const input = ports.find((port) => port.id === 'in_a')!
+		const output = ports.find((port) => port.id === 'out_a')!
+		const effect = ports.find((port) => port.id === 'effect:in_a')!
+
+		expect([
+			portElbowSideForFace(input, 'outer'),
+			portElbowSideForFace(input, 'inner'),
+			portElbowSideForFace(output, 'outer'),
+			portElbowSideForFace(output, 'inner'),
+			portElbowSideForFace(effect, 'outer'),
+			portElbowSideForFace(effect, 'inner'),
+		]).toEqual(['left', 'right', 'right', 'left', 'top', 'bottom'])
+	})
+
 	it('keeps every Simple-view identity live at its coincident donor midpoint', () => {
 		const props = {
 			...setBlockViewProps(portView(), 'simple'),

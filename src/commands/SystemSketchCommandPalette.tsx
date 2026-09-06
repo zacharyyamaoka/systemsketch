@@ -395,6 +395,7 @@ export function SystemSketchCommandPalette({
             <button
               type="button"
               disabled={editorIsReadOnly || !activeItem || !(activeItem as BoardSearchMatch).replaceable}
+              title={activeItem ? replacementBlockerLabel(activeItem as BoardSearchMatch) ?? undefined : 'Select a match to replace'}
               onClick={() => activeItem && replaceMatch(activeItem as BoardSearchMatch)}
             >Replace</button>
             <button

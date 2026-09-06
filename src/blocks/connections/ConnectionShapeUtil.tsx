@@ -30,6 +30,7 @@ import {
 	getBlockPortDotAtPoint,
 	getPortHostPort,
 	isPortHostShape,
+	portElbowSideForFace,
 } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
@@ -97,6 +98,7 @@ import {
 	ASYNC_PACKET_DASHARRAY,
 	asyncDashOffsetForLength,
 	cablePresentation,
+	DATA_CABLE_MARCH_DASHARRAY,
 	DELAY_DOT_GAP_PX,
 	DELAY_DOT_PX,
 	DELAY_PILL_HEIGHT,
@@ -1148,17 +1150,27 @@ export function DataCablePath({
 	dashArray?: string
 }) {
 	const async = temporal === 'async' && !tunnel
+	// WHY: React Flow's homepage marching-ants line, on by default for v1 exactly
+	// as Zach asked — a plain `data` cable only, never `async` (its own packet
+	// cadence above) or a tunnel/lens dash override, which already outrank a
+	// kind's own cadence. `.ConnectionShape-marchingData` in app.css owns the
+	// CSS `animation`; the dashoffset is left unset here on purpose so that
+	// animation — not this static attribute — drives it.
+	const marching = temporal === 'data' && !tunnel && !dashArray
 	return (
 		<path
 			d={path}
 			fill="none"
 			stroke={stroke}
-			strokeLinecap={async && !dashArray ? 'butt' : 'round'}
+			strokeLinecap={(async || marching) && !dashArray ? 'butt' : 'round'}
 			strokeLinejoin="round"
 			strokeWidth={strokeWidth}
-			strokeDasharray={dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : undefined)}
+			strokeDasharray={
+				dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : marching ? DATA_CABLE_MARCH_DASHARRAY : undefined)
+			}
 			strokeDashoffset={async && !dashArray ? asyncDashOffsetForLength(length) : undefined}
 			vectorEffect={vectorEffect}
+			className={marching ? 'ConnectionShape-marchingData' : undefined}
 			data-edge-type={temporal}
 		/>
 	)
@@ -1368,7 +1380,7 @@ export function DelayPill({
 				textAnchor="middle"
 				fontSize={12}
 				fontWeight={700}
-				fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace"
+				fontFamily="Inter, ui-sans-serif, system-ui, sans-serif"
 				fill={ink}
 				style={{ userSelect: 'none' }}
 			>
@@ -1384,7 +1396,7 @@ function SemanticTagPill({ point, label }: { point: { x: number; y: number }; la
 	return (
 		<g transform={`translate(${point.x} ${point.y})`} data-testid="connection-semantic-tag" aria-label={`${label} semantic tag`} pointerEvents="none">
 			<rect x={-width / 2} y={-DELAY_PILL_HEIGHT / 2} width={width} height={DELAY_PILL_HEIGHT} rx={DELAY_PILL_HEIGHT / 2} fill="var(--ss-surface, #ffffff)" stroke="var(--ss-accent, #2563eb)" strokeWidth={1.3} />
-			<text x={0} y={4} textAnchor="middle" fontSize={12} fontWeight={700} fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace" fill="var(--ss-accent, #2563eb)" style={{ userSelect: 'none' }}>{label}</text>
+			<text x={0} y={4} textAnchor="middle" fontSize={12} fontWeight={700} fontFamily="Inter, ui-sans-serif, system-ui, sans-serif" fill="var(--ss-accent, #2563eb)" style={{ userSelect: 'none' }}>{label}</text>
 		</g>
 	)
 }
@@ -1686,6 +1698,11 @@ function getConnectionElbowBoxes(
 	const portFor = (binding: ConnectionBinding | undefined) => (
 		binding ? getPortHostPort(editor, binding.toId, binding.props.portId) : null
 	)
+	const sideFor = (binding: ConnectionBinding | undefined) => {
+		if (!binding) return undefined
+		const port = portFor(binding)
+		return port ? portElbowSideForFace(port, binding.props.face) : undefined
+	}
 	const toLocalBox = (binding: ConnectionBinding | undefined) => {
 		if (!binding || binding.props.face === 'inner') return null
 		// A face that looks into its own host contributes no box, for exactly the
@@ -1706,8 +1723,8 @@ function getConnectionElbowBoxes(
 	return {
 		start: toLocalBox(source),
 		end: toLocalBox(sink),
-		startSide: portFor(source)?.elbowSide,
-		endSide: portFor(sink)?.elbowSide,
+		startSide: sideFor(source),
+		endSide: sideFor(sink),
 	}
 }
 

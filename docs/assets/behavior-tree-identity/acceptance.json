@@ -1,0 +1,1669 @@
+{
+  "generatedAt": "2026-09-05T18:22:48.000Z",
+  "passed": 33,
+  "total": 33,
+  "results": [
+    {
+      "id": "seed.offsets",
+      "description": "a freshly projected region has no free offsets",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "duplicate.regions",
+      "description": "Ctrl+D leaves two regions",
+      "ok": true,
+      "observed": 2,
+      "desired": 2
+    },
+    {
+      "id": "duplicate.offsets",
+      "description": "duplicate: the original's free offsets are byte-identical",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "duplicate.kids",
+      "description": "duplicate: the original keeps exactly its own children, where they were",
+      "ok": true,
+      "observed": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ],
+      "desired": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ]
+    },
+    {
+      "id": "duplicate.copy.count",
+      "description": "duplicate: the copy has its own full child set",
+      "ok": true,
+      "observed": 13,
+      "desired": 13
+    },
+    {
+      "id": "duplicate.copy.parent",
+      "description": "duplicate: and every one of them is stamped with the copy, not the original",
+      "ok": true,
+      "observed": 0,
+      "desired": 0
+    },
+    {
+      "id": "duplicate.copy.paths",
+      "description": "duplicate: the copy projects the same occurrences",
+      "ok": true,
+      "observed": [
+        "node:0",
+        "node:0.0",
+        "node:0.1",
+        "node:0.1.0",
+        "node:0.1.1",
+        "node:0.2",
+        "node:0.3",
+        "node:0.4",
+        "node:0.4.0",
+        "node:0.4.1",
+        "node:0.4.1.0",
+        "node:0.4.1.1",
+        "node:0.4.2"
+      ],
+      "desired": [
+        "node:0",
+        "node:0.0",
+        "node:0.1",
+        "node:0.1.0",
+        "node:0.1.1",
+        "node:0.2",
+        "node:0.3",
+        "node:0.4",
+        "node:0.4.0",
+        "node:0.4.1",
+        "node:0.4.1.0",
+        "node:0.4.1.1",
+        "node:0.4.2"
+      ]
+    },
+    {
+      "id": "move.offsets",
+      "description": "dragging the copy 400px leaves the original’s offsets untouched",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "move.kids",
+      "description": "and leaves every original child exactly where it was",
+      "ok": true,
+      "observed": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ],
+      "desired": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ]
+    },
+    {
+      "id": "move.copy",
+      "description": "while the copy itself moved",
+      "ok": true,
+      "observed": true,
+      "desired": true
+    },
+    {
+      "id": "move.copy.offsets",
+      "description": "and moving a whole region is not a free child offset",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "undo.regions",
+      "description": "undo removes the copy",
+      "ok": true,
+      "observed": [
+        "shape:bt-identity-region"
+      ],
+      "desired": [
+        "shape:bt-identity-region"
+      ]
+    },
+    {
+      "id": "undo.total",
+      "description": "and every record it brought with it",
+      "ok": true,
+      "observed": 14,
+      "desired": 14
+    },
+    {
+      "id": "undo.original",
+      "description": "the original is exactly as it started",
+      "ok": true,
+      "observed": {
+        "offsets": {},
+        "x": 200,
+        "y": 200,
+        "kids": [
+          {
+            "path": "0",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 785,
+            "y": 196,
+            "stamp": true
+          },
+          {
+            "path": "0.0",
+            "role": "node",
+            "type": "block",
+            "x": 60,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.1",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 443,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.1.0",
+            "role": "node",
+            "type": "block",
+            "x": 183,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.1.1",
+            "role": "node",
+            "type": "block",
+            "x": 592,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.2",
+            "role": "node",
+            "type": "block",
+            "x": 755,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.3",
+            "role": "node",
+            "type": "block",
+            "x": 1138,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.4",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 1494,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.4.0",
+            "role": "node",
+            "type": "block",
+            "x": 1118,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.4.1",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 1501,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.4.1.0",
+            "role": "node",
+            "type": "block",
+            "x": 1235,
+            "y": 736,
+            "stamp": true
+          },
+          {
+            "path": "0.4.1.1",
+            "role": "node",
+            "type": "block",
+            "x": 1618,
+            "y": 736,
+            "stamp": true
+          },
+          {
+            "path": "0.4.2",
+            "role": "node",
+            "type": "block",
+            "x": 1721,
+            "y": 540,
+            "stamp": true
+          }
+        ]
+      },
+      "desired": {
+        "offsets": {},
+        "x": 200,
+        "y": 200,
+        "kids": [
+          {
+            "path": "0",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 785,
+            "y": 196,
+            "stamp": true
+          },
+          {
+            "path": "0.0",
+            "role": "node",
+            "type": "block",
+            "x": 60,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.1",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 443,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.1.0",
+            "role": "node",
+            "type": "block",
+            "x": 183,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.1.1",
+            "role": "node",
+            "type": "block",
+            "x": 592,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.2",
+            "role": "node",
+            "type": "block",
+            "x": 755,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.3",
+            "role": "node",
+            "type": "block",
+            "x": 1138,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.4",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 1494,
+            "y": 344,
+            "stamp": true
+          },
+          {
+            "path": "0.4.0",
+            "role": "node",
+            "type": "block",
+            "x": 1118,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.4.1",
+            "role": "node",
+            "type": "behaviorTreeControl",
+            "x": 1501,
+            "y": 540,
+            "stamp": true
+          },
+          {
+            "path": "0.4.1.0",
+            "role": "node",
+            "type": "block",
+            "x": 1235,
+            "y": 736,
+            "stamp": true
+          },
+          {
+            "path": "0.4.1.1",
+            "role": "node",
+            "type": "block",
+            "x": 1618,
+            "y": 736,
+            "stamp": true
+          },
+          {
+            "path": "0.4.2",
+            "role": "node",
+            "type": "block",
+            "x": 1721,
+            "y": 540,
+            "stamp": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "paste.regions",
+      "description": "paste leaves two regions",
+      "ok": true,
+      "observed": 2,
+      "desired": 2
+    },
+    {
+      "id": "paste.offsets",
+      "description": "paste: the original's free offsets are byte-identical",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "paste.kids",
+      "description": "paste: the original keeps exactly its own children, where they were",
+      "ok": true,
+      "observed": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ],
+      "desired": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ]
+    },
+    {
+      "id": "paste.copy.count",
+      "description": "paste: the copy has its own full child set",
+      "ok": true,
+      "observed": 13,
+      "desired": 13
+    },
+    {
+      "id": "paste.copy.parent",
+      "description": "paste: and every one of them is stamped with the copy, not the original",
+      "ok": true,
+      "observed": 0,
+      "desired": 0
+    },
+    {
+      "id": "paste.copy.paths",
+      "description": "paste: the copy projects the same occurrences",
+      "ok": true,
+      "observed": [
+        "node:0",
+        "node:0.0",
+        "node:0.1",
+        "node:0.1.0",
+        "node:0.1.1",
+        "node:0.2",
+        "node:0.3",
+        "node:0.4",
+        "node:0.4.0",
+        "node:0.4.1",
+        "node:0.4.1.0",
+        "node:0.4.1.1",
+        "node:0.4.2"
+      ],
+      "desired": [
+        "node:0",
+        "node:0.0",
+        "node:0.1",
+        "node:0.1.0",
+        "node:0.1.1",
+        "node:0.2",
+        "node:0.3",
+        "node:0.4",
+        "node:0.4.0",
+        "node:0.4.1",
+        "node:0.4.1.0",
+        "node:0.4.1.1",
+        "node:0.4.2"
+      ]
+    },
+    {
+      "id": "lone.offsets",
+      "description": "pasting one projected occurrence alone leaves the region’s offsets empty",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "lone.kids",
+      "description": "and the region keeps exactly its own children, where they were",
+      "ok": true,
+      "observed": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ],
+      "desired": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 785,
+          "y": 196,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 60,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 443,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 183,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 592,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 755,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1138,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1494,
+          "y": 344,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1118,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1501,
+          "y": 540,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1235,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1618,
+          "y": 736,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1721,
+          "y": 540,
+          "stamp": true
+        }
+      ]
+    },
+    {
+      "id": "dataflow.cables",
+      "description": "the lens wires real cables",
+      "ok": true,
+      "observed": true,
+      "desired": true
+    },
+    {
+      "id": "dataflow.contained",
+      "description": "each of which lives inside one region",
+      "ok": true,
+      "observed": 0,
+      "desired": 0
+    },
+    {
+      "id": "dataflow.regions",
+      "description": "Ctrl+D under the lens leaves two regions",
+      "ok": true,
+      "observed": 2,
+      "desired": 2
+    },
+    {
+      "id": "dataflow.offsets",
+      "description": "dataflow: the original's free offsets are byte-identical",
+      "ok": true,
+      "observed": {},
+      "desired": {}
+    },
+    {
+      "id": "dataflow.kids",
+      "description": "dataflow: the original keeps exactly its own children, where they were",
+      "ok": true,
+      "observed": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 730,
+          "y": 470,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 1060,
+          "y": 104,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1060,
+          "y": 298,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 156,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 350,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 1060,
+          "y": 402,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1060,
+          "y": 596,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1060,
+          "y": 790,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 596,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1664,
+          "y": 790,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 2268,
+          "y": 648,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 2268,
+          "y": 842,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 894,
+          "stamp": true
+        },
+        {
+          "path": "key:object_pose",
+          "role": "key",
+          "type": "block",
+          "x": 2938,
+          "y": 448,
+          "stamp": true
+        },
+        {
+          "path": "key:quality",
+          "role": "key",
+          "type": "block",
+          "x": 2938,
+          "y": 548,
+          "stamp": true
+        },
+        {
+          "path": "key:grip_state",
+          "role": "key",
+          "type": "block",
+          "x": 2938,
+          "y": 648,
+          "stamp": true
+        },
+        {
+          "path": "unbundle",
+          "role": "unbundle",
+          "type": "block",
+          "x": 60,
+          "y": 104,
+          "stamp": true
+        }
+      ],
+      "desired": [
+        {
+          "path": "0",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 730,
+          "y": 470,
+          "stamp": true
+        },
+        {
+          "path": "0.0",
+          "role": "node",
+          "type": "block",
+          "x": 1060,
+          "y": 104,
+          "stamp": true
+        },
+        {
+          "path": "0.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1060,
+          "y": 298,
+          "stamp": true
+        },
+        {
+          "path": "0.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 156,
+          "stamp": true
+        },
+        {
+          "path": "0.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 350,
+          "stamp": true
+        },
+        {
+          "path": "0.2",
+          "role": "node",
+          "type": "block",
+          "x": 1060,
+          "y": 402,
+          "stamp": true
+        },
+        {
+          "path": "0.3",
+          "role": "node",
+          "type": "block",
+          "x": 1060,
+          "y": 596,
+          "stamp": true
+        },
+        {
+          "path": "0.4",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1060,
+          "y": 790,
+          "stamp": true
+        },
+        {
+          "path": "0.4.0",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 596,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1",
+          "role": "node",
+          "type": "behaviorTreeControl",
+          "x": 1664,
+          "y": 790,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.0",
+          "role": "node",
+          "type": "block",
+          "x": 2268,
+          "y": 648,
+          "stamp": true
+        },
+        {
+          "path": "0.4.1.1",
+          "role": "node",
+          "type": "block",
+          "x": 2268,
+          "y": 842,
+          "stamp": true
+        },
+        {
+          "path": "0.4.2",
+          "role": "node",
+          "type": "block",
+          "x": 1664,
+          "y": 894,
+          "stamp": true
+        },
+        {
+          "path": "key:object_pose",
+          "role": "key",
+          "type": "block",
+          "x": 2938,
+          "y": 448,
+          "stamp": true
+        },
+        {
+          "path": "key:quality",
+          "role": "key",
+          "type": "block",
+          "x": 2938,
+          "y": 548,
+          "stamp": true
+        },
+        {
+          "path": "key:grip_state",
+          "role": "key",
+          "type": "block",
+          "x": 2938,
+          "y": 648,
+          "stamp": true
+        },
+        {
+          "path": "unbundle",
+          "role": "unbundle",
+          "type": "block",
+          "x": 60,
+          "y": 104,
+          "stamp": true
+        }
+      ]
+    },
+    {
+      "id": "dataflow.copy.count",
+      "description": "dataflow: the copy has its own full child set",
+      "ok": true,
+      "observed": 17,
+      "desired": 17
+    },
+    {
+      "id": "dataflow.copy.parent",
+      "description": "dataflow: and every one of them is stamped with the copy, not the original",
+      "ok": true,
+      "observed": 0,
+      "desired": 0
+    },
+    {
+      "id": "dataflow.copy.paths",
+      "description": "dataflow: the copy projects the same occurrences",
+      "ok": true,
+      "observed": [
+        "key:key:grip_state",
+        "key:key:object_pose",
+        "key:key:quality",
+        "node:0",
+        "node:0.0",
+        "node:0.1",
+        "node:0.1.0",
+        "node:0.1.1",
+        "node:0.2",
+        "node:0.3",
+        "node:0.4",
+        "node:0.4.0",
+        "node:0.4.1",
+        "node:0.4.1.0",
+        "node:0.4.1.1",
+        "node:0.4.2",
+        "unbundle:unbundle"
+      ],
+      "desired": [
+        "key:key:grip_state",
+        "key:key:object_pose",
+        "key:key:quality",
+        "node:0",
+        "node:0.0",
+        "node:0.1",
+        "node:0.1.0",
+        "node:0.1.1",
+        "node:0.2",
+        "node:0.3",
+        "node:0.4",
+        "node:0.4.0",
+        "node:0.4.1",
+        "node:0.4.1.0",
+        "node:0.4.1.1",
+        "node:0.4.2",
+        "unbundle:unbundle"
+      ]
+    },
+    {
+      "id": "dataflow.cables.count",
+      "description": "and twice the cables",
+      "ok": true,
+      "observed": 16,
+      "desired": 16
+    },
+    {
+      "id": "dataflow.cables.contained",
+      "description": "with no cable bound across the two regions",
+      "ok": true,
+      "observed": 0,
+      "desired": 0
+    },
+    {
+      "id": "console",
+      "description": "no local console errors",
+      "ok": true,
+      "observed": [],
+      "desired": []
+    }
+  ],
+  "aborted": null
+}

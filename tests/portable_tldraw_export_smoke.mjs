@@ -109,6 +109,12 @@ async function main() {
       ])
       editor.createShape({ id: 'shape:portable-pink', type: 'geo', x: 590, y: 520,
         props: { geo: 'ellipse', w: 130, h: 90, color: 'pink' } })
+      editor.createShape({ id: 'shape:portable-code', type: 'code', x: 280, y: 760,
+        props: {
+          w: 420, h: 150,
+          code: 'const portable = true\\nconsole.log(portable)',
+          language: 'javascript', fontSize: 16, showLineNumbers: true, characterWidth: 48,
+        } })
       editor.createShapes([
         { id: 'shape:portable-async-source', type: 'block', x: 1120, y: 650,
           props: { title: 'async source', view: 'port', inputs: [], outputs: [{ id: 'out0', name: 'event', type: 'Event', visible: true }] } },
@@ -232,6 +238,7 @@ async function main() {
     check('portable JSON contains no custom Block or connection shape',
       !shapeTypes.includes('block') && !shapeTypes.includes('connection'), shapeTypes.join(', '))
     check('portable JSON contains no custom Branch shape', !shapeTypes.includes('branch'))
+    check('portable JSON contains no custom Code shape', !shapeTypes.includes('code'))
     check('portable JSON contains no semantic connection binding', !bindingTypes.includes('connection'))
     const rememberedBlocks = portable.records.filter((record) =>
       record.typeName === 'shape'
@@ -303,6 +310,10 @@ async function main() {
         && record.props?.geo !== 'systemsketch-rounded-rect'))
     check('portable export preserves the board’s active canvas', portable.records
       .some((record) => record.typeName === 'instance' && record.currentPageId === setup.firstPage))
+    check('Code becomes editable stock text with its authored literal intact', portable.records.some((record) =>
+      record.typeName === 'shape'
+      && record.type === 'text'
+      && JSON.stringify(record.props?.richText).includes('const portable = true')))
 
     const portableShapes = new Map(portable.records
       .filter((record) => record.typeName === 'shape')

@@ -49,7 +49,7 @@ export interface Size {
   h: number
 }
 
-export type SelectionMenuSide = 'above' | 'below'
+export type SelectionMenuSide = 'above' | 'below' | 'pinned'
 
 export interface SelectionMenuPlacementInput {
   /** The selection's bounding box in viewport space. */
@@ -100,7 +100,17 @@ export function isSelectionOnScreen(selection: Rect, viewport: Size): boolean {
 
 /**
  * Centre on the selection, offset above it, flip below when there is no room,
+ * pin to the top margin when even the selection's top edge is off-screen,
  * then clamp into the safe area — in that order.
+ *
+ * Neither reference implementation covers a selection bigger than the
+ * viewport: stock tldraw's `TldrawUiContextualToolbar` (and the rich text
+ * toolbar built on top of it — same primitive, no extra logic) clamps on the
+ * *full* selection's true centre with no visible-portion centring and no
+ * top-pin branch; Excalidraw has no floating selection-following toolbar at
+ * all — its Stats panel is CSS-docked (`position: absolute; top: 60px`), not
+ * computed from the selection. Both branches below are FigJam's behaviour
+ * (Miro's is the same shape), added on top of what neither library does.
  */
 export function placeSelectionMenu({
   selection,
@@ -111,11 +121,30 @@ export function placeSelectionMenu({
 }: SelectionMenuPlacementInput): SelectionMenuPlacement {
   const overlayTop = selection.y - overlayInset
   const overlayBottom = selection.y + selection.h + overlayInset
-  const centreX = selection.x + selection.w / 2
 
-  let side: SelectionMenuSide = 'above'
-  let y = overlayTop - menu.h - SELECTION_MENU_GAP
-  if (y < SELECTION_MENU_MARGIN) {
+  // A selection wider than the viewport has a true centre that can land
+  // anywhere — including nowhere near what the user can actually see.
+  // Centring on the visible slice instead is what makes an Expanded Block
+  // wider than the screen still get a usefully-placed menu.
+  const centreX = selection.w > viewport.w
+    ? (Math.max(selection.x, 0) + Math.min(selection.x + selection.w, viewport.w)) / 2
+    : selection.x + selection.w / 2
+
+  let side: SelectionMenuSide
+  let y: number
+  const aboveY = overlayTop - menu.h - SELECTION_MENU_GAP
+  if (aboveY >= SELECTION_MENU_MARGIN) {
+    side = 'above'
+    y = aboveY
+  } else if (overlayTop < 0) {
+    // The selection's top edge is above the viewport too — we're scrolled
+    // inside a region taller than the screen, so there is no "above" to flip
+    // to. Pin near the top instead of falling through to the below branch,
+    // which would otherwise clamp the menu down against the bottom toolbar
+    // far from the only part of the selection actually in view.
+    side = 'pinned'
+    y = SELECTION_MENU_MARGIN
+  } else {
     side = 'below'
     y = overlayBottom + SELECTION_MENU_GAP
   }

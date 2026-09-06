@@ -22,6 +22,8 @@ import {
   installBranchRegions,
 } from './branch'
 import { LoopShapeUtil, LoopTool } from './loop'
+import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from './behaviorTree'
+import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import {
   blockConnectionBindingUtils,
@@ -74,11 +76,13 @@ import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisual
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
 import { CompareProvider } from './compare'
+import {
+  installSystemSketchWheelZoom,
+  SYSTEMSKETCH_EDITOR_OPTIONS,
+} from './canvasCamera'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
-/** SystemSketch has one durable canvas; structural depth replaces pages. */
-const SYSTEMSKETCH_EDITOR_OPTIONS = { maxPages: 1 }
 const SYSTEMSKETCH_COMPONENTS = {
   ContextMenu: BlockContextMenu,
   InFrontOfTheCanvas: SystemSketchSurfaceHost,
@@ -97,10 +101,13 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  BehaviorTreeShapeUtil,
+  BtControlShapeUtil,
+  CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -117,9 +124,12 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  BehaviorTreeShapeUtil,
+  BtControlShapeUtil,
+  CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -138,6 +148,7 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     setMountedEditor(editor)
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
@@ -149,7 +160,9 @@ function SystemSketchCanvas() {
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
+    const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -159,8 +172,10 @@ function SystemSketchCanvas() {
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBehaviorTreeRegions()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopCodeClickToEdit()
       stopBlockClickToEdit()
       stopArrowClickToPlace()
       stopInstantTextEditing()
@@ -170,6 +185,7 @@ function SystemSketchCanvas() {
       stopDefinitionLinking()
       stopBoardTheme()
       stopWorkspace()
+      stopWheelZoom()
       setMountedEditor(null)
     }
   }, [attach])
@@ -217,6 +233,7 @@ function SystemSketchCanvas() {
 function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId, 'product'> }) {
   const isBlockDevelopment = profile === 'block-dev'
   const onMount = useCallback((editor: Editor) => {
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     // The development profiles keep tldraw's stock toolbar, so they cannot
     // cycle the preset — but they must still open on the same arrow and the
@@ -240,6 +257,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBranchClickToEdit = isBlockDevelopment
       ? installBranchClickToEdit(editor)
       : () => undefined
+    const stopCodeClickToEdit = isBlockDevelopment
+      ? installCodeClickToEdit(editor)
+      : () => undefined
     const stopBranchRegions = isBlockDevelopment
       ? installBranchRegions(editor)
       : () => undefined
@@ -254,12 +274,14 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopCodeClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
       stopBoardTheme()
+      stopWheelZoom()
     }
   }, [isBlockDevelopment])
 

@@ -1,0 +1,22 @@
+{
+  "checks": [
+    "the saved review board cold-opens and its first cue remains bound to the Text target",
+    "Settings saves the literal @datatype alias under the canonical Text tool",
+    "Asset search finds @datatype, marks it as an alias, and arms the stock Text tool"
+  ],
+  "saved": {
+    "stored": {
+      "version": 1,
+      "aliases": {
+        "text": [
+          "@datatype"
+        ]
+      }
+    },
+    "row": "TextCanvas tool↪@datatype×Add an alias for TextAdd"
+  },
+  "result": {
+    "id": "text",
+    "text": "TextTools↪@datatypeEnter"
+  }
+}
