@@ -62,51 +62,67 @@ function portPhase(port: BlockPort): CommunicationPhase | null {
 export interface InferencePort {
 	port: BlockPort
 	side: 'input' | 'output'
+	/**
+	 * The edge this port has already been put on, if any. Groups follow their
+	 * placed members rather than out-voting them.
+	 */
+	placedEdge?: PortEdge
 }
 
 /**
  * Place every port that has no authored communication placement.
  *
- * Ports are grouped by interaction, each group is kept contiguous, and groups
- * are laid along the edge their side faces — inputs left, outputs right, which
- * is the reading direction the signature already established. A port whose name
- * says nothing about an interaction is simply appended, so an off-the-shelf
- * component still gets an orderly card rather than a pile.
+ * THE RULE (Zach, 2026-09-06): "in communication view, all of the ports for the
+ * associated communication pattern must be side by side on the same edge." An
+ * Action's goal leaves the client and its feedback and result come back into
+ * it, so by side alone they would sit on opposite walls — and the one thing you
+ * most want to see about an interaction is all of it at once, next to the arrow
+ * that stands for it. So the interaction, not the side, chooses the edge, and
+ * its members are laid out contiguously along that edge in protocol order.
+ *
+ * Which edge: the one its already-placed members use, if any — the generator
+ * puts a whole interaction on the wall facing the component it talks to, and an
+ * inferred sibling must not contradict that. Otherwise the majority side, which
+ * keeps a producer's channels on the right and a consumer's on the left, the
+ * reading direction the signature already established.
  */
 export function inferCommunicationPlacements(
 	ports: readonly InferencePort[],
 ): Map<string, InferredPlacement> {
+	const visible = ports.filter((entry) => entry.port.visible)
+	if (visible.length === 0) return new Map()
+
+	// Group by interaction, preserving first-appearance order so a card's layout
+	// does not reshuffle when an unrelated port is added.
+	const groups: { key: string; members: InferencePort[] }[] = []
+	for (const entry of visible) {
+		const key = portInteractionKey(entry.port) ?? `solo:${entry.port.id}`
+		const existing = groups.find((group) => group.key === key)
+		if (existing) existing.members.push(entry)
+		else groups.push({ key, members: [entry] })
+	}
+
 	const placements = new Map<string, InferredPlacement>()
-	for (const side of ['input', 'output'] as const) {
-		const lane = ports.filter((entry) => entry.side === side && entry.port.visible)
-		if (lane.length === 0) continue
+	const byEdge = new Map<PortEdge, InferencePort[]>()
+	for (const group of groups) {
+		group.members.sort((a, b) => {
+			const orderA = PHASE_ORDER[portPhase(a.port) ?? 'publish']
+			const orderB = PHASE_ORDER[portPhase(b.port) ?? 'publish']
+			return orderA - orderB || a.port.name.localeCompare(b.port.name)
+		})
+		const placed = group.members.find((entry) => entry.placedEdge)?.placedEdge
+		const outputs = group.members.filter((entry) => entry.side === 'output').length
+		const edge: PortEdge = placed ?? (outputs * 2 >= group.members.length ? 'right' : 'left')
+		const lane = byEdge.get(edge) ?? []
+		lane.push(...group.members)
+		byEdge.set(edge, lane)
+	}
 
-		// Group by interaction, preserving first-appearance order so a card's
-		// layout does not reshuffle when an unrelated port is added.
-		const groups: { key: string; members: InferencePort[] }[] = []
-		for (const entry of lane) {
-			const key = portInteractionKey(entry.port) ?? `solo:${entry.port.id}`
-			const existing = groups.find((group) => group.key === key)
-			if (existing) existing.members.push(entry)
-			else groups.push({ key, members: [entry] })
-		}
-		for (const group of groups) {
-			group.members.sort((a, b) => {
-				const phaseA = portPhase(a.port)
-				const phaseB = portPhase(b.port)
-				const orderA = phaseA ? PHASE_ORDER[phaseA] : 0
-				const orderB = phaseB ? PHASE_ORDER[phaseB] : 0
-				return orderA - orderB || a.port.name.localeCompare(b.port.name)
-			})
-		}
-
-		const ordered = groups.flatMap((group) => group.members)
-		const edge: PortEdge = side === 'input' ? 'left' : 'right'
-		ordered.forEach((entry, index) => {
-			// Evenly along the edge, leaving a margin at both corners so a socket
-			// never lands exactly on one.
-			const edgeT = (index + 1) / (ordered.length + 1)
-			placements.set(entry.port.id, { edge, edgeT })
+	for (const [edge, lane] of byEdge) {
+		lane.forEach((entry, index) => {
+			// Evenly along the edge among the ports that actually land on it,
+			// leaving a margin at both corners so a socket never sits on one.
+			placements.set(entry.port.id, { edge, edgeT: (index + 1) / (lane.length + 1) })
 		})
 	}
 	return placements

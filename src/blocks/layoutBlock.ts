@@ -165,9 +165,11 @@ export function portCommunicationEdge(
 export function withInferredCommunicationPlacements(props: BlockShapeProps): BlockShapeProps {
 	const unplaced = [...props.inputs, ...props.outputs].some((port) => port.commEdge === undefined)
 	if (!unplaced) return props
+	// `placedEdge` is what keeps an inferred sibling from contradicting a leg the
+	// generator already put on the wall facing its peer.
 	const inferred = inferCommunicationPlacements([
-		...props.inputs.map((port) => ({ port, side: 'input' as const })),
-		...props.outputs.map((port) => ({ port, side: 'output' as const })),
+		...props.inputs.map((port) => ({ port, side: 'input' as const, placedEdge: port.commEdge })),
+		...props.outputs.map((port) => ({ port, side: 'output' as const, placedEdge: port.commEdge })),
 	])
 	const fill = (ports: readonly BlockPort[]) => ports.map((port) => {
 		if (port.commEdge !== undefined) return port

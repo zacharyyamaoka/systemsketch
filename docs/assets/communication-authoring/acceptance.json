@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T23:07:06.212Z",
+  "generatedAt": "2026-09-06T23:20:28.034Z",
   "checks": [
     "Components mode offers exactly the three drawable patterns, none armed and nothing wired",
     "a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher",

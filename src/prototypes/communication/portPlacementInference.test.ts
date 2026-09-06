@@ -37,13 +37,51 @@ describe('an inferred placement keeps an interaction together', () => {
 		expect(moveIndices).toEqual([...moveIndices].sort((a, b) => a - b))
 	})
 
-	it('puts an interaction on the edge its side faces', () => {
+	it('keeps both legs of a Service on ONE edge, though their sides differ', () => {
+		// THE RULE: "all of the ports for the associated communication pattern
+		// must be side by side on the same edge." By side alone these two would
+		// sit on opposite walls, which is the split this rule exists to forbid.
 		const placements = inferCommunicationPlacements([
-			...lane('input', ['health.request']),
-			...lane('output', ['health.response']),
+			...lane('input', ['health.response']),
+			...lane('output', ['health.request']),
 		])
-		expect(placements.get('health.request')?.edge).toBe('left')
-		expect(placements.get('health.response')?.edge).toBe('right')
+		expect(placements.get('health.request')?.edge)
+			.toBe(placements.get('health.response')?.edge)
+	})
+
+	it('keeps all three legs of an Action on one edge, in protocol order', () => {
+		const placements = inferCommunicationPlacements([
+			...lane('input', ['move.feedback', 'move.result']),
+			...lane('output', ['move.goal']),
+		])
+		const edges = ['move.goal', 'move.feedback', 'move.result']
+			.map((id) => placements.get(id)?.edge)
+		expect(new Set(edges).size).toBe(1)
+		const order = ['move.goal', 'move.feedback', 'move.result']
+			.map((id) => placements.get(id)!.edgeT)
+		expect(order).toEqual([...order].sort((a, b) => a - b))
+	})
+
+	it('follows an edge a leg was already placed on rather than out-voting it', () => {
+		// The generator puts a whole interaction on the wall facing its peer; an
+		// inferred sibling must not contradict that.
+		const placements = inferCommunicationPlacements([
+			{ port: port('move.goal', 'move.goal', { commEdge: 'bottom' }), side: 'output', placedEdge: 'bottom' },
+			{ port: port('move.result', 'move.result'), side: 'input' },
+		])
+		expect(placements.get('move.result')?.edge).toBe('bottom')
+	})
+
+	it('spreads an edge over only the ports that land on it', () => {
+		// The bug this guards: fractions computed over the whole side, including
+		// ports authored onto another wall, left visible gaps on the edge.
+		const placements = inferCommunicationPlacements([
+			{ port: port('a', 'a.stream', { commEdge: 'bottom' }), side: 'output', placedEdge: 'bottom' },
+			{ port: port('b', 'b.stream', { commEdge: 'bottom' }), side: 'output', placedEdge: 'bottom' },
+			...lane('output', ['c.stream']),
+		])
+		// The one remaining right-edge port is centred, not squeezed to a third.
+		expect(placements.get('c.stream')?.edgeT).toBeCloseTo(0.5, 5)
 	})
 
 	it('never lands a socket exactly on a corner', () => {

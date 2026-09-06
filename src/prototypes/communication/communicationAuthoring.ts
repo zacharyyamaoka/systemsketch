@@ -240,26 +240,29 @@ interface PendingPort {
 }
 
 /**
- * Which edge of `fromId` faces `toId`, when the two are stacked rather than
- * side by side.
+ * Which wall of `fromId` faces `toId`.
  *
- * Null keeps the historical derived rails (input left, named output right),
- * which is still the right answer for a left-to-right topology. Returning a
- * horizontal rail is what puts a generated socket on the face the cable
- * actually leaves by — the reason four-sided ports exist for this view at all.
+ * WHY it names an edge in every direction rather than only the horizontal
+ * rails: an interaction's ports must sit together on ONE wall, and the wall
+ * they belong on is the one pointing at the component they talk to. Returning
+ * null for a side-by-side pair left those legs to the side-derived rule, which
+ * put an Action's goal on the right and its feedback and result on the left —
+ * the same interaction split across two walls, which is exactly what the rule
+ * forbids. Both endpoints of every leg ask this about the same pair, so they
+ * all agree on the same wall without any of them coordinating.
  */
 export function facingRail(
 	editor: Editor,
 	fromId: TLShapeId,
 	toId: TLShapeId,
-): 'top' | 'bottom' | null {
+): 'left' | 'right' | 'top' | 'bottom' | null {
 	const from = editor.getShapePageBounds(fromId)
 	const to = editor.getShapePageBounds(toId)
 	if (!from || !to) return null
 	const dx = to.center.x - from.center.x
 	const dy = to.center.y - from.center.y
-	if (Math.abs(dy) <= Math.abs(dx)) return null
-	return dy > 0 ? 'bottom' : 'top'
+	if (Math.abs(dy) > Math.abs(dx)) return dy > 0 ? 'bottom' : 'top'
+	return dx > 0 ? 'right' : 'left'
 }
 
 function appendPorts(editor: Editor, pending: readonly PendingPort[]): boolean {
