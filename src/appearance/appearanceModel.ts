@@ -26,6 +26,7 @@ import {
 
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import { CodeLanguageStyle } from '../code/codeModel'
+import { combineSharedStyles } from '../contextualMenus/sharedValues'
 import {
   CONNECTOR_CONTEXTUAL_RECIPE,
   CONTEXTUAL_CONTROL_REGISTRY,
@@ -49,12 +50,22 @@ export type AppearanceOption = ContextualControlOption
 export interface AppearanceControl extends ContextualControlDefinition {
   id: AppearanceControlId
   kind: AppearanceControlId
-  style: StyleProp<string>
+  /** Absent only on `lineShape`, which writes three styles through one preset. */
+  style?: StyleProp<string>
   value: SharedStyle<string>
   meta?: StrokeMetaField
   modeControl?: AppearanceControl
   modePlacement?: 'above' | 'beside'
 }
+
+/**
+ * The routing actually painted across the selected stock arrows, or null when
+ * none are selected. The model cannot read this off the style map: tldraw
+ * stores Straight and Curved as the same `kind: 'arc'` and only per-shape
+ * `bend` separates them, so the caller reads it per shape
+ * (`arrowPresetForShape`) and hands the verdict in.
+ */
+export type ArrowRoutingReading = 'straight' | 'curve' | 'elbow' | 'mixed' | null
 
 export const APPEARANCE_COLORS = CONTEXTUAL_CONTROL_REGISTRY.color.options
   .map((candidate) => candidate.value)
@@ -64,7 +75,6 @@ const STYLE_BY_KIND: Partial<Record<AppearanceControlId, StyleProp<string>>> = {
   geo: GeoShapeGeoStyle as StyleProp<string>,
   color: DefaultColorStyle as StyleProp<string>,
   fill: DefaultFillStyle as StyleProp<string>,
-  dash: DefaultDashStyle as StyleProp<string>,
   lineStyle: DefaultDashStyle as StyleProp<string>,
   strokeColor: DefaultColorStyle as StyleProp<string>,
   // A Code block's own StyleProp — see `contextualControlRegistry.ts`'s
@@ -76,12 +86,19 @@ const STYLE_BY_KIND: Partial<Record<AppearanceControlId, StyleProp<string>>> = {
   font: DefaultFontStyle as StyleProp<string>,
   align: DefaultHorizontalAlignStyle as StyleProp<string>,
   verticalAlign: DefaultVerticalAlignStyle as StyleProp<string>,
-  arrowKind: ArrowShapeKindStyle as StyleProp<string>,
-  spline: LineShapeSplineStyle as StyleProp<string>,
-  connectionRouting: ConnectionRoutingStyle as StyleProp<string>,
   arrowheadStart: ArrowShapeArrowheadStartStyle as StyleProp<string>,
   arrowheadEnd: ArrowShapeArrowheadEndStyle as StyleProp<string>,
 }
+
+/**
+ * Each stock style's private vocabulary, read into the one canonical Line
+ * shape vocabulary (the toolbar's ArrowPreset: elbow/curve/straight).
+ * toolbarModel.ts owns the write direction (`connectionRoutingForArrowPreset`).
+ */
+const CONNECTION_ROUTING_TO_LINE_SHAPE: Record<string, string> = {
+  elbow: 'elbow', curved: 'curve', straight: 'straight',
+}
+const SPLINE_TO_LINE_SHAPE: Record<string, string> = { cubic: 'curve', line: 'straight' }
 
 const CONNECTOR_STYLES = [
   ArrowShapeArrowheadStartStyle,
@@ -152,6 +169,48 @@ function connectorLineStyleControl(styles: ReadonlySharedStyleMap): AppearanceCo
   return control
 }
 
+function translateShared(
+  value: SharedStyle<string>,
+  vocabulary: Record<string, string>,
+): SharedStyle<string> {
+  if (value.type !== 'shared') return { type: 'mixed' }
+  return { type: 'shared', value: vocabulary[value.value] ?? value.value }
+}
+
+/**
+ * ONE Line shape control however many connector kinds are selected.
+ *
+ * WHY: an arrow's kind, a line's spline and a cable's routing are three stock
+ * StyleProps for the same user concept, already unified by the toolbar as
+ * ArrowPreset ("a preset IS a routing" — toolbarModel.ts). Emitting a control
+ * per StyleProp is what used to render two or three identical "Line shape"
+ * dropdowns for a mixed arrow/line/cable selection. Every present style is
+ * read into the canonical vocabulary here; `applyLineShape` in
+ * AppearanceControls.tsx writes the choice back to all of them.
+ */
+function lineShapeControl(
+  styles: ReadonlySharedStyleMap,
+  arrowRouting: ArrowRoutingReading,
+): AppearanceControl | undefined {
+  const readings: SharedStyle<string>[] = []
+  if (styles.get(ArrowShapeKindStyle as StyleProp<string>)) {
+    readings.push(arrowRouting && arrowRouting !== 'mixed'
+      ? { type: 'shared', value: arrowRouting }
+      : { type: 'mixed' })
+  }
+  const routing = styles.get(ConnectionRoutingStyle as StyleProp<string>)
+  if (routing) readings.push(translateShared(routing, CONNECTION_ROUTING_TO_LINE_SHAPE))
+  const spline = styles.get(LineShapeSplineStyle as StyleProp<string>)
+  if (spline) readings.push(translateShared(spline, SPLINE_TO_LINE_SHAPE))
+  if (readings.length === 0) return undefined
+  return {
+    ...CONTEXTUAL_CONTROL_REGISTRY.lineShape,
+    id: 'lineShape',
+    kind: 'lineShape',
+    value: combineSharedStyles(readings) ?? { type: 'mixed' },
+  }
+}
+
 function recipeOrder(connector: boolean): readonly AppearanceControlId[] {
   const recipe = connector ? CONNECTOR_CONTEXTUAL_RECIPE : SHAPE_CONTEXTUAL_RECIPE
   return recipe.groups.flatMap((group) => group.items)
@@ -162,6 +221,7 @@ function recipeOrder(connector: boolean): readonly AppearanceControlId[] {
 export function buildAppearanceControls(
   styles: ReadonlySharedStyleMap | null,
   hasText: boolean,
+  arrowRouting: ArrowRoutingReading = null,
 ): AppearanceControl[] {
   if (!styles) return []
   const connector = isConnectorSelection(styles)
@@ -172,15 +232,22 @@ export function buildAppearanceControls(
   for (const kind of recipeOrder(connector)) {
     if (suppressTypography && TYPOGRAPHY_IDS.has(kind)) continue
     if (connector && !lineStyle && kind === 'size') continue
+    if (kind === 'lineShape') {
+      const lineShape = lineShapeControl(styles, arrowRouting)
+      if (lineShape) controls.push(lineShape)
+      continue
+    }
     if (kind === 'lineStyle') {
       if (lineStyle) {
         controls.push(lineStyle)
         continue
       }
-      // A Text shape selected beside a dash-less cable keeps its own size.
-      const sizeStyle = DefaultSizeStyle as StyleProp<string>
-      const size = styles.get(sizeStyle)
-      if (size) controls.push(bindStyleControl('size', sizeStyle, size))
+      if (connector) {
+        // A Text shape selected beside a dash-less cable keeps its own size.
+        const sizeStyle = DefaultSizeStyle as StyleProp<string>
+        const size = styles.get(sizeStyle)
+        if (size) controls.push(bindStyleControl('size', sizeStyle, size))
+      }
       continue
     }
     if (kind === 'strokeColor') {
@@ -195,7 +262,7 @@ export function buildAppearanceControls(
       if (dash) controls.push(bindStyleControl('lineStyle', dashStyle, dash))
       continue
     }
-    if (kind === 'fill' || kind === 'weight' || kind === 'dash') continue
+    if (kind === 'fill' || kind === 'weight') continue
     const style = STYLE_BY_KIND[kind]
     if (!style) continue
     const value = styles.get(style)

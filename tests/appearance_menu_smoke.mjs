@@ -59,6 +59,11 @@ const FRAMES = {
   mixed: join(ROOT, 'docs', 'appearance-menu-9-mixed-selection-2026-09-01.png'),
   arrowRouting: join(ROOT, 'docs', 'assets', 'arrow-routing-three-options.png'),
   arrowRoutingSwitched: join(ROOT, 'docs', 'assets', 'arrow-routing-switched-control.png'),
+  // The two reported pill bugs, photographed fixed: a disagreeing selection
+  // without the spurious Automatic badges, and every connector kind at once
+  // holding exactly one Line shape control.
+  mixedNoBadge: join(ROOT, 'docs', 'assets', 'appearance-mixed-no-automatic-2026-09-06.png'),
+  oneLineShape: join(ROOT, 'docs', 'assets', 'appearance-one-line-shape-2026-09-06.png'),
 }
 
 /**
@@ -73,7 +78,7 @@ const SHAPE_CONTROLS = ['geo', 'color', 'strokeColor', 'font', 'size', 'align', 
  */
 // FigJam's connector pill never shows typography, labelled or not; 'addText'
 // is a real button, not a style-backed control (see AppearanceControls.tsx).
-const CONNECTOR_CONTROLS = ['color', 'lineStyle', 'addText', 'arrowheadStart', 'arrowKind', 'arrowheadEnd']
+const CONNECTOR_CONTROLS = ['color', 'lineStyle', 'addText', 'arrowheadStart', 'lineShape', 'arrowheadEnd']
 
 /** Read out of FigJam's DOM; see figjamTokens.ts for where each came from. */
 const FIGJAM = {
@@ -126,6 +131,11 @@ async function readMenu(page) {
         control: t.dataset.control, kind: t.dataset.trigger, registeredKind: t.dataset.kind, ...box(t),
         text: t.querySelector('.systemsketch-appearance__trigger-text')?.textContent ?? null,
         icon: t.querySelector('[data-icon]')?.dataset.icon ?? null,
+        // The Automatic badge belongs to the one control that declares an
+        // Automatic option (a Block title's colour) — anywhere else it is the
+        // regression where a mixed value compared as undefined === undefined.
+        automatic: Boolean(t.querySelector('.systemsketch-appearance__automatic')),
+        mixedSwatch: Boolean(t.querySelector('.systemsketch-appearance__swatch[data-mixed]')),
       })),
       separators: [...document.querySelectorAll('.systemsketch-appearance__separator')].map(box),
       stroke: painted ? painted.getAttribute('stroke') : null,
@@ -635,20 +645,20 @@ async function main() {
     //     straight arrow as an arc with zero bend; this control exposes that
     //     third visual state and translates it at the UI seam.
     assert.ok(
-      connector.controls.indexOf('arrowheadStart') < connector.controls.indexOf('arrowKind') &&
-        connector.controls.indexOf('arrowKind') < connector.controls.indexOf('arrowheadEnd'),
+      connector.controls.indexOf('arrowheadStart') < connector.controls.indexOf('lineShape') &&
+        connector.controls.indexOf('lineShape') < connector.controls.indexOf('arrowheadEnd'),
       'line shape belongs between start and end',
     )
-    const routing = await openControl(page, 'arrowKind')
+    const routing = await openControl(page, 'lineShape')
     assert.deepEqual(routing.panel.options.map((o) => o.value), ['elbow', 'curve', 'straight'])
     await frame(page, 'arrowRouting')
-    await pickOption(page, 'arrowKind', 'straight')
+    await pickOption(page, 'lineShape', 'straight')
     const straightArrow = JSON.parse(await evaluate(page, `(() => {
       const arrow = window.__systemsketch?.editor?.getOnlySelectedShape()
       return JSON.stringify({ type: arrow?.type, kind: arrow?.props?.kind, bend: arrow?.props?.bend })
     })()`))
     assert.deepEqual(straightArrow, { type: 'arrow', kind: 'arc', bend: 0 })
-    assert.equal((await readMenu(page)).labels.arrowKind, 'Line shape, straight')
+    assert.equal((await readMenu(page)).labels.lineShape, 'Line shape, straight')
     const switchedArrowBounds = JSON.parse(await evaluate(page, `(() => {
       const editor = window.__systemsketch?.editor
       const arrow = editor?.getOnlySelectedShape()
@@ -666,7 +676,7 @@ async function main() {
     assert.ok(switchedArrowHandles.includes('middle'),
       'the transparent menu-dismiss layer must not hide the switched arrow control inside its rectangle')
     await saveScreenshot(page, FRAMES.arrowRoutingSwitched)
-    await closeControl(page, 'arrowKind')
+    await closeControl(page, 'lineShape')
     pass('an arrow offers Elbowed, Curved, and Straight; switching preserves its in-rectangle control point')
 
     const ends = await openControl(page, 'arrowheadEnd')
@@ -733,6 +743,138 @@ async function main() {
     assert.equal((await readMenu(page)).labels.color, 'Color, violet')
     await closeControl(page, 'color')
     pass('a Block selected beside a shape keeps the shape\'s appearance reachable without a count summary')
+
+    // 18. REGRESSION (2026-09-06): a disagreeing selection must not wear the
+    //     Automatic badge. `automaticOption?.value === current?.value` was
+    //     `undefined === undefined` for every automatic-less control with a
+    //     mixed value, which painted a bare "A" over both the Color and the
+    //     Line style triggers — the two-A pill in the report. The colour
+    //     trigger shows its own mixed swatch; the stacked Line style trigger
+    //     keeps FigJam's fixed three-bar icon, which names the control rather
+    //     than claiming a value.
+    await clearBoard(page)
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.createShapes([
+        { id: 'shape:mixedRed', type: 'geo', x: 420, y: 380, props: { w: 200, h: 120, color: 'red' } },
+        { id: 'shape:mixedBlue', type: 'geo', x: 700, y: 380, props: { w: 200, h: 120, color: 'blue' } },
+      ])
+      editor.setSelectedShapes(['shape:mixedRed', 'shape:mixedBlue'])
+      return 'ok'
+    })()`)
+    await waitFor(page, `document.querySelector('.systemsketch-appearance__trigger')`,
+      'the pill over the disagreeing rectangles')
+    await delay(300)
+    const disagreeing = await readMenu(page)
+    assert.equal(disagreeing.labels.color, 'Color, mixed')
+    assert.ok(disagreeing.triggers.every((t) => !t.automatic),
+      `no trigger may wear the Automatic badge outside a declared Automatic option, `
+      + `got ${JSON.stringify(disagreeing.triggers.filter((t) => t.automatic).map((t) => t.control))}`)
+    assert.ok(disagreeing.triggers.find((t) => t.control === 'color').mixedSwatch,
+      'the mixed colour trigger shows its designed mixed swatch')
+    assert.equal(disagreeing.triggers.find((t) => t.control === 'strokeColor').icon, 'trigger/Line style',
+      'the Line style trigger keeps its fixed icon whatever the values do')
+    await frame(page, 'mixedNoBadge')
+    pass('a disagreeing selection shows mixed faces, never the Automatic badge (the two-A pill)')
+
+    // 19. A freehand stroke's Line style chips actually render: the model has
+    //     always emitted them (`buildAppearanceControls`'s freehand fallback),
+    //     but the shape recipe never listed the slot, so composition silently
+    //     dropped the control.
+    await clearBoard(page)
+    await key(page, 'd', 'KeyD')
+    await drag(page, { x: 480, y: 420 }, { x: 700, y: 500 })
+    await delay(200)
+    await key(page, 'Escape', 'Escape')
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const draws = editor.getCurrentPageShapes().filter((s) => s.type === 'draw')
+      editor.setSelectedShapes(draws.map((s) => s.id))
+      return 'ok'
+    })()`)
+    await waitFor(page, `document.querySelector('.systemsketch-appearance__trigger')`,
+      'the pill over the freehand stroke')
+    await delay(300)
+    const freehand = await readMenu(page)
+    assert.deepEqual(freehand.controls, ['color', 'lineStyle'],
+      'a freehand stroke offers its colour and its bare Line style chips')
+    assert.equal(freehand.triggers.find((t) => t.control === 'lineStyle').icon, 'trigger/Line style')
+    pass('a freehand stroke keeps its Line style control instead of silently losing it to the recipe')
+
+    // 20. ONE Line shape control across every connector kind at once. An
+    //     arrow's kind, a line's spline and a cable's routing are one user
+    //     concept (the toolbar's ArrowPreset); selected together they must
+    //     compose one control that reads their agreement and writes all three
+    //     — not two or three pixel-identical dropdowns, which was the reported
+    //     duplicate.
+    await clearBoard(page)
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.createShapes([
+        { id: 'shape:kindArrow', type: 'arrow', x: 380, y: 380, props: {
+          start: { x: 0, y: 0 }, end: { x: 220, y: 80 }, kind: 'arc', bend: 40,
+        } },
+        { id: 'shape:kindLine', type: 'line', x: 700, y: 380, props: {
+          spline: 'cubic',
+          points: {
+            a1: { id: 'a1', index: 'a1', x: 0, y: 0 },
+            a2: { id: 'a2', index: 'a2', x: 200, y: 90 },
+          },
+        } },
+        { id: 'shape:kindCable', type: 'connection', x: 380, y: 560, props: {
+          start: { x: 0, y: 0 }, end: { x: 220, y: 60 }, routing: 'curved',
+        } },
+      ])
+      editor.setSelectedShapes(['shape:kindArrow', 'shape:kindLine', 'shape:kindCable'])
+      return 'ok'
+    })()`)
+    await waitFor(page, `document.querySelector('.systemsketch-appearance__trigger')`,
+      'the pill over all three connector kinds')
+    await delay(300)
+    const everyKind = await readMenu(page)
+    const lineShapeTriggers = everyKind.triggers.filter((t) => t.registeredKind === 'lineShape')
+    assert.equal(lineShapeTriggers.length, 1,
+      `one Line shape control, got ${JSON.stringify(everyKind.controls)}`)
+    assert.equal(everyKind.labels.lineShape, 'Line shape, curved',
+      'the three kinds agree through their own vocabularies: arc+bend, cubic, curved')
+    assert.equal(lineShapeTriggers[0].icon, 'line-shape/Curved')
+    await frame(page, 'oneLineShape')
+
+    await openControl(page, 'lineShape')
+    await pickOption(page, 'lineShape', 'straight')
+    await closeControl(page, 'lineShape')
+    const straightened = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const arrow = editor.getShape('shape:kindArrow')
+      const line = editor.getShape('shape:kindLine')
+      const cable = editor.getShape('shape:kindCable')
+      return JSON.stringify({
+        arrow: { kind: arrow.props.kind, bend: arrow.props.bend },
+        spline: line.props.spline,
+        routing: cable.props.routing,
+      })
+    })()`))
+    assert.deepEqual(straightened, {
+      arrow: { kind: 'arc', bend: 0 },
+      spline: 'line',
+      routing: 'straight',
+    }, 'one Straight writes the whole selection: arrow, line and cable alike')
+    assert.equal((await readMenu(page)).labels.lineShape, 'Line shape, straight')
+
+    // The whole three-shape write is one history step.
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(300)
+    const undone = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      return JSON.stringify({
+        bend: editor.getShape('shape:kindArrow').props.bend,
+        spline: editor.getShape('shape:kindLine').props.spline,
+        routing: editor.getShape('shape:kindCable').props.routing,
+      })
+    })()`))
+    assert.deepEqual(undone, { bend: 40, spline: 'cubic', routing: 'curved' },
+      'a single undo retracts the Line shape choice from all three kinds together')
+    pass('every connector kind composes ONE Line shape control that reads, writes and undoes all of them')
 
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))

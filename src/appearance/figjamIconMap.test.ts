@@ -48,13 +48,17 @@ describe('FigJam icon map', () => {
     expect(FIGJAM_ICONS['shape/Triangle']).not.toEqual(FIGJAM_ICONS['arrowhead/Triangle'])
   })
 
-  it('gives all three line-shape styles the same three icons', () => {
-    for (const control of ['connectionRouting', 'arrowKind', 'spline'] as const) {
-      const names = Object.values(FIGJAM_ICON_FOR[control] ?? {})
-      expect(names.every((name) => name.startsWith('line-shape/'))).toBe(true)
-    }
-    expect(figjamIconName('connectionRouting', 'straight')).toBe('line-shape/Straight')
-    expect(figjamIconName('spline', 'line')).toBe('line-shape/Straight')
+  it('gives the ONE Line shape control FigJam\'s three icons, one per canonical value', () => {
+    // Three StyleProps (arrow kind, line spline, cable routing) reach the menu
+    // as one control in one vocabulary; only that vocabulary is mapped, so a
+    // raw style value leaking through would fall back to the drawn glyph and
+    // be visible rather than silently passing for FigJam's icon.
+    const names = Object.values(FIGJAM_ICON_FOR.lineShape ?? {})
+    expect(names.every((name) => name.startsWith('line-shape/'))).toBe(true)
+    expect(figjamIconName('lineShape', 'elbow')).toBe('line-shape/Elbowed')
+    expect(figjamIconName('lineShape', 'curve')).toBe('line-shape/Curved')
+    expect(figjamIconName('lineShape', 'straight')).toBe('line-shape/Straight')
+    expect(figjamIconName('lineShape', 'cubic')).toBeUndefined()
   })
 
   it('says nothing for a value FigJam has no icon for', () => {

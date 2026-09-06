@@ -21,6 +21,7 @@
 import { DefaultSizeStyle, type Editor, type TLShape, type TLShapePartial } from 'tldraw'
 
 import { CODE_FONT_SIZES, CODE_SHAPE_TYPE } from '../code/codeModel'
+import { sharedValueAcross } from '../contextualMenus/sharedValues'
 
 export type SizeRung = 's' | 'm' | 'l' | 'xl'
 const RUNGS: readonly SizeRung[] = ['s', 'm', 'l', 'xl']
@@ -122,12 +123,12 @@ export function fontSizeTargets(editor: Editor): TLShape[] {
 
 /** One shared effective px across the selection, 'mixed', or null (none apply). */
 export function sharedFontPx(editor: Editor): number | 'mixed' | null {
-	const values = fontSizeTargets(editor)
-		.map(effectiveFontPx)
-		.filter((px): px is number => px !== null)
-	if (values.length === 0) return null
-	const first = values[0]
-	return values.every((px) => Math.abs(px - first) < 0.01) ? first : 'mixed'
+	const shared = sharedValueAcross(
+		fontSizeTargets(editor).map((shape) => effectiveFontPx(shape) ?? undefined),
+		(a, b) => Math.abs(a - b) < 0.01,
+	)
+	if (!shared) return null
+	return shared.type === 'shared' ? shared.value : 'mixed'
 }
 
 /** True when every participant sits exactly on its rung (scale 1), so the

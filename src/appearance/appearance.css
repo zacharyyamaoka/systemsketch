@@ -75,6 +75,15 @@
   background: var(--ss-accent);
 }
 
+/* WHY: a value-preview trigger with no shared value must not show one option's
+ * crisp glyph as if it were chosen — the colour swatch already has its own
+ * mixed face, so the drawn glyphs fade the same claim down. Fixed-icon
+ * triggers (data-trigger='icon') stay solid: their icon names the control,
+ * not a value. */
+.systemsketch-appearance__trigger[data-mixed][data-trigger='value'] .systemsketch-appearance__glyph {
+  opacity: 0.4;
+}
+
 .systemsketch-appearance__automatic {
   display: inline-grid;
   width: 24px;

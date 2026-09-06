@@ -4,17 +4,53 @@ import { useValue, type Editor } from 'tldraw'
 import type {
   AppearanceControlId,
   ContextualControl,
+  ContextualGlyphFamily,
 } from '../contextualMenus/contextualControlRegistry'
 import { FIGJAM_ICONS } from './figjamIcons'
 import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
+
+interface GlyphFamilyRenderer {
+  /**
+   * This family always draws its own preview, even for a value FigJam has a
+   * traced icon for (the typeface wordmarks lost to the compact Aa; a colour
+   * is its swatch).
+   */
+  ownDrawing?: boolean
+  render(value: string | undefined, editor: Editor): ReactNode
+}
+
+/**
+ * Every way a value can be previewed, keyed by the registry's `glyph` field.
+ *
+ * WHY a lookup instead of a kind if-chain: a control's KIND is its identity;
+ * how its values are drawn is a separate, shareable fact the registry entry
+ * declares. Dispatching on kinds is how `connectionRouting` once missed the
+ * routing branch and had its options drawn by the arrowhead renderer. A new
+ * registry entry that previews like an existing one names its family and
+ * touches nothing here; only a genuinely new drawing earns a new entry.
+ */
+const GLYPH_FAMILIES: Record<ContextualGlyphFamily, GlyphFamilyRenderer> = {
+  swatch: { ownDrawing: true, render: (value, editor) => <ColorSwatch editor={editor} name={value} /> },
+  font: { ownDrawing: true, render: (value) => <FontGlyph value={value} /> },
+  fill: { render: (value) => <FillGlyph value={value} /> },
+  geo: { render: (value) => <GeoGlyph value={value} /> },
+  dash: { render: (value) => <DashGlyph value={value} /> },
+  size: { render: (value) => <SizeGlyph value={value} /> },
+  align: { render: (value) => <AlignGlyph value={value} /> },
+  verticalAlign: { render: (value) => <AlignGlyph value={value} vertical /> },
+  lineShape: { render: (value) => <RoutingGlyph value={value} /> },
+  arrowheadStart: { render: (value) => <ArrowheadGlyph value={value} atStart /> },
+  arrowheadEnd: { render: (value) => <ArrowheadGlyph value={value} /> },
+}
 
 /**
  * What an appearance option looks like.
  *
  * FigJam previews the value rather than naming it — the size list is drawn at
- * each size, the line endings are drawn as lines, the colours are circles. Each
- * glyph here does the same for its control, so the popover is legible without
- * reading it.
+ * each size, the line endings are drawn as lines, the colours are circles.
+ * Dispatch is data: the registry names each control's `glyph` family, FigJam's
+ * traced icon substitutes wherever one exists for the value, and a control
+ * with no family draws nothing (its label or row is the preview).
  */
 export function AppearanceGlyph({
   control, value, editor,
@@ -23,54 +59,22 @@ export function AppearanceGlyph({
   value: string | undefined
   editor: Editor
 }) {
-  // The edge palette draws the same swatch the fill palette does; only the
-  // style it writes differs.
-  if (control.kind === 'color' || control.kind === 'strokeColor') {
-    return <ColorSwatch editor={editor} name={value} />
-  }
+  const family = control.glyph ? GLYPH_FAMILIES[control.glyph] : undefined
+  if (family?.ownDrawing) return family.render(value, editor)
   // FigJam's Font size list draws no glyph: each row is its own name, at its
-  // own size, and the label carries that.
-  if (control.kind === 'size' && control.layout === 'list') {
-    return null
-  }
-  // Every typeface list uses the same compact Aa preview. The traced FigJam
-  // wordmarks already spell “Bookish” / “Technical”; adding the option label
-  // beside them produced the duplicated text visible in the old Text menu.
-  if (control.kind === 'font') {
-    return <FontGlyph value={value} />
-  }
-  // FigJam's own icon wherever FigJam draws this value. The drawn glyphs below
-  // stay for the states tldraw has and FigJam does not.
-  const appearanceKind = control.kind as AppearanceControlId
-  const figjam = figjamIconName(appearanceKind, value)
+  // own size, and the label carries that. (The same `size` family still draws
+  // its bars where the layout is a compact row — the connector's weight.)
+  if (control.glyph === 'size' && control.layout === 'list') return null
+  // FigJam's own icon wherever FigJam draws this value. The drawn families
+  // below stay for the states tldraw has and FigJam does not.
+  const figjam = figjamIconName(control.kind as AppearanceControlId, value)
   if (figjam && FIGJAM_ICONS[figjam]) {
     // FigJam draws one arrowhead set and mirrors it for the far end, so the
     // icon always points the way the arrow travels. The traced paths are the
     // start orientation; the end control flips them.
-    return <FigjamGlyph name={figjam} flipped={control.kind === 'arrowheadEnd'} />
+    return <FigjamGlyph name={figjam} flipped={control.glyph === 'arrowheadEnd'} />
   }
-  if (control.kind === 'fill') {
-    return <FillGlyph value={value} />
-  }
-  if (control.kind === 'geo') {
-    return <GeoGlyph value={value} />
-  }
-  // One glyph for the one line-style vocabulary, whichever menu asks. Before
-  // this the connector's control id missed this branch entirely and its Dotted
-  // option was drawn by the arrowhead renderer below — a plain line.
-  if (control.kind === 'dash' || control.kind === 'lineStyle') {
-    return <DashGlyph value={value} />
-  }
-  if (control.kind === 'size' || control.kind === 'weight') {
-    return <SizeGlyph value={value} />
-  }
-  if (control.kind === 'align' || control.kind === 'verticalAlign') {
-    return <AlignGlyph value={value} vertical={control.kind === 'verticalAlign'} />
-  }
-  if (control.kind === 'arrowKind' || control.kind === 'spline') {
-    return <RoutingGlyph value={value} />
-  }
-  return <ArrowheadGlyph value={value} atStart={control.kind === 'arrowheadStart'} />
+  return family ? family.render(value, editor) : null
 }
 
 /**
@@ -85,9 +89,7 @@ export function TriggerGlyph({
   value: string | undefined
   editor: Editor
 }) {
-  const fixed = control.trigger === 'icon'
-    ? FIGJAM_TRIGGER_ICON[control.kind as AppearanceControlId]
-    : undefined
+  const fixed = control.trigger === 'icon' ? FIGJAM_TRIGGER_ICON[control.kind] : undefined
   if (fixed && FIGJAM_ICONS[fixed]) return <FigjamGlyph name={fixed} />
   return <AppearanceGlyph control={control} value={value} editor={editor} />
 }
@@ -302,7 +304,9 @@ function AlignGlyph({ value, vertical }: { value: string | undefined; vertical?:
 
 function RoutingGlyph({ value }: { value: string | undefined }) {
   if (value === 'elbow') return <Svg><path d="M3 15h6V5h8" /></Svg>
-  if (value === 'line') return <Svg><path d="M3 15 17 5" /></Svg>
+  // `straight` is the canonical Line shape value; `line` is the stock spline
+  // style's word for the same thing, kept so a raw style value still draws.
+  if (value === 'straight' || value === 'line') return <Svg><path d="M3 15 17 5" /></Svg>
   return <Svg><path d="M3 15c5 0 3-10 14-10" /></Svg>
 }
 
