@@ -7,5 +7,6 @@
   "S remains ordinary typing while a library input owns focus",
   "Ctrl+P still opens the existing large Commands modal as a separate surface",
   "the result stack flips above-left at the corner and stays inside the canvas above the toolbar",
+  "at 160% interface scale, the search target and panel still open beside the pointer in canvas pixels",
   "the complete primitive-search journey produced no local console errors"
 ]

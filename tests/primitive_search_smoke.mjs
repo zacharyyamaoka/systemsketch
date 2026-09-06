@@ -24,6 +24,7 @@ import {
 
 const SHOTS = join(ROOT, 'docs', 'assets')
 const OUT = join(SHOTS, 'primitive-search-smoke.json')
+const SCALE_EVIDENCE = join(SHOTS, 'primitive-search-cursor-160-2026-09-06.json')
 const FIXTURE = join(ROOT, 'sketches', 'review', 'primitive-search.systemsketch')
 const { checks, pass } = makeChecklist()
 
@@ -35,17 +36,35 @@ async function screenshot(page, name) {
 async function geometry(page) {
   return JSON.parse(await evaluate(page, `(() => {
     const search = document.querySelector('[data-testid="systemsketch-primitive-search"]')
+    const target = document.querySelector('.systemsketch-primitive-search__target')
     const toolbar = document.querySelector('[data-testid="systemsketch-tool-library"]')?.closest('.tlui-main-toolbar')
     const rect = search?.getBoundingClientRect()
+    const targetRect = target?.getBoundingClientRect()
     const toolbarRect = toolbar?.getBoundingClientRect()
     return JSON.stringify({
       search: rect && { x: rect.x, y: rect.y, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      target: targetRect && { x: targetRect.x + targetRect.width / 2, y: targetRect.y + targetRect.height / 2 },
       toolbarTop: toolbarRect?.top ?? innerHeight,
       viewport: { width: innerWidth, height: innerHeight },
       horizontal: search?.dataset.horizontal,
       vertical: search?.dataset.vertical,
     })
   })()`))
+}
+
+/**
+ * Reboot under the persisted preference so React's scale hook and the CSS
+ * coordinate system agree. Writing only the CSS variables can prove the
+ * cancellation layer, but it cannot exercise the scale-aware placement input.
+ */
+async function reopenAtInterfaceScale(page, percent) {
+  await evaluate(page, `(() => {
+    localStorage.setItem('systemsketch.interface-scale.v1', JSON.stringify({ version: 1, percent: ${percent} }))
+  })()`)
+  await page.send('Page.reload')
+  await waitFor(page, `document.querySelector('[data-interface-scale="${percent}"]')`, `${percent}% interface scale`)
+  await waitFor(page, `window.__systemsketch?.editor`, 'reloaded product canvas')
+  await delay(300)
 }
 
 async function main() {
@@ -216,6 +235,33 @@ async function main() {
     assert.ok(cornerGeometry.search.y >= 0 && cornerGeometry.search.bottom < cornerGeometry.toolbarTop)
     await screenshot(page, 'primitive-search-corner-2026-09-04.png')
     pass('the result stack flips above-left at the corner and stays inside the canvas above the toolbar')
+
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'corner search closing')
+    await reopenAtInterfaceScale(page, 160)
+    const scaledPointer = { x: 540, y: 360 }
+    await mouse(page, 'mouseMoved', scaledPointer.x, scaledPointer.y)
+    await evaluate(page, `(() => { window.__systemsketch.editor.focus(); return true })()`)
+    await shortcut(page, 's', 'KeyS')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'scaled primitive search')
+    const scaledGeometry = await geometry(page)
+    assert.ok(Math.abs(scaledGeometry.target.x - scaledPointer.x) <= 2)
+    assert.ok(Math.abs(scaledGeometry.target.y - scaledPointer.y) <= 2)
+    assert.ok(scaledGeometry.search.x >= scaledPointer.x && scaledGeometry.search.y >= scaledPointer.y)
+    assert.ok(scaledGeometry.search.right <= scaledGeometry.viewport.width)
+    assert.ok(scaledGeometry.search.bottom < scaledGeometry.toolbarTop)
+    assert.ok(scaledGeometry.search.width >= 480)
+    await writeFile(SCALE_EVIDENCE, JSON.stringify({
+      interfaceScale: 160,
+      pointer: scaledPointer,
+      targetCenter: scaledGeometry.target,
+      panel: scaledGeometry.search,
+      viewport: scaledGeometry.viewport,
+      toolbarTop: scaledGeometry.toolbarTop,
+    }, null, 2))
+    await screenshot(page, 'primitive-search-cursor-160-2026-09-06.png')
+    pass('at 160% interface scale, the search target and panel still open beside the pointer in canvas pixels')
+    await key(page, 'Escape', 'Escape')
 
     const errors = localConsoleErrors(page)
     assert.deepEqual(errors, [])

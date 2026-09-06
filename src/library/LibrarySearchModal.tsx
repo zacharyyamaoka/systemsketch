@@ -18,6 +18,7 @@ import {
   useId,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from 'react'
@@ -55,6 +56,8 @@ export interface LibrarySearchModalProps {
   /** Screen point the search is anchored to — a dot is drawn there. */
   target: PrimitiveSearchPoint
   placement: PrimitiveSearchPlacement
+  /** Chrome zoom, which is cancelled at the host before painting around `target`. */
+  viewportScale?: number
   /** The key that opened it, shown as a chip in the field. */
   keyChip: string
   ariaLabel: string
@@ -134,6 +137,7 @@ export function LibrarySearchModal({
   maxResults = PRIMITIVE_SEARCH_MAX_RESULTS,
   target,
   placement,
+  viewportScale = 1,
   keyChip,
   ariaLabel,
   listAriaLabel,
@@ -217,7 +221,10 @@ export function LibrarySearchModal({
     <>
       <span
         className="systemsketch-primitive-search__target"
-        style={{ left: target.x, top: target.y }}
+        style={{
+          '--systemsketch-library-search-target-x': `${target.x}px`,
+          '--systemsketch-library-search-target-y': `${target.y}px`,
+        } as CSSProperties}
         aria-hidden="true"
       />
       <div
@@ -229,7 +236,12 @@ export function LibrarySearchModal({
         data-systemsketch-chrome
         role="search"
         aria-label={ariaLabel}
-        style={{ left: placement.x, top: placement.y, width: placement.w, maxHeight: placement.h }}
+        style={{
+          '--systemsketch-library-search-x': `${placement.x}px`,
+          '--systemsketch-library-search-y': `${placement.y}px`,
+          width: placement.w / viewportScale,
+          maxHeight: placement.h / viewportScale,
+        } as CSSProperties}
         onKeyDownCapture={onKeyDownCapture}
         onPointerDown={(event) => event.stopPropagation()}
         onWheel={(event) => event.stopPropagation()}

@@ -2,6 +2,7 @@ import { TldrawUiButtonIcon, useEditor, useTools } from 'tldraw'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useChrome } from '../chrome/ChromeProvider'
+import { useInterfaceScale } from '../settings/interfaceScale'
 import { LibrarySearchModal, type LibrarySearchItem } from './LibrarySearchModal'
 import { activateShapeLibraryTool } from './shapeLibraryTool'
 import {
@@ -52,6 +53,7 @@ export function PrimitiveSearch() {
   const editor = useEditor()
   const tools = useTools()
   const { toolbarSurface } = useChrome()
+  const interfaceScale = useInterfaceScale()
   const aliases = useToolAliases()
   const [invocation, setInvocation] = useState<PrimitiveSearchInvocation | null>(null)
   const [query, setQuery] = useState('')
@@ -117,10 +119,14 @@ export function PrimitiveSearch() {
   if (!invocation) return null
 
   const viewport = editor.getViewportScreenBounds()
+  const chromeScale = interfaceScale / 100
   const desiredHeight = primitiveSearchPanelHeight(matches.length)
   const placement = placePrimitiveSearch(
     invocation.screenPoint,
-    { w: PRIMITIVE_SEARCH_WIDTH, h: desiredHeight },
+    // `screenPoint` and the viewport are canvas pixels while the panel is
+    // chrome. Place its scaled painted bounds, then let the modal cancel the
+    // host zoom before re-applying it around this fixed point.
+    { w: PRIMITIVE_SEARCH_WIDTH * chromeScale, h: desiredHeight * chromeScale },
     { w: viewport.w, h: viewport.h },
     toolbarObstacleTop(editor.getContainer(), viewport.h),
   )
@@ -134,6 +140,7 @@ export function PrimitiveSearch() {
       maxResults={PRIMITIVE_SEARCH_MAX_RESULTS}
       target={invocation.screenPoint}
       placement={placement}
+      viewportScale={chromeScale}
       keyChip="S"
       ariaLabel="Search tools"
       listAriaLabel="Matching tools"

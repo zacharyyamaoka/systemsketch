@@ -29,7 +29,9 @@
 .systemsketch-app .systemsketch-selection-menu,
 .systemsketch-app .OnCanvasBlockPicker,
 .systemsketch-app .systemsketch-hit-areas,
-.systemsketch-app .systemsketch-depth-mask {
+.systemsketch-app .systemsketch-depth-mask,
+.systemsketch-app .systemsketch-primitive-search,
+.systemsketch-app .systemsketch-primitive-search__target {
   zoom: var(--systemsketch-interface-scale-inverse);
 }
 

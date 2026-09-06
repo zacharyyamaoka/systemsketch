@@ -1,0 +1,69 @@
+{
+  "feature": "Primitive search cursor anchor at interface scale",
+  "viewport": { "width": 1700, "height": 900 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "function",
+      "type": "block",
+      "x": 650,
+      "y": 255,
+      "props": {
+        "title": "normalize_reading()",
+        "description": "Open the primitive search in this blank canvas area",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 510,
+        "h": 330,
+        "inputs": [
+          { "id": "in_value", "name": "value", "type": "float", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_value", "name": "normalized", "type": "float", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open Settings › Interface and set Interface scale to 160%",
+      "x": 40,
+      "y": 135,
+      "w": 440,
+      "h": 110,
+      "target": { "shapeId": "function", "anchor": "left", "dy": 55 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Hover this blank point inside the function and press S",
+      "x": 40,
+      "y": 350,
+      "w": 440,
+      "h": 110,
+      "target": { "shapeId": "function", "anchor": "left", "dy": 165 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · The blue anchor stays on the cursor; the enlarged search begins beside it",
+      "x": 1210,
+      "y": 225,
+      "w": 440,
+      "h": 110,
+      "target": { "shapeId": "function", "anchor": "right", "dy": 75 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · At 160%, S opens primitive search beside the cursor, remains inside the viewport, and clears the bottom toolbar",
+      "x": 520,
+      "y": 715,
+      "w": 800,
+      "h": 120
+    }
+  ]
+}
