@@ -5,11 +5,24 @@
   flex-direction: column;
 }
 
+/* WHY padding-inline, not margin: `.tlui-input` (tldraw's base class, applied
+ * to this element directly) is `width: 100%` of `.tlui-input__wrapper`. A
+ * horizontal margin on top of that overflows the wrapper by exactly the
+ * margin amount — invisible while the popout clips it with `overflow:
+ * hidden`, until `autoFocus` fires on open and Chromium scrolls the nearest
+ * (even non-scrolling) ancestor to reveal the focused control, dragging the
+ * whole panel left and eating the left inset. Padding stays inside the
+ * border-box, so it can't trigger that scroll. */
 .systemsketch-library-browser .systemsketch-library-search {
   flex: 0 0 auto;
-  margin: 0 14px 5px;
+  margin: 0 0 5px;
+  padding-inline: 14px;
 }
 
+/* `ShapeLibraryBrowser` also carries `.ss-scroll`, which supplies exactly
+ * these three. They stay declared here so the stylesheet is self-sufficient:
+ * the class and the rule land in different commits, and a body that lost
+ * `min-height: 0` would simply stop scrolling. */
 .systemsketch-library-browser .systemsketch-library-panel__body {
   min-height: 0;
   flex: 1;

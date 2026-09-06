@@ -98,6 +98,7 @@ import {
 	ASYNC_PACKET_DASHARRAY,
 	asyncDashOffsetForLength,
 	cablePresentation,
+	DATA_CABLE_MARCH_DASHARRAY,
 	DELAY_DOT_GAP_PX,
 	DELAY_DOT_PX,
 	DELAY_PILL_HEIGHT,
@@ -1149,17 +1150,27 @@ export function DataCablePath({
 	dashArray?: string
 }) {
 	const async = temporal === 'async' && !tunnel
+	// WHY: React Flow's homepage marching-ants line, on by default for v1 exactly
+	// as Zach asked — a plain `data` cable only, never `async` (its own packet
+	// cadence above) or a tunnel/lens dash override, which already outrank a
+	// kind's own cadence. `.ConnectionShape-marchingData` in app.css owns the
+	// CSS `animation`; the dashoffset is left unset here on purpose so that
+	// animation — not this static attribute — drives it.
+	const marching = temporal === 'data' && !tunnel && !dashArray
 	return (
 		<path
 			d={path}
 			fill="none"
 			stroke={stroke}
-			strokeLinecap={async && !dashArray ? 'butt' : 'round'}
+			strokeLinecap={(async || marching) && !dashArray ? 'butt' : 'round'}
 			strokeLinejoin="round"
 			strokeWidth={strokeWidth}
-			strokeDasharray={dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : undefined)}
+			strokeDasharray={
+				dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : marching ? DATA_CABLE_MARCH_DASHARRAY : undefined)
+			}
 			strokeDashoffset={async && !dashArray ? asyncDashOffsetForLength(length) : undefined}
 			vectorEffect={vectorEffect}
+			className={marching ? 'ConnectionShape-marchingData' : undefined}
 			data-edge-type={temporal}
 		/>
 	)

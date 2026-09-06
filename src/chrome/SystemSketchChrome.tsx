@@ -11,7 +11,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
@@ -31,9 +31,9 @@ import {
   getOnlySelectedFloatingPort,
 } from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
-import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges, tidyEdgesOutcomeSeverity } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
-import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
+import { describeOrganizeNodesOutcome, organizeNodes, organizeNodesOutcomeSeverity } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
@@ -53,6 +53,7 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
+import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree } from '../behaviorTree'
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
@@ -104,6 +105,24 @@ function PanelIcon() {
   )
 }
 
+function ShapesIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <rect x="3" y="3" width="6" height="6" rx="1" />
+      <circle cx="14" cy="6" r="3" />
+      <path d="m6 12 3.5 5H2.5L6 12Zm6 0h5v5h-5z" />
+    </svg>
+  )
+}
+
+function CommandIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M7 5.5a2.5 2.5 0 1 0-2.5 2.5H15.5A2.5 2.5 0 1 0 13 5.5v9a2.5 2.5 0 1 0 2.5-2.5H4.5A2.5 2.5 0 1 0 7 14.5v-9Z" />
+    </svg>
+  )
+}
+
 export function SystemSketchMenuPanel() {
   const { MainMenu } = useTldrawUiComponents()
   const ref = useRef<HTMLElement>(null)
@@ -123,7 +142,7 @@ export function SystemSketchMenuPanel() {
 }
 
 export function SystemSketchSharePanel() {
-  const { rightSurface, toggleRight } = useChrome()
+  const { rightSurface, toggleRight, leftSurface, toggleLeft, toolbarSurface, setToolbar } = useChrome()
   const { addDialog } = useDialogs()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
@@ -178,6 +197,41 @@ export function SystemSketchSharePanel() {
         onClick={() => toggleRight('comments')}
       >
         <PanelIcon />
+      </TldrawUiButton>
+      {/* WHY these two live here rather than beside the breadcrumb, where they
+          used to sit: "Refine structural breadcrumb controls" (66afad2e) gave
+          the top-left shell's whole width to the structural path — see the
+          `max-width` comment on `.systemsketch-top-left-shell` — and
+          `tests/depth_breadcrumb_navigation_smoke.mjs` now asserts zero
+          trailing controls in that shell at any width. The shared left
+          popout (Shapes/Behaviors) and the command palette still need a
+          discoverable opener beyond the palette-only path, so they ride the
+          other corner's icon-button row instead of reclaiming the space that
+          commit deliberately freed. They sit right before Share, the row's
+          rightmost anchor: the centred Preview/REC notice
+          (`topNoticePlacement.ts`) can only ever reach as far as this shell's
+          *left* edge, so the closer a button is to Share, the less a wide
+          notice can ever cover it. */}
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button systemsketch-shapes-button"
+        title="Shapes library"
+        aria-expanded={leftSurface === 'shapes' || leftSurface === 'behaviors'}
+        aria-controls={leftSurface ? 'systemsketch-left-popout' : undefined}
+        onClick={() => toggleLeft('shapes')}
+      >
+        <ShapesIcon />
+      </TldrawUiButton>
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button systemsketch-command-button"
+        title="Search and commands (Ctrl+P)"
+        aria-label="Search and commands"
+        aria-keyshortcuts="Control+P Meta+P"
+        aria-expanded={toolbarSurface !== null}
+        onClick={() => setToolbar(toolbarSurface ? null : 'commands')}
+      >
+        <CommandIcon />
       </TldrawUiButton>
       <PortableShareButton />
     </nav>
@@ -234,6 +288,7 @@ function InspectorDock({
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'port') return <FloatingPortInspector editor={editor} />
+  if (subject === 'behaviorTree') return <EditorBehaviorTreeInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
   if (subject === 'empty') return <InspectorEmptyState />
@@ -254,7 +309,7 @@ function InspectorEmptyState() {
       <span aria-hidden="true">▣</span>
       <strong>Nothing selected</strong>
       <p>
-        Select a Block, Port, Branch or cable to edit it here. Any other shape shows
+        Select a Block, Port, Branch, Behavior Tree or cable to edit it here. Any other shape shows
         what the board knows about it.
       </p>
     </div>
@@ -299,6 +354,11 @@ function SelectionMiniMenu() {
     () => getOnlySelectedBranch(editor) !== null,
     [editor],
   )
+  const hasBehaviorTree = useValue(
+    'systemsketch selection is a Behavior Tree',
+    () => getSelectedBehaviorTree(editor) !== null,
+    [editor],
+  )
   const hasCode = useValue(
     'systemsketch selection is one Code block',
     () => getOnlySelectedCode(editor) !== null,
@@ -329,16 +389,26 @@ function SelectionMiniMenu() {
     [editor],
   )
   const propagationFocus = usePropagationFocus(editor)
+  const [organizingNodes, setOrganizingNodes] = useState(false)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
-    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: tidyEdgesOutcomeSeverity(outcome) })
   }
   const runOrganizeNodes = async () => {
-    const outcome = await organizeNodes(editor)
-    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
+    // The elk layout pass is async and can take a visible moment on a large
+    // graph; without this the trigger stayed clickable and unlabeled mid-run,
+    // inviting a second, redundant pass.
+    setOrganizingNodes(true)
+    try {
+      const outcome = await organizeNodes(editor)
+      addToast({ title: describeOrganizeNodesOutcome(outcome), severity: organizeNodesOutcomeSeverity(outcome) })
+    } finally {
+      setOrganizingNodes(false)
+    }
   }
   const hasVisibleActions = hasCode
     || hasBranch
+    || hasBehaviorTree
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
@@ -369,10 +439,12 @@ function SelectionMiniMenu() {
     )
   }
 
-  const surface = hasBranch
-    ? 'branch-selection'
-    : hasBlocks ? 'block-selection' : 'shape-selection'
+  const surface = hasBehaviorTree
+    ? 'behavior-tree-selection'
+    : hasBranch ? 'branch-selection'
+      : hasBlocks ? 'block-selection' : 'shape-selection'
   const items = {
+    'behavior-tree-actions': <EditorBehaviorTreeSelectionMiniMenu editor={editor} />,
     'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
     'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
     appearance: <AppearanceControls />,
@@ -380,6 +452,7 @@ function SelectionMiniMenu() {
     layout: (
       <SelectionLayoutActions
         {...layoutActions}
+        organizeNodesBusy={organizingNodes}
         onTidyEdges={runTidyEdges}
         onOrganizeNodes={() => void runOrganizeNodes()}
       />
@@ -453,6 +526,8 @@ export function SystemSketchSurfaceHost() {
       if (loop) return `loop:${loop.id}`
       const port = getOnlySelectedFloatingPort(editor)
       if (port) return `port:${port.id}`
+      const tree = getSelectedBehaviorTree(editor)
+      if (tree) return `behaviorTree:${tree.region.id}:${tree.path ?? ''}`
       const context = getBlockInspectorContext(editor)
       if (context.kind === 'selected') return context.shape.id
       if (context.kind === 'multi') return `multi:${context.styles.blockCount}`
@@ -486,6 +561,7 @@ export function SystemSketchSurfaceHost() {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
       getOnlySelectedFloatingPort,
+      getSelectedBehaviorTree,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
     }),
@@ -671,6 +747,7 @@ export function SystemSketchSurfaceHost() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
+      if (event.repeat) return
       const key = event.key.toLowerCase()
       if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()

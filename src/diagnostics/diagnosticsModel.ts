@@ -252,6 +252,11 @@ function addBlockDiagnostics(
 	pageId: TLPageId,
 	occupiedInputs: ReadonlySet<string>,
 ): void {
+	// A Behavior Tree projects its Blackboard keys as value pills whose literal
+	// is unknown until a run, and its leaves carry `{key}` bindings rather than
+	// defaults. Those Blocks are generated from XML and repaired on every edit,
+	// so a warning here could never be acted on where it points.
+	if (typeof block.meta?.btRole === 'string') return
 	const label = blockLabel(block)
 	if (block.props.title.trim() === '') {
 		diagnostics.push({

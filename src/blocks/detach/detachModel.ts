@@ -91,11 +91,56 @@ function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+/**
+ * The same value with every absent-but-present key removed.
+ *
+ * WHY: a shape's `props` and a shape's `meta` are validated by *different*
+ * rules, so a record that is legal as one is not automatically legal as the
+ * other. An optional prop (`T.number.optional()`) accepts a key whose value is
+ * `undefined`, and tldraw's own update merge copies `props`/`meta` sub-keys
+ * verbatim — `undefined` included — so a patch written to clear a field leaves
+ * the key behind holding `undefined`. `meta` is validated by `T.jsonValue`,
+ * which rejects `undefined` anywhere in the tree and reports the failure at the
+ * top of `meta` rather than at the offending key. Copying props into meta
+ * therefore has to re-state what "absent" means, at this seam, once — the
+ * tempting alternative, a try/catch around the store write, would turn a
+ * whole detach into a silent no-op.
+ */
+export function toJsonSafe<T>(value: T): T {
+	return sanitize(value) as T
+}
+
+function sanitize(value: unknown): unknown {
+	if (value === null) return null
+	if (Array.isArray(value)) {
+		// JSON has no hole: an undefined element becomes null so later indices
+		// keep the position the author gave them.
+		return value.map((entry) => {
+			const next = sanitize(entry)
+			return next === undefined ? null : next
+		})
+	}
+	if (isObject(value)) {
+		const next: Record<string, unknown> = {}
+		for (const [key, entry] of Object.entries(value)) {
+			const sanitized = sanitize(entry)
+			if (sanitized === undefined) continue
+			next[key] = sanitized
+		}
+		return next
+	}
+	const kind = typeof value
+	if (kind === 'undefined' || kind === 'function' || kind === 'symbol' || kind === 'bigint') {
+		return undefined
+	}
+	return value
+}
+
 /** Wrap a record for the `meta` field of the shape that will carry it. */
 export function detachMeta(record: DetachedRecord): JsonObject {
-	// The record is JSON by construction — every field is a string, a number,
-	// a boolean, or a Block prop, and a Block prop is never a class.
-	return { [SYSTEMSKETCH_META_KEY]: record as unknown as JsonObject }
+	// Every field is a string, a number, a boolean, or a Block prop — but an
+	// optional Block prop can be *present* and `undefined`, which `meta` refuses.
+	return { [SYSTEMSKETCH_META_KEY]: toJsonSafe(record) as unknown as JsonObject }
 }
 
 export function detachedDelayPillMeta(arrowId: string): JsonObject {

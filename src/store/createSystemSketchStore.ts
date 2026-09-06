@@ -9,6 +9,7 @@ import { SYSTEMSKETCH_THEMES } from '../appearance/figjamPalette'
 import { BlockShapeUtil } from '../blocks'
 import { BranchArmShapeUtil, BranchShapeUtil } from '../branch'
 import { LoopShapeUtil } from '../loop'
+import { BehaviorTreeShapeUtil, BtControlShapeUtil } from '../behaviorTree'
 import { CodeShapeUtil } from '../code'
 import { FloatingPortShapeUtil } from '../floatingPort'
 import {
@@ -37,6 +38,8 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
     BlockShapeUtil,
     BranchShapeUtil,
     LoopShapeUtil,
+    BehaviorTreeShapeUtil,
+    BtControlShapeUtil,
     CodeShapeUtil,
     FloatingPortShapeUtil,
     BranchArmShapeUtil,

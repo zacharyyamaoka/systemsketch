@@ -3,7 +3,10 @@ import {
   type Editor,
   type TLArrowShape,
   type TLShape,
+  type TLShapeId,
+  type TLUiActionsContextType,
   type TLUiEventSource,
+  type TLUiOverrideHelpers,
   type TLUiOverrides,
   type TLUiToolItem,
   type TLUiToolsContextType,
@@ -12,6 +15,12 @@ import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
 import { withBranchTool } from '../branch/branchToolUi'
 import { withLoopTool } from '../loop/loopToolUi'
+import { withBehaviorTreeTool } from '../behaviorTree/behaviorTreeToolUi'
+import { BEHAVIOR_TREE_SHAPE_TYPE } from '../behaviorTree/behaviorTreeModel'
+import {
+  getSelectedBehaviorTreeSiblings,
+  groupSelectedBehaviorTreeNodes,
+} from '../behaviorTree/behaviorTreeCommands'
 import { withCalloutTool } from '../callout'
 import { withCodeTool } from '../code'
 import { withFloatingPortTool } from '../floatingPort/floatingPortToolUi'
@@ -258,17 +267,122 @@ function overrideTools(
  */
 function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
   const next: TLUiToolsContextType = { ...tools }
-  for (const id of ['block', 'branch', 'loop', 'code', 'pill', 'floating-port', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
+  for (const id of ['block', 'branch', 'loop', 'behaviorTree', 'code', 'pill', 'floating-port', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
     const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
     if (wrapped) next[id] = wrapped
   }
   return next
 }
 
+/**
+ * WHY: stock tldraw's SVG/PNG export (`getSvgJsx.tsx`) special-cases exporting
+ * a single frame-like shape by itself: it skips that shape's own `toSvg` and
+ * exports only its children, on the assumption a frame's own paint is
+ * decorative chrome (a border, a name label) nobody wants baked into an
+ * export of its contents. A Behavior Tree region's own paint is not chrome —
+ * it is the wires, the Start marker and the header title, i.e. most of the
+ * diagram — so that skip silently drops the actual content whenever someone
+ * selects just the region and exports it (the natural way to do it). There is
+ * no ShapeUtil-level override for this (only `isFrameLike`, which also drives
+ * real interaction behavior this region relies on — see `RegionShapeUtil`'s
+ * own click-through docs — so flipping it would trade one bug for another).
+ * The only lever tldraw exposes is the `ids` array handed to the export
+ * action before it ever reaches `toSvg`, so the fix widens that array here,
+ * at the same seam this file already uses to teach frame-like Branches and
+ * Loops their non-stock toolbar behavior.
+ */
+function widenSingleRegionExportIds(editor: Editor, ids: TLShapeId[]): TLShapeId[] {
+  if (ids.length !== 1) return ids
+  const shape = editor.getShape(ids[0])
+  if (!shape || shape.type !== BEHAVIOR_TREE_SHAPE_TYPE) return ids
+  return [...editor.getShapeAndDescendantIds(ids)]
+}
+
+/**
+ * Export-as-SVG/PNG reimplemented rather than wrapped: the ids they resolve
+ * from selection have to be widened *before* `helpers.exportAs` runs, and the
+ * stock action closes over its own `ids` local with no seam to inject into.
+ * Faithful to `context/actions.tsx` except for the (unwired, no-op in this
+ * app - no `onUiEvent` is passed to `<Tldraw>`) analytics call.
+ */
+function overrideRegionExportActions(
+  editor: Editor,
+  actions: TLUiActionsContextType,
+  helpers: TLUiOverrideHelpers,
+): TLUiActionsContextType {
+  const resolveIds = () => {
+    let ids = editor.getSelectedShapeIds()
+    if (ids.length === 0) ids = Array.from(editor.getCurrentPageShapeIds().values())
+    return widenSingleRegionExportIds(editor, ids)
+  }
+  const exportName = () =>
+    editor.getSelectedShapes().length === 0
+      ? (editor.getDocumentSettings().name || helpers.msg('document.default-name'))
+      : undefined
+
+  const next = { ...actions }
+  if (next['export-as-svg']) {
+    next['export-as-svg'] = {
+      ...next['export-as-svg'],
+      onSelect() {
+        const ids = resolveIds()
+        if (ids.length === 0) return
+        helpers.exportAs(ids, { format: 'svg', name: exportName() })
+      },
+    }
+  }
+  if (next['export-as-png']) {
+    next['export-as-png'] = {
+      ...next['export-as-png'],
+      onSelect() {
+        const ids = resolveIds()
+        if (ids.length === 0) return
+        helpers.exportAs(ids, { format: 'png', name: exportName() })
+      },
+    }
+  }
+  return next
+}
+
+/**
+ * Ctrl+G on sibling Behavior Tree occurrences groups them under one new
+ * Sequence — MoveIt Pro 10.0's "Group Under Sequence", on the very keystroke
+ * (and menu item) tldraw already spends on grouping.
+ *
+ * WHY shadow the stock action instead of adding a second shortcut: a tldraw
+ * group of projected children was never a real outcome anyway — the region's
+ * reconcile owns those shapes and would fight the group shape — so on this
+ * selection the stock behavior is a trap, and any selection the BT command
+ * refuses falls through to stock grouping unchanged.
+ */
+function overrideGroupActionForBehaviorTrees(
+  editor: Editor,
+  actions: TLUiActionsContextType,
+): TLUiActionsContextType {
+  const stockGroup = actions['group']
+  if (!stockGroup) return actions
+  return {
+    ...actions,
+    group: {
+      ...stockGroup,
+      onSelect(source) {
+        if (getSelectedBehaviorTreeSiblings(editor)) {
+          const result = groupSelectedBehaviorTreeNodes(editor)
+          if (result.ok) return
+        }
+        stockGroup.onSelect(source)
+      },
+    },
+  }
+}
+
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
     rememberSystemTools(withCalloutTool(editor, withCodeTool(editor, withFloatingPortTool(editor,
-      withLoopTool(editor, withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))))))),
+      withBehaviorTreeTool(editor, withLoopTool(editor, withBranchTool(editor,
+        withBlockTool(editor, overrideTools(editor, tools))))))))),
+  actions: (editor, actions, helpers) =>
+    overrideGroupActionForBehaviorTrees(editor, overrideRegionExportActions(editor, actions, helpers)),
   translations: {
     en: {
       // Stock frame removal reparents children out before deleting the

@@ -15,6 +15,10 @@ describe('contextual surface composition', () => {
     ])
   })
 
+  it('keeps Behavior Tree actions as a named composition surface', () => {
+    expect(contextualSurfaceItems('behavior-tree-selection')).toEqual(['behavior-tree-actions'])
+  })
+
   it('keeps live title editing as a named composition, not a second toolbar implementation', () => {
     expect(contextualSurfaceItems('block-title-editing')).toEqual(['title-formatting'])
   })

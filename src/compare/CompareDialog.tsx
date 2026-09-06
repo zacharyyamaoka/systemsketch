@@ -778,11 +778,14 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 								</nav>
 								<div className="systemsketch-compare__detail-body">
 									{problem ? (
+										/* A problem means there is nothing to compare — showing the
+										 * table's own "identical" state and its "select an element"
+										 * invitation alongside it read as contradictory. One calm
+										 * message replaces all three. */
 										<p className="systemsketch-compare__problem" data-testid="compare-problem">
 											{problem}
 										</p>
-									) : null}
-									{tab === 'properties' ? (
+									) : tab === 'properties' ? (
 										<>
 											<div className="systemsketch-review__options">
 												<label

@@ -17,7 +17,7 @@ export type ShapeFamilyTool =
 export type DrawFamilyTool = 'draw' | 'highlight'
 
 /** The system-design family under the Block slot: nodes, regions, code, values, free ports, and Callouts. */
-export type SystemFamilyTool = 'block' | 'branch' | 'loop' | 'code' | 'pill' | 'floating-port' | 'callout'
+export type SystemFamilyTool = 'block' | 'branch' | 'loop' | 'behaviorTree' | 'code' | 'pill' | 'floating-port' | 'callout'
 
 export interface ToolbarPreferences {
   version: 1

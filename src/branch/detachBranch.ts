@@ -18,7 +18,7 @@ import {
 	type TLDefaultColorStyle,
 } from 'tldraw'
 
-import { DETACH_FORMAT_VERSION } from '../blocks/detach/detachModel'
+import { DETACH_FORMAT_VERSION, toJsonSafe } from '../blocks/detach/detachModel'
 import { portTldrawColor } from '../blocks/ui/portPalette'
 import { branchLayout, isBranchShape, type BranchShape } from './branchModel'
 import { unwrapBranchArmFrames } from './branchArmFrames'
@@ -223,7 +223,9 @@ export function detachBranchToPrimitives(
 			systemSketch: {
 				kind: 'branch',
 				version: DETACH_FORMAT_VERSION,
-				props: structuredClone(branch.props),
+				// WHY: `meta` is `T.jsonValue`; a present-but-undefined optional
+				// prop is legal in `props` and fatal here. See `toJsonSafe`.
+				props: toJsonSafe(structuredClone(branch.props)),
 			},
 		},
 	})

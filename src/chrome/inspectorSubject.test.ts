@@ -10,7 +10,8 @@ import {
 } from './inspectorSubject'
 
 const EMPTY = {
-  hasBranch: false, hasLoop: false, hasPort: false, hasBlockContext: false, hasConnection: false, hasSelection: false,
+  hasBranch: false, hasLoop: false, hasPort: false, hasBehaviorTree: false,
+  hasBlockContext: false, hasConnection: false, hasSelection: false,
 }
 
 describe('resolveInspectorSubject', () => {
@@ -24,6 +25,8 @@ describe('resolveInspectorSubject', () => {
       .toBe('loop')
     expect(resolveInspectorSubject({ ...EMPTY, hasPort: true, hasBlockContext: true, hasSelection: true }))
       .toBe('port')
+    expect(resolveInspectorSubject({ ...EMPTY, hasBehaviorTree: true, hasBlockContext: true, hasSelection: true }))
+      .toBe('behaviorTree')
     expect(resolveInspectorSubject({ ...EMPTY, hasConnection: true, hasSelection: true }))
       .toBe('connection')
     // A Block wins over a cable, because a Block carries far more to edit.
@@ -53,6 +56,7 @@ describe('inspectorSubjectOwnsHeader', () => {
       branch: true,
       loop: true,
       port: false,
+      behaviorTree: true,
       connection: false,
       shape: false,
       empty: false,
@@ -77,10 +81,12 @@ describe('readInspectorSubject', () => {
     connection: unknown,
     loop: unknown = null,
     port: unknown = null,
+    behaviorTree: unknown = null,
   ) => ({
     getOnlySelectedBranch: () => branch,
     getOnlySelectedLoop: () => loop,
     getOnlySelectedFloatingPort: () => port,
+    getSelectedBehaviorTree: () => behaviorTree,
     getBlockInspectorContextKind: () => kind,
     getConnectionInspectorContext: () => connection,
   })
@@ -108,5 +114,10 @@ describe('readInspectorSubject', () => {
 
   it('reads a selected free Port ahead of the generic shape lens', () => {
     expect(readInspectorSubject(editor(['shape:port']), reader(null, 'empty', null, null, {}))).toBe('port')
+  })
+
+  it('reads a projected Behavior Tree node ahead of the Block lens', () => {
+    expect(readInspectorSubject(editor(['shape:node']), reader(null, 'selected', null, null, null, {})))
+      .toBe('behaviorTree')
   })
 })

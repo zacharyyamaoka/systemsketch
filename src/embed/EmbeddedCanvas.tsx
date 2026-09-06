@@ -24,6 +24,7 @@ import {
 import { CalloutAddLeaderTool, CalloutTool } from '../callout'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from '../code'
 import { FloatingPortShapeUtil, FloatingPortTool } from '../floatingPort'
+import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from '../behaviorTree'
 import { BlockContextMenu } from '../blocks/ui'
 import {
   BranchArmShapeUtil,
@@ -131,12 +132,14 @@ const EMBEDDED_SHAPE_UTILS = [
   BlockShapeUtil,
   BranchShapeUtil,
   BranchArmShapeUtil,
+  BehaviorTreeShapeUtil,
+  BtControlShapeUtil,
   CodeShapeUtil,
   FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
@@ -255,6 +258,7 @@ function EmbeddedSurface({
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
+    const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -348,6 +352,7 @@ function EmbeddedSurface({
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBehaviorTreeRegions()
       stopBranchRegions()
       stopCodeClickToEdit()
       stopBranchClickToEdit()

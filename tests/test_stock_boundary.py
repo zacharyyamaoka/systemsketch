@@ -51,7 +51,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("FloatingPortShapeUtil", source)
         self.assertIn("FloatingPortTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -91,6 +91,8 @@ class StockBoundaryTests(unittest.TestCase):
         # click deeper. It must not become a top-level toolbar slot of its own.
         self.assertIn("label: 'Loop', icon: <LoopIcon />", toolbar_source)
         self.assertIn("label: 'Port', icon: <FloatingPortIcon />", toolbar_source)
+        self.assertIn("label: 'Behavior Tree', icon: <BehaviorTreeIcon />", toolbar_source)
+        self.assertNotIn('title="Behavior Tree"', toolbar_source)
         self.assertNotIn('title="Loop"', toolbar_source)
         # Listing a tool in that submenu is not enough to make it selectable:
         # `selectSystemFamilyTool` calls `tools[id]?.onSelect(...)`, so an id
@@ -99,16 +101,22 @@ class StockBoundaryTests(unittest.TestCase):
         integration = (
             PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
         ).read_text(encoding="utf-8")
-        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withCodeTool", "withFloatingPortTool", "withCalloutTool"):
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withBehaviorTreeTool", "withCodeTool", "withFloatingPortTool", "withCalloutTool"):
             self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
         self.assertIn("BranchArmShapeUtil,", source)
         self.assertIn("LoopShapeUtil,", source)
+        # The Behavior Tree is a region whose nodes are real Blocks; its own
+        # shape paints only wires, rails and chips, and its control cards are a
+        # helper shape — never a second canvas beside the engine.
+        self.assertIn("BehaviorTreeShapeUtil,", source)
+        self.assertIn("BtControlShapeUtil,", source)
+        self.assertIn("const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)", product_source)
         self.assertIn("CodeShapeUtil,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -149,6 +157,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
         self.assertIn("BranchArmShapeUtil,", embedded)
+        self.assertIn("BehaviorTreeShapeUtil,", embedded)
+        self.assertIn("BtControlShapeUtil,", embedded)
         self.assertIn("PillTool,", embedded)
         self.assertIn("CodeShapeUtil,", embedded)
         self.assertIn("CodeBlockTool,", embedded)
@@ -156,7 +166,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("FloatingPortTool", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)
@@ -199,23 +209,48 @@ class StockBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("BranchShapeUtil", portable_export)
         self.assertIn("BranchArmShapeUtil", portable_export)
-        # Branch lowering is shared with the live Detach command so export
-        # cannot grow a second, subtly different custom-record conversion.
-        self.assertIn("detachBranchToPrimitives", portable_export)
-        self.assertIn("isBranchShape", portable_export)
-        # Loops share that exact portable lowering contract; an export may not
-        # retain a custom Loop record merely because the live menu does not.
+        # Lowering is shared with the live Detach command through the one
+        # registered-kind sweep, so export cannot grow a second, subtly
+        # different custom-record conversion for any kind.
+        self.assertIn("DETACHABLE_KINDS", portable_export)
+        self.assertIn("runDetachSweep", portable_export)
+        self.assertIn("allDetachableIds", portable_export)
+        # Custom records must still be loadable in the isolated export store
+        # before the sweep can lower them.
         self.assertIn("LoopShapeUtil", portable_export)
-        self.assertIn("detachLoopToPrimitives", portable_export)
-        self.assertIn("isLoopShape", portable_export)
+        self.assertIn("BehaviorTreeShapeUtil", portable_export)
+        self.assertIn("BtControlShapeUtil", portable_export)
+        self.assertIn("CodeShapeUtil", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)
         # The free semantic endpoint lowers alongside Blocks and regions; a
         # portable .tldr must never depend on the custom Port shape type.
         self.assertIn("FloatingPortShapeUtil", portable_export)
-        self.assertIn("detachFloatingPortToPrimitives", portable_export)
-        self.assertIn("isFloatingPortShape", portable_export)
+
+        floating_port_detachable = (
+            PROJECT_ROOT / "src" / "floatingPort" / "floatingPortDetachable.ts"
+        ).read_text(encoding="utf-8")
+        self.assertIn("detachFloatingPortToPrimitives", floating_port_detachable)
+        self.assertIn("isFloatingPortShape", floating_port_detachable)
+
+        # The registry is deliberately the only enumeration of detachable
+        # kinds: each shape kind carries its own reduction, and every surface
+        # (menu, export, composites) consumes this one list. A kind that lowers
+        # outside it would be a second dispatcher growing back.
+        registered_kinds = (
+            PROJECT_ROOT / "src" / "detach" / "registeredKinds.ts"
+        ).read_text(encoding="utf-8")
+        for kind in (
+            "connectionDetachable",
+            "blockDetachable",
+            "codeDetachable",
+            "branchDetachable",
+            "loopDetachable",
+            "behaviorTreeDetachable",
+            "floatingPortDetachable",
+        ):
+            self.assertIn(kind, registered_kinds)
 
     def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
         """A host runs in Node and bundles separately, so anything it reaches

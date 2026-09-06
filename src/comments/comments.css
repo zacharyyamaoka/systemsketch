@@ -254,23 +254,9 @@
   background: var(--ss-danger-soft);
 }
 
-.systemsketch-comments__empty {
-  display: grid;
-  justify-items: center;
-  padding: 34px 20px;
-  color: var(--ss-text-muted);
-  text-align: center;
-}
-
-.systemsketch-comments__empty > span {
-  margin-bottom: 8px;
-  font-size: 30px;
-}
-
-.systemsketch-comments__empty p {
-  max-width: 230px;
-  margin: 4px 0 0;
-}
+/* Empty-state layout (the boxed glyph, heading, helper line) now comes from
+   the shared `.systemsketch-panel-empty` pattern in systemsketch-chrome.css —
+   see that file's WHY comment. This class stays only as a test/query hook. */
 
 @media (prefers-reduced-motion: reduce) {
   .systemsketch-comments * {

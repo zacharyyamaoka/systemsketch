@@ -386,6 +386,13 @@ function updateDefinitionGroup(
 	group: readonly BlockShape[],
 	patch: Pick<BlockShapeProps, 'definitionId' | 'definitionKey' | 'draftOrdinal'>,
 ): void {
+	// WHY: `draftOrdinal: undefined` in the patch is how this clears the field —
+	// tldraw's update merge has no "delete this key", and a key omitted from the
+	// patch keeps its old value instead. The consequence is that a Block's stored
+	// `props` can legitimately hold a *present* `undefined`, which `props`
+	// validation accepts and `meta` validation (`T.jsonValue`) does not. Anything
+	// copying props into meta must go through `toJsonSafe`; do not "tidy" this by
+	// dropping the key here, or a set ordinal stops being clearable.
 	for (const block of group) {
 		editor.updateShape<BlockShape>({
 			id: block.id,
