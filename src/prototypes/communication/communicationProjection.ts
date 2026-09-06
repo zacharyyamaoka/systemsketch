@@ -8,6 +8,7 @@ import {
 import { getPortHostPort } from '../../blocks/connections/blockPorts'
 import {
 	CONNECTION_SHAPE_TYPE,
+	type ConnectionRoutingKind,
 } from '../../blocks/connections/connectionModel'
 import type { ConnectionShape } from '../../blocks/connections/ConnectionShapeUtil'
 import { EditorAtom } from '../../blocks/ports/portState'
@@ -43,7 +44,6 @@ export const COMMUNICATION_PROTOTYPE_QUERY = 'communication'
  */
 export type CommunicationLens = 'dataflow' | 'communication'
 export type CommunicationComponentView = 'simple' | 'port' | 'expanded'
-export type CommunicationRouteStyle = 'elbow' | 'straight'
 /**
  * What the cables say, independent of which lens is reading them.
  *
@@ -56,7 +56,6 @@ export type CommunicationCableStyle = 'data' | 'split' | 'summary'
 export interface CommunicationProjectionState {
 	lens: CommunicationLens
 	componentView: CommunicationComponentView
-	routeStyle: CommunicationRouteStyle
 	cableStyle: CommunicationCableStyle
 	focusedGroupKey: string | null
 	/** Null is the legacy query-gated whole-board prototype. */
@@ -75,7 +74,6 @@ export const communicationProjection = new EditorAtom<CommunicationProjectionSta
 	() => ({
 		lens: 'dataflow',
 		componentView: 'simple',
-		routeStyle: 'elbow',
 		cableStyle: 'data',
 		focusedGroupKey: null,
 		activeRegionId: null,
@@ -512,15 +510,54 @@ export function applyCommunicationComponentView(
 	updateProjection(editor, (state) => ({ ...state, componentView }))
 }
 
-export function applyCommunicationRouteStyle(editor: Editor, routeStyle: CommunicationRouteStyle): void {
-	updateProjection(editor, (state) => ({ ...state, routeStyle }))
-}
-
 export function applyCommunicationDrawFamily(
 	editor: Editor,
 	drawFamily: CommunicationProjectionState['drawFamily'],
 ): void {
 	updateProjection(editor, (state) => ({ ...state, drawFamily }))
+}
+
+/**
+ * Set the shape of every cable inside the active region.
+ *
+ * WHY this writes the document rather than a projection field: cable shape is
+ * already a real per-cable style (`ConnectionRoutingStyle`), settable on one
+ * selected cable through the ordinary selection menu. A second presentation-only
+ * copy of the same idea would let the bar and the cable disagree about what
+ * shape a cable is. So the bar is a BULK EDIT of the thing that already exists —
+ * "you can change them individually, but that top thing just allows you to do it
+ * for all of them inside."
+ */
+export function applyCommunicationCableRouting(
+	editor: Editor,
+	routing: ConnectionRoutingKind,
+): number {
+	const regionId = activeCommunicationRegionId(editor)
+	const targets = editor.getCurrentPageShapes().filter((shape): shape is ConnectionShape => {
+		if (shape.type !== CONNECTION_SHAPE_TYPE) return false
+		if (!regionId) return isCommunicationPrototypeQueryEnabled()
+		return isConnectionInCommunicationScope(editor, shape as ConnectionShape)
+	}).filter((connection) => connection.props.routing !== routing)
+	if (targets.length === 0) return 0
+	editor.markHistoryStoppingPoint(`use ${routing} cables in this region`)
+	editor.updateShapes(targets.map((connection) => ({
+		id: connection.id,
+		type: CONNECTION_SHAPE_TYPE,
+		props: { routing },
+	})))
+	return targets.length
+}
+
+/** What the bar should show: the one shape every cable agrees on, else null. */
+export function communicationCableRouting(editor: Editor): ConnectionRoutingKind | null {
+	const regionId = activeCommunicationRegionId(editor)
+	const routings = new Set(editor.getCurrentPageShapes()
+		.filter((shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE)
+		.filter((connection) => (regionId
+			? isConnectionInCommunicationScope(editor, connection)
+			: isCommunicationPrototypeQueryEnabled()))
+		.map((connection) => connection.props.routing))
+	return routings.size === 1 ? [...routings][0] : null
 }
 
 export function applyCommunicationFocus(editor: Editor, groupKey: string | null): void {

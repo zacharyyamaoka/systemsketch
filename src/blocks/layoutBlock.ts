@@ -161,10 +161,18 @@ export function withInferredCommunicationPlacements(props: BlockShapeProps): Blo
 	return { ...props, inputs: fill(props.inputs), outputs: fill(props.outputs) }
 }
 
-/** Where along its edge a communication-lens port sits. Centred by default. */
-export function portRailT(port: BlockPort): number {
+/**
+ * Where along its edge a port was PUT, or null when nobody has put it anywhere.
+ *
+ * The difference matters: an authored fraction is a person's decision and is
+ * honoured exactly, while an absent one means the edge is free to distribute.
+ * Treating "absent" as 0.5 is what made four generated sockets pile up in the
+ * middle of a wall and then march rightwards off it as the spacer pushed them
+ * apart, instead of spreading evenly across the whole edge.
+ */
+export function portRailT(port: BlockPort): number | null {
 	const value = port.commEdgeT
-	return Number.isFinite(value) ? Math.min(1, Math.max(0, value as number)) : 0.5
+	return Number.isFinite(value) ? Math.min(1, Math.max(0, value as number)) : null
 }
 
 /**
@@ -733,6 +741,20 @@ function placeHorizontalRails(
 	band: { top: number; bottom: number },
 	placed: LaidOutBlockPort[],
 ): void {
+	// A top or bottom socket draws its label INWARD, into the same strip a side
+	// socket's label would use. Reserve those strips first so the two never
+	// overprint — this is what turned a card's left column into
+	// "missiomissiomissio…" struck through by the bottom channel's name.
+	const occupies = (edge: 'top' | 'bottom') => [...props.inputs, ...props.outputs]
+		.some((port) => port.visible && portCommunicationEdge(port) === edge)
+	const sideSpan = {
+		top: band.top + (occupies('top') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
+		bottom: band.bottom - (occupies('bottom') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
+	}
+	const usableSide = sideSpan.bottom - sideSpan.top > PORT_LABEL_HEIGHT_PX
+		? sideSpan
+		: { top: band.top, bottom: band.bottom }
+
 	for (const edge of ['top', 'bottom', 'left', 'right'] as const) {
 		const lane = ([
 			['input', props.inputs],
@@ -740,16 +762,35 @@ function placeHorizontalRails(
 		] as const).flatMap(([side, ports]) => ports
 			.filter((port) => port.visible && portCommunicationEdge(port) === edge)
 			.map((port) => ({ port, side })))
-			// Both rails read left→right, which is Simulink's ordering rule and
-			// what the prior-art study assumes. An authored fraction decides the
-			// order; ties keep their order in the port list.
-			.sort((a, b) => portRailT(a.port) - portRailT(b.port))
 		if (lane.length === 0) continue
-		const spread = spreadRailFractions(lane.map(({ port }) => portRailT(port)))
-		lane.forEach(({ port, side }, index) => {
+		// Every socket that has not been placed by hand gets an even share of the
+		// WHOLE edge; the ones that have keep exactly where they were put. Sorting
+		// after that assignment is what makes both rails read left→right, which is
+		// Simulink's ordering rule and what the prior-art study assumes.
+		const even = (index: number) => (index + 1) / (lane.length + 1)
+		const withFraction = lane.map((entry, index) => ({
+			...entry,
+			t: portRailT(entry.port) ?? even(index),
+		}))
+		withFraction.sort((a, b) => a.t - b.t)
+		// The collision gap can never exceed what an even spread would give, or a
+		// crowded edge would be pushed wider than the edge itself and march off
+		// the end — the exact failure the even distribution above just fixed.
+		const spread = spreadRailFractions(
+			withFraction.map((entry) => entry.t),
+			Math.min(0.14, 1 / (lane.length + 1)),
+		)
+		withFraction.forEach(({ port, side }, index) => {
 			const t = spread[index]
-			const point = edgePortPoint(edge, t, width, height)
 			const vertical = edge === 'left' || edge === 'right'
+			// A side socket rides the strip left between the two horizontal label
+			// rows, so the dot and its words both stay clear of them.
+			const point = vertical
+				? {
+					x: edge === 'left' ? 0 : width,
+					y: usableSide.top + t * (usableSide.bottom - usableSide.top),
+				}
+				: edgePortPoint(edge, t, width, height)
 			const labelWidth = vertical
 				? Math.max(0, width / 2 - PORT_LABEL_INSET_PX - 8)
 				: Math.max(0, Math.min(

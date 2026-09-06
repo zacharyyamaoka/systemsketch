@@ -172,7 +172,6 @@ import {
 	type CommunicationDescriptor,
 	type CommunicationProjectionState,
 	type CommunicationRelation,
-	type CommunicationRouteStyle,
 } from '../../prototypes/communication/communicationProjection'
 
 /** Complete one creation-time default after both semantic bindings exist. */
@@ -1082,45 +1081,32 @@ function boundaryPoint(bounds: Box, toward: PagePoint): PagePoint {
 	return { x: center.x + dx * scale, y: center.y + dy * scale }
 }
 
+/**
+ * The route a summary cable paints.
+ *
+ * WHY there is no centre-to-centre option any more (Zach, 2026-09-06): "Please
+ * no longer support the straight arrow that goes from the middle of the node to
+ * the middle of another node. All arrows should always travel between ports."
+ * A centre line says a relationship exists but not which sockets carry it, and
+ * two relationships between one pair of cards drew the identical line — which
+ * is why it needed staggered labels to stay clickable at all. Riding the
+ * representative leg's real port-to-port route removes that whole class of
+ * problem: the summary cable is literally one of the cables it summarises, so
+ * it starts and ends where the data does, and its shape is the ordinary
+ * `routing` style that cable already carries.
+ */
 function componentRelationshipGeometry(
 	editor: Editor,
 	connection: ConnectionShape,
 	relation: CommunicationRelation,
 	representative: CommunicationDescriptor,
-	routeStyle: CommunicationRouteStyle,
 ) {
-	if (routeStyle === 'elbow') {
-		const points = getConnectionRenderPoints(editor, connection)
-		return {
-			// WHY: the aggregate relationship must ride one authored cable verbatim.
-			// A selected phase or measured shortest route therefore remains visible
-			// proof of the semantic parse without inventing a second graph geometry.
-			path: getConnectionShapePath(editor, connection),
-			label: pointAtFraction(points, 0.5),
-		}
-	}
-	const sourceBounds = editor.getShapePageBounds(representative.sourceShapeId)
-	const targetBounds = editor.getShapePageBounds(representative.targetShapeId)
-	if (!sourceBounds || !targetBounds) return null
-	const sourceCenter = sourceBounds.center
-	const targetCenter = targetBounds.center
-	// The conceptual route is centre-to-centre. Clip its visible endpoints to the
-	// two card boundaries so arrowheads do not paint over component titles.
-	const pageStart = boundaryPoint(sourceBounds, targetCenter)
-	const pageEnd = boundaryPoint(targetBounds, sourceCenter)
-	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
-	const start = Mat.applyToPoint(inverse, pageStart)
-	const end = Mat.applyToPoint(inverse, pageEnd)
-	const labelFraction = Math.max(0.16, Math.min(0.84, 0.5 + relation.lane * 0.095))
+	void relation
+	void representative
+	const points = getConnectionRenderPoints(editor, connection)
 	return {
-		path: `M ${start.x} ${start.y} L ${end.x} ${end.y}`,
-		// Multiple centre lines between one component pair are geometrically
-		// identical. Staggering their clickable labels keeps each exact straight
-		// relationship addressable without pretending the paths are different.
-		label: {
-			x: start.x + (end.x - start.x) * labelFraction,
-			y: start.y + (end.y - start.y) * labelFraction,
-		},
+		path: getConnectionShapePath(editor, connection),
+		label: pointAtFraction(points, 0.5),
 	}
 }
 
@@ -1150,20 +1136,18 @@ function ComponentCommunicationConnection({
 	connection,
 	relation,
 	representative,
-	routeStyle,
 	focusedGroupKey,
 }: {
 	connection: ConnectionShape
 	relation: CommunicationRelation
 	representative: CommunicationDescriptor
-	routeStyle: CommunicationRouteStyle
 	focusedGroupKey: string | null
 }) {
 	const editor = useEditor()
 	const geometry = useValue(
 		'component communication relationship geometry',
-		() => componentRelationshipGeometry(editor, connection, relation, representative, routeStyle),
-		[editor, connection, relation, representative, routeStyle],
+		() => componentRelationshipGeometry(editor, connection, relation, representative),
+		[editor, connection, relation, representative],
 	)
 	if (!geometry) return null
 	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
@@ -1189,7 +1173,6 @@ function ComponentCommunicationConnection({
 			data-communication-edges={relation.edgeCount}
 			data-communication-representative-phase={representative.phase}
 			data-communication-representative-id={representative.connectionId}
-			data-communication-route={routeStyle}
 			data-communication-id={relation.displayId}
 			data-communication-member-ids={relation.memberIds.join(',')}
 			data-communication-focus={focusState}
@@ -1287,7 +1270,9 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		if (!relation || !representativeDescriptor) return null
 		const representative = representativeDescriptor.connectionId === connection.id
 		const focusedMember = projection.focusedGroupKey === relation.groupKey
-		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
+		// The representative's own route already carries the collapsed arrow, so
+		// painting its leg tag as well would double the same line.
+		const showMember = focusedMember && !representative
 		return (
 			<>
 				{showMember && descriptor ? (
@@ -1304,7 +1289,6 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						connection={connection}
 						relation={relation}
 						representative={representativeDescriptor}
-						routeStyle={projection.routeStyle}
 						focusedGroupKey={projection.focusedGroupKey}
 					/>
 				) : null}

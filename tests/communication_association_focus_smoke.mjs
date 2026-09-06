@@ -314,12 +314,22 @@ async function main() {
     pass('focused A2 aggregate reveals cancel, feedback, and result over the Simple cards while goal remains the aggregate track')
     await shot(app.page, '05-components-a2-focus-elbow.png')
 
+    // Straight is now the CABLE's own shape, written to every cable in the
+    // region, not a centre-to-centre line replacing them: focus still reveals
+    // A2's other three legs, and every one of them still runs port to port.
     await clickElement(app.page, '[data-testid="communication-route-straight"]')
-    await delay(400)
+    await delay(500)
     state = await projectionState(app.page)
-    assert.equal(state.members, 4)
+    assert.equal(state.members, 3, JSON.stringify(state.memberIds))
     assert.deepEqual(new Set(state.memberIds), new Set(['A2']))
-    pass('Straight keeps the centreline aggregate and reveals all four canonical A2 tracks underneath')
+    const routings = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      return [...new Set(editor.getCurrentPageShapes()
+        .filter((shape) => shape.type === 'connection')
+        .map((shape) => shape.props.routing))]
+    })())`))
+    assert.deepEqual(routings, ['straight'], JSON.stringify(routings))
+    pass('the Arrow control writes one cable shape to every cable in the region, port to port')
     await shot(app.page, '06-components-a2-focus-straight.png')
 
     await clickElement(app.page, '[data-testid="communication-focus-clear"]')
@@ -327,12 +337,33 @@ async function main() {
     await delay(350)
     state = await projectionState(app.page)
     assert.deepEqual(state.activeIds, ['S4'])
-    assert.equal(state.members, 2)
+    // One of S4's two legs IS the summary cable's route, so only the other one
+    // needs its own tag — the representative would otherwise draw twice.
+    assert.equal(state.members, 1, JSON.stringify(state.memberIds))
     assert.match(state.status, /S4 focused · 2 legs/)
-    pass('staggered labels make every overlapping centreline relationship independently focusable')
+    pass('every relationship stays independently focusable by its own label')
     await shot(app.page, '07-components-s4-focus-straight.png')
 
-    await clickElement(app.page, '[data-testid="communication-focus-clear"]')
+    // The Arrow control is a real edit, not paint — so put it back, and prove
+    // the whole bulk write was ONE history step while doing it. Everything
+    // after this point is projection only, which is what the final check tests.
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.undo(); return true })()`)
+    await delay(400)
+    const restored = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      return [...new Set(editor.getCurrentPageShapes()
+        .filter((shape) => shape.type === 'connection')
+        .map((shape) => shape.props.routing))]
+    })())`))
+    assert.deepEqual(restored, ['elbow'], JSON.stringify(restored))
+    pass('one undo puts every cable back, so the bulk shape change is a single history step')
+
+    // Undo already cleared focus by changing the selection; only clear it when
+    // the control is still there to click.
+    if (await evaluate(app.page, `Boolean(document.querySelector('[data-testid="communication-focus-clear"]'))`) === 'true'
+      || await evaluate(app.page, `Boolean(document.querySelector('[data-testid="communication-focus-clear"]'))`) === true) {
+      await clickElement(app.page, '[data-testid="communication-focus-clear"]')
+    }
     await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(350)
     assert.equal(await storedGraph(app.page), before)

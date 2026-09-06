@@ -338,6 +338,27 @@ async function main() {
     assert.equal(railGeometry.align, 'center', JSON.stringify(railGeometry))
     pass('the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention')
 
+    // Ports with no authored fraction share the WHOLE edge, rather than piling
+    // up mid-wall and marching off one end as the spacer pushes them apart.
+    const spacing = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const bounds = editor.getShapePageBounds('shape:mission')
+      const dots = Array.from(document.querySelectorAll(
+        '[data-shape-id="shape:mission"] [data-block-port-edge="left"]'))
+      return { count: dots.length, h: bounds.h }
+    })())`))
+    if (spacing.count >= 2) {
+      const centres = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+        const editor = window.__systemsketch.editor
+        const shape = editor.getShape('shape:mission')
+        return shape.props.inputs.concat(shape.props.outputs)
+          .filter((port) => (port.commEdge ?? 'left') === 'left')
+          .map((port) => port.commEdgeT ?? null)
+      })())`))
+      assert.ok(centres.length > 0, JSON.stringify(centres))
+    }
+    pass('an edge with no authored fractions distributes its sockets across the whole wall')
+
     const cameraPort = await elementBox(
       app.page,
       '[data-shape-id="shape:camera"] .Port[data-block-port-id="comm:stream:camera:stream"]',

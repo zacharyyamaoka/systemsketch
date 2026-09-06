@@ -9,7 +9,8 @@ import {
 	applyCommunicationComponentView,
 	applyCommunicationFocus,
 	applyCommunicationLens,
-	applyCommunicationRouteStyle,
+	applyCommunicationCableRouting,
+	communicationCableRouting,
 	collectCommunicationRelations,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
@@ -20,9 +21,9 @@ import {
 	type CommunicationCableStyle,
 	type CommunicationComponentView,
 	type CommunicationLens,
-	type CommunicationRouteStyle,
 } from './communicationProjection'
 import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
+import type { ConnectionRoutingKind } from '../../blocks/connections/connectionModel'
 import {
 	COMMUNICATION_DRAW_FAMILIES,
 	COMMUNICATION_ROLE_LABELS,
@@ -54,9 +55,10 @@ const CABLE_STYLES: readonly { id: CommunicationCableStyle; label: string; hint:
 	{ id: 'summary', label: 'Summary', hint: 'One cable per relationship, riding its initiating leg' },
 ]
 
-const ROUTES: readonly { id: CommunicationRouteStyle; label: string }[] = [
-	{ id: 'elbow', label: 'Elbow' },
-	{ id: 'straight', label: 'Straight' },
+const ROUTES: readonly { id: ConnectionRoutingKind; label: string; hint: string }[] = [
+	{ id: 'elbow', label: 'Elbow', hint: 'Right-angled runs' },
+	{ id: 'curved', label: 'Curve', hint: 'A single swept curve' },
+	{ id: 'straight', label: 'Straight', hint: 'A direct line, port to port' },
 ]
 
 const DRAW_FAMILIES: readonly { id: CommunicationDrawFamily; label: string; hint: string }[] = [
@@ -108,6 +110,13 @@ export function CommunicationPrototypeControls() {
 		() => (editor.getCurrentToolId() === COMMUNICATION_LINK_TOOL_ID
 			? communicationProjection.get(editor).drawFamily
 			: null),
+		[editor],
+	)
+	// Read off the cables themselves, so the bar can never disagree with what a
+	// single cable's own selection menu says its shape is. Mixed reads as none.
+	const cableRouting = useValue(
+		'communication cable routing',
+		() => communicationCableRouting(editor),
 		[editor],
 	)
 	const [renameDraft, setRenameDraft] = useState<string | null>(null)
@@ -261,15 +270,16 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
-				<div className="communication-prototype-routes" aria-label="Relationship routing">
+				<div className="communication-prototype-routes" aria-label="Cable shape">
 					<span>Arrow</span>
 					{ROUTES.map((route) => (
 						<button
 							key={route.id}
 							type="button"
-							aria-pressed={state.routeStyle === route.id}
+							aria-pressed={cableRouting === route.id}
 							data-testid={`communication-route-${route.id}`}
-							onClick={() => applyCommunicationRouteStyle(editor, route.id)}
+							title={`${route.hint} — sets every cable in this region`}
+							onClick={() => applyCommunicationCableRouting(editor, route.id)}
 						>
 							{route.label}
 						</button>

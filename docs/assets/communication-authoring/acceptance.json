@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T22:17:12.772Z",
+  "generatedAt": "2026-09-06T22:42:17.675Z",
   "checks": [
     "Components mode offers exactly the three drawable patterns, none armed and nothing wired",
     "a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher",
@@ -12,6 +12,7 @@
     "the strict parser reads the generated dataflow back as exactly the three relationships that were drawn",
     "Split cables inside the communication lens paints every protocol leg separately",
     "the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention",
+    "an edge with no authored fractions distributes its sockets across the whole wall",
     "press-and-hold slides a socket onto another edge in the communication lens, keeping every cable",
     "the relocated socket leaves the Dataflow signature untouched",
     "renaming a relationship rewrites its port names and keeps every cable bound",
