@@ -246,6 +246,22 @@
   border-top: 1px solid var(--ss-border);
 }
 
+/*
+ * The explicit-source rail has no rows to scroll — just the two names — so it
+ * skips the `.ss-history` scroll box and the foot note entirely rather than
+ * reusing rules built for a list that isn't there.
+ */
+.systemsketch-compare__history-source {
+  padding: 0 14px 14px;
+}
+
+.systemsketch-compare__history-source p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ss-text);
+}
+
 /* ---- the two board renders --------------------------------------------- */
 
 .systemsketch-compare__stage {
@@ -755,3 +771,68 @@
 }
 
 .systemsketch-review__options .systemsketch-compare__segmented { margin-left: auto; }
+
+/* ---- the review-and-apply bar ------------------------------------------
+ *
+ * IcePanel's "Merge changes" modal puts one solid confirm at the bottom right
+ * with the state of the review to its left. Present only in action mode, so a
+ * plain Shift+D review keeps exactly the two-row layout it has today — the
+ * `.systemsketch-compare` flex column simply has no third child.
+ */
+
+.systemsketch-compare__actionbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-top: 1px solid var(--ss-border);
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-compare__action-note {
+  min-width: 0;
+  color: var(--ss-text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* A refusal and a blocked action are the same news to the reviewer — the thing
+ * they were about to do is not going to happen — so they read the same. Ink on
+ * the surface, never coloured text on a coloured chip: `--ss-danger` on
+ * `--ss-danger-soft` does not clear contrast in every palette. */
+.systemsketch-compare__action-note [data-state='blocked'],
+.systemsketch-compare__action-note [data-state='error'],
+.systemsketch-compare__action-note [data-state='partial'] {
+  display: inline-block;
+  padding-left: 9px;
+  border-left: 3px solid var(--ss-danger);
+  color: var(--ss-text);
+  font-weight: 600;
+}
+
+.systemsketch-compare__action-confirm {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.systemsketch-compare__action-confirm:hover:not(:disabled) { filter: brightness(1.08); }
+
+.systemsketch-compare__action-confirm:disabled {
+  border-color: var(--ss-border);
+  color: var(--ss-text-faint);
+  background: transparent;
+  cursor: not-allowed;
+}

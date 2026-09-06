@@ -53,6 +53,7 @@ import {
   getOnlySelectedCode,
 } from '../code'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import { DraftsControl } from '../drafts/DraftsControl'
 import {
   PropagationFocusControls,
   PropagationFocusDomLens,
@@ -127,6 +128,10 @@ export function SystemSketchMenuPanel() {
       data-systemsketch-chrome
     >
       {MainMenu ? <MainMenu /> : null}
+      {/* Between the file identity and the breadcrumb — never after it. Zach's
+          explicit requirement: the breadcrumb stays the rightmost element of
+          this cluster, so Drafts goes here rather than appended below. */}
+      <DraftsControl />
       <DepthStackNavigator placement="menu" />
     </nav>
   )

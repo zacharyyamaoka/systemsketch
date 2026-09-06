@@ -76,6 +76,8 @@ import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisual
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
 import { CompareProvider } from './compare'
+import { DraftModeBar } from './drafts/DraftModeBar'
+import { DraftProvider, useDrafts } from './drafts/DraftProvider'
 import {
   installSystemSketchWheelZoom,
   SYSTEMSKETCH_EDITOR_OPTIONS,
@@ -141,6 +143,7 @@ const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
  */
 function SystemSketchCanvas() {
   const { attach, path } = useLocalWorkspace()
+  const { attachEditor, isDraftMode } = useDrafts()
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
   const [store] = useState(createSystemSketchStore)
@@ -152,6 +155,9 @@ function SystemSketchCanvas() {
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
+    // Right after attach, same tick: a resumed draft must swap its content in
+    // before the first paint, or reload flashes Main first. See DraftProvider.tsx.
+    const stopDrafts = attachEditor(editor)
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
@@ -184,11 +190,12 @@ function SystemSketchCanvas() {
       stopBlockConnections()
       stopDefinitionLinking()
       stopBoardTheme()
+      stopDrafts()
       stopWorkspace()
       stopWheelZoom()
       setMountedEditor(null)
     }
-  }, [attach])
+  }, [attach, attachEditor])
 
   return (
     <main
@@ -211,20 +218,30 @@ function SystemSketchCanvas() {
         either one owning the other.
       */}
       <CompareProvider editor={mountedEditor} currentPath={path}>
-        <Tldraw
-          assetUrls={ASSET_URLS}
-          bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
-          components={SYSTEMSKETCH_COMPONENTS}
-          getShapeVisibility={getBlockShapeVisibility}
-          licenseKey={TLDRAW_LICENSE_KEY}
-          onMount={onMount}
-          options={SYSTEMSKETCH_EDITOR_OPTIONS}
-          overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
-          shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
-          store={store}
-          themes={SYSTEMSKETCH_THEMES}
-          tools={SYSTEMSKETCH_TOOLS}
-        />
+        {/*
+          The draft-mode bar is a sibling of the canvas wrapper, both inside
+          CompareProvider (its Compare button needs `useCompare()`) — pushing
+          the canvas down rather than overlaying it, confirmed with Zach. See
+          DraftModeBar.tsx's own header comment for why it has no access to
+          tldraw's own UI context.
+        */}
+        {isDraftMode ? <DraftModeBar /> : null}
+        <div className="systemsketch-app__canvas">
+          <Tldraw
+            assetUrls={ASSET_URLS}
+            bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
+            components={SYSTEMSKETCH_COMPONENTS}
+            getShapeVisibility={getBlockShapeVisibility}
+            licenseKey={TLDRAW_LICENSE_KEY}
+            onMount={onMount}
+            options={SYSTEMSKETCH_EDITOR_OPTIONS}
+            overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
+            shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+            store={store}
+            themes={SYSTEMSKETCH_THEMES}
+            tools={SYSTEMSKETCH_TOOLS}
+          />
+        </div>
       </CompareProvider>
     </main>
   )
@@ -368,9 +385,11 @@ export function App() {
   return (
     <ThemeRoot>
       <SystemSketchWorkspaceProvider>
-        <ChromeProvider>
-          <SystemSketchCanvas />
-        </ChromeProvider>
+        <DraftProvider>
+          <ChromeProvider>
+            <SystemSketchCanvas />
+          </ChromeProvider>
+        </DraftProvider>
       </SystemSketchWorkspaceProvider>
     </ThemeRoot>
   )

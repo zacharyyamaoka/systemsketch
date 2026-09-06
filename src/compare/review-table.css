@@ -94,25 +94,53 @@
   outline-offset: -1px;
 }
 
+/*
+ * Icon, name, badge — one row, Figma's order left to right.
+ *
+ * This used to be a flex COLUMN with the badge above the name ("the tag that
+ * says edited should be to the right of the element name instead of on top
+ * of it" — Zach, comparing directly against Figma's own panel). The name is
+ * the one flexible child (`min-width: 0` so it can actually shrink and
+ * ellipsis instead of pushing the badge out of the row); the icon and badge
+ * are fixed width.
+ */
 .systemsketch-review__layer {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
 }
 
 .systemsketch-review__layer-name {
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--ss-text);
   font-size: 11px;
   font-weight: 650;
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* The state badge. Ink on a tint plus its own bar — an accent on accent-soft
+/* The element-type glyph — muted so it never competes with the state badge,
+ * which is the row's primary claim. See `PropertyTable.tsx`'s `elementIcon`. */
+.systemsketch-review__element-icon {
+  flex: 0 0 auto;
+  color: var(--ss-text-faint);
+}
+
+/*
+ * The state badge. Ink on a tint plus its own bar — an accent on accent-soft
  * fails contrast on its own, so the label is normal ink and the colour lives
- * in the border. */
+ * in the border.
+ *
+ * `flex: 0 0 auto`, not `align-self: flex-start` — it now sits at the END of
+ * a horizontal row (the Layer cell, or the Property row div below) rather
+ * than above a column of text, so there is no cross-axis edge left to pin it
+ * to; it only needs to resist being squeezed when the name beside it is long.
+ */
 .systemsketch-review__state {
-  align-self: flex-start;
+  flex: 0 0 auto;
   padding: 2px 7px;
   border: 1px solid var(--ss-border);
   border-radius: 5px;
@@ -248,43 +276,100 @@
 /* ---- Element · Property columns ---------------------------------------- */
 
 /*
- * The Property cell stays a REAL table cell — no `display: flex` on a `<td>`.
+ * The `<td>` itself stays a REAL table cell — no `display: flex` on it.
  *
- * Flex was the obvious way to stack the badge over the name, and it silently
- * took the cell out of the table's column layout: the browser wraps a
- * non-table-cell child in an anonymous cell, and the property text dropped onto
- * its own line underneath the Element column instead of sitting under its own
- * header. Every assertion still passed, because the text was present and
- * correct — it was simply in the wrong column. Stacking is done with
- * block-level children instead, which the table layout understands.
+ * Flex was once the obvious way to put the badge beside the name, and it
+ * silently took the cell out of the table's column layout: the browser wraps
+ * a non-table-cell child in an anonymous cell, and the property text dropped
+ * onto its own line underneath the Element column instead of sitting under
+ * its own header. Every assertion still passed, because the text was present
+ * and correct — it was simply in the wrong column.
+ *
+ * `.systemsketch-review__property-row` is the fix: an ordinary `<div>` INSIDE
+ * the `<td>` carries the flex row, so the cell's own `display` never changes.
+ * Figma puts the badge to the right of the name on one line ("the tag that
+ * says edited should be to the right of the element name instead of on top
+ * of it"); this is that row, with the name as the one flexible child so a
+ * long property name ellipsises instead of pushing the badge out of sight.
  */
+.systemsketch-review__property-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .systemsketch-review__property-name {
-  display: block;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--ss-text);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.systemsketch-review__property .systemsketch-review__state {
-  display: inline-block;
-  margin-bottom: 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---- Figma's layout ----------------------------------------------------- */
 
 /*
- * A list of elements, and the properties of exactly one of them. The split is
- * fixed rather than proportional: the element list is an index and stops being
- * readable when it is wider than its longest name, while the value columns are
- * the thing a reviewer actually reads and should take every pixel that is left.
+ * A list of elements, and the properties of exactly one of them.
+ *
+ * This used to be a fixed `minmax(112px, 148px)` column on the theory that the
+ * element list is an index that stops being readable once it is wider than its
+ * longest name. Zach's own screenshot proved the opposite: at that width a name
+ * like "Controller" truncated to three visible characters, while Figma's own
+ * Layers panel — the reference this whole view is deliberately copied from,
+ * see `FigmaLayout`'s comment above — gives the name column enough room to
+ * read a normal name whole. The column is now driven by `listWidth` state
+ * (`PropertyTable.tsx`) through the `--systemsketch-review-list-width` custom
+ * property, with a plain px default as the fallback for anything that renders
+ * this rule without setting it (e.g. a stray snapshot).
  */
 .systemsketch-review__figma {
   display: grid;
   min-height: 0;
   flex: 1;
-  grid-template-columns: minmax(112px, 148px) minmax(0, 1fr);
+  grid-template-columns: var(--systemsketch-review-list-width, 220px) 6px minmax(0, 1fr);
   overflow: hidden;
+}
+
+/*
+ * The drag handle between the element list and the property detail. A hair
+ * wider than its painted line so there is a real hit target, transparent at
+ * rest so it doesn't read as a third column, and lit with `--ss-accent` on
+ * hover/drag — the same affordance `BlockNode-dividerHandle` uses for its own
+ * resize handle (`block-canvas.css`), so a resize cursor means the same thing
+ * everywhere in this app.
+ */
+.systemsketch-review__resize-handle {
+  position: relative;
+  grid-column: 2;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  touch-action: none;
+}
+
+.systemsketch-review__resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2px;
+  width: 2px;
+  border-radius: 1px;
+  background: transparent;
+}
+
+.systemsketch-review__resize-handle:hover::after,
+.systemsketch-review__resize-handle[data-dragging]::after {
+  background: var(--ss-accent);
+  opacity: 0.6;
+}
+
+.systemsketch-review__resize-handle[data-dragging]::after {
+  opacity: 1;
 }
 
 .systemsketch-review__elements {
@@ -298,13 +383,21 @@
 
 .systemsketch-review__elements > li { margin-bottom: 3px; }
 
+/*
+ * One row: icon, name, count, badge — Figma's own left-to-right order in its
+ * Layers list. This used to be a two-row grid (`status count` / `name name`,
+ * the badge stacked above the name) because a chip beside a name squeezed the
+ * name to nothing at this column's width; the icon now identifies element
+ * KIND up front ("it wasn't clear to me that one was like an edge, one was a
+ * node, one was like a rectangle primitive" — Zach, holding up Figma's own
+ * panel), and the name is the one flexible child so it ellipsises before it
+ * can push the badge out of the row.
+ */
 .systemsketch-review__elements button {
-  display: grid;
+  display: flex;
   width: 100%;
-  gap: 4px;
-  grid-template-areas: 'status count' 'name name';
-  grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 6px;
   padding: 6px 7px;
   border: 1px solid transparent;
   border-radius: 7px;
@@ -325,28 +418,25 @@
 
 .systemsketch-review__element-name {
   overflow: hidden;
-  grid-area: name;
+  flex: 1 1 auto;
+  min-width: 0;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .systemsketch-review__element-count {
-  grid-area: count;
+  flex: 0 0 auto;
   color: var(--ss-text-faint);
   font-variant-numeric: tabular-nums;
   font-size: 10px;
 }
 
-/*
- * Added · Edited · Removed — Figma's vocabulary, in the same chip the property
+/* Added · Edited · Removed — Figma's vocabulary, in the same chip the property
  * rows use for their own three states, so one visual language covers both
- * altitudes. Stacked above the name rather than inline: the column is an index
- * about 180px wide, and a chip beside a name squeezes the name to nothing.
- */
+ * altitudes. */
 .systemsketch-review__element-status {
-  grid-area: status;
-  justify-self: start;
+  flex: 0 0 auto;
   padding: 2px 6px;
   border: 1px solid var(--ss-border);
   border-radius: 5px;
@@ -383,3 +473,40 @@
   font-size: 12px;
   text-align: center;
 }
+
+/* ---- accept / reject, action mode only ---------------------------------
+ *
+ * The box is a SIBLING of the element row's button, so the list item becomes
+ * the flex row the button used to be. Only stamped when the table was handed a
+ * `review`; a plain comparison keeps `> li` exactly as it was.
+ *
+ * It sits at the TRAILING edge in both layouts, which is not a style choice:
+ * every row already opens with a 13px kind glyph, and for a `geo` rectangle
+ * that glyph is a square outline — a leading checkbox beside it read as two
+ * checkboxes, one inexplicably unticked.
+ */
+
+.systemsketch-review__elements[data-review] > li {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.systemsketch-review__elements[data-review] > li > button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.systemsketch-review__accept {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  margin: 0 3px 0 0;
+  accent-color: var(--ss-accent);
+  cursor: pointer;
+}
+
+/* In the flat table the box rides the element cell, whose name already takes
+ * the slack — so it lands after the state badge, the same column the list
+ * puts it in. */
+.systemsketch-review__layer > .systemsketch-review__accept { margin: 0 0 0 2px; }
