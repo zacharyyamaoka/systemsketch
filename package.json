@@ -86,6 +86,8 @@
     "test:authoring": "node tests/branch_authoring_smoke.mjs",
     "test:branch": "node tests/branch_region_smoke.mjs",
     "test:branch-frames": "node tests/branch_arm_frames_smoke.mjs",
+    "test:branch-edge-selection": "node tests/branch_edge_selection_smoke.mjs",
+    "test:branch-edge-selection-fixture": "node tests/branch_edge_selection_fixture_smoke.mjs",
     "test:edge-vocabulary": "node tests/edge_vocabulary_smoke.mjs",
     "test:tunnel": "node tests/edge_tunnel_smoke.mjs",
     "test:async-edge-style": "node tests/async_edge_style_smoke.mjs",

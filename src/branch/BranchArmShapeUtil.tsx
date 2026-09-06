@@ -1,9 +1,10 @@
 import {
 	BaseFrameLikeShapeUtil,
 	Group2d,
-	Rectangle2d,
+	Polyline2d,
 	SVGContainer,
 	T,
+	Vec,
 	createShapePropsMigrationSequence,
 	isShapeId,
 	type RecordProps,
@@ -92,15 +93,25 @@ export class BranchArmShapeUtil extends BaseFrameLikeShapeUtil<BranchArmShape> {
 	}
 
 	override getGeometry(shape: BranchArmShape) {
-		// BaseFrameLikeShapeUtil's hit testing walks label children, so even an
-		// invisible frame must use the same Group2d envelope as the stock Frame.
+		const w = Math.max(1, shape.props.w)
+		const h = Math.max(1, shape.props.h)
+		// WHY: arm frames must still be real tldraw clipping/drop containers, but
+		// their invisible face may not terminate hit testing before a semantic
+		// cable owned by the Branch. An open perimeter preserves a full bounds
+		// envelope and a selectable edge while letting a click in the arm body
+		// reach the cable or the Branch below it.
 		return new Group2d({
-			children: [new Rectangle2d({
-				width: Math.max(1, shape.props.w),
-				height: Math.max(1, shape.props.h),
-				isFilled: false,
+			children: [new Polyline2d({
+				points: [new Vec(0, 0), new Vec(w, 0), new Vec(w, h), new Vec(0, h), new Vec(0, 0)],
 			})],
 		})
+	}
+
+	/** The clipping rectangle is intentionally independent of the open hit perimeter. */
+	override getClipPath(shape: BranchArmShape): Vec[] {
+		const w = Math.max(1, shape.props.w)
+		const h = Math.max(1, shape.props.h)
+		return [new Vec(0, 0), new Vec(w, 0), new Vec(w, h), new Vec(0, h)]
 	}
 
 	override component(shape: BranchArmShape) {
