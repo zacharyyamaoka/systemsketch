@@ -34,16 +34,16 @@ npm run dev
 
 ## Worktree lifecycle
 
-- Put each bounded implementation track in a fresh temporary worktree based on the current
-  committed `main`. Use the repository's track tooling so the track owns its ports, runtime,
-  and scratch board; do not reuse Stable, Preview, or another track's process.
+- The Codex GUI-selected task environment decides whether work happens in the primary checkout
+  or a worktree. Do not create, move, or remove a worktree as a local default.
+- When the GUI or Zach explicitly asks for a new worktree, use the repository's track tooling so
+  the track owns its ports, runtime, and scratch board; do not reuse Stable, Preview, or another
+  track's process.
 - Worktrees isolate files, not design dependencies. Run tracks in parallel only when their
   contracts are independent, and keep one writer per shared seam.
-- An already-merged worktree is finished. Even when Zach continues in the same chat, create
-  a new worktree from the updated `main` before the next implementation change.
-- Verify in the track, reconcile with current `main`, and re-run the relevant proof on the
-  combined tree. After the merge is verified on `main`, remove the temporary worktree and
-  delete its branch only if it is fully merged. Never remove dirty or unmerged work.
+- Do not automatically replace a merged worktree or delete a worktree after integration. The GUI
+  or Zach selects the next task environment and cleanup timing. Never remove dirty or unmerged
+  work.
 - In every handoff, name the worktree path, branch or detached commit, base commit, merge
   status, and whether cleanup is complete.
 

@@ -239,3 +239,230 @@
 .bt-mini-menu .block-mini-menu__views button:disabled {
   opacity: 0.4;
 }
+
+/* ---- item 6: the Auto layout split button ---------------------------- */
+
+.bt-auto-layout {
+  position: relative;
+  display: inline-flex;
+}
+
+.bt-auto-layout__split {
+  display: inline-flex;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bt-auto-layout__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: none;
+  border-right: 1px solid var(--ss-border);
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.bt-auto-layout__toggle:hover {
+  background: var(--ss-surface-hover);
+}
+
+.bt-auto-layout__toggle[aria-pressed='true'] {
+  background: var(--ss-accent);
+  border-right-color: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+.bt-auto-layout__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  border: none;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  cursor: pointer;
+}
+
+.bt-auto-layout__chevron:hover {
+  background: var(--ss-surface-hover);
+}
+
+.bt-auto-layout__toggle[aria-pressed='true'] + .bt-auto-layout__chevron {
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+.bt-auto-layout__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 156px;
+  padding: 4px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+}
+
+.bt-auto-layout__menuItem {
+  padding: 6px 8px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--ss-text);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bt-auto-layout__menuItem:hover:not(:disabled) {
+  background: var(--ss-surface-hover);
+}
+
+.bt-auto-layout__menuItem:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.bt-auto-layout__menuSwitch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  color: var(--ss-text);
+  cursor: pointer;
+}
+
+/* ------------------------------ Drag Model Tuner --------------------------- */
+/* Dev-only floating cockpit (BtDragModelTunerPanel.tsx): overlay layers,
+   live tuning knobs, and the measured swap-cost table. Left side so it can
+   stay open beside the inspector dock while dragging in the middle. */
+.bt-drag-tuner {
+	position: absolute;
+	left: 12px;
+	top: 64px;
+	width: 306px;
+	max-height: calc(100% - 140px);
+	overflow-y: auto;
+	background: var(--ss-surface-raised);
+	border: 1px solid var(--ss-border);
+	border-radius: 12px;
+	box-shadow: var(--ss-shadow-2);
+	padding: 12px 14px 14px;
+	color: var(--ss-text);
+	font: 12.5px/1.45 var(--systemsketch-chrome-font, 'Inter', sans-serif);
+	pointer-events: all;
+	z-index: 600;
+}
+.bt-drag-tuner__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.bt-drag-tuner__header span { display: block; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ss-text-muted); }
+.bt-drag-tuner__header h2 { margin: 0; font-size: 15px; }
+.bt-drag-tuner__header button { border: 0; background: none; color: var(--ss-text-muted); font-size: 16px; cursor: pointer; padding: 2px 6px; }
+.bt-drag-tuner__header button:hover { color: var(--ss-text); }
+.bt-drag-tuner__master, .bt-drag-tuner__layer { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; cursor: pointer; }
+/* The subject region and its Auto layout switch — the manual override that
+   stays reachable while the selection pill is suppressed for the tuner. */
+.bt-drag-tuner__region {
+	display: flex; align-items: center; justify-content: space-between; gap: 10px;
+	padding: 4px 0 6px;
+}
+.bt-drag-tuner__regionName {
+	overflow: hidden; flex: 1 1 auto;
+	font-weight: 650; text-overflow: ellipsis; white-space: nowrap;
+}
+.bt-drag-tuner__regionName em { color: var(--ss-text-muted); font-weight: 500; font-style: italic; }
+.bt-drag-tuner__region small { color: var(--ss-text-muted); }
+.bt-drag-tuner__region .bt-auto-layout { flex: 0 0 auto; }
+.bt-drag-tuner__master b, .bt-drag-tuner__layer b { display: block; font-size: 12.5px; }
+.bt-drag-tuner__master small, .bt-drag-tuner__layer small { color: var(--ss-text-muted); font-size: 11px; }
+/* "during a drag" — the layers that legitimately paint nothing at rest. */
+.bt-drag-tuner__when {
+	display: inline-block; margin: 1px 0 1px; padding: 0 5px; border-radius: 999px;
+	background: var(--ss-surface-hover); color: var(--ss-text-muted);
+	font: 600 9.5px/1.5 var(--systemsketch-chrome-font, 'Inter', sans-serif);
+	letter-spacing: 0.03em; font-style: normal; text-transform: uppercase;
+}
+
+/* The overlay's key. Every value here is the same token the canvas paints
+   with (`src/behaviorTree/behavior-tree.css`), so the key cannot drift from
+   the drawing it explains — that was the whole point of making the dash
+   patterns tokens. */
+.bt-drag-tuner__swatch { flex: 0 0 auto; margin-top: 1px; overflow: visible; }
+.bt-drag-tuner__swatch [data-mark='zone'] { fill: var(--ss-debug-column-fill); stroke: none; }
+.bt-drag-tuner__swatch [data-mark='zone-alt'] { fill: var(--ss-debug-column-fill-alt); stroke: none; }
+.bt-drag-tuner__swatch [data-mark='seam'] { stroke: var(--ss-debug-column-seam); stroke-width: 1.25; }
+.bt-drag-tuner__swatch [data-mark='overhang'] {
+	stroke: var(--ss-debug-column-overhang); stroke-width: 1; stroke-dasharray: var(--ss-debug-dash-overhang);
+}
+.bt-drag-tuner__swatch [data-mark='bound'] {
+	fill: none; stroke: var(--ss-debug-column-bound); stroke-width: 1.4;
+	stroke-dasharray: var(--ss-debug-dash-bound); stroke-linecap: round;
+}
+.bt-drag-tuner__swatch [data-mark='slot'] {
+	fill: none; stroke: var(--ss-debug-slot-stroke); stroke-width: 1; stroke-dasharray: var(--ss-debug-dash-slot);
+}
+.bt-drag-tuner__swatch [data-mark='slot-padded'] {
+	fill: none; stroke: var(--ss-debug-slot-stroke-padded); stroke-width: 1.8; stroke-dasharray: var(--ss-debug-dash-slot);
+}
+.bt-drag-tuner__swatch [data-mark='capture'] { stroke: var(--ss-debug-capture); stroke-width: 1.25; }
+.bt-drag-tuner__swatch [data-mark='release'] {
+	stroke: var(--ss-debug-release); stroke-width: 1.8; stroke-dasharray: var(--ss-debug-dash-release);
+}
+.bt-drag-tuner__swatch [data-mark='climb'] {
+	fill: none; stroke: var(--ss-debug-climb); stroke-width: 1.8; stroke-dasharray: var(--ss-debug-dash-climb);
+}
+.bt-drag-tuner__section {
+	display: flex; align-items: center; justify-content: space-between;
+	margin: 10px 0 4px; padding-top: 8px; border-top: 1px solid var(--ss-border);
+	font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ss-text-muted);
+}
+.bt-drag-tuner__lag { font-size: 9.5px; letter-spacing: 0.04em; color: var(--ss-accent); text-transform: none; }
+.bt-drag-tuner__focusHint { margin: 2px 0 0; font-style: italic; }
+/* What the focus view will light up. Hidden until the row is pointed at, so
+   the list of knobs stays scannable. */
+.bt-drag-tuner__draws {
+	display: block; margin-top: 1px; font-style: normal;
+	font: 600 10px/1.4 var(--systemsketch-chrome-font, 'Inter', sans-serif);
+	color: var(--ss-accent); opacity: 0; transition: opacity 90ms ease-out;
+}
+.bt-drag-tuner__knob:hover .bt-drag-tuner__draws,
+.bt-drag-tuner__knob:focus-within .bt-drag-tuner__draws { opacity: 1; }
+.bt-drag-tuner__knob:hover, .bt-drag-tuner__knob:focus-within { background: var(--ss-surface-hover); border-radius: 6px; }
+.bt-drag-tuner__fade input[type='range'] { accent-color: var(--ss-text-muted); }
+.bt-drag-tuner__table[data-measuring='true'] { opacity: 0.55; }
+.bt-drag-tuner__reset { border: 1px solid var(--ss-border); background: var(--ss-surface); color: var(--ss-text); border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+.bt-drag-tuner__reset:hover { background: var(--ss-surface-hover); }
+.bt-drag-tuner__knob { display: block; padding: 5px 0; }
+.bt-drag-tuner__knobLabel { display: flex; justify-content: space-between; align-items: baseline; }
+.bt-drag-tuner__knobLabel code { font: 700 12px var(--systemsketch-mono-font, ui-monospace, monospace); color: var(--ss-accent); }
+.bt-drag-tuner__knob input[type='range'] { width: 100%; accent-color: var(--ss-accent); }
+.bt-drag-tuner__knob small { color: var(--ss-text-muted); font-size: 10.5px; display: block; margin-top: -2px; }
+.bt-drag-tuner__table { width: 100%; border-collapse: collapse; margin-top: 2px; }
+.bt-drag-tuner__table th, .bt-drag-tuner__table td { text-align: left; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--ss-border); vertical-align: top; }
+.bt-drag-tuner__table thead th { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ss-text-muted); }
+.bt-drag-tuner__table tbody th { font-weight: 600; font-size: 12px; }
+.bt-drag-tuner__table tbody th small { display: block; color: var(--ss-text-muted); font-weight: 500; font-size: 10px; }
+.bt-drag-tuner__table td b { font: 700 12.5px var(--systemsketch-mono-font, ui-monospace, monospace); }
+.bt-drag-tuner__table td small { display: block; color: var(--ss-text-muted); font-size: 10.5px; }
+.bt-drag-tuner__empty, .bt-drag-tuner__note { color: var(--ss-text-muted); font-size: 11px; margin: 6px 0; }
+.bt-drag-tuner__copy {
+	width: 100%; margin-top: 6px; padding: 7px 10px; border-radius: 8px; cursor: pointer;
+	border: 1px solid var(--ss-border); background: var(--ss-accent); color: var(--ss-accent-text); font-weight: 650;
+}
+.bt-drag-tuner__export {
+	width: 100%; margin-top: 8px; height: 74px; resize: vertical;
+	border: 1px solid var(--ss-border); border-radius: 8px; background: var(--ss-code-surface);
+	color: var(--ss-code-text); font: 10.5px/1.4 var(--systemsketch-mono-font, ui-monospace, monospace); padding: 6px;
+}

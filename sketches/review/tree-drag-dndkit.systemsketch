@@ -1,0 +1,1530 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 3,
+      "block": 14,
+      "geo": 4,
+      "behaviorTree": 1
+    },
+    "bindings": {
+      "arrow": 6
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 2,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.systemsketch-bt-insert-glyph": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 430,
+      "y": 515,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 90,
+          "y": 85
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a3xWxG",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 2720,
+      "y": 610,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -1300,
+          "y": -50
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a4pTZV",
+      "typeName": "shape"
+    },
+    {
+      "x": 2182,
+      "y": 474,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.3",
+        "btRole": "node"
+      },
+      "id": "shape:iK_Ga2HF0X0FOn4ISMqi8",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 154,
+        "title": "MoveHome",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 154
+          },
+          "port": {
+            "w": 520,
+            "h": 154
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "BI_0nwcTAwk4X23kG39dM",
+        "inputs": [
+          {
+            "id": "in:home",
+            "name": "home",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{home_pose}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:MoveHome"
+      },
+      "index": "a7WGQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 1602,
+      "y": 452,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.2",
+        "btRole": "node"
+      },
+      "id": "shape:kzucykEFIdYqw3B2731MC",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 198,
+        "title": "CloseGrip",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 198
+          },
+          "port": {
+            "w": 520,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "6j-F3R1BrnYBVsRPcNpDD",
+        "inputs": [
+          {
+            "id": "in:force",
+            "name": "force",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{grip_force}"
+          },
+          {
+            "id": "in:state",
+            "name": "state",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{grip_state}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:CloseGrip"
+      },
+      "index": "a6u6E",
+      "typeName": "shape"
+    },
+    {
+      "x": 4220,
+      "y": 356,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "key:quality",
+        "btRole": "key"
+      },
+      "id": "shape:QX8F-WVeYI2_RrP1Cutk1",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 184,
+        "h": 56,
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "icon": "",
+        "view": "value",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 184,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "quality",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "quality",
+            "type": "",
+            "visible": true
+          }
+        ]
+      },
+      "index": "aFaQA",
+      "typeName": "shape"
+    },
+    {
+      "x": 300,
+      "y": 96,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 620,
+        "h": 116,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 6,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Auto layout is ON. Slowly drag the middle-row CloseGrip left across its siblings — they reflow live as you cross each slot."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a2F8Q",
+      "typeName": "shape"
+    },
+    {
+      "x": 30,
+      "y": 700,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN drags land where dropped with no preview flicker at slot boundaries, the Fallback lands at root level with both children intact, and one Ctrl+Z undoes the whole drag."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a58Tr",
+      "typeName": "shape"
+    },
+    {
+      "x": 30,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 12,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Park the dragged card right on a slot boundary, then wobble it a few pixels — the preview HOLDS its slot instead of flapping back and forth (new deadband)."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3fRr",
+      "typeName": "shape"
+    },
+    {
+      "x": -264.63233080330883,
+      "y": 2102.4858269854776,
+      "z": 0.23569133483336394,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 3003.256492917772,
+      "y": -70.11765756076602,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 180,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Drag the Fallback (children ride along) into the emptied space under its old spot — it climbs to a ROOT-level slot there, never into Parallel."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4clE",
+      "typeName": "shape"
+    },
+    {
+      "x": 270,
+      "y": 474,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.0",
+        "btRole": "node"
+      },
+      "id": "shape:ti9gnvisYom9e7AIlq_NF",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 154,
+        "title": "MoveToObj",
+        "description": "",
+        "blockType": "Sub Tree",
+        "icon": "Workflow",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 154
+          },
+          "port": {
+            "w": 520,
+            "h": 154
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "G-czCxQzV_NbtKCKQxA_0",
+        "inputs": [
+          {
+            "id": "in:target",
+            "name": "target",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{object_pose}"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out:target",
+            "name": "target",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "definitionKey": "subtree:MoveToObj"
+      },
+      "index": "a29sz",
+      "typeName": "shape"
+    },
+    {
+      "x": 2822,
+      "y": 452,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.4.1.0",
+        "btRole": "node"
+      },
+      "id": "shape:dnicULx6Sh7mwjjfsM9Sh",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 198,
+        "title": "CloseGrip",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 198
+          },
+          "port": {
+            "w": 520,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "T5qSUmiUIkUn6sNSKJn5r",
+        "inputs": [
+          {
+            "id": "in:force",
+            "name": "force",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{grip_force}"
+          },
+          {
+            "id": "in:state",
+            "name": "state",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{grip_state}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:CloseGrip"
+      },
+      "index": "aBP2A",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.2111111111111111,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 2822,
+      "y": 194,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.4.0",
+        "btRole": "node"
+      },
+      "id": "shape:__yIgwSzLrCbVYHwHmA_D",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 198,
+        "title": "CloseGrip",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 198
+          },
+          "port": {
+            "w": 520,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "WQ4fsC4Lcb8vrHh3-pWd1",
+        "inputs": [
+          {
+            "id": "in:force",
+            "name": "force",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{grip_force}"
+          },
+          {
+            "id": "in:state",
+            "name": "state",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{grip_state}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:CloseGrip"
+      },
+      "index": "a9yVM",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.43333333333333335
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [
+        "shape:subject"
+      ],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:US3tEQgdffDoFEcEjirZu",
+      "typeName": "user"
+    },
+    {
+      "x": 2822,
+      "y": 710,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.4.2",
+        "btRole": "node"
+      },
+      "id": "shape:D5Zqzel6QmIZrKt5phYRy",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 154,
+        "title": "MoveHome",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 154
+          },
+          "port": {
+            "w": 520,
+            "h": 154
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "EXFT1UwMwQCQLWIYGklp9",
+        "inputs": [
+          {
+            "id": "in:home",
+            "name": "home",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{home_pose}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:MoveHome"
+      },
+      "index": "aDtyE",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 623.7633447836757,
+      "y": 391.37354036392514,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:subject",
+      "type": "behaviorTree",
+      "props": {
+        "w": 4522,
+        "h": 924,
+        "title": "Drag reorder (dnd-kit)",
+        "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n</root>\n",
+        "treeId": "",
+        "treeStack": [],
+        "projection": "process",
+        "orientation": "right",
+        "nodeFace": "port",
+        "controlFace": "expanded",
+        "edgeStyle": "straight",
+        "dataLens": "blackboard",
+        "blackboardLayout": "rail",
+        "arrangement": "tidy",
+        "controlWireOpacity": 1,
+        "spacingScale": 1,
+        "offsets": {},
+        "insertVisibility": "hover",
+        "nodeViewOverrides": {}
+      },
+      "parentId": "page:page",
+      "index": "a17bv",
+      "typeName": "shape"
+    },
+    {
+      "x": 962,
+      "y": 104,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.1.1",
+        "btRole": "node"
+      },
+      "id": "shape:g4LkVuk4EU29x8laoiB2w",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 198,
+        "title": "CorrectGrip",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 198
+          },
+          "port": {
+            "w": 520,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "sUEeuI5LBEjmBD-o5KaRT",
+        "inputs": [
+          {
+            "id": "in:pose",
+            "name": "pose",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{object_pose}"
+          },
+          {
+            "id": "in:corrected",
+            "name": "corrected",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{object_pose}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:CorrectGrip"
+      },
+      "index": "a5cJM",
+      "typeName": "shape"
+    },
+    {
+      "x": 850,
+      "y": 452,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.1.0",
+        "btRole": "node"
+      },
+      "id": "shape:Jg7BQ110LMtUKjPrugf2x",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 198,
+        "title": "GraspValid",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 198
+          },
+          "port": {
+            "w": 520,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "XucnBGpcOeXPJcDFcIvg6",
+        "inputs": [
+          {
+            "id": "in:pose",
+            "name": "pose",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{object_pose}"
+          },
+          {
+            "id": "in:quality",
+            "name": "quality",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{quality}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:GraspValid"
+      },
+      "index": "a4NRA",
+      "typeName": "shape"
+    },
+    {
+      "x": 3402,
+      "y": 474,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.4.1.1",
+        "btRole": "node"
+      },
+      "id": "shape:5MYxE2CCL8H0zYUvc102X",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 520,
+        "h": 154,
+        "title": "MoveHome",
+        "description": "",
+        "blockType": "Unknown",
+        "icon": "Box",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 520,
+            "h": 154
+          },
+          "port": {
+            "w": 520,
+            "h": 154
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "EUnNGYY8LqsAS6Ia-mWGH",
+        "inputs": [
+          {
+            "id": "in:home",
+            "name": "home",
+            "type": "",
+            "visible": true,
+            "defaultValue": "{home_pose}"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "bt:MoveHome"
+      },
+      "index": "aCZkQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 4220,
+      "y": 556,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "key:grip_state",
+        "btRole": "key"
+      },
+      "id": "shape:RL-KhOC4OY_IUpty5ARdT",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 228,
+        "h": 56,
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "icon": "",
+        "view": "value",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 228,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "grip_state",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "grip_state",
+            "type": "",
+            "visible": true
+          }
+        ]
+      },
+      "index": "aHzKH",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1479.3333740234375,
+        "h": 1192
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1.5,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": false,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "name": "",
+      "color": "#9D5BD2",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:d9tvF_Hwgy4BzcMPlCnn-",
+      "typeName": "user"
+    },
+    {
+      "x": 4220,
+      "y": 456,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "key:grip_force",
+        "btRole": "key"
+      },
+      "id": "shape:hVQxySOgLGpnQhN1qwIyF",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 228,
+        "h": 56,
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "icon": "",
+        "view": "value",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 228,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "grip_force",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "grip_force",
+            "type": "",
+            "visible": true
+          }
+        ]
+      },
+      "index": "aGaG6",
+      "typeName": "shape"
+    },
+    {
+      "x": 4220,
+      "y": 656,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "key:home_pose",
+        "btRole": "key"
+      },
+      "id": "shape:RvVyOBgL2TrOC_VxfkPzB",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 213,
+        "h": 56,
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "icon": "",
+        "view": "value",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 213,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "home_pose",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "home_pose",
+            "type": "",
+            "visible": true
+          }
+        ]
+      },
+      "index": "aIPbU",
+      "typeName": "shape"
+    },
+    {
+      "x": 4220,
+      "y": 256,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "key:object_pose",
+        "btRole": "key"
+      },
+      "id": "shape:8BOFTjujqHAzMDJg72VXE",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 242,
+        "h": 56,
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "icon": "",
+        "view": "value",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 242,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "object_pose",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "object_pose",
+            "type": "",
+            "visible": true
+          }
+        ]
+      },
+      "index": "aE396",
+      "typeName": "shape"
+    },
+    {
+      "x": 610,
+      "y": 212,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 88
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2rZ2V",
+      "typeName": "shape"
+    }
+  ]
+}

@@ -52,7 +52,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("FloatingPortShapeUtil", source)
         self.assertIn("FloatingPortTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool, BtInsertGlyphTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -122,7 +122,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("CodeShapeUtil,", source)
         self.assertIn("TypeTool,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool, BtInsertGlyphTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -131,6 +131,106 @@ class StockBoundaryTests(unittest.TestCase):
         context_menu = (PROJECT_ROOT / "src" / "blocks" / "ui" / "BlockContextMenu.tsx").read_text(encoding="utf-8")
         self.assertNotIn("Branch region", context_menu)
         self.assertNotIn("Loop region", context_menu)
+
+    def test_the_behavior_tree_dual_drag_exception_is_scoped_and_mutually_exclusive(self) -> None:
+        """A second drag system exists — deliberately, conditionally, alone.
+
+        Zach's 2026-09-06 exception to the one-drag-engine rule: with Auto
+        layout ON, a Tree region stops acting as a whiteboard and acts as a
+        reactive diagram, so pressing a diagram node hands the gesture to a
+        real mounted dnd-kit context; pressing anything else — whiteboard
+        primitives drawn over the diagram included — stays native tldraw.
+        These assertions pin the exception exactly that narrow:
+
+          - the claim gate is the three literals (tree projection, tidy
+            arrangement, node role), and the press is arbitrated by tldraw's
+            OWN hit test replicated verbatim, so an arrow drawn over the
+            diagram wins the point exactly as it would natively;
+          - the hand-off runs through supported seams only: the select tool
+            stands down via its own public cancel event, the cloned
+            activation event is hidden from tldraw via markEventAsHandled,
+            and the claim threshold sits strictly below tldraw's 4px drag
+            threshold so translating can never engage first;
+          - dnd-kit appears in exactly one module, mounted once through the
+            InFrontOfTheCanvas seam both lanes already share; no sortable
+            DOM mirror of the layout exists (that would be a second, staler
+            copy of the projection — the forking failure mode);
+          - the region installer no longer resolves drags itself: the
+            reorder machinery lives with the gesture in treeDndDrag.tsx, and
+            what remains is single-writer discipline (skip the gesture
+            owner's shapes, settle on release).
+
+        A future rewrite must not silently re-litigate this fork
+        (single-drag-owner vs conditional-dual-drag-owner): the WHY block in
+        treeDndDrag.tsx records the decision, and its durable record is
+        docs/peps/0007-conditional-dual-drag-owner.md.
+        """
+
+        drag_lane = (PROJECT_ROOT / "src" / "behaviorTree" / "treeDndDrag.tsx").read_text(
+            encoding="utf-8"
+        )
+        # The gate: Zach's scoping literals, and nothing looser — the tidy
+        # arrangement, the node role, and exactly the two diagram projections
+        # he authorized (tree first, process on his 2026-09-06 follow-up).
+        self.assertIn("!isDndDragProjection(region.props.projection) || region.props.arrangement !== 'tidy'", drag_lane)
+        self.assertIn("return projection === 'tree' || projection === 'process'", drag_lane)
+        self.assertIn("meta.btRole !== 'node'", drag_lane)
+        # The press is arbitrated by tldraw's own hit-test rules, replicated
+        # verbatim from getHitShapeOnCanvasPointerDown — this is what keeps a
+        # whiteboard primitive drawn over the diagram fully native.
+        self.assertIn("hitInside: false", drag_lane)
+        self.assertIn("editor.getHitTestMargin()", drag_lane)
+        self.assertIn("editor.getSelectedShapeAtPoint(pagePoint)", drag_lane)
+        # The hand-off uses tldraw's supported seams, never its internals.
+        self.assertIn("editor.cancel()", drag_lane)
+        self.assertIn("editor.markEventAsHandled(clone)", drag_lane)
+        self.assertIn("export const BT_DND_CLAIM_DISTANCE_PX = 3", drag_lane)
+        # The second system is real and mounted — sensors, not just math.
+        self.assertIn("<DndContext", drag_lane)
+        self.assertIn("PointerSensor", drag_lane)
+        # The decision is recorded where it lives, and in its merge-time PEP.
+        self.assertIn("docs/peps/0007-conditional-dual-drag-owner.md", drag_lane)
+
+        # dnd-kit stays inside the one module that owns the exception; nothing
+        # else in the app may import it, mount a second DndContext, or build a
+        # sortable DOM mirror beside the canvas.
+        offenders: list[tuple[str, str]] = []
+        for path in sorted((PROJECT_ROOT / "src").rglob("*.ts*")):
+            # The one mounted context, and the two PURE resolution modules
+            # (Tree and its Process twin) that use dnd-kit's exported
+            # collision functions without mounting anything.
+            if path.name in {"treeDndDrag.tsx", "dragListReorder.ts", "processDragList.ts"}:
+                continue
+            source = path.read_text(encoding="utf-8")
+            if "@dnd-kit" in source:
+                offenders.append((str(path.relative_to(PROJECT_ROOT)), "@dnd-kit import"))
+            if (
+                ".test." not in path.name
+                and "DndContext" in source
+                and "BehaviorTreeDndDragHost" not in source
+            ):
+                offenders.append((str(path.relative_to(PROJECT_ROOT)), "second DndContext"))
+        self.assertEqual(offenders, [])
+        self.assertNotIn("from '@dnd-kit/sortable'", drag_lane)
+        self.assertNotIn("<SortableContext", drag_lane)
+
+        # Mounted once, through the InFrontOfTheCanvas seam the app already
+        # owns (the embedded lane composes the same host).
+        chrome = (PROJECT_ROOT / "src" / "chrome" / "SystemSketchChrome.tsx").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("<BehaviorTreeDndDragHost />", chrome)
+
+        # The installer no longer resolves drags: the gesture and its reorder
+        # machinery moved out together, and what remains is single-writer
+        # discipline for whichever system owns a given gesture.
+        installer = (
+            PROJECT_ROOT / "src" / "behaviorTree" / "installBehaviorTreeRegions.ts"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("handleAutoLayoutDrag", installer)
+        self.assertNotIn("dragListReorder", installer)
+        self.assertIn("skipShapeIds", installer)
+        self.assertIn("nativeGlidesFor", installer)
 
     def test_the_embedded_lane_is_the_same_engine_with_the_file_surfaces_removed(self) -> None:
         """An IDE host must reach tldraw through the same seams the app does.

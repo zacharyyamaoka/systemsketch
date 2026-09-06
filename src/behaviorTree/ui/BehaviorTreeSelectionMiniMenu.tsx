@@ -6,7 +6,15 @@
  */
 import { type Editor, useValue } from 'tldraw'
 
-import { getSelectedBehaviorTree, setBehaviorTreeView, tidyBehaviorTree } from '../behaviorTreeCommands'
+import {
+	behaviorTreeSubtreeLeaf,
+	getSelectedBehaviorTree,
+	setBehaviorTreeView,
+	stepIntoBehaviorTreeSubtree,
+	stepOutOfBehaviorTreeSubtree,
+	tidyBehaviorTree,
+} from '../behaviorTreeCommands'
+import { BtAutoLayoutControl } from './BtAutoLayoutControl'
 import '../../blocks/ui/block-inspector.css'
 import './behavior-tree-inspector.css'
 
@@ -14,8 +22,17 @@ export function EditorBehaviorTreeSelectionMiniMenu({ editor }: { editor: Editor
 	const selection = useValue('SystemSketch selected Behavior Tree mini menu', () => getSelectedBehaviorTree(editor), [editor])
 	if (!selection) return null
 	const { region } = selection
-	const { projection, orientation, nodeFace, dataLens, offsets } = region.props
+	const { projection, orientation, nodeFace, dataLens, offsets, treeStack, arrangement } = region.props
 	const set = (patch: Parameters<typeof setBehaviorTreeView>[2]) => void setBehaviorTreeView(editor, region.id, patch)
+	// Item 3: a selected Sub Tree leaf offers Step in; once inside, the region
+	// itself is what's selected (see `stepIntoBehaviorTreeSubtree`), so Step
+	// out is offered there instead — the same pill, the opposite direction.
+	const subtreeLeaf = selection.child ? behaviorTreeSubtreeLeaf(editor, selection.child) : null
+	const stepAction = subtreeLeaf
+		? { direction: 'in' as const, onSelect: () => void stepIntoBehaviorTreeSubtree(editor, region.id, subtreeLeaf.node.path) }
+		: treeStack.length > 0
+			? { direction: 'out' as const, onSelect: () => void stepOutOfBehaviorTreeSubtree(editor, region.id) }
+			: null
 
 	return (
 		<div className="block-mini-menu bt-mini-menu" role="toolbar" aria-label="Selected Behavior Tree actions" data-projection={projection}>
@@ -56,10 +73,31 @@ export function EditorBehaviorTreeSelectionMiniMenu({ editor }: { editor: Editor
 				</button>
 			</div>
 			<div className="block-mini-menu__views" role="group" aria-label="Arrangement">
-				<button type="button" data-testid="bt-pill-tidy" disabled={Object.keys(offsets).length === 0} onClick={() => void tidyBehaviorTree(editor, region.id)}>
-					⌗<span>tidy</span>
-				</button>
+				{projection === 'tree' ? (
+					<BtAutoLayoutControl
+						arrangement={arrangement}
+						offsetCount={Object.keys(offsets).length}
+						onSetArrangement={(next) => set({ arrangement: next })}
+						onArrangeNow={() => void tidyBehaviorTree(editor, region.id)}
+					/>
+				) : (
+					<button type="button" data-testid="bt-pill-tidy" disabled={Object.keys(offsets).length === 0} onClick={() => void tidyBehaviorTree(editor, region.id)}>
+						⌗<span>tidy</span>
+					</button>
+				)}
 			</div>
+			{stepAction ? (
+				<button
+					type="button"
+					className="block-mini-menu__step-in"
+					data-depth-action={stepAction.direction}
+					data-testid={stepAction.direction === 'in' ? 'bt-step-into-subtree' : 'bt-step-out-of-subtree'}
+					title={stepAction.direction === 'in' ? "Step into this Sub Tree's own definition" : 'Step out to the tree that called this Sub Tree'}
+					onClick={stepAction.onSelect}
+				>
+					{stepAction.direction === 'in' ? 'Step into subtree' : 'Step out'}
+				</button>
+			) : null}
 		</div>
 	)
 }

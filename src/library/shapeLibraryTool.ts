@@ -8,17 +8,23 @@ import {
   selectShapeFamilyTool,
 } from '../toolbar/toolbarIntegration'
 import type { ShapeFamilyTool } from '../toolbar/toolbarModel'
+import { BT_INSERT_GLYPH_TOOL_ID } from './btInsertGlyphModel'
 import {
   rememberShapeLibraryItem,
   type ShapeLibraryItem,
   type ShapeLibraryStorage,
 } from './shapeLibraryModel'
 
-export type ShapeLibraryToolId = ShapeFamilyTool | TLGeoShape['props']['geo'] | 'text'
+export type ShapeLibraryToolId =
+  | ShapeFamilyTool
+  | TLGeoShape['props']['geo']
+  | 'text'
+  | typeof BT_INSERT_GLYPH_TOOL_ID
 
 export function shapeLibraryToolId(item: ShapeLibraryItem): ShapeLibraryToolId {
   if (item.kind === 'tool') return item.tool
   if (item.kind === 'geo') return item.geo
+  if (item.kind === 'custom') return item.shapeType as ShapeLibraryToolId
   if (item.arrowKind === 'elbow') return 'arrow-elbow'
   return Math.abs(item.bend) > 0.001 ? 'arrow-curve' : 'arrow-straight'
 }

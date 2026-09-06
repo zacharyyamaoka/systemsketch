@@ -1,0 +1,54 @@
+{
+  "spacing": 2,
+  "nodeFace": "simple",
+  "table": [
+    {
+      "scenario": "root leaf",
+      "path": "0.2",
+      "down": {
+        "capturePx": 550,
+        "releaseBackPx": 237,
+        "crossExtentPx": 342,
+        "gapPx": 235.875
+      },
+      "right": {
+        "capturePx": 257,
+        "releaseBackPx": 142,
+        "crossExtentPx": 112,
+        "gapPx": 140
+      }
+    },
+    {
+      "scenario": "root subtree head",
+      "path": "0.1",
+      "down": {
+        "capturePx": 252,
+        "releaseBackPx": 82,
+        "crossExtentPx": 272,
+        "gapPx": 80
+      },
+      "right": {
+        "capturePx": 137,
+        "releaseBackPx": 82,
+        "crossExtentPx": 64,
+        "gapPx": 80
+      }
+    },
+    {
+      "scenario": "deep leaf",
+      "path": "0.1.0",
+      "down": {
+        "capturePx": 415,
+        "releaseBackPx": 1,
+        "crossExtentPx": 368,
+        "gapPx": 0
+      },
+      "right": {
+        "capturePx": 153,
+        "releaseBackPx": 2,
+        "crossExtentPx": 112,
+        "gapPx": 0
+      }
+    }
+  ]
+}

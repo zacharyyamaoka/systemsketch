@@ -46,6 +46,8 @@ import { useTopNoticePlacement } from './chrome/topNoticePlacement'
 import { useLocalWorkspace } from './workspace/LocalWorkspace'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setSolidBeforePill } from './blocks/connections/connectionPresentation'
+import { setTreeDragModelOverlay, treeDragModelOverlay } from './behaviorTree/treeDragModelOverlayState'
+import { openDragModelTuner } from './behaviorTree/ui/BtDragModelTunerPanel'
 import { setTypeChevronPlacement, typeAttributePresentation } from './blocks/typeAttributePresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
@@ -184,6 +186,7 @@ export function SystemSketchNavigationPanel() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [recentIds, setRecentIds] = useState<DevelopmentPresetId[]>(readRecentDevelopmentPresets)
   const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
+  const treeDragModelOn = useValue('tree drag model overlay', () => treeDragModelOverlay.get(), [])
   const typeChevronPlacement = useValue(
     'Type attribute chevron placement',
     () => typeAttributePresentation.get().chevronPlacement,
@@ -499,6 +502,44 @@ export function SystemSketchNavigationPanel() {
               <small>Delayed cables: solid up to the pill, dotted after it</small>
             </span>
           </label>
+
+          <div className="systemsketch-dev-section-label">
+            <span>Behavior Tree</span>
+            <small>This browser, live</small>
+          </div>
+          <label className="systemsketch-dev-toggle">
+            <input
+              type="checkbox"
+              data-testid="systemsketch-dev-tree-drag-model"
+              checked={treeDragModelOn}
+              onChange={(event) => setTreeDragModelOverlay(event.target.checked)}
+            />
+            <span>
+              <b>Show the Tree drag model</b>
+              <small>Auto-layout drag containers, column zones and virtual card slots — live while dragging</small>
+            </span>
+          </label>
+          <button
+            type="button"
+            className="systemsketch-dev-latest"
+            data-testid="systemsketch-dev-drag-tuner"
+            onClick={() => {
+              // Opening the tuner also arms what it needs to say anything — the
+              // overlay master and the subject region's Auto layout. Both live
+              // in `openDragModelTuner` beside the definition of "the subject
+              // region"; closing leaves them as set.
+              openDragModelTuner(editor)
+              setDevOpen(false)
+            }}
+          >
+            <span className="systemsketch-dev-latest__glyph" aria-hidden="true">⛭</span>
+            <span>
+              <small>Live knobs · measured swap costs</small>
+              <b>Drag Model Tuner</b>
+              <em>Layers, thresholds, copy-for-chat export</em>
+            </span>
+            <strong>↗</strong>
+          </button>
 
           <div className="systemsketch-dev-section-label">
             <span>Type attributes</span>

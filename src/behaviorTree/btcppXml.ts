@@ -248,8 +248,15 @@ export function cloneXmlDocument(document: XmlDocument): XmlDocument {
 
 export type BtNodeKind = 'control' | 'decorator' | 'action' | 'condition' | 'subtree' | 'unknown'
 export type BtPortDirection = 'input' | 'output' | 'inout'
-/** How a control node treats its ordered children; what the Process view draws. */
-export type BtControlKind = 'sequence' | 'fallback' | 'parallel' | 'branch' | 'switch' | 'other'
+/**
+ * How a control node treats its ordered children; what the Process view
+ * draws. `recoveryLoop` is `RecoveryNode` alone — kept distinct from
+ * `fallback`/`branch` on purpose, because unlike every other kind here its
+ * second child's success loops back to re-run the first, rather than the
+ * flow converging forward past it (see `BtEdgeKind`'s own `retryLoop` vs
+ * `recovery` split, and `recoveryLoopItem` in `processLayout.ts`).
+ */
+export type BtControlKind = 'sequence' | 'fallback' | 'parallel' | 'branch' | 'switch' | 'recoveryLoop' | 'other'
 
 export interface BtPortModel {
 	name: string
@@ -305,6 +312,27 @@ export const BT_BUILTIN_MODELS: readonly BtNodeModel[] = [
 	model('Switch5', 'control', [port('variable', 'input'), port('case_1', 'input'), port('case_2', 'input'), port('case_3', 'input'), port('case_4', 'input'), port('case_5', 'input')], { controlKind: 'switch' }),
 	model('Switch6', 'control', [port('variable', 'input'), port('case_1', 'input'), port('case_2', 'input'), port('case_3', 'input'), port('case_4', 'input'), port('case_5', 'input'), port('case_6', 'input')], { controlKind: 'switch' }),
 	model('ManualSelector', 'control', [port('repeat_last_selection', 'input', 'bool', 'false')], { controlKind: 'other' }),
+	// WHY: RecoveryNode is Nav2's own extension (nav2_behavior_tree/plugins/
+	// control/recovery_node.cpp), not core BT.CPP like everything else in this
+	// array — included anyway because it is the only named pattern with a
+	// genuine loop-back: on child 0 (primary) FAILURE it ticks child 1
+	// (recovery); recovery SUCCESS re-ticks the primary from the top (and only
+	// then counts against number_of_retries); recovery FAILURE, or the primary
+	// failing again with the budget spent, ends the node in FAILURE. It never
+	// succeeds via the recovery child — only the primary's own SUCCESS does.
+	// Confirmed 2026-09-06 straight from that source file (`main` branch) and
+	// Nav2's shipped `navigate_to_pose_w_replanning_and_recovery.xml`, which
+	// nests it three ways (`number_of_retries="6"` wrapping the whole
+	// pipeline, `="1"` wrapping just ComputePathToPose, `="1"` wrapping
+	// FollowPath) — real trees use it at multiple granularities, which is why
+	// this app needs to render it recognizably rather than fall back to a
+	// generic "control with children" box the way it did before this model
+	// existed. The decision record is
+	// docs/peps/0008-recoverynode-first-class-control.md.
+	model('RecoveryNode', 'control', [port('number_of_retries', 'input', 'int', '1', 'Successful recoveries allowed before giving up')], {
+		controlKind: 'recoveryLoop',
+		description: 'Primary step; on failure, a one-step recovery, then retry the primary.',
+	}),
 
 	model('Inverter', 'decorator', [], { description: 'Swap SUCCESS and FAILURE.' }),
 	model('ForceSuccess', 'decorator', [], { description: 'Always report SUCCESS once the child finishes.' }),
@@ -576,6 +604,12 @@ function interpretNode(
 	if (kind === 'decorator' && node.children.length !== 1) {
 		diagnostics.push({ severity: 'error', message: `${node.label} is a decorator and needs exactly one child`, path, treeId })
 	}
+	// RecoveryNode throws at runtime (BT::BehaviorTreeException) unless it has
+	// exactly 2 children — a harder requirement than any other control node
+	// here, so it gets its own check rather than a generic "control" rule.
+	if (id === 'RecoveryNode' && node.children.length !== 2) {
+		diagnostics.push({ severity: 'error', message: `${node.label} needs exactly 2 children: a primary step, then a recovery step`, path, treeId })
+	}
 	if ((kind === 'action' || kind === 'condition' || kind === 'subtree') && node.children.length > 0) {
 		diagnostics.push({ severity: 'error', message: `${node.label} is a leaf and cannot have children`, path, treeId })
 	}
@@ -769,6 +803,9 @@ export function insertBehaviorTreeNode(
 	if (parentKind === 'decorator' && parent.children.length >= 1) {
 		return { ok: false, reason: 'A decorator holds exactly one child; wrap or replace it instead' }
 	}
+	if (parentKind === 'control' && controlKindOfElement(parent) === 'recoveryLoop' && parent.children.length >= 2) {
+		return { ok: false, reason: 'RecoveryNode holds exactly two children — a primary step and a recovery step' }
+	}
 	if (parentKind === 'action' || parentKind === 'condition' || parentKind === 'subtree') {
 		return { ok: false, reason: `${labelOfElement(parent)} is a leaf; add the node beside it instead` }
 	}
@@ -796,11 +833,21 @@ export function insertBehaviorTreeSibling(
 	if (typeof location === 'string') return { ok: false, reason: location }
 	const located = elementAtPath(location.treeElement, path)
 	if (!located) return { ok: false, reason: `No node at ${path}` }
-	if (located.parent === location.treeElement) {
-		// A sibling of the root: wrap the root in a Sequence first.
+	const atRoot = located.parent === location.treeElement
+	// WHY: a plain "add another child here" only means "next step" under a
+	// sequence-like parent. Under a Fallback/Parallel/IfThenElse — whose
+	// children are alternatives or lanes, not steps — "insert a sibling
+	// after X" wraps X in a Sequence first, the same way a sibling of the
+	// root does, so a bare recovery-arm leaf (e.g. `CorrectGrip` under
+	// `Fallback(GraspValid, CorrectGrip)`) becomes stackable instead of
+	// silently turning into a third alternative arm. Zach's ruling
+	// 2026-09-05: a Fallback's failure branch "just becomes another
+	// sequential branch that you can begin to stack skills … on."
+	const needsWrap = atRoot || !isSequenceLikeControlKind(controlKindOfElement(located.parent))
+	if (needsWrap) {
 		const wrapped = wrapBehaviorTreeNode(source, treeId, path, { id: 'Sequence', kind: 'control' })
 		if (!wrapped.ok) return wrapped
-		const result = insertBehaviorTreeNode(wrapped.xml, treeId, '0', after ? 1 : 0, template)
+		const result = insertBehaviorTreeNode(wrapped.xml, treeId, wrapped.path, after ? 1 : 0, template)
 		if (!result.ok) return result
 		return { ...result, remap: composeRemaps(wrapped.remap, result.remap) }
 	}
@@ -956,6 +1003,9 @@ export function moveBehaviorTreeNode(
 	if (targetKind === 'decorator' && target.element.children.length >= 1 && target.element !== located.parent) {
 		return { ok: false, reason: 'A decorator holds exactly one child' }
 	}
+	if (targetKind === 'control' && controlKindOfElement(target.element) === 'recoveryLoop' && target.element.children.length >= 2 && target.element !== located.parent) {
+		return { ok: false, reason: 'RecoveryNode holds exactly two children — a primary step and a recovery step' }
+	}
 	// Identity, not arithmetic: record every element's path before the move,
 	// mutate, record again, and the remap is the pairing.
 	const pathsOf = (): Map<XmlElement, string> => {
@@ -970,8 +1020,21 @@ export function moveBehaviorTreeNode(
 	const before = pathsOf()
 	const moving = located.element
 	located.parent.children.splice(located.index, 1)
-	let insertAt = Math.max(0, Math.min(index, target.element.children.length))
-	if (located.parent === target.element && located.index < index) insertAt = Math.max(0, insertAt - 1)
+	// `index` is expressed as if the removal had not happened yet (that is what
+	// lets a caller ask for "the position right after sibling K" using K's own
+	// pre-move index, and what `nudgeBehaviorTreeOccurrence`'s `index + 2` for
+	// "move later" relies on) — a same-parent forward move then shifts back by
+	// one to land in the now-one-shorter array. WHY the clamp ceiling adds that
+	// same +1 back for exactly this case: `target.element.children.length` is
+	// already post-removal, so clamping a forward move against it first and
+	// THEN subtracting one double-counts the removal and makes the true last
+	// slot (splice at the post-removal length) unreachable by any `index` —
+	// discovered by Tree view's drag-to-reorder wanting to drop a node after
+	// the current last sibling of its own parent (see dragListReorder.test.ts).
+	const sameParentForwardMove = located.parent === target.element && located.index < index
+	const clampCeiling = target.element.children.length + (sameParentForwardMove ? 1 : 0)
+	let insertAt = Math.max(0, Math.min(index, clampCeiling))
+	if (sameParentForwardMove) insertAt = Math.max(0, insertAt - 1)
 	target.element.children.splice(insertAt, 0, moving)
 	const after = pathsOf()
 	const remap: Record<string, string> = {}
@@ -1015,6 +1078,18 @@ function kindOfElement(element: XmlElement, declared: Map<string, BtNodeKind>): 
 	const known = declared.get(element.tag) ?? BUILTIN_BY_ID.get(element.tag)?.kind
 	if (known) return known
 	return element.children.length > 0 ? 'control' : 'unknown'
+}
+
+/** Same lookup `interpretNode` uses to stamp a `BtNode.controlKind`, off a raw element. */
+function controlKindOfElement(element: XmlElement): BtControlKind {
+	const explicit = element.tag in EXPLICIT_TAGS && element.tag !== 'SubTree'
+	const id = (explicit ? getAttr(element, 'ID') : element.tag) ?? element.tag
+	return BUILTIN_BY_ID.get(id)?.controlKind ?? 'other'
+}
+
+/** Mirrors `processLayout.ts`'s `isSequenceLike`: children run as one chain, not as alternatives/lanes. */
+function isSequenceLikeControlKind(kind: BtControlKind): boolean {
+	return kind === 'sequence' || kind === 'other' || kind === 'switch'
 }
 
 function labelOfElement(element: XmlElement): string {

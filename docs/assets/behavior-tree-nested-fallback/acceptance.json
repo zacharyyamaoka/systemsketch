@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-09-06T23:38:16.592Z",
+  "passed": 9,
+  "total": 9,
+  "results": [
+    {
+      "id": "setup.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "reproduce.three-failure-chips",
+      "label": "all three nesting levels paint their own Failure chip",
+      "observed": 3,
+      "desired": 3,
+      "ok": true
+    },
+    {
+      "id": "reproduce.tree-view-shows-all-three-fallbacks",
+      "label": "Tree view labels all three nested Fallback conditions",
+      "observed": [
+        true,
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "depth3.prepend-wraps-bare-leaf",
+      "label": "Retreat lands BEFORE ReleaseAndRetry inside a fresh Sequence, still inside the depth-3 Fallback",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "depth3.node-count",
+      "label": "exactly one Retreat was added",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "depth2.terminus-wraps-nested-fallback",
+      "label": "Escalate lands AFTER the entire depth-3 Fallback block, inside a fresh Sequence at the depth-2 Fallback's own slot",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "depth1.prepend-wraps-nested-fallback-preserving-depth2-and-3-edits",
+      "label": "Abort lands BEFORE the entire depth-2 Fallback block, and both deeper edits survived untouched",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "depth1.main-flow-intact",
+      "label": "CloseGrip still follows the whole nested-Fallback subtree, unmoved",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

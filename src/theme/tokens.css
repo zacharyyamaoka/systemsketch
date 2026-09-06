@@ -350,3 +350,77 @@
   color: var(--ss-text);
   background: var(--ss-surface);
 }
+
+/* -------------------------------------------------------------------------
+ * Debug ink — the Dev panel's Tree drag-model overlay. Deliberately OUTSIDE
+ * the theme vocabulary: debug drawings must read as "not the product" in
+ * every theme, so the violet columns and orange slots keep one identity on
+ * light and dark canvases alike (the alpha carries the legibility), and no
+ * host theme block is asked to restyle them.
+ * ---------------------------------------------------------------------- */
+:root {
+  /* CONTAINERS — violet. The two fills alternate along a strip: tiled zones
+     ABUT by construction, so one shared tint made five columns read as one
+     continuous band. Zebra striping is what makes a seam visible at all. */
+  /* Tuned DOWN once the overlay moved above the shapes: these tints used to
+     sit under the cards and now sit on them, so the same alpha that read as a
+     faint band read as a wash. DevTools lands on 0.1 for the same job. */
+  --ss-debug-column-fill: rgba(109, 94, 217, 0.03);
+  --ss-debug-column-fill-alt: rgba(109, 94, 217, 0.1);
+  --ss-debug-column-fill-active: rgba(109, 94, 217, 0.18);
+  /* The zones' shared edge (a real handover) and their outer reach (overhang)
+     replaced the per-zone rect stroke, which drew a box no one asked for
+     around every column. */
+  --ss-debug-column-seam: rgba(109, 94, 217, 0.85);
+  --ss-debug-column-overhang: rgba(109, 94, 217, 0.45);
+  --ss-debug-column-bound: rgba(109, 94, 217, 0.9);
+  --ss-debug-column-ink: rgba(76, 62, 178, 1);
+  /* Label plates, Chrome DevTools' idiom: opaque plate in the LAYER's colour,
+     1px white keyline, text chosen by the plate's luminance. Violet at
+     rgb(109,94,217) has relative luminance 0.16 — under DevTools' own 0.2
+     cut — so the ink is white. That combination is what makes a label readable
+     over content the overlay does not own, without a scrim or a blend mode. */
+  --ss-debug-column-plate: rgba(85, 71, 190, 0.96);
+  --ss-debug-plate-ink: rgba(255, 255, 255, 1);
+  --ss-debug-plate-keyline: rgba(255, 255, 255, 0.95);
+  --ss-debug-plate: rgba(255, 255, 255, 0.92);
+  /* Paper for the tree-fade scrim, and the gap's hatch bars. */
+  --ss-debug-scrim: rgba(250, 250, 252, 1);
+  --ss-debug-hatch: rgba(109, 94, 217, 0.34);
+  /* SLOTS — orange. */
+  --ss-debug-slot-stroke: rgba(234, 121, 27, 0.55);
+  --ss-debug-slot-stroke-padded: rgba(214, 96, 8, 1);
+}
+
+/* Additional debug ink for the Drag Model Tuner's threshold layers. */
+:root {
+  /* Five layer hues, held at least 40 degrees apart — violet 248, orange 27,
+     teal 174, rose 340, magenta 292. `ink.hues-are-40-degrees-apart` in
+     `tests/behavior_tree_drag_tuner_smoke.mjs` reads them back off the painted
+     elements mid-drag and fails if a new value crowds an existing one; it is
+     what found both of the collisions these two comments record. */
+  --ss-debug-capture: rgba(13, 148, 136, 0.9);
+  /* WHY: release was rgba(220,38,38) — 27 degrees from the slot orange, so
+     mid-drag the deadband boundary and the virtual slots read as one warm
+     family. Rose keeps the "this is a limit" reading and clears both the
+     orange and the climb magenta. */
+  --ss-debug-release: rgba(201, 29, 86, 0.9);
+  /* WHY: climb was rgba(217,119,6) — 17 degrees of hue from the slot orange,
+     so mid-drag the exit ring and the virtual slots were the same mark. The
+     ring moves to magenta, which no other layer uses. */
+  --ss-debug-climb: rgba(192, 38, 211, 0.9);
+  /* Claim distance: hue 100, the one band left ≥40° clear of the other five,
+     and dark enough (relative luminance 0.13) that the white label on it
+     clears 5.9:1. Focus-only — it is a pointer threshold, not tree geometry. */
+  --ss-debug-claim: rgba(57, 114, 29, 0.95);
+}
+
+/* Line signatures. Tokens, not literals, so the Tuner panel's key and the
+   canvas cannot drift apart: both read these. */
+:root {
+  --ss-debug-dash-overhang: 4 4;
+  --ss-debug-dash-bound: 6 4;
+  --ss-debug-dash-slot: 2 3;
+  --ss-debug-dash-release: 7 4;
+  --ss-debug-dash-climb: 12 7;
+}

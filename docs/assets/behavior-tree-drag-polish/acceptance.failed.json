@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-09-06T12:06:00.703Z",
+  "passed": 2,
+  "total": 2,
+  "results": [
+    {
+      "id": "wire.samples",
+      "label": "mid-drag frames were actually sampled",
+      "observed": 8,
+      "desired": 8,
+      "ok": true
+    },
+    {
+      "id": "wire.live-tracking",
+      "label": "the wire endpoint rides the dragged card every sampled frame (worst gap 0px, per-step [0,0,0,0,0,0,0,0])",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    }
+  ],
+  "aborted": "Error: TypeError: Cannot read properties of null (reading 'querySelectorAll')\n    at <anonymous>:8:31\n    at <anonymous>:25:3"
+}

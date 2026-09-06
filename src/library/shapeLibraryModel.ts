@@ -5,8 +5,9 @@ import {
   type TLGeoShape,
   type TLShapeId,
 } from 'tldraw'
+import { BT_INSERT_GLYPH_SHAPE_TYPE, BT_INSERT_GLYPH_SIZE } from './btInsertGlyphModel'
 
-export const SHAPE_LIBRARY_SECTIONS = ['Tools', 'Connections', 'Basic', 'Flowchart'] as const
+export const SHAPE_LIBRARY_SECTIONS = ['Tools', 'Connections', 'Basic', 'Flowchart', 'Behavior Tree'] as const
 export type ShapeLibrarySection = (typeof SHAPE_LIBRARY_SECTIONS)[number]
 
 interface ShapeLibraryItemBase {
@@ -36,7 +37,31 @@ export interface ShapeLibraryToolItem extends ShapeLibraryItemBase {
   tool: 'text'
 }
 
-export type ShapeLibraryItem = ShapeLibraryGeoItem | ShapeLibraryArrowItem | ShapeLibraryToolItem
+/**
+ * A SystemSketch-custom shape with no stock `geo`/`arrow` equivalent.
+ *
+ * WHY a narrow `{ shapeType, width, height }` contract rather than a generic
+ * props bag: the one item using this today (the Behavior Tree insert glyph)
+ * needs nothing else, and every custom shape's own ShapeUtil already knows
+ * its full default props via `getDefaultProps()` — this only needs to carry
+ * the library's chosen footprint. Widen `width`/`height` into a props bag,
+ * and `shapeType` into a union of every supported literal, if a future
+ * custom item needs more — kept to one exact literal for now so
+ * `editor.createShape` can narrow tldraw's shape union on its own, with no
+ * cast standing in for that guarantee.
+ */
+export interface ShapeLibraryCustomItem extends ShapeLibraryItemBase {
+  kind: 'custom'
+  shapeType: typeof BT_INSERT_GLYPH_SHAPE_TYPE
+  width: number
+  height: number
+}
+
+export type ShapeLibraryItem =
+  | ShapeLibraryGeoItem
+  | ShapeLibraryArrowItem
+  | ShapeLibraryToolItem
+  | ShapeLibraryCustomItem
 
 /**
  * One catalog for every SystemSketch library surface.
@@ -99,6 +124,17 @@ export const SHAPE_LIBRARY_ITEMS: readonly ShapeLibraryItem[] = [
   { id: 'data', label: 'Data', section: 'Flowchart', kind: 'geo', geo: 'rhombus', icon: 'geo-rhombus' },
   { id: 'manual-input', label: 'Manual input', section: 'Flowchart', kind: 'geo', geo: 'trapezoid', icon: 'geo-trapezoid', width: 180 },
   { id: 'cloud-service', label: 'Cloud service', section: 'Flowchart', kind: 'geo', geo: 'cloud', icon: 'geo-cloud', width: 180 },
+  {
+    id: 'bt-insert',
+    label: 'Insert point',
+    section: 'Behavior Tree',
+    kind: 'custom',
+    shapeType: BT_INSERT_GLYPH_SHAPE_TYPE,
+    width: BT_INSERT_GLYPH_SIZE,
+    height: BT_INSERT_GLYPH_SIZE,
+    icon: 'plus',
+    searchTerms: ['behavior tree', 'bt', 'plus', 'add node', 'add child'],
+  },
 ]
 
 const ITEM_BY_ID = new Map(SHAPE_LIBRARY_ITEMS.map((item) => [item.id, item]))
@@ -221,6 +257,14 @@ export function insertShapeLibraryItem(
           bend: item.bend,
           elbowMidPoint: 0.5,
         },
+      })
+    } else if (item.kind === 'custom') {
+      editor.createShape({
+        id,
+        type: item.shapeType,
+        x: center.x - item.width / 2,
+        y: center.y - item.height / 2,
+        props: { w: item.width, h: item.height },
       })
     }
     editor.setCurrentTool('select')

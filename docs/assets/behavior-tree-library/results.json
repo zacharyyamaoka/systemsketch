@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T03:13:36.830Z",
+  "generatedAt": "2026-09-06T23:39:28.099Z",
   "passed": 21,
   "checks": [
     "the sample PickAndPlace tree projects its 13 occurrences before the panel is ever opened",

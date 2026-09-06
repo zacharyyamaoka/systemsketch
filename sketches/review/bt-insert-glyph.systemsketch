@@ -1,0 +1,1050 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 3,
+      "geo": 5,
+      "behaviorTreeControl": 2,
+      "block": 5,
+      "behaviorTree": 1,
+      "systemsketch-bt-insert-glyph": 1
+    },
+    "bindings": {
+      "arrow": 6
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 2,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.systemsketch-bt-insert-glyph": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 400,
+      "y": 720,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 150
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a5r7Jl",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 2324,
+      "y": 260,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -182,
+          "y": -132
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a6vMJG",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 200,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Hover this region — every blue “+” target lights up. These are the REAL, live icons this primitive clones."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4zom",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#9D5BD2",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:h7QO-S3GSxR96DQrVS5T1",
+      "typeName": "user"
+    },
+    {
+      "x": 500,
+      "y": 900,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 560,
+        "h": 260,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · The library copy (top right) matches the region's own hovered icons exactly — same blue, same 28px rounded square, same white “+” — and behaves like a plain Rectangle: movable/selectable, never fading, never opening a menu."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a7dkj",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 620,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 200,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · In the Library panel search “insert,” then drag a 2nd copy onto the canvas near the reference copy at top right."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5ehr",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 640.75,
+      "y": 196,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0",
+        "btRole": "node"
+      },
+      "id": "shape:03LG-cy4wTAZ_qsGnSRkg",
+      "type": "behaviorTreeControl",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 246,
+        "h": 64,
+        "label": "Pick and place",
+        "glyph": "sequence",
+        "face": "expanded",
+        "tone": "control",
+        "orientation": "down"
+      },
+      "index": "a1IPn",
+      "typeName": "shape"
+    },
+    {
+      "x": 2114,
+      "y": 260,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 220,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · This copy was already dropped from the library. Plain and ordinary — movable, not clickable, never opens a menu."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a6mqE",
+      "typeName": "shape"
+    },
+    {
+      "x": 755,
+      "y": 344,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.2",
+        "btRole": "node"
+      },
+      "id": "shape:17KD_Sr7Jtx_ZcAVjk0uN",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 343,
+        "h": 112,
+        "title": "CloseGrip",
+        "description": "",
+        "blockType": "Skill",
+        "icon": "Zap",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 343,
+            "h": 112
+          },
+          "port": {
+            "w": 343,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "tDbNXDx4pSOsoxFUqEmZ6",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:CloseGrip"
+      },
+      "index": "a6wOA",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:efTCtxHWJU3KFhB-tDGrE",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.95
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 20,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-note-1",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 200,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "New: Library › Behavior Tree › “Insert point”. This board compares it against the app's real insert icon."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3fEX",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 60,
+      "y": 344,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.0",
+        "btRole": "node"
+      },
+      "id": "shape:zZs1dPetPUAXt-QCWZMxq",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 343,
+        "h": 112,
+        "title": "MoveToObj",
+        "description": "",
+        "blockType": "Sub Tree",
+        "icon": "Workflow",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 343,
+            "h": 112
+          },
+          "port": {
+            "w": 343,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "Yp_TvaoKv9EcnBRHhtuO3",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "subtree:MoveToObj"
+      },
+      "index": "a28XU",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:glyph-ref",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:zK6B8L-kH81HYn7nT4sO8",
+      "typeName": "user"
+    },
+    {
+      "x": 443,
+      "y": 344,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.1",
+        "btRole": "node"
+      },
+      "id": "shape:mQsBOJv0cgRVgIQ0yL57K",
+      "type": "behaviorTreeControl",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 272,
+        "h": 64,
+        "label": "Grasp or correct",
+        "glyph": "fallback",
+        "face": "expanded",
+        "tone": "control",
+        "orientation": "down"
+      },
+      "index": "a3vqj",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:BGSWLNd9braqckEG9PGYO",
+      "typeName": "user"
+    },
+    {
+      "name": "",
+      "color": "#02B1CC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:woyJkXAVmOO0rmOYTYjc-",
+      "typeName": "user"
+    },
+    {
+      "x": 1138,
+      "y": 344,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.3",
+        "btRole": "node"
+      },
+      "id": "shape:HonfTJyY-WoAt2ZbWP3Ou",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 316,
+        "h": 112,
+        "title": "MoveHome",
+        "description": "",
+        "blockType": "Skill",
+        "icon": "Zap",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 316,
+            "h": 112
+          },
+          "port": {
+            "w": 316,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "uDfFpddnoS_zFgLReheRr",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:MoveHome"
+      },
+      "index": "a7QP6",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 500,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:subject",
+      "type": "behaviorTree",
+      "props": {
+        "w": 1514,
+        "h": 712,
+        "title": "PickAndPlace",
+        "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+        "treeId": "PickAndPlace",
+        "treeStack": [],
+        "projection": "tree",
+        "orientation": "down",
+        "nodeFace": "simple",
+        "controlFace": "expanded",
+        "edgeStyle": "straight",
+        "dataLens": "none",
+        "blackboardLayout": "pytrees",
+        "arrangement": "tidy",
+        "controlWireOpacity": 1,
+        "spacingScale": 1,
+        "offsets": {},
+        "insertVisibility": "hover",
+        "nodeViewOverrides": {}
+      },
+      "parentId": "page:page",
+      "index": "a13c6",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:hw-VVhSF9EsONspucQ0zi",
+      "typeName": "user"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:6wmg5g3vaVH4P8a7OzDYU",
+      "typeName": "user"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:1Uddjf8f6OAir8e7n0VFA",
+      "typeName": "user"
+    },
+    {
+      "x": 2114,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:glyph-ref",
+      "type": "systemsketch-bt-insert-glyph",
+      "props": {
+        "w": 28,
+        "h": 28
+      },
+      "parentId": "page:page",
+      "index": "a20Oj",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1600,
+        "h": 1000
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 592.25,
+      "y": 540,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.1.1",
+        "btRole": "node"
+      },
+      "id": "shape:frOM8OBd3s2YXUikeBgtg",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 396,
+        "h": 112,
+        "title": "CorrectGrip",
+        "description": "",
+        "blockType": "Skill",
+        "icon": "Zap",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 396,
+            "h": 112
+          },
+          "port": {
+            "w": 396,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "No3wNXrMD_mAvrKvN7Ait",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:CorrectGrip"
+      },
+      "index": "a5tQj",
+      "typeName": "shape"
+    },
+    {
+      "x": 183.25,
+      "y": 540,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.1.0",
+        "btRole": "node"
+      },
+      "id": "shape:-4Xg12CiiMyp-h39rUEs_",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 369,
+        "h": 112,
+        "title": "GraspValid",
+        "description": "",
+        "blockType": "Condition",
+        "icon": "Braces",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 369,
+            "h": 112
+          },
+          "port": {
+            "w": 369,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "OMMKKTgnW_rCUCMp2LNq6",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:GraspValid"
+      },
+      "index": "a4qME",
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 460,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 210
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a4zxJcl",
+      "typeName": "shape"
+    }
+  ]
+}

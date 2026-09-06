@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-09-06T23:38:21.049Z",
+  "passed": 7,
+  "total": 7,
+  "results": [
+    {
+      "id": "setup.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "lane-end.present-by-default",
+      "label": "a \"+\" sits after CorrectGrip without the \"Show all\" toggle",
+      "observed": "hover",
+      "desired": "hover",
+      "ok": true
+    },
+    {
+      "id": "lane-end.hidden-at-rest",
+      "label": "that \"+\" is invisible with the pointer far away — no longer an always-on exemption",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "lane-end.hover-reveal",
+      "label": "it fades in once the pointer is near it, same as any other interior insert",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "lane-end.wraps-bare-leaf",
+      "label": "CorrectGrip's arm is wrapped in a Sequence with the new node after it, not a third Fallback alternative",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "lane-end.node-count",
+      "label": "exactly one PlanPath was added",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "lane-end.stays-hover-only-on-longer-chain",
+      "label": "the terminus insert stays hidden at rest once the arm already has a Sequence",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    }
+  ],
+  "aborted": "Error: Missing element [data-testid=\"bt-insert-row-skills\"]"
+}

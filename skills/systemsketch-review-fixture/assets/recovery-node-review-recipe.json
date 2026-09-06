@@ -1,0 +1,95 @@
+{
+  "feature": "RecoveryNode (Nav2 control extension, genuine loop-back)",
+  "viewport": {
+    "width": 2850,
+    "height": 1750
+  },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "behaviorTree",
+      "x": 560,
+      "y": 360,
+      "props": {
+        "title": "NavigateWithRecovery",
+        "treeId": "NavigateWithRecovery",
+        "projection": "process",
+        "orientation": "down",
+        "nodeFace": "simple",
+        "controlFace": "expanded",
+        "edgeStyle": "straight",
+        "dataLens": "none",
+        "blackboardLayout": "rail",
+        "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"NavigateWithRecovery\">\n  <BehaviorTree ID=\"NavigateWithRecovery\">\n    <Sequence name=\"Navigate with recovery\">\n      <RecoveryNode number_of_retries=\"3\" name=\"ComputePathToPose\">\n        <ComputePathToPose goal=\"{goal}\" path=\"{path}\"/>\n        <Sequence name=\"Clear and retry\">\n          <WouldAPlannerRecoveryHelp error_code=\"{compute_path_error_code}\"/>\n          <ClearEntireCostmap name=\"ClearGlobalCostmap-Context\"/>\n        </Sequence>\n      </RecoveryNode>\n      <FollowPath path=\"{path}\"/>\n    </Sequence>\n  </BehaviorTree>\n  <TreeNodesModel>\n    <Action ID=\"ComputePathToPose\"><input_port name=\"goal\" type=\"Pose\"/><output_port name=\"path\" type=\"Path\"/></Action>\n    <Condition ID=\"WouldAPlannerRecoveryHelp\"><input_port name=\"error_code\"/></Condition>\n    <Action ID=\"ClearEntireCostmap\"/>\n    <Action ID=\"FollowPath\"><input_port name=\"path\" type=\"Path\"/></Action>\n  </TreeNodesModel>\n</root>\n"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · ComputePathToPose is the PRIMARY step. On FAILURE it enters the recovery arm via this “Failure” chip — same mechanism a Fallback uses",
+      "x": 40,
+      "y": 460,
+      "w": 420,
+      "h": 170,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left",
+        "dy": 200
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · THE WHOLE POINT — the only backward wire in this app. When “Clear and retry” SUCCEEDS, it loops back to re-run ComputePathToPose (up to Retry ×3) instead of merging forward like a Fallback arm",
+      "x": 2320,
+      "y": 380,
+      "w": 460,
+      "h": 230,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "right",
+        "dy": 140
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Open Add-process on any “+”, choose Control flow — “Recovery” sits beside “Fallback” with its own label and icon, not a Fallback variant",
+      "x": 900,
+      "y": 20,
+      "w": 460,
+      "h": 200,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "top",
+        "dx": 260
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Flip to Tree view in the pill — RecoveryNode wears its own glyph, never Fallback's branch icon or Retry's full circle",
+      "x": 900,
+      "y": 1560,
+      "w": 460,
+      "h": 170,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "bottom",
+        "dx": 400
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The Retry ×3 wire is dashed, travels backward, and lands on ComputePathToPose's own entry — AND the menu's “Recovery” row reads as its own primitive beside “Fallback”, not a relabel of it",
+      "x": 40,
+      "y": 980,
+      "w": 420,
+      "h": 260
+    }
+  ]
+}

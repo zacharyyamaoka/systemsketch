@@ -1,0 +1,25 @@
+/*
+ * The library's static clone of `.BehaviorTree-insert`
+ * (src/behaviorTree/behavior-tree.css) — same tokens, same size, same
+ * radius, so a theme or token change to the live affordance stays in sync
+ * here automatically instead of drifting.
+ *
+ * Deliberately NOT copied: that rule's `position: absolute` + negative
+ * margin (a live insert button self-centres on a computed point; a library
+ * shape is positioned by tldraw itself like any other shape), its
+ * opacity/hover-reveal transition (this glyph is always visible once
+ * placed, never gated), and its `cursor: pointer` (this shape is not
+ * clickable — it is a decorative, movable object, exactly like a plain
+ * Rectangle dropped from the library).
+ */
+.systemsketch-library-bt-insert-glyph {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+  box-shadow: var(--ss-shadow-1);
+}

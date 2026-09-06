@@ -1,5 +1,6 @@
-import { SAMPLE_BEHAVIOR_TREE_XML } from './behaviorTree/btcppXml'
+import { parseBehaviorTreeXml, SAMPLE_BEHAVIOR_TREE_XML, selectTree, type BtDocument, type BtTree } from './behaviorTree/btcppXml'
 import { reconcileBehaviorTree } from './behaviorTree/installBehaviorTreeRegions'
+import { btDndDragState, type BtDndDragSignal } from './behaviorTree/treeDndDragState'
 import { serializeTldrawJson, type Editor } from 'tldraw'
 import { renderWithStockTldraw } from './export/stockTldrawPrimitives'
 import { getPropagationRelationMetrics } from './propagation'
@@ -22,8 +23,27 @@ import { getPropagationRelationMetrics } from './propagation'
  * the DOM must read the DOM.
  */
 export interface SystemSketchDevelopmentSeam {
-	/** The journeys seed a region from the shipped sample without retyping it. */
-	behaviorTree: { SAMPLE_BEHAVIOR_TREE_XML: string; reconcile(regionId: string): unknown }
+	/**
+	 * The journeys seed a region from the shipped sample without retyping it,
+	 * and parse a region's own `props.xml` back — that string is already a
+	 * legitimate read of the model (every journey reads it raw for XML
+	 * substring checks); this only saves a journey from hand-rolling its own
+	 * tag-order regex to ask a structural question like "did the whole
+	 * subtree move together".
+	 */
+	behaviorTree: {
+		SAMPLE_BEHAVIOR_TREE_XML: string
+		reconcile(regionId: string): unknown
+		parse(xml: string): BtDocument
+		selectTree(document: BtDocument, treeId: string): BtTree | null
+		/**
+		 * The dnd drag lane's live signal (`treeDndDragState`), for the
+		 * dual-drag journey's ownership claims — which system owns the gesture
+		 * under the pointer right now is editor-scoped state with no DOM to
+		 * read, the same class of gap as the overlay ids above.
+		 */
+		dndDrag(): BtDndDragSignal | null
+	}
 	editor: Editor
 	/** Ids of the overlays currently on screen, e.g. `handle:shape:x:bend`. */
 	overlayIds(): string[]
@@ -48,7 +68,13 @@ export function installDevelopmentSeam(editor: Editor): () => void {
 
 	window.__systemsketch = {
 		editor,
-		behaviorTree: { SAMPLE_BEHAVIOR_TREE_XML, reconcile: (regionId) => reconcileBehaviorTree(editor, regionId as never) },
+		behaviorTree: {
+			SAMPLE_BEHAVIOR_TREE_XML,
+			reconcile: (regionId) => reconcileBehaviorTree(editor, regionId as never),
+			parse: parseBehaviorTreeXml,
+			selectTree,
+			dndDrag: () => btDndDragState.get(editor),
+		},
 		overlayIds: () => editor.overlays.getCurrentOverlays().map((overlay) => overlay.id),
 		shapeIndex: (shapeId) => editor.getShape(shapeId as never)?.index ?? null,
 		renderStockTldraw: async (json) => {

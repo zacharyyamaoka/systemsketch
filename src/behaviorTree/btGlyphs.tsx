@@ -56,6 +56,16 @@ export function BtGlyphSvg({ glyph, orientation, size = 24 }: { glyph: BtGlyph; 
 		case 'branch':
 			body = <path d="M12 4v6M12 10l-6 5M12 10l6 5M6 15v5M18 15v5" {...stroke} />
 			break
+		case 'recovery-loop':
+			// WHY: deliberately NOT 'fallback's branch-and-rejoin shape or
+			// 'retry's near-full circle — this is RecoveryNode, whose second
+			// step loops back and re-enters the FIRST, so the glyph draws that
+			// literally: a step along the top, a hook around the right, a step
+			// back along the bottom, and an arrowhead re-entering at the start
+			// (Zach: "recovery implies ... a one-step recovery and then a
+			// return to the last branch" — this is that return, drawn).
+			body = <path d="M6 7h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H9M9 12l-3 3 3 3" {...stroke} />
+			break
 		case 'switch':
 			body = <path d="M5 6h14M5 12h14M5 18h14M9 4v4M15 10v4M9 16v4" {...stroke} />
 			break

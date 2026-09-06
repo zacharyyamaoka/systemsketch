@@ -1,0 +1,154 @@
+{
+  "generatedAt": "2026-09-06T23:38:28.172Z",
+  "passed": 16,
+  "total": 16,
+  "results": [
+    {
+      "id": "setup.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "setup.titles",
+      "label": "his exact node names all painted",
+      "observed": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "setup.failure-chips",
+      "label": "one Failure chip per recovery hand-off (MoveHome→GraspValid, GraspValid→CorrectGrip)",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "layout.no-node-overlap",
+      "label": "no projected card intersects any other",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "arrows.merge-heads",
+      "label": "two drop landings + one junction arrival are marked",
+      "observed": 3,
+      "desired": 3,
+      "ok": true
+    },
+    {
+      "id": "arrows.merge-edges",
+      "label": "two drops, one run, one headless rail continuation",
+      "observed": 4,
+      "desired": 4,
+      "ok": true
+    },
+    {
+      "id": "arrows.failure-heads",
+      "label": "both Failure hand-off edges keep their arrowheads",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "hover.interior-hidden-at-rest",
+      "label": "a non-persistent \"+\" is invisible until approached",
+      "observed": "0",
+      "desired": "0",
+      "ok": true
+    },
+    {
+      "id": "hover.lane-inserts-present",
+      "label": "both arms' prepend+terminus inserts are all in the DOM (2 arms x 2 = 4)",
+      "observed": 4,
+      "desired": 4,
+      "ok": true
+    },
+    {
+      "id": "hover.lane-inserts-not-persistent",
+      "label": "none of them carry data-persistent",
+      "observed": [
+        "false",
+        "false",
+        "false",
+        "false"
+      ],
+      "desired": [
+        "false",
+        "false",
+        "false",
+        "false"
+      ],
+      "ok": true
+    },
+    {
+      "id": "hover.lane-inserts-hidden-at-rest",
+      "label": "none of them are visible with the pointer far away",
+      "observed": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "desired": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "ok": true
+    },
+    {
+      "id": "hover.exactly-one-persistent-terminus",
+      "label": "the ONLY always-visible \"+\" is the end-of-tree terminus after CloseGrip",
+      "observed": [
+        "bt-insert-end"
+      ],
+      "desired": [
+        "bt-insert-end"
+      ],
+      "ok": true
+    },
+    {
+      "id": "hover.terminus-visible-at-rest",
+      "label": "that end-of-tree terminus \"+\" stays visible with the pointer far away",
+      "observed": "1",
+      "desired": "1",
+      "ok": true
+    },
+    {
+      "id": "hover.interior-revealed",
+      "label": "the same \"+\" fades in over its own hover zone",
+      "observed": "1",
+      "desired": "1",
+      "ok": true
+    },
+    {
+      "id": "tree.fallback-labeled",
+      "label": "Tree view shows the Fallback control",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

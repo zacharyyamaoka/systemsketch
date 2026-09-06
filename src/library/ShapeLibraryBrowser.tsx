@@ -31,6 +31,7 @@ const DEFAULT_OPEN_SECTIONS: Record<BrowserSection, boolean> = {
   Connections: true,
   Basic: true,
   Flowchart: true,
+  'Behavior Tree': true,
 }
 
 function useShapeLibraryRecents(): string[] {
@@ -110,6 +111,7 @@ export function ShapeLibraryBrowser({
       Connections: true,
       Basic: true,
       Flowchart: true,
+      'Behavior Tree': true,
     }))
   }, [normalizedQuery])
 

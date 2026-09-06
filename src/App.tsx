@@ -27,6 +27,8 @@ import {
 import { LoopShapeUtil, LoopTool } from './loop'
 import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from './behaviorTree'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
+import { BtInsertGlyphShapeUtil } from './library/BtInsertGlyphShapeUtil'
+import { BtInsertGlyphTool } from './library/BtInsertGlyphTool'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
@@ -112,11 +114,12 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BehaviorTreeShapeUtil,
   BtControlShapeUtil,
   CodeShapeUtil,
+  BtInsertGlyphShapeUtil,
   FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool, BtInsertGlyphTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -136,6 +139,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BehaviorTreeShapeUtil,
   BtControlShapeUtil,
   CodeShapeUtil,
+  BtInsertGlyphShapeUtil,
   FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]

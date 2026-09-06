@@ -37,9 +37,29 @@ export const BT_BLACKBOARD_LAYOUTS = ['table', 'rail', 'pytrees'] as const
 export type BtBlackboardLayout = (typeof BT_BLACKBOARD_LAYOUTS)[number]
 export const BT_ARRANGEMENTS = ['tidy', 'free'] as const
 export type BtArrangement = (typeof BT_ARRANGEMENTS)[number]
+/**
+ * Process view only. Flowstate reveals an interior "+" on hover near it and
+ * keeps only a sequence's terminal targets on at rest ('hover'); 'all' is the
+ * debug escape hatch Zach wants kept ("helpful for debugging"), not a
+ * temporary flag — so it lives beside the other presentation props, not in a
+ * dev-only corner. The Tree view is deliberately not gated by this prop: it
+ * keeps its own always-show-when-selected-or-hovered behaviour untouched.
+ */
+export const BT_INSERT_VISIBILITIES = ['hover', 'all'] as const
+export type BtInsertVisibility = (typeof BT_INSERT_VISIBILITIES)[number]
 
 export const BtOffset = T.object({ dx: T.number, dy: T.number })
 export type BtOffset = T.TypeOf<typeof BtOffset>
+
+/**
+ * A leaf pinned away from the region's own `nodeFace` default — the escape
+ * hatch a person reaches for from the ordinary Block view pill (Simple / Port
+ * / Expanded) when one occurrence needs more room than its siblings. `view`
+ * is `BtNodeFace | 'expanded'`, kept as a plain string here so this model
+ * does not have to import Block's view type; `leafBlockProps` narrows it.
+ */
+export const BtNodeViewOverride = T.object({ view: T.string, w: T.number, h: T.number })
+export type BtNodeViewOverride = T.TypeOf<typeof BtNodeViewOverride>
 
 export const BEHAVIOR_TREE_SHAPE_PROPS = {
 	w: T.number,
@@ -50,6 +70,8 @@ export const BEHAVIOR_TREE_SHAPE_PROPS = {
 	xml: T.string,
 	/** Which `<BehaviorTree ID>` this region projects; '' means the main tree. */
 	treeId: T.string,
+	/** `treeId`s to restore on Step out, innermost last. See `stepIntoBehaviorTreeSubtree`. */
+	treeStack: T.arrayOf(T.string),
 	projection: T.literalEnum(...BT_PROJECTIONS),
 	orientation: T.literalEnum(...BT_ORIENTATIONS),
 	nodeFace: T.literalEnum(...BT_NODE_FACES),
@@ -60,8 +82,22 @@ export const BEHAVIOR_TREE_SHAPE_PROPS = {
 	arrangement: T.literalEnum(...BT_ARRANGEMENTS),
 	/** 0–1: how strongly control wires paint while a data lens is on. */
 	controlWireOpacity: T.number,
+	/**
+	 * Multiplier on the layout's gap constants — Tree view's
+	 * `TREE_LEVEL_GAP`/`TREE_SIBLING_GAP`, Process view's `PROCESS_GAP` —
+	 * set from the Inspector's Spacing slider. 1 is the constants as written.
+	 * WHY a scale and not a pixel value: the two views share one knob, and a
+	 * multiplier keeps every derived gap (lane offsets, "+" midpoints, chip
+	 * clearances) in the same proportion instead of inventing a second,
+	 * parallel spacing system per view.
+	 */
+	spacingScale: T.number,
 	/** Free-arrangement offsets per node path, presentation only. */
 	offsets: T.dict(T.string, BtOffset),
+	/** Process view: whether every "+" shows at rest, or only the persistent ones. */
+	insertVisibility: T.literalEnum(...BT_INSERT_VISIBILITIES),
+	/** Per-leaf-path view/size overrides; see `BtNodeViewOverride`. */
+	nodeViewOverrides: T.dict(T.string, BtNodeViewOverride),
 } as const
 
 declare module 'tldraw' {
@@ -72,6 +108,7 @@ declare module 'tldraw' {
 			title: string
 			xml: string
 			treeId: string
+			treeStack: string[]
 			projection: BtProjection
 			orientation: BtOrientation
 			nodeFace: BtNodeFace
@@ -81,7 +118,10 @@ declare module 'tldraw' {
 			blackboardLayout: BtBlackboardLayout
 			arrangement: BtArrangement
 			controlWireOpacity: number
+			spacingScale: number
 			offsets: Record<string, BtOffset>
+			insertVisibility: BtInsertVisibility
+			nodeViewOverrides: Record<string, BtNodeViewOverride>
 		}
 		[BT_CONTROL_SHAPE_TYPE]: {
 			w: number
@@ -147,7 +187,7 @@ export function keyPath(key: string, global: boolean): string {
 export const BT_GLYPHS = [
 	'sequence', 'sequence-reactive', 'fallback', 'fallback-reactive', 'parallel', 'branch', 'switch', 'generic',
 	'inverter', 'retry', 'repeat', 'timeout', 'delay', 'force-success', 'force-failure',
-	'run-once', 'keep-running', 'loop', 'precondition', 'breakpoint',
+	'run-once', 'keep-running', 'loop', 'precondition', 'recovery-loop', 'breakpoint',
 ] as const
 export type BtGlyph = (typeof BT_GLYPHS)[number]
 export type BtControlTone = 'control' | 'decorator' | 'unknown'
@@ -176,6 +216,7 @@ export function btGlyphFor(node: Pick<BtNode, 'id' | 'kind' | 'controlKind'>): B
 			case 'parallel': return 'parallel'
 			case 'branch': return 'branch'
 			case 'switch': return 'switch'
+			case 'recoveryLoop': return 'recovery-loop'
 			default: return 'generic'
 		}
 	}
@@ -334,7 +375,18 @@ export interface BtSceneNode {
 	role: BtSceneNodeRole
 }
 
-export type BtEdgeKind = 'control' | 'recovery' | 'merge' | 'write' | 'read' | 'use'
+/**
+ * `recovery` is Fallback/Branch's failure-lane wire (Zach's "plan A to B to
+ * C, first success wins, never loops back" — see `lanesWithRecovery` in
+ * `processLayout.ts`). `retryLoop` is a different animal on purpose: the one
+ * genuinely backward-drawn wire in this app, `RecoveryNode`'s "the recovery
+ * step succeeded, so re-run the primary step from the top" edge (see
+ * `recoveryLoopItem`). Naming them differently is deliberate — Zach's whole
+ * point in asking for this node was that the two control-flow destinations
+ * are fundamentally different, and `grep`ing "recovery" for one must not
+ * turn up the other.
+ */
+export type BtEdgeKind = 'control' | 'recovery' | 'retryLoop' | 'merge' | 'write' | 'read' | 'use'
 
 export interface BtSceneEdge {
 	id: string
@@ -380,9 +432,28 @@ export interface BtSceneInsert {
 	/** null: the tree is empty and this creates the root. */
 	parentPath: string | null
 	index: number
-	kind: 'between' | 'end' | 'root' | 'empty' | 'child'
+	kind: 'between' | 'end' | 'start' | 'root' | 'empty' | 'child'
 	/** Drawn at rest (Flowstate's small square) rather than only on hover. */
 	persistent: boolean
+	/**
+	 * WHY: a Fallback/Branch recovery lane's own terminus isn't a real "child
+	 * of parentPath at index" slot — it's "the next step after this node,"
+	 * which may need to wrap a bare leaf in a Sequence first (a Fallback's
+	 * children are alternatives, not steps). When set, the click handler
+	 * calls `insertBehaviorTreeSiblingOf(afterPath, after: true, …)` instead
+	 * of the parentPath/index child-insert, so a Skill/Condition at the end
+	 * of a failure arm becomes stackable the same way a Sequence's tail is.
+	 */
+	afterPath?: string
+	/**
+	 * The mirror image of `afterPath`: "the step before this node," for the
+	 * gap the Failure elbow's turn-down now opens above a recovery arm's own
+	 * first node, and the gap between Start and the root sequence's current
+	 * first child. Same reasoning as `afterPath` — a bare leaf still needs
+	 * wrapping in a Sequence first — so the click handler calls
+	 * `insertBehaviorTreeSiblingOf(beforePath, after: false, …)`.
+	 */
+	beforePath?: string
 }
 
 export interface BtSceneKey {
@@ -478,6 +549,7 @@ export function getDefaultBehaviorTreeProps(): BehaviorTreeShapeProps {
 		title: '',
 		xml: '',
 		treeId: '',
+		treeStack: [],
 		projection: 'tree',
 		orientation: 'down',
 		nodeFace: 'simple',
@@ -487,7 +559,10 @@ export function getDefaultBehaviorTreeProps(): BehaviorTreeShapeProps {
 		blackboardLayout: 'rail',
 		arrangement: 'tidy',
 		controlWireOpacity: 1,
+		spacingScale: 1,
 		offsets: {},
+		insertVisibility: 'hover',
+		nodeViewOverrides: {},
 	}
 }
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T03:27:14.381Z",
+  "generatedAt": "2026-09-06T23:39:02.997Z",
   "passed": 28,
   "total": 28,
   "results": [
@@ -8,10 +8,10 @@
       "description": "right-clicking a projected leaf selects it",
       "ok": true,
       "observed": [
-        "shape:HHG3AeUsGgTjgbgQ9aR8E"
+        "shape:Q7anezcpcRi0F0gT_OTAJ"
       ],
       "desired": [
-        "shape:HHG3AeUsGgTjgbgQ9aR8E"
+        "shape:Q7anezcpcRi0F0gT_OTAJ"
       ]
     },
     {
@@ -26,10 +26,10 @@
       "description": "right-clicking a projected control selects it",
       "ok": true,
       "observed": [
-        "shape:Dutt2JPYx2PoIQQ-tYpjH"
+        "shape:3ApRy9j_rYUwr0RNL7Vj4"
       ],
       "desired": [
-        "shape:Dutt2JPYx2PoIQQ-tYpjH"
+        "shape:3ApRy9j_rYUwr0RNL7Vj4"
       ]
     },
     {

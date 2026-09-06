@@ -12,6 +12,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextInput } from '../../fields'
+import { BLOCK_PRESENTATION_VIEWS, isBlockShape, type BlockPresentationView } from '../../blocks'
+import { setBlockView } from '../../blocks/commands/blockCommands'
 import {
 	addBehaviorTreeFailureRecovery,
 	applyBehaviorTreeXml,
@@ -39,6 +41,7 @@ import {
 import { planBehaviorInsert } from '../behaviorLibraryModel'
 import { projectBehaviorTree } from '../behaviorTreeProjection'
 import { isBtNodeDisabled, type BtDocument, type BtInsertTemplate, type BtNode, type BtTree } from '../btcppXml'
+import { BtAutoLayoutControl } from './BtAutoLayoutControl'
 import '../../blocks/ui/block-inspector.css'
 import './behavior-tree-inspector.css'
 
@@ -105,6 +108,31 @@ function ViewSection({ props, set, onTidy }: {
 						]} />
 				</>
 			) : null}
+			{props.projection === 'process' ? (
+				// Process-view-only debug aid Zach asked to keep, not a temporary
+				// flag: "Show on hover" is the Flowstate-matching default; "Show
+				// all" is helpful while debugging a layout. Tree view is untouched
+				// and has no equivalent control — it always shows every target.
+				<Segmented label="Attachment points" value={props.insertVisibility} testId="bt-view-inserts" onChange={(insertVisibility) => set({ insertVisibility })}
+					options={[{ value: 'hover', label: 'Show on hover' }, { value: 'all', label: 'Show all' }]} />
+			) : null}
+			{/* One knob for both views' layout gaps (`spacingScale`): Tree view's
+			    level/sibling gaps, Process view's unit. Always visible — spacing
+			    applies whatever the data lens — and styled exactly like the
+			    Control wires opacity row below, the section's other range input. */}
+			<label className="bt-inspector__row">
+				<span className="bt-inspector__rowLabel">Spacing</span>
+				<input
+					type="range"
+					min={0.5}
+					max={2}
+					step={0.1}
+					value={props.spacingScale}
+					aria-label="Layout spacing"
+					data-testid="bt-view-spacing"
+					onChange={(event) => set({ spacingScale: Number(event.target.value) })}
+				/>
+			</label>
 			<Segmented label="Data" value={props.dataLens} testId="bt-view-lens" onChange={(dataLens) => set({ dataLens })}
 				options={[{ value: 'none', label: 'None' }, { value: 'blackboard', label: 'Blackboard' }, { value: 'dataflow', label: 'Dataflow' }]} />
 			{props.dataLens === 'blackboard' ? (
@@ -127,9 +155,15 @@ function ViewSection({ props, set, onTidy }: {
 				</label>
 			) : null}
 			<div className="bt-inspector__actions">
-				<button type="button" className="bt-inspector__action" data-testid="bt-action-tidy" disabled={Object.keys(props.offsets).length === 0} onClick={onTidy}>
-					Tidy
-				</button>
+				{/* One auto-layout contract for both diagram views since the
+				    2026-09-06 Process drag port — the bare Tidy button Process
+				    kept while it had no reorder story is gone with the story. */}
+				<BtAutoLayoutControl
+					arrangement={props.arrangement}
+					offsetCount={Object.keys(props.offsets).length}
+					onSetArrangement={(arrangement) => set({ arrangement })}
+					onArrangeNow={onTidy}
+				/>
 			</div>
 		</section>
 	)
@@ -143,6 +177,7 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 		if (!result.ok) setNotice(result.reason)
 	}
 	const isControl = isBtControlNode(node)
+	const leafBlock = !isControl && selection.child && isBlockShape(selection.child) ? selection.child : null
 	const isRoot = node.parentPath === null
 	const siblings = node.parentPath ? Number.parseInt(node.path.split('.').pop() ?? '0', 10) : 0
 	return (
@@ -153,6 +188,27 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 				<span className="bt-inspector__id">{node.subtreeId ?? node.id}</span>
 				<span className="bt-inspector__path">{node.path}</span>
 			</div>
+			{leafBlock ? (
+				// Item 2: the ordinary Block view pill, scoped to this one leaf. The
+				// region's own View section still sets the DEFAULT face for every
+				// leaf (`nodeFace`); picking Expanded here is the escape hatch that
+				// pins this occurrence away from that default — recorded on the
+				// region as a `nodeViewOverrides` entry (`installBehaviorTreeRegions.
+				// ts`'s `recordNodeViewOverride`) so the projection stops fighting it,
+				// and read back by the Tree/Process layouts so siblings, rails and
+				// wires react to its real, possibly hand-resized box.
+				<Segmented<BlockPresentationView>
+					label="View"
+					value={leafBlock.props.view === 'value' ? 'simple' : leafBlock.props.view}
+					testId="bt-node-view"
+					onChange={(view) => void setBlockView(editor, leafBlock.id, view)}
+					options={BLOCK_PRESENTATION_VIEWS.map((value) => ({
+						value,
+						label: value === 'simple' ? 'Simple' : value === 'port' ? 'Ports' : 'Expanded',
+						title: value === 'expanded' ? 'A frame with room for this one occurrence to grow' : undefined,
+					}))}
+				/>
+			) : null}
 			<label className="block-inspector__field">
 				<span>Name</span>
 				<LiveTextInput

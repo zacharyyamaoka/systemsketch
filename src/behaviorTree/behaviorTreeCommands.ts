@@ -107,7 +107,7 @@ export function childShapeForPath(editor: Editor, regionId: TLShapeId, path: str
 /* --------------------------------- views ---------------------------------- */
 
 export type BtViewPatch = Partial<Pick<BehaviorTreeShapeProps,
-	'projection' | 'orientation' | 'nodeFace' | 'controlFace' | 'edgeStyle' | 'dataLens' | 'blackboardLayout' | 'controlWireOpacity' | 'title' | 'treeId'
+	'projection' | 'orientation' | 'nodeFace' | 'controlFace' | 'edgeStyle' | 'dataLens' | 'blackboardLayout' | 'controlWireOpacity' | 'spacingScale' | 'title' | 'treeId' | 'insertVisibility' | 'arrangement'
 >>
 
 export function setBehaviorTreeView(editor: Editor, regionId: TLShapeId, patch: BtViewPatch, historyLabel = 'behavior tree view'): boolean {
@@ -151,6 +151,81 @@ export function applyBehaviorTreeXml(editor: Editor, regionId: TLShapeId, xml: s
 	return { ok: true, error: null }
 }
 
+/* ------------------------------- step inside -------------------------------
+ *
+ * A `<SubTree>` leaf names another `<BehaviorTree ID>` of the SAME document
+ * (`btcppXml.ts` already parses every tree of a file, and a region already
+ * shows whichever one its own `treeId` names). Stepping into a SubTree leaf
+ * is therefore not a new isolation mechanism — `src/depth`'s scope stack is
+ * built for a shape whose children are OTHER SHAPES parented to it, which a
+ * SubTree leaf is not (its "contents" are a sibling <BehaviorTree>, not a
+ * child of this leaf) — it is the SAME region re-pointed at that tree, with
+ * `treeStack` remembering the `treeId` to restore on Step out. That is also
+ * why Zach's "its contextual menu should display the options to configure
+ * everything inside just like the behaviour tree region contextual menu has"
+ * needs no separate work: after stepping in, the selected thing IS the
+ * region — `getSelectedBehaviorTree`/`EditorBehaviorTreeInspector` already
+ * render its full View section for whatever `treeId` it currently holds.
+ */
+
+/** The Sub Tree leaf at `path`, if its `SubTree ID` resolves to a real tree in this document. */
+export function behaviorTreeSubtreeLeaf(editor: Editor, shape: TLShape): { region: BehaviorTreeShape; node: BtNode } | null {
+	const meta = readBtChildMeta(shape)
+	if (!meta || meta.btRole !== 'node' || !isShapeId(shape.parentId)) return null
+	const region = editor.getShape(shape.parentId)
+	if (!isBehaviorTreeShape(region)) return null
+	const document = parseBehaviorTreeXml(region.props.xml)
+	const tree = selectTree(document, region.props.treeId)
+	const node = tree?.nodes.find((candidate) => candidate.path === meta[BT_META_PATH])
+	if (!node || node.kind !== 'subtree' || !node.subtreeId) return null
+	if (!document.trees.some((candidate) => candidate.id === node.subtreeId)) return null
+	return { region, node }
+}
+
+/**
+ * Step into a Sub Tree leaf: the region swaps to the tree it names and
+ * remembers how to get back. Selecting the region afterward (rather than
+ * Depth's usual deselect) is deliberate — Zach wants the region's own
+ * options visible the moment he steps in, not a second click to find them.
+ */
+export function stepIntoBehaviorTreeSubtree(editor: Editor, regionId: TLShapeId, path: string): BtCommandResult {
+	const region = regionOrFail(editor, regionId)
+	if (!region) return { ok: false, reason: 'No Behavior Tree' }
+	const document = parseBehaviorTreeXml(region.props.xml)
+	const tree = selectTree(document, region.props.treeId)
+	const node = tree?.nodes.find((candidate) => candidate.path === path)
+	if (!node || node.kind !== 'subtree' || !node.subtreeId) return { ok: false, reason: 'Not a Sub Tree node' }
+	if (!document.trees.some((candidate) => candidate.id === node.subtreeId)) return { ok: false, reason: `${node.subtreeId} is not defined in this file` }
+	const subtreeId = node.subtreeId
+	editor.run(() => {
+		editor.markHistoryStoppingPoint('step into subtree')
+		editor.updateShape<BehaviorTreeShape>({
+			id: region.id,
+			type: BEHAVIOR_TREE_SHAPE_TYPE,
+			props: { ...region.props, treeId: subtreeId, treeStack: [...region.props.treeStack, region.props.treeId] },
+		})
+		reconcileBehaviorTree(editor, region.id)
+		editor.select(region.id)
+	})
+	return { ok: true, path: '0', shapeId: region.id }
+}
+
+/** Step out one level: restore the `treeId` this region showed before the matching Step in. */
+export function stepOutOfBehaviorTreeSubtree(editor: Editor, regionId: TLShapeId): boolean {
+	const region = editor.getShape(regionId)
+	if (!isBehaviorTreeShape(region)) return false
+	if (region.props.treeStack.length === 0) return false
+	const treeStack = [...region.props.treeStack]
+	const treeId = treeStack.pop()!
+	editor.run(() => {
+		editor.markHistoryStoppingPoint('step out of subtree')
+		editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, treeId, treeStack } })
+		reconcileBehaviorTree(editor, region.id)
+		editor.select(region.id)
+	})
+	return true
+}
+
 /* ------------------------------- structure -------------------------------- */
 
 export type BtCommandResult = { ok: true; path: string; shapeId: TLShapeId | null } | { ok: false; reason: string }
@@ -181,7 +256,16 @@ function applyEdit(editor: Editor, region: BehaviorTreeShape, result: BtEditResu
 			const to = remap[path]
 			if (to !== undefined) offsets[to] = offset
 		}
-		editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, xml: result.xml, offsets } })
+		// A structural edit shifts sibling indices, so an Expanded leaf's own
+		// override (item 2) must follow its path the same way its offset does —
+		// otherwise the override silently orphans and the leaf that lands at the
+		// vacated path inherits it instead.
+		const nodeViewOverrides: BehaviorTreeShapeProps['nodeViewOverrides'] = {}
+		for (const [path, override] of Object.entries(region.props.nodeViewOverrides)) {
+			const to = remap[path]
+			if (to !== undefined) nodeViewOverrides[to] = override
+		}
+		editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, xml: result.xml, offsets, nodeViewOverrides } })
 		reconcileBehaviorTree(editor, region.id)
 		const target = childShapeForPath(editor, region.id, selectPath ?? result.path)
 		if (target) {

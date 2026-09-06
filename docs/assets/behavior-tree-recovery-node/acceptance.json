@@ -1,0 +1,160 @@
+{
+  "generatedAt": "2026-09-06T23:38:05.523Z",
+  "passed": 18,
+  "total": 18,
+  "results": [
+    {
+      "id": "process.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "process.failure-chip",
+      "label": "the primary→recovery Failure chip paints once",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "process.retry-chip-text",
+      "label": "the loop-back carries a Retry ×N chip with the real port value",
+      "observed": [
+        "Retry ×3"
+      ],
+      "desired": [
+        "Retry ×3"
+      ],
+      "ok": true
+    },
+    {
+      "id": "process.retryloop-edge",
+      "label": "exactly one retryLoop-kind edge paints",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "process.retryloop-dashed",
+      "label": "the loop-back wire is dashed, not a plain solid control wire",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "tree.shows-recovery-node",
+      "label": "Tree view labels the RecoveryNode occurrence",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "tree.shows-both-children",
+      "label": "Tree view draws both real children — the primary action and the recovery step's own Sequence",
+      "observed": [
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "menu.recovery-row-present",
+      "label": "a \"Recovery\" row exists in Control flow, distinct from \"Fallback\"",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "menu.recovery-row-detail",
+      "label": "its detail names the loop-back, not a Fallback synonym",
+      "observed": "Loop · one-step fix, then retry",
+      "desired": "Loop · one-step fix, then retry",
+      "ok": true
+    },
+    {
+      "id": "menu.fallback-still-present",
+      "label": "Fallback keeps its own separate row (not merged/replaced)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "insert.creates-recoverynode",
+      "label": "choosing \"Recovery\" writes a real <RecoveryNode> tag",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "insert.default-retries",
+      "label": "the fresh node carries the menu's own default retry count",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "insert.primary-added",
+      "label": "the primary step landed as RecoveryNode's first (and so far only) child",
+      "observed": {
+        "id": "RecoveryNode",
+        "controlKind": "recoveryLoop",
+        "childCount": 1
+      },
+      "desired": {
+        "id": "RecoveryNode",
+        "controlKind": "recoveryLoop",
+        "childCount": 1
+      },
+      "ok": true
+    },
+    {
+      "id": "prompt.recovery-still-required",
+      "label": "a persistent prompt to add the required recovery step is showing",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "insert.recovery-added",
+      "label": "the recovery step landed as RecoveryNode's second child, completing the arity",
+      "observed": {
+        "id": "RecoveryNode",
+        "controlKind": "recoveryLoop",
+        "childCount": 2
+      },
+      "desired": {
+        "id": "RecoveryNode",
+        "controlKind": "recoveryLoop",
+        "childCount": 2
+      },
+      "ok": true
+    },
+    {
+      "id": "insert.no-third-prompt",
+      "label": "the \"add recovery\" prompt is gone now that the node is complete",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "render.retryloop-after-real-build",
+      "label": "a real loop-back wire now paints for a node built entirely through the UI",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

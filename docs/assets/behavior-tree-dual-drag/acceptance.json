@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-09-06T23:44:30.403Z",
+  "passed": 33,
+  "total": 33,
+  "results": [
+    {
+      "id": "setup.tidy",
+      "label": "Auto layout starts on",
+      "observed": "tidy",
+      "desired": "tidy",
+      "ok": true
+    },
+    {
+      "id": "arrow.native-owner",
+      "label": "mid-drag the select tool is translating and the dnd signal is null — tldraw owns the arrow",
+      "observed": [
+        {
+          "path": "select.translating",
+          "dnd": null
+        }
+      ],
+      "desired": [
+        {
+          "path": "select.translating",
+          "dnd": null
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "arrow.moved",
+      "label": "the arrow actually moved with the pointer",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "arrow.xml-untouched",
+      "label": "dragging the arrow over the diagram never touches the tree",
+      "observed": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "desired": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "ok": true
+    },
+    {
+      "id": "arrow.no-offsets",
+      "label": "no node recorded a free offset either",
+      "observed": {},
+      "desired": {},
+      "ok": true
+    },
+    {
+      "id": "node.dnd-owner",
+      "label": "mid-drag the select tool is idle and the dnd signal names this region + node — dnd-kit owns the gesture",
+      "observed": [
+        {
+          "path": "select.idle",
+          "region": "shape:bt-dual-drag",
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
+        },
+        {
+          "path": "select.idle",
+          "region": "shape:bt-dual-drag",
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
+        }
+      ],
+      "desired": [
+        {
+          "path": "select.idle",
+          "region": "shape:bt-dual-drag",
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
+        },
+        {
+          "path": "select.idle",
+          "region": "shape:bt-dual-drag",
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "node.reordered",
+      "label": "the drag committed a live reorder",
+      "observed": [
+        "CloseGrip",
+        "SubTree",
+        "Fallback",
+        "MoveHome",
+        "Parallel"
+      ],
+      "desired": [
+        "CloseGrip",
+        "SubTree",
+        "Fallback",
+        "MoveHome",
+        "Parallel"
+      ],
+      "ok": true
+    },
+    {
+      "id": "node.signal-cleared",
+      "label": "the dnd signal clears on release",
+      "observed": null,
+      "desired": null,
+      "ok": true
+    },
+    {
+      "id": "node.state-at-rest",
+      "label": "the select tool is idle at rest",
+      "observed": "select.idle",
+      "desired": "select.idle",
+      "ok": true
+    },
+    {
+      "id": "node.xml-changed",
+      "label": "the reorder is a real structural change",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "click.selects",
+      "label": "the click selected the node",
+      "observed": [
+        "shape:pz0lje2rdN9WaVA9x0sCI"
+      ],
+      "desired": [
+        "shape:pz0lje2rdN9WaVA9x0sCI"
+      ],
+      "ok": true
+    },
+    {
+      "id": "click.no-dnd",
+      "label": "a motionless press never touches dnd-kit",
+      "observed": null,
+      "desired": null,
+      "ok": true
+    },
+    {
+      "id": "escape.was-dragging",
+      "label": "the gesture was a live dnd drag before Escape",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "escape.signal-cleared",
+      "label": "Escape clears the dnd signal",
+      "observed": null,
+      "desired": null,
+      "ok": true
+    },
+    {
+      "id": "escape.xml-restored",
+      "label": "Escape restores the exact pre-drag tree",
+      "observed": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "desired": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "ok": true
+    },
+    {
+      "id": "off.native-owner",
+      "label": "with Auto layout off, tldraw translates and the dnd signal stays null",
+      "observed": [
+        {
+          "path": "select.translating",
+          "dnd": null
+        }
+      ],
+      "desired": [
+        {
+          "path": "select.translating",
+          "dnd": null
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "off.offset-recorded",
+      "label": "the drag records a free offset, exactly as before",
+      "observed": [
+        "0.3"
+      ],
+      "desired": [
+        "0.3"
+      ],
+      "ok": true
+    },
+    {
+      "id": "off.xml-untouched",
+      "label": "a free drag never touches the XML",
+      "observed": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "desired": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "ok": true
+    },
+    {
+      "id": "toggle.dnd-after-rapid",
+      "label": "after a rapid off/on burst ending tidy, a node drag is dnd-owned again",
+      "observed": [
+        {
+          "path": "select.idle",
+          "dnd": true
+        }
+      ],
+      "desired": [
+        {
+          "path": "select.idle",
+          "dnd": true
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "toggle.no-stuck-signal",
+      "label": "the signal is clear at rest",
+      "observed": null,
+      "desired": null,
+      "ok": true
+    },
+    {
+      "id": "midflip.was-dnd",
+      "label": "the gesture started dnd-owned",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "midflip.signal-cleared",
+      "label": "the session completed and cleared despite the mid-drag flip",
+      "observed": null,
+      "desired": null,
+      "ok": true
+    },
+    {
+      "id": "midflip.state-at-rest",
+      "label": "the select tool is idle at rest",
+      "observed": "select.idle",
+      "desired": "select.idle",
+      "ok": true
+    },
+    {
+      "id": "multi.native-owner",
+      "label": "a multi-select drag stays native (translating, no dnd signal)",
+      "observed": [
+        {
+          "path": "select.translating",
+          "dnd": null
+        }
+      ],
+      "desired": [
+        {
+          "path": "select.translating",
+          "dnd": null
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "multi.xml-untouched",
+      "label": "a glide commits no reorder",
+      "observed": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "desired": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n",
+      "ok": true
+    },
+    {
+      "id": "multi.settles-back",
+      "label": "the glided nodes snap back onto the tidy layout on release",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "overlay.absent-by-default",
+      "label": "with the Dev toggle off (the default) the overlay does not exist",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "overlay.columns",
+      "label": "at least one depth strip shows two column zones side by side (parallel sibling lists)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "overlay.nested-rows",
+      "label": "zones exist at several depths (nested lists paint as rows of columns)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "overlay.padded-slot",
+      "label": "the Expanded leaf's list paints visibly padded virtual slots",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "overlay.live-during-drag",
+      "label": "mid-drag the overlay paints the live session's geometry with the hysteresis container highlighted",
+      "observed": {
+        "present": 1,
+        "activeZones": 1,
+        "dnd": true
+      },
+      "desired": {
+        "present": 1,
+        "activeZones": 1,
+        "dnd": true
+      },
+      "ok": true
+    },
+    {
+      "id": "overlay.off-again",
+      "label": "toggling off removes the overlay entirely",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

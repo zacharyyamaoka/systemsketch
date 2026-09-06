@@ -17,6 +17,7 @@ import {
 	valueBlockSize,
 	type BlockPort,
 	type BlockShapeProps,
+	type BlockView,
 } from '../blocks'
 import { createUnbundleProps } from '../blocks/stockBlocks'
 import {
@@ -34,6 +35,7 @@ import {
 	type BehaviorTreeShapeProps,
 	type BtChildRole,
 	type BtControlShape,
+	type BtNodeViewOverride,
 	type BtPoint,
 	type BtRect,
 	type BtScene,
@@ -146,10 +148,23 @@ function projectedBlockDefaults(): BlockShapeProps {
 	return withoutDefinitionId as BlockShapeProps
 }
 
-function leafBlockProps(node: BtNode, rect: BtRect, face: 'simple' | 'port'): BlockShapeProps {
+/**
+ * `override` is the escape hatch from item 2: a leaf a person set to Expanded
+ * (or hand-resized in Port view) from the ordinary Block view pill. Its
+ * `view` wins over the region's own `nodeFace`, and its box — already the
+ * size the layout gave this leaf, via `ProcessLayoutOptions.nodeViewOverrides`
+ * — replaces `rect` so the child shape lands exactly where the wires expect.
+ */
+function leafBlockProps(node: BtNode, rect: BtRect, face: 'simple' | 'port', override?: BtNodeViewOverride): BlockShapeProps {
 	const base = projectedBlockDefaults()
-	const ports = face === 'port' ? leafPorts(node) : { inputs: [], outputs: [] }
-	const views = { ...base.views, simple: { w: rect.w, h: rect.h }, port: { w: rect.w, h: rect.h } }
+	const view = (override?.view as BlockView) || face
+	const ports = view === 'port' ? leafPorts(node) : { inputs: [], outputs: [] }
+	const views = {
+		...base.views,
+		simple: { w: rect.w, h: rect.h },
+		port: { w: rect.w, h: rect.h },
+		...(view === 'expanded' ? { expanded: { w: rect.w, h: rect.h } } : {}),
+	}
 	return {
 		...base,
 		w: rect.w,
@@ -158,7 +173,7 @@ function leafBlockProps(node: BtNode, rect: BtRect, face: 'simple' | 'port'): Bl
 		description: node.reserved.find(([name]) => name === '_description')?.[1] ?? '',
 		blockType: btLeafBlockType(node),
 		icon: btLeafIcon(node),
-		view: face,
+		view,
 		views,
 		showDescription: false,
 		portLayout: 'inline',
@@ -176,11 +191,26 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 	// with the port face, and left-to-right, whatever the stored choices say.
 	const nodeFace = lens === 'dataflow' ? 'port' : props.nodeFace
 	const orientation = lens === 'dataflow' ? 'right' : props.orientation
-	const layoutOptions = { orientation, nodeFace, controlFace: props.controlFace, offsets: props.offsets }
+	const layoutOptions = {
+		orientation,
+		nodeFace,
+		controlFace: props.controlFace,
+		offsets: props.offsets,
+		nodeViewOverrides: props.nodeViewOverrides,
+		spacing: props.spacingScale,
+	}
 	const emptyTree: BtTree = { id: props.treeId, root: null, nodes: [] }
+	// The auto-layout toggle (item 6, `arrangement`), one contract for BOTH
+	// views since the 2026-09-06 Process port: 'tidy' means a node's position
+	// is always exactly what the layout says — never a person's free offset —
+	// and a drag is a reorder request (`processDragList.ts` /
+	// `dragListReorder.ts`); 'free' keeps the classic offset behaviour.
+	// Offsets recorded earlier stay stored either way and paint again the
+	// moment the toggle goes back to 'free'.
+	const freeOffsets = props.arrangement === 'free' ? props.offsets : undefined
 	const scene = props.projection === 'process'
-		? layoutProcess(tree ?? emptyTree, layoutOptions)
-		: layoutTree(tree ?? emptyTree, { ...layoutOptions, edgeStyle: props.edgeStyle })
+		? layoutProcess(tree ?? emptyTree, { ...layoutOptions, offsets: freeOffsets })
+		: layoutTree(tree ?? emptyTree, { ...layoutOptions, offsets: freeOffsets, edgeStyle: props.edgeStyle })
 
 	let dataflow: BtDataflow | null = null
 	const cables: BtDesiredCable[] = []
@@ -257,7 +287,16 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 			})
 			continue
 		}
-		children.push({ path: entry.path, role: 'node', type: 'block', x: rect.x, y: rect.y, opacity, node: entry.node, props: leafBlockProps(entry.node, rect, nodeFace) })
+		children.push({
+			path: entry.path,
+			role: 'node',
+			type: 'block',
+			x: rect.x,
+			y: rect.y,
+			opacity,
+			node: entry.node,
+			props: leafBlockProps(entry.node, rect, nodeFace, props.nodeViewOverrides[entry.path]),
+		})
 	}
 	for (const key of scene.keys) {
 		const rect = { ...key.rect, x: key.rect.x + origin.x, y: key.rect.y + origin.y }
