@@ -1,5 +1,6 @@
 import {
 	Editor,
+	createShapeId,
 	createTLStore,
 	defaultBindingUtils,
 	defaultAddFontsFromNode,
@@ -32,6 +33,7 @@ import {
 	isBranchShape,
 } from '../branch'
 import { LoopShapeUtil, detachLoopToPrimitives, isLoopShape } from '../loop'
+import { CODE_GUTTER_WIDTH, CODE_SIDE_PADDING, CodeShapeUtil, codeFontPixels, isCodeShape, type CodeShape } from '../code'
 import {
 	CONNECTION_SHAPE_TYPE,
 	blockConnectionBindingUtils,
@@ -68,6 +70,7 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		BranchShapeUtil,
 		BranchArmShapeUtil,
 		LoopShapeUtil,
+		CodeShapeUtil,
 		...blockConnectionShapeUtils,
 	],
 )
@@ -88,6 +91,48 @@ const PORTABLE_COLOR_FALLBACKS: Readonly<Record<string, string>> = {
 	'light-yellow': 'yellow',
 	'light-teal': 'light-green',
 	'light-pink': 'light-violet',
+}
+
+/**
+ * Stock tldraw has no CodeMirror document shape. Freeze its authored text into
+ * two editable stock primitives in the isolated export instead of leaking a
+ * custom record into a `.tldr` another tldraw app cannot open.
+ */
+function detachCodeToPrimitives(editor: Editor, code: CodeShape): void {
+	const cardId = createShapeId()
+	const textId = createShapeId()
+	const inset = CODE_SIDE_PADDING + (code.props.showLineNumbers ? CODE_GUTTER_WIDTH : 0)
+	editor.createShapes([
+		{
+			id: cardId,
+			type: 'geo',
+			parentId: code.parentId,
+			x: code.x,
+			y: code.y,
+			props: {
+				geo: 'rectangle', w: code.props.w, h: code.props.h,
+				color: 'black', fill: 'solid', dash: 'solid', size: 's',
+			},
+		},
+		{
+			id: textId,
+			type: 'text',
+			parentId: code.parentId,
+			x: code.x + inset,
+			y: code.y + 12,
+			props: {
+				richText: toRichText(code.props.code),
+				autoSize: false,
+				color: 'white',
+				font: 'mono',
+				scale: codeFontPixels(code.props.size, code.props.fontScale) / 18,
+				size: 's',
+				textAlign: 'start',
+				w: Math.max(1, code.props.w - inset - CODE_SIDE_PADDING),
+			},
+		},
+	])
+	editor.deleteShape(code.id)
 }
 
 function blockDepth(editor: Editor, shape: TLShape): number {
@@ -273,6 +318,9 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 			}
 			for (const loop of exportEditor.getCurrentPageShapes().filter(isLoopShape)) {
 				detachLoopToPrimitives(exportEditor, loop.id)
+			}
+			for (const code of exportEditor.getCurrentPageShapes().filter(isCodeShape)) {
+				detachCodeToPrimitives(exportEditor, code)
 			}
 			normalizeCustomGeometries(exportEditor)
 		}

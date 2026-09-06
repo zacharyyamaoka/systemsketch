@@ -117,7 +117,8 @@ button {
 .systemsketch-library-browser,
 .systemsketch-settings,
 .systemsketch-workspace-dialog,
-.block-inspector {
+.block-inspector,
+.systemsketch-block-canvas {
   scrollbar-width: thin;
   scrollbar-color: var(--ss-border-strong) transparent;
 }
@@ -128,7 +129,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar,
 .systemsketch-settings ::-webkit-scrollbar,
 .systemsketch-workspace-dialog ::-webkit-scrollbar,
-.block-inspector ::-webkit-scrollbar {
+.block-inspector ::-webkit-scrollbar,
+.systemsketch-block-canvas ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
@@ -139,7 +141,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-track,
 .systemsketch-settings ::-webkit-scrollbar-track,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-track,
-.block-inspector ::-webkit-scrollbar-track {
+.block-inspector ::-webkit-scrollbar-track,
+.systemsketch-block-canvas ::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -149,7 +152,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-thumb,
 .systemsketch-settings ::-webkit-scrollbar-thumb,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-thumb,
-.block-inspector ::-webkit-scrollbar-thumb {
+.block-inspector ::-webkit-scrollbar-thumb,
+.systemsketch-block-canvas ::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   border-radius: 999px;
   /* `background-clip: content-box` is what turns the 10px track into a 4px
@@ -164,7 +168,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-thumb:hover,
 .systemsketch-settings ::-webkit-scrollbar-thumb:hover,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-thumb:hover,
-.block-inspector ::-webkit-scrollbar-thumb:hover {
+.block-inspector ::-webkit-scrollbar-thumb:hover,
+.systemsketch-block-canvas ::-webkit-scrollbar-thumb:hover {
   background: var(--ss-text-muted);
   background-clip: content-box;
 }
@@ -175,7 +180,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-corner,
 .systemsketch-settings ::-webkit-scrollbar-corner,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-corner,
-.block-inspector ::-webkit-scrollbar-corner {
+.block-inspector ::-webkit-scrollbar-corner,
+.systemsketch-block-canvas ::-webkit-scrollbar-corner {
   background: transparent;
 }
 

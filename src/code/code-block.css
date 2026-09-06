@@ -1,0 +1,220 @@
+/*
+ * Code block — CodeMirror inside a stock tldraw shape.
+ *
+ * Everything is painted from `--ss-*` tokens so the document follows every
+ * board theme (the house rule: tokens on the container, never a second
+ * palette). The unselected block is deliberately a calm code surface with NO
+ * persistent chrome — the babble record scored the always-visible header
+ * direction (V4) a 2/5 on "readable code, quiet canvas" and rejected it, so
+ * language / width metadata live only in the selection menu and resize HUD.
+ */
+
+.code-block-canvas {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	overflow: hidden;
+	border: 1px solid var(--ss-border);
+	border-radius: 10px;
+	background: var(--ss-code-surface);
+	color: var(--ss-code-text);
+	pointer-events: all;
+}
+
+.code-block-canvas[data-editing='true'] {
+	border-color: var(--ss-accent);
+}
+
+.code-block-canvas__editor {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+}
+
+.code-block-canvas__editor .cm-editor {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: 100%;
+	background: transparent;
+	color: var(--ss-code-text);
+	outline: none;
+}
+
+.code-block-canvas__editor .cm-scroller {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	line-height: 1.45;
+	padding: 10px 0;
+}
+
+.code-block-canvas__editor .cm-content {
+	padding: 0 16px;
+	caret-color: var(--ss-accent);
+}
+
+.code-block-canvas__editor .cm-cursor,
+.code-block-canvas__editor .cm-dropCursor {
+	border-left-color: var(--ss-accent);
+}
+
+.code-block-canvas__editor .cm-gutters {
+	background: transparent;
+	color: var(--ss-text-faint);
+	border-right: 1px solid var(--ss-border);
+	min-width: 36px;
+	justify-content: flex-end;
+}
+
+.code-block-canvas__editor .cm-lineNumbers .cm-gutterElement {
+	padding: 0 8px 0 6px;
+}
+
+.code-block-canvas[data-editing='true'] .cm-activeLine {
+	background: color-mix(in srgb, var(--ss-accent) 7%, transparent);
+}
+
+.code-block-canvas[data-editing='true'] .cm-activeLineGutter {
+	background: color-mix(in srgb, var(--ss-accent) 7%, transparent);
+	color: var(--ss-text-muted);
+}
+
+.code-block-canvas__editor .cm-selectionBackground,
+.code-block-canvas__editor .cm-focused .cm-selectionBackground,
+.code-block-canvas__editor ::selection {
+	background: color-mix(in srgb, var(--ss-accent) 30%, transparent);
+}
+
+/* --------------------------- syntax vocabulary ---------------------------
+ * `classHighlighter` emits stable `tok-*` classes; the palette is the same
+ * restrained accent-mixed scheme the Type primitive's spans use, so a board's
+ * code reads as one family across light and dark themes rather than a third
+ * editor theme pasted onto the canvas. */
+
+.code-block-canvas .tok-keyword,
+.code-block-canvas .tok-operatorKeyword,
+.code-block-canvas .tok-controlKeyword,
+.code-block-canvas .tok-definitionKeyword,
+.code-block-canvas .tok-moduleKeyword {
+	color: color-mix(in srgb, var(--ss-accent) 78%, var(--ss-code-text));
+	font-weight: 600;
+}
+
+.code-block-canvas .tok-string,
+.code-block-canvas .tok-docString,
+.code-block-canvas .tok-character,
+.code-block-canvas .tok-attributeValue {
+	color: color-mix(in srgb, var(--ss-success) 62%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-number,
+.code-block-canvas .tok-integer,
+.code-block-canvas .tok-float,
+.code-block-canvas .tok-bool,
+.code-block-canvas .tok-atom,
+.code-block-canvas .tok-null,
+.code-block-canvas .tok-unit {
+	color: color-mix(in srgb, var(--ss-warning) 58%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-comment,
+.code-block-canvas .tok-lineComment,
+.code-block-canvas .tok-blockComment,
+.code-block-canvas .tok-meta {
+	color: var(--ss-text-muted);
+	font-style: italic;
+}
+
+.code-block-canvas .tok-typeName,
+.code-block-canvas .tok-className,
+.code-block-canvas .tok-namespace {
+	color: color-mix(in srgb, var(--ss-accent) 55%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-propertyName,
+.code-block-canvas .tok-attributeName,
+.code-block-canvas .tok-labelName {
+	color: color-mix(in srgb, var(--ss-danger) 42%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-function,
+.code-block-canvas .tok-macroName {
+	color: var(--ss-code-text);
+	font-weight: 600;
+}
+
+.code-block-canvas .tok-operator,
+.code-block-canvas .tok-punctuation,
+.code-block-canvas .tok-separator,
+.code-block-canvas .tok-bracket {
+	color: var(--ss-text-muted);
+}
+
+.code-block-canvas .tok-invalid {
+	color: var(--ss-danger);
+}
+
+/* --------------------- selection-menu contributions ---------------------
+ * The controls reuse the appearance pill's own classes so a Code selection's
+ * pill is indistinguishable from any other shape's; only the pressed state of
+ * the line-number toggle and the compact width combobox are Code-specific. */
+
+.code-selection-controls__lines[data-active] {
+	color: var(--ss-accent);
+}
+
+/* A "48 ch" value never needs the Font-size combobox's 144px; keep the
+ * trigger to its content, matching the pill's icon triggers. */
+.systemsketch-appearance__trigger[data-control='codeWidth'] {
+	width: auto;
+	min-width: 64px;
+}
+
+.code-width-custom {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 6px;
+	padding: 6px 8px 2px;
+	border-top: 1px solid var(--ss-border-inverse);
+	font-size: 11px;
+	color: var(--ss-text-inverse);
+}
+
+.code-width-custom span:first-child {
+	flex: 1;
+}
+
+.code-width-custom input {
+	width: 56px;
+	padding: 4px 6px;
+	border: 1px solid var(--ss-border-inverse);
+	border-radius: 4px;
+	background: var(--ss-surface-inverse-hover);
+	color: var(--ss-text-inverse);
+	font: inherit;
+	text-align: right;
+}
+
+.code-width-custom input:focus {
+	outline: none;
+	border-color: var(--ss-accent);
+}
+
+.code-width-custom__unit {
+	color: color-mix(in srgb, var(--ss-text-inverse) 65%, transparent);
+}
+
+/* ------------------------------ resize HUD ------------------------------ */
+
+.code-resize-hud {
+	position: absolute;
+	z-index: 10;
+	padding: 3px 8px;
+	border-radius: 6px;
+	background: var(--ss-surface-inverse);
+	color: var(--ss-text-inverse);
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+	white-space: nowrap;
+	box-shadow: var(--ss-shadow-2);
+}

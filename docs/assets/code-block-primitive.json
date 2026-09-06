@@ -1,0 +1,198 @@
+[
+  {
+    "id": "TOOL-1",
+    "label": "the System family menu offers Code",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CREATE-1",
+    "label": "a new Code block is a Python CodeMirror document with line numbers, on the shared size style",
+    "observed": {
+      "language": "python",
+      "size": "m",
+      "lines": true,
+      "chars": true
+    },
+    "desired": {
+      "language": "python",
+      "size": "m",
+      "lines": true,
+      "chars": true
+    },
+    "ok": true
+  },
+  {
+    "id": "CREATE-2",
+    "label": "the unselected-state body carries no persistent header chrome",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MENU-1",
+    "label": "the Code selection contributes to the ONE shared pill — no second floating menu",
+    "observed": {
+      "menus": 1,
+      "legacy": 0,
+      "language": true,
+      "size": true,
+      "lines": true,
+      "width": true
+    },
+    "desired": {
+      "menus": 1,
+      "legacy": 0,
+      "language": true,
+      "size": true,
+      "lines": true,
+      "width": true
+    },
+    "ok": true
+  },
+  {
+    "id": "LANG-1",
+    "label": "the appearance language row drives the live CodeMirror mode",
+    "observed": "javascript",
+    "desired": "javascript",
+    "ok": true
+  },
+  {
+    "id": "SIZE-1",
+    "label": "the size rows are the standard Small/Medium/Large/Extra large vocabulary",
+    "observed": "s,m,l,xl",
+    "desired": "s,m,l,xl",
+    "ok": true
+  },
+  {
+    "id": "SIZE-2",
+    "label": "a type-scale change preserves the authored character measure and re-derives pixels",
+    "observed": {
+      "chars": true,
+      "grew": true
+    },
+    "desired": {
+      "chars": true,
+      "grew": true
+    },
+    "ok": true
+  },
+  {
+    "id": "LINES-1",
+    "label": "the gutter toggle keeps the character width while removing only the gutter",
+    "observed": {
+      "chars": true,
+      "shrank": true
+    },
+    "desired": {
+      "chars": true,
+      "shrank": true
+    },
+    "ok": true
+  },
+  {
+    "id": "WIDTH-1",
+    "label": "width offers the preset rows in the same list idiom as every other combobox",
+    "observed": "32,48,64,80",
+    "desired": "32,48,64,80",
+    "ok": true
+  },
+  {
+    "id": "WIDTH-2",
+    "label": "exact entry persists a 72-character measure",
+    "observed": 72,
+    "desired": 72,
+    "ok": true
+  },
+  {
+    "id": "RESIZE-1",
+    "label": "the selection exposes stock resize bounds",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "RESIZE-2",
+    "label": "the drag runs in tldraw's own select.resizing state",
+    "observed": "select.resizing",
+    "desired": "select.resizing",
+    "ok": true
+  },
+  {
+    "id": "RESIZE-3",
+    "label": "a freely dragged wider shape recalculates its character width",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "EDIT-1",
+    "label": "the click edits the existing Code block without placing a stock Text shape",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "CLEAN-CODE",
+    "label": "the Code journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  },
+  {
+    "id": "BABBLE-1",
+    "label": "the Source editor takes the cursor immediately",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BABBLE-2",
+    "label": "the grammar highlight paints through CodeMirror decorations",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BABBLE-3",
+    "label": "the completion lists the live board type with its kind pill and the browse escalation",
+    "observed": {
+      "pose": true,
+      "browse": true
+    },
+    "desired": {
+      "pose": true,
+      "browse": true
+    },
+    "ok": true
+  },
+  {
+    "id": "BABBLE-4",
+    "label": "Tab accepts the suggestion into the document",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BABBLE-5",
+    "label": "clicking outside commits the CodeMirror draft",
+    "observed": "pose: Pose\nnext: Pose",
+    "desired": "pose: Pose\nnext: Pose",
+    "ok": true
+  },
+  {
+    "id": "BABBLE-6",
+    "label": "Escape discards the draft without writing it",
+    "observed": "pose: Pose\nnext: Pose",
+    "desired": "pose: Pose\nnext: Pose",
+    "ok": true
+  },
+  {
+    "id": "CLEAN-BABBLE",
+    "label": "the babble journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

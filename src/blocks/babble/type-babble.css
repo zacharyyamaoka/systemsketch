@@ -1,0 +1,406 @@
+/*
+ * Dev-only babble styles for the 5 Type attribute-body variants. Reached only
+ * through `shape.meta.babbleVariant` — no ordinary board paints any of this.
+ */
+
+.systemsketch-block-canvas .TypeBabble {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 21px;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .TypeBabble[data-selected] {
+  pointer-events: auto;
+}
+
+/* ---------------------------- shared spans ------------------------------ */
+
+.systemsketch-block-canvas .TypeBabble-name { font-weight: 650; }
+.systemsketch-block-canvas .TypeBabble-punct { color: var(--ss-text-muted); }
+.systemsketch-block-canvas .TypeBabble-value { color: var(--ss-text); }
+.systemsketch-block-canvas .TypeBabble-raw { color: var(--ss-text-muted); }
+.systemsketch-block-canvas .TypeBabble-type--primitive { color: color-mix(in srgb, var(--ss-accent) 68%, var(--ss-text)); }
+/* Solid, thin, and the same blue as every ordinary web link — not the
+   dotted mark used below for "doesn't resolve." Zach's ask: reuse the
+   hyperlink convention everyone already knows rather than teach a new one,
+   and let hover brighten it the way a browser's own link underline does. */
+.systemsketch-block-canvas .TypeBabble-type--known {
+  color: var(--ss-accent);
+  text-decoration: underline solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.systemsketch-block-canvas .TypeBabble-type--known:hover {
+  text-decoration-thickness: 2px;
+  filter: saturate(1.4);
+}
+/* Deliberately plain — an underline here read as visual clutter once most
+   names in a typical line don't resolve to anything; the only underline in
+   this vocabulary now means "this is a real link" (see --known above). */
+.systemsketch-block-canvas .TypeBabble-type--unknown {
+  color: var(--ss-text-muted);
+}
+
+/* ------------------------- shared code editor ---------------------------- */
+
+.systemsketch-block-canvas .TypeBabble-codeEditor {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 64px;
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor-highlight,
+.systemsketch-block-canvas .TypeBabble-codeEditor-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--ss-accent);
+  border-radius: 4px;
+  overflow: auto;
+  font: inherit;
+  line-height: 21px;
+  white-space: pre;
+  tab-size: 2;
+  box-sizing: border-box;
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor-highlight {
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor-line { min-height: 21px; }
+
+.systemsketch-block-canvas .TypeBabble-codeEditor-input {
+  resize: none;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor-input::selection {
+  background: color-mix(in srgb, var(--ss-accent) 35%, transparent);
+  color: transparent;
+}
+
+/* ------------------------------- heading --------------------------------- */
+
+.systemsketch-block-canvas .TypeBabble-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .TypeBabble-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ss-accent) 16%, transparent);
+  color: var(--ss-accent);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.systemsketch-block-canvas .TypeBabble button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* --------------------------------- V1 ------------------------------------ */
+/* Segmented [UI | Source] toggle; a known type expands an inline preview   */
+/* directly under its row.                                                  */
+
+.systemsketch-block-canvas .TypeBabbleV1-toggle {
+  display: inline-flex;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.systemsketch-block-canvas .TypeBabbleV1-toggle button {
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .TypeBabbleV1-toggle button[data-active] {
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+/* `cursor:text` on both is the honest affordance now: a click anywhere in
+   here that isn't the chevron or a resolved-type link (each carve out their
+   own cursor via their own rule below) drops into Source mode at that
+   point, including the blank space below the last row. */
+.systemsketch-block-canvas .TypeBabbleV1-body { flex: 1 1 auto; overflow: auto; cursor: text; }
+.systemsketch-block-canvas .TypeBabbleV1-row { padding: 1px 0; }
+/* `display:block` (not the default inline) so this span's hit area is the
+   ROW'S FULL WIDTH, not just as wide as its text — clicking blank space to
+   the right of "quality: float" must still open Source, not miss entirely. */
+.systemsketch-block-canvas .TypeBabbleV1-rowContent { display: block; width: 100%; cursor: text; }
+
+/* Chevron placement — a style-only axis, compared live as AltA/AltB. */
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph {
+  display: inline-block;
+  min-width: 10px;
+  color: var(--ss-text-muted);
+}
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph[data-known] { cursor: pointer; }
+.systemsketch-block-canvas .TypeBabbleV1-chevron--leading .TypeBabbleV1-chevronGlyph { margin-right: 4px; }
+.systemsketch-block-canvas .TypeBabbleV1-chevron--trailing .TypeBabbleV1-chevronGlyph { margin-left: 4px; }
+
+/* Dot glyph — an alternative disclosure indicator to the triangle, drawn
+   entirely in CSS (no glyph text): hollow ring when collapsed, filled when
+   open. Prior-art note: every mainstream file/tree browser (Explorer,
+   Finder, VS Code, GitHub) uses a rotating triangle, not a dot — this
+   variant exists to test whether a non-triangle indicator still reads as
+   "expandable" at a glance. */
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph--dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  margin-top: 6px;
+  /* Transparent, not muted, when this row has nothing to expand — the ring
+     only paints for a row that's actually `[data-known]`, so a plain row's
+     slot reserves the same 8px width without drawing a dot nobody can click. */
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  vertical-align: top;
+}
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph--dot[data-known] {
+  border-color: var(--ss-text-muted);
+}
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph--dot[data-open] {
+  background: var(--ss-accent);
+  border-color: var(--ss-accent);
+}
+
+/* Hover-only visibility — reserved space (the glyph stays laid out, only
+   its opacity changes) so text never reflows when it appears/disappears.
+   Still visible without hovering once open, so collapsing an already-open
+   row never depends on finding a hidden control. Prior-art note: NN/g and
+   Zach's own [[C - Information Scent]] both flag hover-only disclosure as a
+   discoverability risk — this variant exists to show the trade-off, not
+   because it is the recommendation. */
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph--hoverOnly {
+  opacity: 0;
+  transition: opacity 80ms ease-out;
+}
+.systemsketch-block-canvas .TypeBabbleV1-rowContent:hover .TypeBabbleV1-chevronGlyph--hoverOnly,
+.systemsketch-block-canvas .TypeBabbleV1-chevronGlyph--hoverOnly[data-open] {
+  opacity: 1;
+}
+
+/* Nested-guide styling — recursion is unlimited depth, so each level of
+   `.TypeBabbleV1-preview` re-applies the same rule and indentation/guide
+   compound naturally through DOM nesting; no per-depth CSS needed. */
+.systemsketch-block-canvas .TypeBabbleV1-preview {
+  margin: 2px 0 4px 14px;
+  padding: 4px 0 4px 8px;
+  color: var(--ss-text-muted);
+}
+.systemsketch-block-canvas .TypeBabbleV1-guide--rail {
+  border-left: 2px solid color-mix(in srgb, var(--ss-accent) 45%, transparent);
+}
+/* VS Code's own "indent guide" default: a faint, low-contrast solid line —
+   not accent-tinted — so it orients without competing with real content. */
+.systemsketch-block-canvas .TypeBabbleV1-guide--muted-rail {
+  border-left: 1px solid color-mix(in srgb, var(--ss-text-muted) 35%, transparent);
+}
+.systemsketch-block-canvas .TypeBabbleV1-guide--dotted {
+  border-left: 1px dotted color-mix(in srgb, var(--ss-text-muted) 70%, transparent);
+  padding-left: 10px;
+}
+
+/* --------------------------------- V2 ------------------------------------ */
+/* Always-both: a read-only tree pane stacked over a live source pane.      */
+
+.systemsketch-block-canvas .TypeBabbleV2-tree {
+  flex: 0 0 auto;
+  max-height: 45%;
+  overflow: auto;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ss-border);
+  margin-bottom: 4px;
+}
+
+.systemsketch-block-canvas .TypeBabbleV2-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 0;
+}
+
+.systemsketch-block-canvas .TypeBabbleV2-goto {
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.systemsketch-block-canvas .TypeBabbleV2-goto:hover { color: var(--ss-accent); }
+
+/* --------------------------------- V3 ------------------------------------ */
+/* Source-primary; a known type gets a faint inline CodeLens-style hint.    */
+
+.systemsketch-block-canvas .TypeBabbleV3-hint {
+  margin-left: 10px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.systemsketch-block-canvas .TypeBabbleV3-popover {
+  position: absolute;
+  z-index: 10;
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+  pointer-events: auto;
+}
+
+/* --------------------------------- V4 ------------------------------------ */
+/* UI-primary; clicking a known type drills in, replacing the card content. */
+
+.systemsketch-block-canvas .TypeBabbleV4-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-block-canvas .TypeBabbleV4-crumbs button {
+  color: var(--ss-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.systemsketch-block-canvas .TypeBabbleV4-crumbs button:last-child {
+  color: var(--ss-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.systemsketch-block-canvas .TypeBabbleV4-body { flex: 1 1 auto; overflow: auto; }
+.systemsketch-block-canvas .TypeBabbleV4-row { padding: 1px 0; }
+
+/* --------------------------------- V5 ------------------------------------ */
+/* Source-only; a fixed line-number/fold gutter; hover-peek popovers.       */
+
+.systemsketch-block-canvas .TypeBabbleV5-editor {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 64px;
+}
+
+.systemsketch-block-canvas .TypeBabbleV5-gutter {
+  flex: 0 0 auto;
+  width: 24px;
+  padding: 7px 0;
+  border: 1px solid var(--ss-accent);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.systemsketch-block-canvas .TypeBabbleV5-gutter div { padding: 0 6px; line-height: 21px; }
+
+.systemsketch-block-canvas .TypeBabbleV5-editor .TypeBabble-codeEditor {
+  flex: 1 1 auto;
+}
+
+.systemsketch-block-canvas .TypeBabbleV5-editor .TypeBabble-codeEditor-highlight,
+.systemsketch-block-canvas .TypeBabbleV5-editor .TypeBabble-codeEditor-input {
+  border-radius: 0 4px 4px 0;
+}
+
+.systemsketch-block-canvas .TypeBabbleV5-popover {
+  position: absolute;
+  z-index: 10;
+  min-width: 170px;
+  padding: 8px 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+}
+
+/* ------------------- CodeMirror source editor (V1) ----------------------
+ * The V1 Source mode is a real CodeMirror document now (SourceCodeEditor);
+ * these rules give it the exact box the old textarea-over-<pre> pair had, so
+ * the UI/Source round trip does not shift a pixel. The old -highlight/-input
+ * rules above still serve the other variants' textarea technique. */
+
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-editor {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--ss-accent);
+  border-radius: 4px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  outline: none;
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-scroller {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 21px;
+  padding: 6px 8px;
+  tab-size: 2;
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-content {
+  padding: 0;
+  caret-color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-line { padding: 0; }
+
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-cursor,
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-dropCursor {
+  border-left-color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-selectionBackground,
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm .cm-focused .cm-selectionBackground,
+.systemsketch-block-canvas .TypeBabble-codeEditor--cm ::selection {
+  background: color-mix(in srgb, var(--ss-accent) 35%, transparent);
+}

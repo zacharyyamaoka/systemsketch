@@ -19,11 +19,13 @@ import {
   type TLUiToolItem,
 } from 'tldraw'
 import { useId, useState, type ReactNode } from 'react'
-import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID, TYPE_TOOL_ID } from '../blocks'
 import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
+import { TypeIcon } from '../blocks/TypeIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
+import { CODE_TOOL_ID, CodeIcon } from '../code'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
@@ -113,8 +115,14 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // same reason: it is used less often than a Block and the toolbar, not the
   // right-click menu, is where the muscle memory forms.
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
+  // Code is an authored literal on the board, so C inserts it directly while
+  // its language and presentational width remain on the selected object.
+  { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon />, shortcut: 'C' },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+  // Type intentionally has no key: T stays stock text, so a Type is reached
+  // from this shared slot rather than a letter collision.
+  { id: TYPE_TOOL_ID, label: 'Type', icon: <TypeIcon /> },
   // Callout intentionally has no key: its two-click interaction is reached from
   // the shared system-design muscle-memory slot, not from a letter collision.
   { id: CALLOUT_TOOL_ID, label: 'Callout', icon: <CalloutIcon /> },
@@ -301,10 +309,14 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     ? BRANCH_TOOL_ID
     : activeToolId === LOOP_TOOL_ID
       ? LOOP_TOOL_ID
+    : activeToolId === CODE_TOOL_ID
+      ? CODE_TOOL_ID
       : activeToolId === BLOCK_TOOL_ID
         ? BLOCK_TOOL_ID
       : activeToolId === PILL_TOOL_ID
           ? PILL_TOOL_ID
+          : activeToolId === TYPE_TOOL_ID
+            ? TYPE_TOOL_ID
           : activeToolId === CALLOUT_TOOL_ID
             ? CALLOUT_TOOL_ID
           : preferences.lastSystemTool
@@ -312,7 +324,9 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
+    || activeToolId === CODE_TOOL_ID
     || activeToolId === PILL_TOOL_ID
+    || activeToolId === TYPE_TOOL_ID
     || activeToolId === CALLOUT_TOOL_ID
 
   return (

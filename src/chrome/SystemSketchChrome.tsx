@@ -19,6 +19,7 @@ import { canWrapSelection } from '../frames/wrapSelection'
 import {
   BLOCK_TOOL_ID,
   PILL_TOOL_ID,
+  TYPE_TOOL_ID,
   adoptConnectedPillType,
   canAdoptConnectedPillType,
   getBlockInspectorContext,
@@ -46,6 +47,11 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
+import {
+  CodeResizeIndicator,
+  EditorCodeSelectionMiniMenu,
+  getSelectedCodeShapes,
+} from '../code'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import {
   PropagationFocusControls,
@@ -284,6 +290,11 @@ function SelectionMiniMenu() {
     () => getOnlySelectedBranch(editor) !== null,
     [editor],
   )
+  const hasCode = useValue(
+    'systemsketch selection has Code blocks',
+    () => getSelectedCodeShapes(editor).length > 0,
+    [editor],
+  )
   const layoutActions = useValue(
     'systemsketch selection layout actions',
     () => getSelectionLayoutActionAvailability(editor),
@@ -319,6 +330,7 @@ function SelectionMiniMenu() {
   }
   const hasVisibleActions = hasBranch
     || hasBlockMiniMenu
+    || hasCode
     || hasAppearance
     || canWrap
     || propagationSeed !== null
@@ -377,6 +389,11 @@ function SelectionMiniMenu() {
               dock follows the selection, so the pill only carries the things
               that change the shape. */}
           <AppearanceControls />
+          {/* Code contributes ONLY what is unique to it (line numbers, the
+              character width) into this same pill — its language and text
+              size are already ordinary appearance rows above. One menu, never
+              a second floating surface. */}
+          {hasCode ? <EditorCodeSelectionMiniMenu editor={editor} /> : null}
           <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
@@ -508,6 +525,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['value', 'literal', 'variable'],
         icon: '＝',
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
+      },
+      {
+        id: 'insert-type',
+        label: 'Insert Type',
+        description: 'Switch to the compact Type definition tool',
+        keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
+        icon: '{}',
+        run: () => editor.setCurrentTool(TYPE_TOOL_ID),
       },
       {
         // Taking the lens off is a safety property, not a convenience. A diff
@@ -736,6 +761,7 @@ export function SystemSketchSurfaceHost() {
       ) : null}
 
       <SelectionMiniMenu />
+      <CodeResizeIndicator />
     </div>
   )
 }

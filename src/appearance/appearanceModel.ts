@@ -27,6 +27,7 @@ import {
 } from 'tldraw'
 
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { CODE_LANGUAGES, CODE_LANGUAGE_LABELS, CodeLanguageStyle } from '../code/codeModel'
 import { isCustomColor } from './customColors'
 import {
   FIGJAM_COLOR_NAMES,
@@ -39,6 +40,7 @@ export type AppearanceControlId =
   | 'fill'
   | 'dash'
   | 'lineStyle'
+  | 'codeLanguage'
   | 'size'
   | 'font'
   | 'align'
@@ -202,6 +204,17 @@ const ARROWHEAD_OPTIONS = [
   option('bar', 'Line'),
 ] as const
 
+/**
+ * A Code block's language, as an ordinary appearance row.
+ *
+ * WHY here rather than in a Code-only toolbar: the composable selection menu's
+ * rule is that a shape contributes values into the ONE shared control system —
+ * language is a custom StyleProp exactly the way a cable's routing is, so the
+ * same `list` combobox, check rows, and batch style write serve it with no
+ * bespoke chrome to relearn.
+ */
+const CODE_LANGUAGE_OPTIONS = CODE_LANGUAGES.map((value) => option(value, CODE_LANGUAGE_LABELS[value]))
+
 /** Every geo shape tldraw knows, for the searchable picker. */
 const GEO_OPTIONS = [
   option('rectangle', 'Rectangle'),
@@ -257,6 +270,10 @@ const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineSt
   // A shape's size is FigJam's Font size: a combobox that names the rung,
   // after Typeface, listing each rung at its own size. tldraw's one `size`
   // also drives the stroke, which report §4 records as a deliberate deviation.
+  codeLanguage: {
+    id: 'codeLanguage', label: 'Language', style: CodeLanguageStyle as StyleProp<string>,
+    options: CODE_LANGUAGE_OPTIONS, layout: 'list', trigger: 'text',
+  },
   size: {
     id: 'size', label: 'Font size', style: DefaultSizeStyle as StyleProp<string>,
     options: SIZE_OPTIONS, layout: 'list', trigger: 'text',
@@ -307,7 +324,9 @@ const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineSt
  * once the shape actually has text; see `TYPOGRAPHY_IDS` below.
  */
 const SHAPE_ORDER: readonly AppearanceControlId[] = [
-  'geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign',
+  // Language sits with the "what it is" group: only a Code selection carries
+  // the style, so every other shape's pill is unchanged by its presence here.
+  'geo', 'color', 'dash', 'codeLanguage', 'font', 'size', 'align', 'verticalAlign',
 ]
 
 /**

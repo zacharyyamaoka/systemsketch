@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import {
   startEditingShapeWithRichText,
   TldrawUiPopover,
@@ -35,6 +35,16 @@ import {
   POPOVER_GAP,
   SWATCH_SIZE,
 } from './figjamTokens'
+import {
+  applyCustomFontPx,
+  clampCustomFontPx,
+  formatFontPx,
+  resetCustomFontScale,
+  selectionOnPresetRungs,
+  sharedFontPx,
+  CUSTOM_FONT_PX_MAX,
+  CUSTOM_FONT_PX_MIN,
+} from './customFontSize'
 import { addTextTarget, selectionHasVisibleText } from './textPresence'
 import './appearance.css'
 import {
@@ -159,6 +169,20 @@ export function applyArrowRouting(editor: Editor, preset: ArrowPreset) {
 
 function AppearanceTrigger({ editor, control }: { editor: Editor; control: AppearanceControl }) {
   const current = selectedOption(control)
+  // Truthful Font size combobox: with a custom scale applied, the rung name
+  // ("Medium") is not what is rendered — show the shared effective px
+  // instead, or Mixed when the participants disagree.
+  const isSizeList = control.id === 'size' && control.layout === 'list'
+  const customPx = useValue(
+    'systemsketch trigger font px',
+    () => {
+      if (!isSizeList) return null
+      if (selectionOnPresetRungs(editor)) return null
+      const px = sharedFontPx(editor)
+      return typeof px === 'number' ? `${formatFontPx(px)} px` : MIXED_LABEL
+    },
+    [editor, isSizeList],
+  )
 
   // Open state is deliberately left to `TldrawUiPopover`: it ORs any `open`
   // prop with its own `useMenuIsOpen`, so a second source of truth can open the
@@ -179,7 +203,7 @@ function AppearanceTrigger({ editor, control }: { editor: Editor; control: Appea
           {control.trigger === 'text' ? (
             // FigJam's Font size is a combobox: the rung's name, then the chevron.
             <span className="systemsketch-appearance__trigger-text">
-              {current ? current.label : MIXED_LABEL}
+              {customPx ?? (current ? current.label : MIXED_LABEL)}
             </span>
           ) : (
             <TriggerGlyph control={control} value={current?.value} editor={editor} />
@@ -211,6 +235,16 @@ function AppearanceTrigger({ editor, control }: { editor: Editor; control: Appea
 function AppearancePanel({ control, editor }: { control: AppearanceControl; editor: Editor }) {
   const mode = control.modeControl
   const beside = mode && control.modePlacement === 'beside'
+  // The Font size list gets FigJam's extra row: named presets, then a live
+  // "Custom" px entry (same idiom as the Code width popover's exact field).
+  const customSize = control.id === 'size' && control.layout === 'list'
+  // When any participant carries a custom scale, the preset check marks are
+  // withheld: `Medium` is not what is rendered, and a checked row would lie.
+  const onPresetRungs = useValue(
+    'systemsketch selection on preset rungs',
+    () => (customSize ? selectionOnPresetRungs(editor) : true),
+    [editor, customSize],
+  )
   return (
     // `role="menu"` is load-bearing, not decoration: every option below is a
     // `menuitemradio`, and that role is only defined inside a menu. Measured
@@ -261,23 +295,28 @@ function AppearancePanel({ control, editor }: { control: AppearanceControl; edit
             option={option}
             editor={editor}
             withLabel={control.layout !== 'row' && control.layout !== 'swatches'}
+            forceUnchecked={customSize && !onPresetRungs}
           />
         ))}
         {control.custom ? <CustomColorCell control={control} editor={editor} /> : null}
       </div>
+      {customSize ? <CustomFontSizeField editor={editor} /> : null}
     </div>
   )
 }
 
 function OptionButton({
-  control, option, editor, withLabel,
+  control, option, editor, withLabel, forceUnchecked,
 }: {
   control: AppearanceControl
   option: AppearanceOption
   editor: Editor
   withLabel?: boolean
+  /** A custom font scale is applied, so no preset row is truthfully current. */
+  forceUnchecked?: boolean
 }) {
-  const isCurrent = control.value.type === 'shared' && control.value.value === option.value
+  const isCurrent = !forceUnchecked
+    && control.value.type === 'shared' && control.value.value === option.value
   const list = control.layout === 'list'
   // FigJam draws each Font size row at its own size: 12 / 13 / 14 / 16px.
   const rowSize = list && control.id === 'size' ? FONT_SIZE_LADDER[option.value] : undefined
@@ -294,6 +333,15 @@ function OptionButton({
       onClick={() => {
         if (control.id === 'arrowKind' && isArrowPreset(option.value)) {
           applyArrowRouting(editor, option.value)
+        } else if (control.id === 'size' && control.layout === 'list') {
+          // A preset must actually render at its named size: clear any custom
+          // scale in the same history step, or the checked row would lie.
+          editor.markHistoryStoppingPoint('appearance')
+          editor.run(() => {
+            if (editor.isIn('select')) editor.setStyleForSelectedShapes(control.style, option.value)
+            editor.setStyleForNextShapes(control.style, option.value)
+            resetCustomFontScale(editor)
+          })
         } else {
           applyStyle(editor, control.style, option.value)
         }
@@ -311,6 +359,53 @@ function OptionButton({
         </span>
       ) : null}
     </button>
+  )
+}
+
+/**
+ * FigJam's Custom row under the Font size presets: a live numeric field that
+ * applies any exact pixel size to the whole selection. The write mechanism is
+ * stock tldraw's own per-shape `scale` (nearest rung × residual multiplier —
+ * see `customFontSize.ts`), which the capability report proved the bare stock
+ * viewer renders; the Code block joins through its own `fontScale`. The
+ * field reuses the Code width popover's exact-entry idiom and CSS
+ * (`.code-width-custom`), so the ONE size menu keeps one visual language.
+ */
+function CustomFontSizeField({ editor }: { editor: Editor }) {
+  const shared = useValue('systemsketch shared font px', () => sharedFontPx(editor), [editor])
+  const sharedText = typeof shared === 'number' ? formatFontPx(shared) : ''
+  const [draft, setDraft] = useState(sharedText)
+  useEffect(() => setDraft(sharedText), [sharedText])
+  const commit = () => {
+    const parsed = Number.parseFloat(draft)
+    if (!Number.isFinite(parsed)) {
+      setDraft(sharedText)
+      return
+    }
+    applyCustomFontPx(editor, clampCustomFontPx(parsed))
+  }
+  return (
+    <label className="code-width-custom">
+      <span>Custom</span>
+      <input
+        data-testid="font-size-custom"
+        type="number"
+        min={CUSTOM_FONT_PX_MIN}
+        max={CUSTOM_FONT_PX_MAX}
+        step="1"
+        value={draft}
+        placeholder={shared === 'mixed' ? 'Mixed' : undefined}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            commit()
+          }
+        }}
+      />
+      <span className="code-width-custom__unit">px</span>
+    </label>
   )
 }
 

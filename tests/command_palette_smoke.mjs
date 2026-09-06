@@ -213,6 +213,7 @@ async function main() {
     assert.equal(commands.focusedLabel, 'Search commands')
     assert.ok(commands.options.some((label) => label.includes('Insert Block')))
     assert.ok(commands.options.some((label) => label.includes('Insert Pill')))
+    assert.ok(commands.options.some((label) => label.includes('Insert Type')))
     assert.ok(commands.options.some((label) => label.includes('Find and replace on board')))
     const layer = await paletteLayerState(app.page)
     assert.deepEqual(

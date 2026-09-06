@@ -75,6 +75,19 @@ import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
 import { isClockTriggerBlock, stockBlockVisibleDescription } from '../stockBlocks'
+import { TypeAttributeRegion } from './TypeAttributeRegion'
+// Dev-only: a shape tagged `meta.babbleVariant` (never set on an ordinary
+// board) renders through the attribute-body babble instead. See
+// `src/blocks/babble/TypeBabbleRegion.tsx`.
+import { TypeBabbleRegion } from '../babble/TypeBabbleRegion'
+// Dev-only: a shape tagged `meta.typeMappingBabbleVariant` (never set on an
+// ordinary board) renders through the Type Mapping ("algebraic type system")
+// primitive babble instead. See `src/blocks/babble/TypeMappingRegion.tsx`.
+import { TypeMappingRegion } from '../babble/TypeMappingRegion'
+// Dev-only: a shape tagged `meta.portTextBabbleVariant` (never set on an
+// ordinary board) renders a text-authoring surface for the Block's OWN
+// inputs/outputs instead. See `src/blocks/babble/PortTextBabbleRegion.tsx`.
+import { PortTextBabbleRegion } from '../babble/PortTextBabbleRegion'
 import {
   describeDiffCounts,
   diffGutterGlyph,
@@ -1396,6 +1409,35 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 />
               </div>
             ) : null}
+            {shape.meta?.typeMappingBabbleVariant ? (
+              <TypeMappingRegion
+                shape={shape}
+                top={layout.headerHeight + 1}
+                bottom={layout.footerTop - 1}
+                selected={isSelected}
+              />
+            ) : shape.meta?.babbleVariant ? (
+              <TypeBabbleRegion
+                shape={shape}
+                top={layout.headerHeight + 1}
+                bottom={layout.footerTop - 1}
+                selected={isSelected}
+              />
+            ) : shape.meta?.portTextBabbleVariant ? (
+              <PortTextBabbleRegion
+                shape={shape}
+                top={layout.headerHeight + 1}
+                bottom={layout.footerTop - 1}
+                selected={isSelected}
+              />
+            ) : (
+              <TypeAttributeRegion
+                shape={shape}
+                top={layout.headerHeight + 1}
+                bottom={layout.footerTop - 1}
+                selected={isSelected}
+              />
+            )}
           </>
         ) : null}
 

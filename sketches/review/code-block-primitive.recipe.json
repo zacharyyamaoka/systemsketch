@@ -1,0 +1,64 @@
+{
+  "feature": "Code block primitive review",
+  "viewport": { "width": 1680, "height": 900 },
+  "pages": [{ "id": "review", "name": "Code block review" }],
+  "shapes": [
+    {
+      "id": "code-subject",
+      "type": "code",
+      "x": 560,
+      "y": 360,
+      "props": {
+        "w": 566,
+        "h": 240,
+        "code": "const normalize = (signal) => {\n  const baseline = signal.mean()\n  return signal - baseline\n}",
+        "language": "javascript",
+        "size": "m",
+        "showLineNumbers": true,
+        "characterWidth": 48
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "select-pill",
+      "kind": "step",
+      "text": "1 · Select Code. ONE shared pill appears: Language and Font size are the same rows every shape uses.",
+      "x": 80,
+      "y": 380,
+      "w": 390,
+      "h": 140,
+      "target": { "shapeId": "code-subject", "anchor": "left" }
+    },
+    {
+      "id": "width",
+      "kind": "step",
+      "text": "2 · Open the ch combobox. Pick a preset row (32/48/64/80) or type 72 in Custom.",
+      "x": 540,
+      "y": 90,
+      "w": 600,
+      "h": 120,
+      "target": { "shapeId": "code-subject", "anchor": "top" }
+    },
+    {
+      "id": "edit-resize",
+      "kind": "step",
+      "text": "3 · Click the selected code body once to enter CodeMirror. Type a line, then drag the lower-right handle and watch the live ch badge.",
+      "x": 520,
+      "y": 730,
+      "w": 650,
+      "h": 130,
+      "target": { "shapeId": "code-subject", "anchor": "bottom" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · One shared pill drives language, Font size, lines, and preset/custom width; CodeMirror edits in place; a native resize shows live ch.",
+      "x": 1240,
+      "y": 380,
+      "w": 400,
+      "h": 170
+    }
+  ]
+}

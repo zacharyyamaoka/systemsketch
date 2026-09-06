@@ -36,7 +36,7 @@ import {
   type TLUiOverrides,
 } from 'tldraw'
 import { useEffect, useRef, useState } from 'react'
-import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, withBlockTool } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID, TYPE_TOOL_ID, getBlockInspectorContext, withBlockTool } from '../blocks'
 import {
   EditorBlockInspector,
   EditorConnectionInspector,
@@ -90,14 +90,29 @@ function PillDevelopmentToolbarItem() {
   )
 }
 
+function TypeDevelopmentToolbarItem() {
+  const tools = useTools()
+  const tool = tools[TYPE_TOOL_ID]
+  const isSelected = useIsToolSelected(tool)
+  if (!tool) return null
+
+  return (
+    <TldrawUiMenuItem
+      {...tool}
+      isSelected={isSelected}
+      data-testid="type-development-tool"
+    />
+  )
+}
+
 /**
- * Stock tldraw toolbar with one additive seam: Block and Pill are visible in
- * slots 8 and 9. Asset moves to slot 10 and every remaining stock item keeps
- * its stock order in the overflow menu.
+ * Stock tldraw toolbar with one additive seam: Block, Pill, and Type are
+ * visible in slots 8–10. Asset moves to slot 11 and every remaining stock
+ * item keeps its stock order in the overflow menu.
  */
 export function BlockDevelopmentToolbar() {
   return (
-    <DefaultToolbar maxItems={10}>
+    <DefaultToolbar maxItems={11}>
       <SelectToolbarItem />
       <HandToolbarItem />
       <DrawToolbarItem />
@@ -107,6 +122,7 @@ export function BlockDevelopmentToolbar() {
       <NoteToolbarItem />
       <BlockDevelopmentToolbarItem />
       <PillDevelopmentToolbarItem />
+      <TypeDevelopmentToolbarItem />
       <AssetToolbarItem />
 
       <RectangleToolbarItem />

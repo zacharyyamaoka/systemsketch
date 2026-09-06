@@ -34,6 +34,7 @@ import { EXCALIDRAW_SHAPE_UTILS } from '../excalidrawInterop'
 import { BlockShapeUtil, getBlockShapeVisibility } from '../blocks'
 import { BranchArmShapeUtil, BranchShapeUtil } from '../branch'
 import { LoopShapeUtil } from '../loop'
+import { CodeShapeUtil } from '../code'
 import { blockConnectionBindingUtils, blockConnectionShapeUtils } from '../blocks/connections'
 import { createSystemSketchStore } from '../store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
@@ -53,6 +54,7 @@ const COMPARE_SHAPE_UTILS = [
 	BranchShapeUtil,
 	BranchArmShapeUtil,
 	LoopShapeUtil,
+	CodeShapeUtil,
 	...blockConnectionShapeUtils,
 ]
 const COMPARE_BINDING_UTILS = [...blockConnectionBindingUtils]
