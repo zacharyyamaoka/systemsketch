@@ -372,10 +372,21 @@ independent questions and now they are independent controls.</p>
 <td>Works in both lenses, board-wide or per component.</td></tr>
 <tr><td><b>Cables</b></td><td>Data · Split · Summary</td>
 <td>Paint only. Never moves a port, and readable in either lens.</td></tr>
+<tr><td><b>Arrow</b></td><td>Elbow · Curve · Straight</td>
+<td>A bulk edit of the cables' own shape, not a fourth projection.</td></tr>
 </tbody></table>
 <p>Switching lens lands on that lens's honest default — Dataflow on Port cards
 with grey cables, Communication on Simple cards with one arrow per relationship
 — while an explicit choice inside a lens stands.</p>
+<p><b>Every arrow travels between ports.</b> The centre-to-centre line is
+gone: a line between two card middles said a relationship existed but not
+which sockets carried it, and two relationships between one pair of cards drew
+the identical line — which is why it needed staggered labels to stay clickable
+at all. A summary cable now always rides its representative leg's real
+port-to-port route, so its shape is simply the <code>routing</code> style that
+cable already carries. That is also why the Arrow control is a bulk <em>edit</em>
+rather than a projection: one history step, undoable, and a single selected
+cable still takes its own shape from the ordinary selection menu.</p>
 <p><b>The summary cable lost its dropdowns.</b> It always rides the protocol's
 initiating leg: the request for a Service, the goal for an Action, the one leg a
 Stream has. Offering Response or Result or a shortest-path heuristic made a

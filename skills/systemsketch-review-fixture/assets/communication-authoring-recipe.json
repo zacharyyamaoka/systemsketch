@@ -140,11 +140,11 @@
     {
       "id": "step-5",
       "kind": "step",
-      "text": "5 · Still in Dataflow, CABLES › Summary. The relationship arrows come back over the real routes and no port moves.",
+      "text": "5 · ARROW › Curve, then Straight. Every cable in the region changes shape at once, and one undo puts them all back. A single cable still takes its own shape from its selection menu.",
       "x": 1800,
       "y": 560,
       "w": 420,
-      "h": 160,
+      "h": 200,
       "target": {
         "shapeId": "robot",
         "anchor": "right",
@@ -154,7 +154,7 @@
     {
       "id": "step-6",
       "kind": "step",
-      "text": "6 · Back in Communication with CARD › P, press and HOLD a port dot on Camera, then drag it to any of the four edges. Hold still first — moving straight away draws a cable instead.",
+      "text": "6 · CARD › P, then press and HOLD a port dot and drag it to any of the four edges. Or select the port and use the inspector's Block edge control. Hold still first — moving straight away draws a cable.",
       "x": 1800,
       "y": 860,
       "w": 420,
@@ -167,11 +167,11 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN the two lenses disagree about where a port is and neither disturbs the other. CARD S/P/E works in both. CABLES Data/Split/Summary changes only paint, never a port position. A socket dragged in Communication can sit on any of the four edges, its cable follows it, and Dataflow still shows it on a lane.",
+      "text": "PASS WHEN every arrow starts and ends on a port — there is no line between two card middles any more. Ports on a wall spread across the whole wall rather than clustering in one section, and no label is struck through by another. ARROW changes every cable in the region; a single selected cable still changes on its own. A socket dragged in Communication stays put when you flip to Dataflow and back.",
       "x": 620,
       "y": 1290,
       "w": 1080,
-      "h": 260
+      "h": 280
     }
   ]
 }

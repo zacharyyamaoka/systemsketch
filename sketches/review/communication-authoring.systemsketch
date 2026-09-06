@@ -101,7 +101,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3oltV",
+      "index": "a3wqrO",
       "typeName": "shape"
     },
     {
@@ -153,8 +153,16 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4wGUl",
+      "index": "a4yDyV",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:Qop7J01YpkiTOwIIJ_O91",
+      "typeName": "user"
     },
     {
       "x": 1800,
@@ -197,12 +205,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5qCDV",
+      "index": "a5y5MC",
       "typeName": "shape"
     },
     {
       "x": 1800,
-      "y": 640,
+      "y": 660,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -224,7 +232,7 @@
         },
         "end": {
           "x": -190,
-          "y": -70
+          "y": -90
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -241,7 +249,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6topG",
+      "index": "a6sSxV",
       "typeName": "shape"
     },
     {
@@ -286,7 +294,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2fqM",
+      "index": "a2m6I",
       "typeName": "shape"
     },
     {
@@ -330,7 +338,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a7zzu6V",
+      "index": "a7oSnV",
       "typeName": "shape"
     },
     {
@@ -344,7 +352,7 @@
       "type": "geo",
       "props": {
         "w": 1080,
-        "h": 260,
+        "h": 280,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -367,7 +375,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN the two lenses disagree about where a port is and neither disturbs the other. CARD S/P/E works in both. CABLES Data/Split/Summary changes only paint, never a port position. A socket dragged in Communication can sit on any of the four edges, its cable follows it, and Dataflow still shows it on a lane."
+                  "text": "PASS WHEN every arrow starts and ends on a port — there is no line between two card middles any more. Ports on a wall spread across the whole wall rather than clustering in one section, and no label is struck through by another. ARROW changes every cable in the region; a single selected cable still changes on its own. A socket dragged in Communication stays put when you flip to Dataflow and back."
                 }
               ]
             }
@@ -375,7 +383,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a89aM",
+      "index": "a8xqU",
       "typeName": "shape"
     },
     {
@@ -420,13 +428,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3OfE",
+      "index": "a3rHn",
       "typeName": "shape"
     },
     {
-      "x": -18.851674641148335,
-      "y": -195.93301435406704,
-      "z": 0.7886792452830188,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -473,7 +481,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4Q9A",
+      "index": "a4MZb",
       "typeName": "shape"
     },
     {
@@ -518,7 +526,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5aqn",
+      "index": "a5vb6",
       "typeName": "shape"
     },
     {
@@ -532,10 +540,10 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 160,
+        "h": 200,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -555,7 +563,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "5 · Still in Dataflow, CABLES › Summary. The relationship arrows come back over the real routes and no port moves."
+                  "text": "5 · ARROW › Curve, then Straight. Every cable in the region changes shape at once, and one undo puts them all back. A single cable still takes its own shape from its selection menu."
                 }
               ]
             }
@@ -563,7 +571,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6lUR",
+      "index": "a6ez5",
       "typeName": "shape"
     },
     {
@@ -580,7 +588,7 @@
         "h": 210,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -600,7 +608,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "6 · Back in Communication with CARD › P, press and HOLD a port dot on Camera, then drag it to any of the four edges. Hold still first — moving straight away draws a cable instead."
+                  "text": "6 · CARD › P, then press and HOLD a port dot and drag it to any of the four edges. Or select the port and use the inspector's Block edge control. Hold still first — moving straight away draws a cable."
                 }
               ]
             }
@@ -608,7 +616,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7zMUV",
+      "index": "a7PUJ",
       "typeName": "shape"
     },
     {
@@ -716,7 +724,7 @@
         "color": "violet"
       },
       "parentId": "page:page",
-      "index": "a1qi2",
+      "index": "a1OfM",
       "typeName": "shape"
     },
     {
@@ -820,12 +828,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "NZGiOzkV4C5s9twCDTCrI",
+        "definitionId": "nhWsJpilHwdC-ruQfnId1",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Robot"
       },
-      "index": "a2UU3V",
+      "index": "a2rzN",
       "typeName": "shape"
     },
     {
@@ -929,12 +937,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "MJ9ufF-RpyQAAYh6hWz65",
+        "definitionId": "b0IXhwWBvYjkK5fB1Vyob",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Mission"
       },
-      "index": "a18xj",
+      "index": "a15Vz",
       "typeName": "shape"
     },
     {
@@ -974,14 +982,6 @@
       "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#F04F88",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:LpyyAERMctuY7cjCD2CC3",
-      "typeName": "user"
-    },
-    {
       "meta": {},
       "id": "page:page",
       "name": "Review",
@@ -999,7 +999,6 @@
       "followingUserId": null,
       "opacityForNextShape": 1,
       "stylesForNextShape": {
-        "tldraw:dash": "solid",
         "tldraw:arrowKind": "elbow",
         "systemsketch:connectionRouting": "elbow"
       },
@@ -1092,12 +1091,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "HzuktdHykbDR97MOvSp3m",
+        "definitionId": "Pg1FujFC5Xec-qoo3Hi0p",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Camera"
       },
-      "index": "a3Won",
+      "index": "a3dkb",
       "typeName": "shape"
     },
     {
@@ -1141,7 +1140,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2riQV",
+      "index": "a2u3oG",
       "typeName": "shape"
     }
   ]

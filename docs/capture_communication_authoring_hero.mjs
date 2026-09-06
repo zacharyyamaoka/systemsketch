@@ -208,9 +208,13 @@ async function main() {
     await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(1600)
 
-    // ...and the communication reading of that same wired board.
+    // ...the communication reading of that same wired board...
     await clickElement(app.page, '[data-testid="communication-cables-summary"]')
-    await delay(1800)
+    await delay(1400)
+
+    // ...and one shape written to every cable in the region at once.
+    await clickElement(app.page, '[data-testid="communication-route-curved"]')
+    await delay(1500)
 
     const frames = await stop()
     const kept = await encode(frames)
