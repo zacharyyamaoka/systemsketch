@@ -66,6 +66,7 @@ const SEED = `(() => {
 async function selectionButtons(page) {
   return JSON.parse(await evaluate(page, `(() => JSON.stringify({
     tidy: Boolean(document.querySelector('[data-testid="selection-action-tidy-edges"]')),
+    reset: Boolean(document.querySelector('[data-testid="selection-action-reset-routing"]')),
     organize: Boolean(document.querySelector('[data-testid="selection-action-organize-nodes"]')),
     labels: Array.from(document.querySelectorAll('.systemsketch-selection-layout-action'))
       .map((button) => ({ label: button.getAttribute('aria-label'), title: button.getAttribute('title') })),
@@ -100,6 +101,7 @@ async function main() {
     await waitFor(app.page, `document.querySelector('[data-testid="selection-action-tidy-edges"]')`, 'edge-only tidy action')
     assert.deepEqual(await selectionButtons(app.page), {
       tidy: true,
+      reset: false,
       organize: false,
       labels: [{ label: 'Tidy edges', title: 'Tidy edges' }],
     })
@@ -117,6 +119,7 @@ async function main() {
     await waitFor(app.page, `document.querySelector('[data-testid="selection-action-tidy-edges"]')`, 'incident-edge tidy action')
     assert.deepEqual(await selectionButtons(app.page), {
       tidy: true,
+      reset: false,
       organize: false,
       labels: [{ label: 'Tidy edges', title: 'Tidy edges' }],
     })
@@ -126,6 +129,7 @@ async function main() {
     await waitFor(app.page, `document.querySelector('[data-testid="selection-action-organize-nodes"]')`, 'two-Block organize action')
     assert.deepEqual(await selectionButtons(app.page), {
       tidy: true,
+      reset: false,
       organize: true,
       labels: [
         { label: 'Tidy edges', title: 'Tidy edges' },

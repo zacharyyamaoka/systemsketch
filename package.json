@@ -134,6 +134,7 @@
     "test:collision-routing-endpoint-fixture": "node tests/collision_routing_endpoint_fixture_smoke.mjs",
     "test:text-aware-routing": "node tests/text_aware_routing_smoke.mjs",
     "test:contextual-layout": "node tests/contextual_layout_actions_smoke.mjs",
+    "test:reset-routing": "node tests/reset_edge_routing_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
     "test:export": "node tests/tldraw_export_smoke.mjs",
