@@ -49,7 +49,7 @@ import {
   useAppearancePreferences,
   WHEEL_ZOOM_SENSITIVITY_STEP,
 } from './appearancePreferences'
-import { SHAPE_LIBRARY_ITEMS, type ShapeLibraryItem } from '../library/shapeLibraryModel'
+import { TOOL_SEARCH_ALIAS_ITEMS, type ToolSearchAliasItem } from '../library/toolSearchCatalog'
 import {
   addToolAlias,
   normalizeToolAlias,
@@ -164,7 +164,7 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
   )
 }
 
-function ToolAliasRow({ item }: { item: ShapeLibraryItem }) {
+function ToolAliasRow({ item }: { item: ToolSearchAliasItem }) {
   const aliases = useToolAliases()
   const [draft, setDraft] = useState('')
   const [message, setMessage] = useState<string | null>(null)
@@ -189,7 +189,7 @@ function ToolAliasRow({ item }: { item: ShapeLibraryItem }) {
       <header>
         <div>
           <h3>{item.label}</h3>
-          <p>{item.kind === 'tool' ? 'Canvas tool' : item.section}</p>
+          <p>{item.detail}</p>
         </div>
       </header>
       <div className="systemsketch-tool-alias-row__aliases" aria-label={`Aliases for ${item.label}`}>
@@ -240,17 +240,17 @@ function ToolAliasesPanel() {
       <div className="systemsketch-settings__intro">
         <div>
           <h2 id="tool-aliases-title">Tool aliases</h2>
-          <p>Give any Asset-search tool the names you use. An alias like <code>@datatype</code> opens Text without changing the tool’s canonical name.</p>
+          <p>Give any S-search tool the names you use. An alias like <code>@datatype</code> opens Text without changing the tool’s canonical name.</p>
         </div>
       </div>
       <div className="systemsketch-tool-alias-list">
-        {SHAPE_LIBRARY_ITEMS.map((item) => <ToolAliasRow key={item.id} item={item} />)}
+        {TOOL_SEARCH_ALIAS_ITEMS.map((item) => <ToolAliasRow key={item.id} item={item} />)}
       </div>
       <div className="systemsketch-settings__note">
         <span className="systemsketch-settings__saved-dot" aria-hidden="true" />
         <div>
           <strong>Saved on this computer</strong>
-          <p>Aliases enrich Asset search and the Shapes library. They are personal vocabulary, not board content.</p>
+          <p>Aliases enrich S search and the Shapes library. They are personal vocabulary, not board content.</p>
         </div>
       </div>
     </section>

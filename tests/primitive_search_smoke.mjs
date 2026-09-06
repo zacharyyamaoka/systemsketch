@@ -85,7 +85,7 @@ async function main() {
     await shortcut(page, 's', 'KeyS')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'S primitive search')
     assert.equal(await evaluate(page,
-      `document.activeElement?.getAttribute('aria-label')`), 'Search primitives')
+      `document.activeElement?.getAttribute('aria-label')`), 'Search tools')
     const initial = await geometry(page)
     assert.ok(initial.search.width <= 304 && initial.search.height < 100)
     assert.ok(initial.search.x >= point.x && initial.search.y >= point.y)
@@ -154,14 +154,42 @@ async function main() {
     await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(drawn.id)})`, 'one-step drawing undo')
     pass('ArrowDown + Enter arms the real Curved arrow tool without inserting; the following canvas drag draws it, and one Undo removes it')
 
-    await clickElement(page, '[title="Shapes library"]')
-    await waitFor(page, `document.querySelector('[data-testid="systemsketch-left-popout"] input[aria-label="Search shapes"]')`, 'library search input')
-    await clickElement(page, '[data-testid="systemsketch-left-popout"] input[aria-label="Search shapes"]')
+    const toolbarToolNames = [
+      'Cursor', 'Frame',
+      'Block', 'Branch', 'Loop', 'Behavior Tree', 'Code', 'Pill', 'Type', 'Callout',
+      'Rectangle', 'Ellipse', 'Triangle', 'Diamond', 'Line',
+      'Straight arrow', 'Curved arrow', 'Elbow arrow',
+      'Pen', 'Highlighter', 'Text',
+    ]
+    for (const label of toolbarToolNames) {
+      await evaluate(page, `(() => { window.__systemsketch.editor.focus(); return true })()`)
+      await shortcut(page, 's', 'KeyS')
+      await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, `${label} tool search`)
+      await typeSlowly(page, label)
+      await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"] [data-library-item]')`, `${label} search result`)
+      const first = await evaluate(page,
+        `document.querySelector('[data-testid="systemsketch-primitive-search"] [data-library-item] strong')?.textContent`)
+      assert.equal(first, label, `${label} should be the literal-first S-search result`)
+      if (label === 'Type') {
+        await screenshot(page, 'primitive-search-toolbar-tools-2026-09-06.png')
+        await key(page, 'Enter', 'Enter')
+        await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'Type tool search closing')
+        assert.equal(await evaluate(page, `window.__systemsketch.editor.getCurrentToolId()`), 'type')
+      } else {
+        await key(page, 'Escape', 'Escape')
+        await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, `${label} tool search closing`)
+      }
+    }
+    pass('S finds every visible toolbar tool by its displayed name; Type ranks ahead of Text and arms the registered Type tool')
+
+    await clickElement(page, '[data-testid="systemsketch-tool-library"]')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-library-panel"] input[aria-label="Search shapes"]')`, 'library search input')
+    await clickElement(page, '[data-testid="systemsketch-library-panel"] input[aria-label="Search shapes"]')
     await shortcut(page, 's', 'KeyS')
     assert.equal(await evaluate(page,
       `Boolean(document.querySelector('[data-testid="systemsketch-primitive-search"]'))`), false)
     pass('S remains ordinary typing while a library input owns focus')
-    await clickElement(page, '[aria-label="Close shapes library"]')
+    await clickElement(page, '[title="Close library"]')
 
     await shortcut(page, 'p', 'KeyP', 2)
     await waitFor(page, `document.querySelector('.systemsketch-command-palette')`, 'existing command palette')

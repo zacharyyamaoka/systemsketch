@@ -3,13 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useChrome } from '../chrome/ChromeProvider'
 import { LibrarySearchModal, type LibrarySearchItem } from './LibrarySearchModal'
-import {
-  SHAPE_LIBRARY_ITEMS,
-  filterShapeLibraryItems,
-  shapeLibraryItemById,
-  type ShapeLibraryItem,
-} from './shapeLibraryModel'
 import { activateShapeLibraryTool } from './shapeLibraryTool'
+import {
+  TOOL_SEARCH_ALIAS_ITEMS,
+  filterToolSearchItems,
+  toolSearchItemId,
+  toolSearchItemLabel,
+  type ToolSearchItem,
+} from './toolSearchCatalog'
 import {
   PRIMITIVE_SEARCH_MAX_RESULTS,
   PRIMITIVE_SEARCH_WIDTH,
@@ -37,15 +38,15 @@ function toolbarObstacleTop(editorContainer: HTMLElement, viewportHeight: number
 }
 
 /**
- * A primitive-only sibling to the command palette, anchored to the pointer.
+ * A tool-only sibling to the command palette, anchored to the pointer.
  *
  * WHY: S is about choosing what to draw where the user is already looking.
  * Reusing the centred command modal would destroy that Fusion-style spatial
  * promise; inserting immediately would steal the final placement gesture.
  *
  * The chrome itself now lives in `LibrarySearchModal`, which the Behaviors
- * panel shares; this file keeps what is specific to primitives — the `S`
- * shortcut and its guards, the shape catalog, and arming the tool.
+ * panel shares; this file keeps what is specific to tools — the `S` shortcut,
+ * its guards, the product-toolbar catalog, and arming the chosen tool.
  */
 export function PrimitiveSearch() {
   const editor = useEditor()
@@ -57,17 +58,19 @@ export function PrimitiveSearch() {
   const [layoutRevision, setLayoutRevision] = useState(0)
 
   const matches = useMemo(
-    () => query.trim() ? filterShapeLibraryItems(query, aliases) : [],
-    [aliases, query],
+    () => filterToolSearchItems(query, aliases, new Set(Object.keys(tools))),
+    [aliases, query, tools],
   )
   // Identity is the catalog id, so the row test ids stay
   // `systemsketch-primitive-search-<item.id>` exactly as before.
-  const rows = useMemo<LibrarySearchItem[]>(() => matches.map((item) => ({
-    id: item.id,
-    label: item.label,
-    detail: item.section,
-    icon: <TldrawUiButtonIcon icon={item.icon} />,
-    aliases: aliases[item.id] ?? [],
+  const rows = useMemo<LibrarySearchItem[]>(() => matches.map((match) => ({
+    id: toolSearchItemId(match),
+    label: toolSearchItemLabel(match),
+    detail: match.source === 'library' ? match.item.section : 'Tools',
+    icon: <TldrawUiButtonIcon icon={match.source === 'library'
+      ? match.item.icon
+      : tools[match.item.toolId]?.icon ?? 'tool-pointer'} />,
+    aliases: aliases[toolSearchItemId(match)] ?? [],
   })), [aliases, matches])
 
   const close = useCallback(() => {
@@ -77,10 +80,11 @@ export function PrimitiveSearch() {
   }, [editor])
 
   const choose = useCallback((row: LibrarySearchItem) => {
-    const item: ShapeLibraryItem | undefined = shapeLibraryItemById(row.id)
-    if (item) activateShapeLibraryTool(tools, item)
+    const match: ToolSearchItem | undefined = matches.find((item) => toolSearchItemId(item) === row.id)
+    if (match?.source === 'library') activateShapeLibraryTool(tools, match.item)
+    else if (match?.source === 'toolbar') tools[match.item.toolId]?.onSelect('toolbar')
     close()
-  }, [close, tools])
+  }, [close, matches, tools])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -131,16 +135,16 @@ export function PrimitiveSearch() {
       target={invocation.screenPoint}
       placement={placement}
       keyChip="S"
-      ariaLabel="Search primitive library"
-      listAriaLabel="Matching primitives"
-      inputAriaLabel="Search primitives"
-      placeholder={`Search ${SHAPE_LIBRARY_ITEMS.length} primitives`}
-      noun={{ one: 'primitive', many: 'primitives' }}
+      ariaLabel="Search tools"
+      listAriaLabel="Matching tools"
+      inputAriaLabel="Search tools"
+      placeholder={`Search ${TOOL_SEARCH_ALIAS_ITEMS.length} tools`}
+      noun={{ one: 'tool', many: 'tools' }}
       verb="arm"
-      idleTitle="Primitive library"
-      idleHint="Type a shape or connection name."
-      emptyTitle="No matching primitives"
-      emptyHint="Try arrow, rectangle, decision, or cloud."
+      idleTitle="Tool search"
+      idleHint="Type a toolbar tool, shape, or connection name."
+      emptyTitle="No matching tools"
+      emptyHint="Try block, type, arrow, rectangle, decision, or cloud."
       itemAriaLabel={(row) => `Use ${row.label} tool`}
       onChoose={choose}
       onClose={close}
