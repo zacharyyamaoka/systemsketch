@@ -264,9 +264,15 @@ function BlockExportSvg({
 					{placed.label ? (
 						<>
 							<text
-								x={placed.side === 'input' ? placed.label.x : placed.label.x + placed.label.w}
-								y={placed.y}
-								textAnchor={placed.side === 'input' ? 'start' : 'end'}
+								x={placed.edge === 'top' || placed.edge === 'bottom'
+									? placed.label.x + placed.label.w / 2
+									: placed.side === 'input' ? placed.label.x : placed.label.x + placed.label.w}
+								y={placed.edge === 'top' || placed.edge === 'bottom'
+									? placed.label.y + placed.label.h / 2
+									: placed.y}
+								textAnchor={placed.edge === 'top' || placed.edge === 'bottom'
+									? 'middle'
+									: placed.side === 'input' ? 'start' : 'end'}
 								dominantBaseline="middle"
 								fill={ink}
 								fontFamily="ui-monospace, monospace"

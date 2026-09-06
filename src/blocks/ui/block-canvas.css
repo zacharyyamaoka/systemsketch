@@ -2197,3 +2197,13 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* A four-sided port's label: horizontal, centred on its socket, drawn inward.
+   Vyuh Node Flow's convention — see
+   docs/four-sided-port-labels-prior-art-2026-09-06.html and
+   https://flow.vyuh.tech/docs/theming/port-labels — so the outer face of the
+   Block stays a clear cable corridor rather than a text margin. */
+.systemsketch-block-canvas .BlockNode-portLabel--rail {
+  justify-content: center;
+  text-align: center;
+}

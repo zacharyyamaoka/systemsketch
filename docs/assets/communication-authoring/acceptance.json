@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-09-06T21:01:22.716Z",
+  "checks": [
+    "Components mode offers exactly the three drawable patterns, none armed and nothing wired",
+    "a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher",
+    "a stacked pair puts each generated socket on the facing horizontal rail",
+    "a Service arrow generates request forward and response back, naming the client by the arrowhead",
+    "an Action arrow generates goal, feedback and result — and deliberately no cancel leg",
+    "flipping to Dataflow shows the six real cables the three drawn arrows created",
+    "the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention",
+    "the strict parser reads the generated dataflow back as exactly the three relationships that were drawn",
+    "renaming a relationship rewrites its port names and keeps every cable bound",
+    "the armed family toggles off, returning the canvas to ordinary selection",
+    "leaving the region closes the lens, so an ordinary board has no communication drawing affordance",
+    "the real browser journey emitted no local console errors"
+  ]
+}

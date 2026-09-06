@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useEditor, useValue } from 'tldraw'
 
 import {
@@ -25,6 +25,18 @@ import {
 	type CommunicationServiceTrack,
 } from './communicationProjection'
 import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
+import {
+	COMMUNICATION_DRAW_FAMILIES,
+	COMMUNICATION_ROLE_LABELS,
+	renameCommunicationRelation,
+	type CommunicationDrawFamily,
+} from './communicationAuthoring'
+import {
+	COMMUNICATION_LINK_TOOL_ID,
+	startCommunicationLinkDraw,
+	stopCommunicationLinkDraw,
+} from './CommunicationLinkTool'
+import { CommunicationLinkPreview } from './CommunicationLinkPreview'
 import './communication-prototype.css'
 
 const MODES: readonly {
@@ -60,6 +72,12 @@ const ACTION_TRACKS: readonly { id: CommunicationActionTrack; label: string }[] 
 	{ id: 'shortest', label: 'Shortest' },
 ]
 
+const DRAW_FAMILIES: readonly { id: CommunicationDrawFamily; label: string; hint: string }[] = [
+	{ id: 'stream', label: 'Stream', hint: 'Pub/sub: publisher → subscriber' },
+	{ id: 'service', label: 'Service', hint: 'Client → server; request and response' },
+	{ id: 'action', label: 'Action', hint: 'Client → server; goal, feedback and result' },
+]
+
 function titleCase(value: string): string {
 	return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
 }
@@ -93,6 +111,15 @@ export function CommunicationPrototypeControls() {
 		},
 		[editor],
 	)
+	const activeToolId = useValue('communication active tool', () => editor.getCurrentToolId(), [editor])
+	const drawingFamily = useValue(
+		'communication draw family',
+		() => (editor.getCurrentToolId() === COMMUNICATION_LINK_TOOL_ID
+			? communicationProjection.get(editor).drawFamily
+			: null),
+		[editor],
+	)
+	const [renameDraft, setRenameDraft] = useState<string | null>(null)
 	const legacyPrototype = isCommunicationPrototypeQueryEnabled()
 	const enabled = isCommunicationPrototypeEnabled(editor)
 	const activeRegionId = activeCommunicationRegionId(editor)
@@ -156,6 +183,18 @@ export function CommunicationPrototypeControls() {
 		applyCommunicationFocus(editor, null)
 	}, [editor, enabled, selectionKey, state.focusedGroupKey, summary])
 
+	useEffect(() => {
+		// WHY: the tool is an affordance of this lens, so it must not outlive it.
+		// Leaving Components mode, or the region closing under it, would otherwise
+		// strand a cross-hair cursor that draws protocol legs on an ordinary board.
+		if (activeToolId !== COMMUNICATION_LINK_TOOL_ID) return
+		if (!enabled || state.mode !== 'components') stopCommunicationLinkDraw(editor)
+	}, [editor, activeToolId, enabled, state.mode])
+
+	useEffect(() => {
+		setRenameDraft(null)
+	}, [state.focusedGroupKey])
+
 	if (!enabled) return null
 
 	const relationCounts = summary.relations.reduce<Record<string, number>>((counts, relation) => {
@@ -165,8 +204,11 @@ export function CommunicationPrototypeControls() {
 	const focusedRelation = summary.relations.find((relation) => relation.groupKey === state.focusedGroupKey)
 	const unresolvedEdgeCount = summary.neutralEdgeCount - summary.localValueEdgeCount
 
+	const drawHint = drawingFamily ? COMMUNICATION_ROLE_LABELS[drawingFamily] : null
+
 	return (
 		<>
+			<CommunicationLinkPreview />
 			<section
 				className="communication-prototype-bar"
 				aria-label={activeRegionId ? 'Async region communication controls' : 'Communication projection prototype'}
@@ -198,6 +240,28 @@ export function CommunicationPrototypeControls() {
 				</div>
 				{state.mode === 'components' ? (
 					<>
+						<div className="communication-prototype-draw" aria-label="Draw a communication relationship">
+							<span>Draw</span>
+							{DRAW_FAMILIES.map((family) => {
+								const armed = drawingFamily === family.id
+								const paint = COMMUNICATION_FAMILY_PAINT[family.id]
+								return (
+									<button
+										key={family.id}
+										type="button"
+										aria-pressed={armed}
+										data-testid={`communication-draw-${family.id}`}
+										title={family.hint}
+										style={{ '--family-ink': paint.ink, '--family-soft': paint.soft } as React.CSSProperties}
+										onClick={() => (armed
+											? stopCommunicationLinkDraw(editor)
+											: startCommunicationLinkDraw(editor, family.id))}
+									>
+										<i aria-hidden="true">{paint.monogram}</i>{family.label}
+									</button>
+								)
+							})}
+						</div>
 						<div className="communication-prototype-routes" aria-label="Component presentation">
 							<span>Card</span>
 							{COMPONENT_VIEWS.map((view) => (
@@ -276,6 +340,33 @@ export function CommunicationPrototypeControls() {
 					<>
 						<strong>{focusedRelation.displayId} focused · {focusedRelation.edgeCount} leg{focusedRelation.edgeCount === 1 ? '' : 's'}</strong>
 						<span>{focusedRelation.family} · {focusedRelation.name}; unrelated edges are dimmed.</span>
+						<form
+							className="communication-prototype-rename"
+							data-testid="communication-rename-form"
+							onSubmit={(event) => {
+								event.preventDefault()
+								if (renameDraft === null) return
+								// The name lives nowhere but the port names, so renaming the
+								// relationship IS renaming its ports — one write, no index.
+								renameCommunicationRelation(editor, focusedRelation, renameDraft)
+								setRenameDraft(null)
+							}}
+						>
+							<label>
+								<span>Name</span>
+								<input
+									type="text"
+									data-testid="communication-rename-input"
+									value={renameDraft ?? focusedRelation.name}
+									onChange={(event) => setRenameDraft(event.target.value)}
+									onKeyDown={(event) => {
+										if (event.key === 'Escape') setRenameDraft(null)
+										event.stopPropagation()
+									}}
+								/>
+							</label>
+							<button type="submit" data-testid="communication-rename-submit">Rename</button>
+						</form>
 						<button
 							type="button"
 							data-testid="communication-focus-clear"
@@ -298,6 +389,11 @@ export function CommunicationPrototypeControls() {
 						<span>
 							{summary.localValueEdgeCount} local value · {unresolvedEdgeCount} unresolved · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
 						</span>
+					</>
+				) : drawHint ? (
+					<>
+						<strong>Drawing {drawingFamily}</strong>
+						<span>Drag from the {drawHint.initiator} to the {drawHint.responder}. Escape to stop.</span>
 					</>
 				) : (
 					<>

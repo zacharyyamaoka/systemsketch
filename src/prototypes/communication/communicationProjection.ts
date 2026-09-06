@@ -40,6 +40,13 @@ export interface CommunicationProjectionState {
 	focusedGroupKey: string | null
 	/** Null is the legacy query-gated whole-board prototype. */
 	activeRegionId: TLShapeId | null
+	/**
+	 * Which of the three drawable patterns the link tool is armed with.
+	 *
+	 * Presentation state, like every other field here: arming a family selects
+	 * a tool, and writes nothing to the document until an arrow actually lands.
+	 */
+	drawFamily: 'stream' | 'service' | 'action'
 }
 
 export const communicationProjection = new EditorAtom<CommunicationProjectionState>(
@@ -52,6 +59,7 @@ export const communicationProjection = new EditorAtom<CommunicationProjectionSta
 		actionTrack: 'goal',
 		focusedGroupKey: null,
 		activeRegionId: null,
+		drawFamily: 'stream',
 	}),
 )
 
@@ -611,6 +619,13 @@ export function applyCommunicationServiceTrack(editor: Editor, serviceTrack: Com
 
 export function applyCommunicationActionTrack(editor: Editor, actionTrack: CommunicationActionTrack): void {
 	communicationProjection.update(editor, (state) => ({ ...state, actionTrack }))
+}
+
+export function applyCommunicationDrawFamily(
+	editor: Editor,
+	drawFamily: CommunicationProjectionState['drawFamily'],
+): void {
+	communicationProjection.update(editor, (state) => ({ ...state, drawFamily }))
 }
 
 export function applyCommunicationFocus(editor: Editor, groupKey: string | null): void {

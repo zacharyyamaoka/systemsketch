@@ -249,6 +249,23 @@ export const BlockPort = T.object({
 	 */
 	branch: T.number.optional(),
 	/**
+	 * Put this port on a HORIZONTAL rail instead of its side's vertical one.
+	 *
+	 * Absent — the whole existing corpus — keeps the derived rule: an input is
+	 * on the left edge, a named output on the right. Naming `top` or `bottom`
+	 * moves the socket to that edge, which is what lets a component carry ports
+	 * on all four sides. Left and right stay derived from `side` rather than
+	 * being spellable here: an output on the left rail would invert the read
+	 * direction of every row it shares a body with.
+	 *
+	 * The label convention is Vyuh Node Flow's, via the prior-art study in
+	 * `docs/four-sided-port-labels-prior-art-2026-09-06.html`: text stays
+	 * horizontal and is drawn INWARD from the socket — below a top port, above
+	 * a bottom one — so the outer face remains a clear cable corridor.
+	 * See <https://flow.vyuh.tech/docs/theming/port-labels>.
+	 */
+	edge: T.literalEnum('top', 'bottom').optional(),
+	/**
 	 * Inputs only: the call writes this argument in place, so the caller's own
 	 * object changes. Read off the signature, not off the wiring, which is why
 	 * the hook shows in Port view before any cable exists.

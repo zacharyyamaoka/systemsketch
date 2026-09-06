@@ -98,6 +98,28 @@ export function edgePortPoint(
 	return { x: edge === 'left' ? 0 : width, y: clamped * height }
 }
 
+/** Clearance between a horizontal rail's socket and its inward label. */
+export const RAIL_LABEL_GAP_PX = 12
+
+/**
+ * The horizontal rail a port was authored onto, or null for the ordinary
+ * side-derived vertical rails.
+ */
+export function portRailEdge(port: BlockPort): 'top' | 'bottom' | null {
+	return port.edge === 'top' || port.edge === 'bottom' ? port.edge : null
+}
+
+/**
+ * The body slot plan must not reserve a row for a port that left the vertical
+ * rails, or a Block would grow a blank row for every socket moved to an edge.
+ */
+function withoutRailPorts(props: BlockShapeProps): BlockShapeProps {
+	const inputs = props.inputs.filter((port) => portRailEdge(port) === null)
+	const outputs = props.outputs.filter((port) => portRailEdge(port) === null)
+	if (inputs.length === props.inputs.length && outputs.length === props.outputs.length) return props
+	return { ...props, inputs, outputs }
+}
+
 export interface BlockRect {
 	x: number
 	y: number
@@ -109,11 +131,11 @@ export interface LaidOutBlockPort {
 	port: BlockPort
 	side: 'input' | 'output'
 	/**
-	 * Which edge the dot sits on. Inputs are always `left` and named outputs
-	 * always `right`; an effect output is on `top`, which is the only edge the
-	 * grammar had not already spent.
+	 * Which edge the dot sits on. Inputs default to `left` and named outputs to
+	 * `right`; an effect output is on `top`. A port carrying an authored
+	 * `edge` overrides that onto the horizontal rail it names.
 	 */
-	edge: 'left' | 'right' | 'top'
+	edge: 'left' | 'right' | 'top' | 'bottom'
 	/** Dot centre in Block-local coordinates; always on the outside edge. */
 	x: number
 	y: number
@@ -302,7 +324,8 @@ interface BodySlotPlan {
  * Resolve the Port view's burger grammar onto one 44px grid. Group and branch
  * dividers each consume a full slot, exactly as in the mature pyblocks face.
  */
-function planBodySlots(props: BlockShapeProps): BodySlotPlan {
+function planBodySlots(rawProps: BlockShapeProps): BodySlotPlan {
+	const props = withoutRailPorts(rawProps)
 	const sections = blockPortSections(props, { visibleOnly: true })
 	const portLayout = blockPortLayout(props)
 
@@ -578,6 +601,84 @@ function portLabelContentBox(
 	}
 }
 
+/** Centre the measured content inside a rail label instead of packing it to a lane edge. */
+function railLabelContentBox(port: BlockPort, side: 'input' | 'output', label: BlockRect): BlockRect {
+	const w = Math.max(0, Math.min(label.w, portLabelContentWidth(port, side)))
+	return { x: label.x + (label.w - w) / 2, y: label.y, w, h: label.h }
+}
+
+/**
+ * Place every port authored onto a horizontal rail.
+ *
+ * WHY this exact geometry — it is Vyuh Node Flow's convention, adopted from
+ * the prior-art study in `docs/four-sided-port-labels-prior-art-2026-09-06.html`
+ * (<https://flow.vyuh.tech/docs/theming/port-labels>): the text stays
+ * HORIZONTAL and is drawn INWARD from the socket, so a top port reads below
+ * its dot and a bottom port above it, and the outer face stays a clean cable
+ * corridor. Rotating or outdenting the label is what the study rejects, and
+ * both rails run left→right, which is also Simulink's ordering rule.
+ *
+ * It generalises a decision this app already made: the Loop's `item` outlet
+ * leaves the header's bottom edge and puts its type label above the dot so the
+ * first downward cable cannot strike through the words.
+ */
+function placeHorizontalRails(
+	props: BlockShapeProps,
+	width: number,
+	height: number,
+	band: { top: number; bottom: number },
+	placed: LaidOutBlockPort[],
+): void {
+	for (const edge of ['top', 'bottom'] as const) {
+		const lane = ([
+			['input', props.inputs],
+			['output', props.outputs],
+		] as const).flatMap(([side, ports]) => ports
+			.filter((port) => port.visible && portRailEdge(port) === edge)
+			.map((port) => ({ port, side })))
+		if (lane.length === 0) continue
+		lane.forEach(({ port, side }, index) => {
+			// Evenly spread, ordered left→right by position in the port list.
+			const t = (index + 0.5) / lane.length
+			const point = edgePortPoint(edge, t, width, height)
+			const labelWidth = Math.max(0, Math.min(
+				width - PORT_LABEL_INSET_PX * 2,
+				width / Math.max(1, lane.length),
+			))
+			// Inward by the study's 12px gap, then clamped into the body band: the
+			// header and footer own the strips the raw offset would land in, and
+			// the contract's answer to "it does not fit" is to move the text, not
+			// to distort it or drop the port.
+			const inward = edge === 'top'
+				? Math.max(RAIL_LABEL_GAP_PX, band.top)
+				: Math.min(
+					height - RAIL_LABEL_GAP_PX - PORT_LABEL_HEIGHT_PX,
+					band.bottom - PORT_LABEL_HEIGHT_PX,
+				)
+			const label: BlockRect = {
+				x: Math.max(
+					PORT_LABEL_INSET_PX,
+					Math.min(width - PORT_LABEL_INSET_PX - labelWidth, point.x - labelWidth / 2),
+				),
+				y: Math.max(0, Math.min(height - PORT_LABEL_HEIGHT_PX, inward)),
+				w: labelWidth,
+				h: PORT_LABEL_HEIGHT_PX,
+			}
+			placed.push({
+				port,
+				side,
+				edge,
+				x: point.x,
+				y: point.y,
+				label,
+				labelContent: railLabelContentBox(port, side, label),
+				subtle: false,
+				lifted: false,
+			})
+		})
+	}
+}
+
 /**
  * The pointer target behind one Expanded port label. It joins the words to the
  * Block edge, but deliberately stops after the painted content so the middle
@@ -586,6 +687,9 @@ function portLabelContentBox(
 export function portLabelHitArea(placed: LaidOutBlockPort, width: number): BlockRect | null {
 	if (placed.subtle || !placed.labelContent) return null
 	const content = placed.labelContent
+	// A rail label is centred on its socket rather than packed against a lane
+	// edge, so joining it to the Block's side would claim the whole body width.
+	if (placed.edge === 'top' || placed.edge === 'bottom') return content
 	const near = placed.side === 'input' ? 0 : width
 	const far = placed.side === 'input'
 		? content.x + content.w + PORT_LABEL_HIT_PAD_PX
@@ -1079,6 +1183,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 
 		placeBody(props.inputs, 'input')
 		placeBody(props.outputs, 'output')
+		placeHorizontalRails(props, width, height, { top: bodyTop, bottom: footerTop }, placed)
 		dividers.push(...plan.dividers.map(({ kind, slot }) => ({
 			kind,
 			x: kind === 'group' ? 0 : width / 2,

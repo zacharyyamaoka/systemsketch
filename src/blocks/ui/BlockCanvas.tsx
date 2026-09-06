@@ -1148,6 +1148,10 @@ function PortLabels({
         // rather than growing a second element beside it.
         const diffState = portDiffState(placed.port)
         const gutter = diffGutterGlyph(diffState)
+        // A rail label is centred under (or over) its socket and always reads
+        // `name: Type`, because neither side's lane-edge packing applies once
+        // the socket has left the vertical rails.
+        const onRail = placed.edge === 'top' || placed.edge === 'bottom'
 
         return (
           <div
@@ -1155,6 +1159,7 @@ function PortLabels({
             className={[
               'BlockNode-portLabel',
               placed.side === 'input' ? 'BlockNode-portLabel--in' : 'BlockNode-portLabel--out',
+              onRail ? 'BlockNode-portLabel--rail' : '',
               held ? 'BlockNode-portLabel--dragging' : '',
             ].filter(Boolean).join(' ')}
             data-diff-state={diffState === 'normal' ? undefined : diffState}
@@ -1167,9 +1172,9 @@ function PortLabels({
             {gutter ? (
               <span className="BlockNode-portGutter" aria-hidden="true">{gutter}</span>
             ) : null}
-            {placed.side === 'output' ? type : null}
+            {placed.side === 'output' && !onRail ? type : null}
             {name}
-            {placed.side === 'input' ? type : null}
+            {placed.side === 'input' || onRail ? type : null}
             {chip}
           </div>
         )
