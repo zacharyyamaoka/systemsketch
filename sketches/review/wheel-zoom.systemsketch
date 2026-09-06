@@ -31,7 +31,6 @@
       "com.tldraw.asset.bookmark": 2,
       "com.tldraw.shape.group": 0,
       "com.tldraw.shape.bookmark": 2,
-      "com.tldraw.shape.draw": 5,
       "com.tldraw.shape.note": 13,
       "com.tldraw.shape.frame": 1,
       "com.tldraw.shape.highlight": 4,
@@ -42,9 +41,13 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.block": 8,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 0,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 0,
       "com.tldraw.shape.branch-arm": 0,
       "com.tldraw.shape.connection": 6,
       "com.tldraw.binding.arrow": 1,
@@ -96,7 +99,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3siiV",
+      "index": "a3ncvV",
       "typeName": "shape"
     },
     {
@@ -121,7 +124,7 @@
         "h": 110,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -141,7 +144,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Place the pointer over this Block"
+                  "text": "1 · Scroll over wheel(): the board pans and the % readout stays put"
                 }
               ]
             }
@@ -149,11 +152,11 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2hin",
+      "index": "a2N4j",
       "typeName": "shape"
     },
     {
-      "x": 80,
+      "x": 30,
       "y": 540,
       "rotation": 0,
       "isLocked": false,
@@ -186,7 +189,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · 100% feels unchanged; raising sensitivity makes each scroll step visibly larger"
+                  "text": "PASS WHEN · Normal scroll pans; Ctrl/Cmd + scroll zooms; the opt-in makes plain scroll zoom"
                 }
               ]
             }
@@ -194,7 +197,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4WNU",
+      "index": "a4B6E",
       "typeName": "shape"
     },
     {
@@ -231,7 +234,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Scroll down to zoom in — do not hold Ctrl"
+                  "text": "2 · Hold Ctrl/Cmd + scroll here: the % readout changes"
                 }
               ]
             }
@@ -239,13 +242,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a35II",
+      "index": "a3JX2",
       "typeName": "shape"
     },
     {
-      "x": 39.44444444444444,
-      "y": -10.375,
-      "z": 0.9216,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -267,6 +270,14 @@
         "terminal": "end"
       },
       "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:lJJfryXmh9ewF4Ab_Mj5y",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -336,14 +347,6 @@
       "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#F2555A",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:XRm28aKef2_fL2CNV1mau",
-      "typeName": "user"
-    },
-    {
       "x": 500,
       "y": 250,
       "rotation": 0,
@@ -382,7 +385,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "bp73XH2nJnaTc6MREHNO2",
+        "definitionId": "gaNXYDeP3jwPHVnDzK_D6",
         "inputs": [
           {
             "id": "in_1",
@@ -402,7 +405,7 @@
         "definitionKey": "wheel"
       },
       "parentId": "page:page",
-      "index": "a12hM",
+      "index": "a1wEn",
       "typeName": "shape"
     },
     {
@@ -439,7 +442,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "OPTION · Settings → Canvas → Wheel zoom: tune 50–150% or Reset to standard"
+                  "text": "OPTION · Settings → Canvas → enable Direct wheel zoom, then plain scroll zooms here"
                 }
               ]
             }
@@ -447,7 +450,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5oUF",
+      "index": "a5L9I",
       "typeName": "shape"
     },
     {
@@ -554,7 +557,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2xmuG",
+      "index": "a2izEV",
       "typeName": "shape"
     }
   ]

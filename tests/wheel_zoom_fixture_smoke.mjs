@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-/** Drive the committed review fixture through its cue and wheel interactions. */
+/** Drive the committed review fixture through stock and direct wheel navigation. */
 import assert from 'node:assert/strict'
 import { copyFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import {
   ROOT,
+  clickElement,
   delay,
   drag,
   elementBox,
@@ -26,6 +27,31 @@ async function arrowBounds(page) {
     page,
     `JSON.stringify(window.__systemsketch.editor.getShapePageBounds('shape:cue-step-2-arrow'))`,
   ))
+}
+
+async function wheel(page, x, y, { ctrl = false } = {}) {
+  await page.send('Input.dispatchMouseEvent', {
+    type: 'mouseWheel',
+    x,
+    y,
+    deltaX: 0,
+    deltaY: 120,
+    modifiers: ctrl ? 2 : 0,
+  })
+  await delay(400)
+}
+
+async function enableDirectWheelZoom(page) {
+  await clickElement(page, '[data-testid="main-menu.button"]')
+  await waitFor(page, `document.querySelector('[data-testid="main-menu.settings"]')`, 'the Settings item')
+  await clickElement(page, '[data-testid="main-menu.settings"]')
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog')
+  await clickElement(page, '[data-testid="systemsketch-settings-category-canvas"]')
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')`, 'the Canvas setting')
+  await clickElement(page, '[data-testid="systemsketch-direct-wheel-zoom"]')
+  await waitFor(page, `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'mouse'`, 'direct zoom enabled')
+  await clickElement(page, '.systemsketch-settings__header .tlui-button')
+  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog to close')
 }
 
 async function main() {
@@ -49,19 +75,25 @@ async function main() {
     assert.notDeepEqual(arrowAfter, arrowBefore)
     pass('moving the real target Block reroutes its bound orange cue arrow')
 
-    const zoomBefore = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
-    await app.page.send('Input.dispatchMouseEvent', {
-      type: 'mouseWheel',
-      x: target.x + target.w / 2,
-      y: target.y + target.h / 2,
-      deltaX: 0,
-      deltaY: 120,
-      modifiers: 0,
-    })
-    await delay(400)
-    const zoomAfter = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
-    assert.ok(zoomAfter > zoomBefore)
-    pass(`the fixture's literal no-Ctrl scroll-down gesture zooms in (${zoomBefore.toFixed(2)} → ${zoomAfter.toFixed(2)})`)
+    const at = { x: target.x + target.w / 2, y: target.y + target.h / 2 }
+    const before = JSON.parse(await evaluate(app.page, 'JSON.stringify(window.__systemsketch.editor.getCamera())'))
+    await wheel(app.page, at.x, at.y)
+    const panned = JSON.parse(await evaluate(app.page, 'JSON.stringify(window.__systemsketch.editor.getCamera())'))
+    assert.notEqual(panned.y, before.y)
+    assert.equal(panned.z, before.z)
+    pass('the fixture’s literal plain-scroll gesture pans without changing zoom')
+
+    await wheel(app.page, at.x, at.y, { ctrl: true })
+    const modifierZoomed = JSON.parse(await evaluate(app.page, 'JSON.stringify(window.__systemsketch.editor.getCamera())'))
+    assert.notEqual(modifierZoomed.z, panned.z)
+    pass('the fixture’s Ctrl/Cmd + scroll gesture changes zoom')
+
+    await enableDirectWheelZoom(app.page)
+    const directBefore = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
+    await wheel(app.page, at.x, at.y)
+    const directAfter = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
+    assert.ok(directAfter > directBefore)
+    pass('after the Canvas opt-in, the same plain scroll-down gesture zooms in')
 
     const capture = await app.page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(DRIVEN_SCREENSHOT, Buffer.from(capture.data, 'base64'))

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Editor } from 'tldraw'
 import {
-  enforceSystemSketchWheelZoom,
+  enforceSystemSketchCanvasNavigation,
   SYSTEMSKETCH_EDITOR_OPTIONS,
 } from './canvasCamera'
 
@@ -24,17 +24,17 @@ function editorWithPreferences(
   }
 }
 
-describe('SystemSketch wheel zoom', () => {
-  it('declares zoom as the initial stock camera behavior', () => {
-    expect(SYSTEMSKETCH_EDITOR_OPTIONS.camera).toEqual({ wheelBehavior: 'zoom', zoomSpeed: 1 })
+describe('SystemSketch canvas navigation', () => {
+  it('declares stock pan as the initial camera behavior', () => {
+    expect(SYSTEMSKETCH_EDITOR_OPTIONS.camera).toEqual({ wheelBehavior: 'pan' })
   })
 
   it.each(['trackpad', null] as const)(
-    'replaces the %s device mode that would override wheel zoom',
+    'makes direct zoom authoritative over the %s device mode',
     (inputMode) => {
       const { editor, setCameraOptions, updateUserPreferences } = editorWithPreferences(inputMode, false)
 
-      enforceSystemSketchWheelZoom(editor, true, 100)
+      enforceSystemSketchCanvasNavigation(editor, true, true, 100)
 
       expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'zoom', zoomSpeed: 1 })
       expect(updateUserPreferences).toHaveBeenCalledWith({
@@ -44,10 +44,10 @@ describe('SystemSketch wheel zoom', () => {
     },
   )
 
-  it('uses scroll down to zoom in by default', () => {
+  it('uses scroll down to zoom in when direct zoom is enabled', () => {
     const { editor, updateUserPreferences } = editorWithPreferences('mouse', false)
 
-    enforceSystemSketchWheelZoom(editor, true, 100)
+    enforceSystemSketchCanvasNavigation(editor, true, true, 100)
 
     expect(updateUserPreferences).toHaveBeenCalledWith({
       inputMode: 'mouse',
@@ -58,7 +58,7 @@ describe('SystemSketch wheel zoom', () => {
   it('can flip to scroll up to zoom in', () => {
     const { editor, updateUserPreferences } = editorWithPreferences('mouse', true)
 
-    enforceSystemSketchWheelZoom(editor, false, 100)
+    enforceSystemSketchCanvasNavigation(editor, true, false, 100)
 
     expect(updateUserPreferences).toHaveBeenCalledWith({
       inputMode: 'mouse',
@@ -66,10 +66,10 @@ describe('SystemSketch wheel zoom', () => {
     })
   })
 
-  it('does not rewrite already-correct wheel preferences', () => {
+  it('does not rewrite already-correct direct-wheel preferences', () => {
     const { editor, updateUserPreferences } = editorWithPreferences('mouse', true)
 
-    enforceSystemSketchWheelZoom(editor, true, 100)
+    enforceSystemSketchCanvasNavigation(editor, true, true, 100)
 
     expect(updateUserPreferences).not.toHaveBeenCalled()
   })
@@ -77,8 +77,25 @@ describe('SystemSketch wheel zoom', () => {
   it('projects the sensitivity percentage onto tldraw zoomSpeed', () => {
     const { editor, setCameraOptions } = editorWithPreferences('mouse', true)
 
-    enforceSystemSketchWheelZoom(editor, true, 135)
+    enforceSystemSketchCanvasNavigation(editor, true, true, 135)
 
     expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'zoom', zoomSpeed: 1.35 })
+  })
+
+  it('restores stock pan and the modifier-zoom input mode when direct zoom is off', () => {
+    const { editor, setCameraOptions, updateUserPreferences } = editorWithPreferences('mouse', true)
+
+    enforceSystemSketchCanvasNavigation(editor, false, true, 135)
+
+    expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'pan', zoomSpeed: 1 })
+    expect(updateUserPreferences).toHaveBeenCalledWith({ inputMode: 'trackpad' })
+  })
+
+  it('does not rewrite the already-stock input mode', () => {
+    const { editor, updateUserPreferences } = editorWithPreferences('trackpad', false)
+
+    enforceSystemSketchCanvasNavigation(editor, false, true, 100)
+
+    expect(updateUserPreferences).not.toHaveBeenCalled()
   })
 })

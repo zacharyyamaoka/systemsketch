@@ -187,29 +187,20 @@ function expectedMenuX(union, viewportW, menuW) {
 }
 
 /**
- * Zoom with a plain wheel — the gesture a person uses on this product, and
- * the only one that does not depend on tldraw's shortcut layer receiving a
- * virtual key code.
+ * Zoom with Ctrl/Cmd + wheel, the stock whiteboard modifier gesture.
  *
- * WHY plain wheel and not ctrl+wheel: `src/canvasCamera.ts` sets tldraw's
- * `wheelBehavior: 'zoom'` for every SystemSketch board — a plain wheel scroll
- * is already the zoom gesture here, not the usual browser/trackpad pan. In
- * tldraw's own wheel handler (`Editor.js`, the `"wheel"` case), holding ctrl
- * *inverts* whatever `wheelBehavior` is configured
- * (`if (info.ctrlKey) behavior = wheelBehavior === "pan" ? "zoom" : "pan"`),
- * so ctrl+wheel on this product's default camera options pans instead of
- * zooming — confirmed by reading `editor.getCamera()` after the old gesture:
- * `z` stayed at 1 while `y` moved. Direction follows the product's other
- * default, `scrollDownZoomsIn: true` (`src/settings/appearancePreferences.ts`),
- * which is why a positive `deltaY` (scroll down) is "zoom in" — the same
- * convention already proven out in `tests/wheel_zoom_smoke.mjs` and
- * `tests/wheel_zoom_fixture_smoke.mjs`.
+ * WHY Ctrl/Cmd rather than a plain wheel: `src/canvasCamera.ts` restores
+ * stock `wheelBehavior: 'pan'` for every SystemSketch board. tldraw's own
+ * wheel handler swaps that to zoom when the modifier is held, so this test
+ * follows the ordinary whiteboard contract it is meant to preserve.
  */
 async function zoomBy(page, steps, at = { x: 700, y: 460 }) {
   for (let step = 0; step < Math.abs(steps); step += 1) {
     await page.send('Input.dispatchMouseEvent', {
       type: 'mouseWheel', x: at.x, y: at.y, deltaX: 0,
-      deltaY: steps > 0 ? 120 : -120, modifiers: 0,
+      // tldraw's stock modifier zoom follows the browser direction: scrolling
+      // up zooms in. Direct mode flips this only after its explicit opt-in.
+      deltaY: steps > 0 ? -120 : 120, modifiers: 2,
     })
     await delay(90)
   }
@@ -385,15 +376,11 @@ async function main() {
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))
 
     // 8. Panned off screen: invisible *and* out of the way of the pointer.
-    // WHY ctrl held: same product-wide wheel contract as `zoomBy` above — a
-    // plain wheel is already the zoom gesture here (`src/canvasCamera.ts`),
-    // so a plain horizontal scroll's `dy` is 0 and tldraw's zoom branch reads
-    // no delta at all (confirmed: the camera did not move without ctrl).
-    // Holding ctrl inverts `wheelBehavior` back to 'pan', which is what
-    // actually moves the camera on `dx`/`dy`.
+    // A plain wheel is the stock pan gesture. Horizontal delta moves the
+    // camera without changing zoom, taking the anchored menu beyond the view.
     for (let step = 0; step < 14; step += 1) {
       await page.send('Input.dispatchMouseEvent', {
-        type: 'mouseWheel', x: 700, y: 400, deltaX: -180, deltaY: 0, modifiers: 2,
+        type: 'mouseWheel', x: 700, y: 400, deltaX: -180, deltaY: 0, modifiers: 0,
       })
       await delay(90)
     }

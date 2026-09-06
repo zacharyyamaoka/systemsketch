@@ -322,6 +322,7 @@ function InterfacePanel() {
 
 function CanvasPanel() {
   const {
+    directWheelZoom,
     showZoomButtons,
     scrollDownZoomsIn,
     wheelZoomSensitivityPercent,
@@ -337,9 +338,30 @@ function CanvasPanel() {
         </div>
       </div>
 
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-behavior-title">
         <div className="systemsketch-settings__appearance-heading">
-          <h3 id="wheel-zoom-title">Wheel zoom</h3>
+          <h3 id="wheel-behavior-title">Wheel behavior</h3>
+          <p>Use normal whiteboard navigation, or make the wheel zoom directly.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={directWheelZoom}
+          data-testid="systemsketch-direct-wheel-zoom"
+          onClick={() => updateAppearancePreferences({ directWheelZoom: !directWheelZoom })}
+        >
+          <span>
+            <strong>Direct wheel zoom</strong>
+            <small>Off: scroll pans and Ctrl/Cmd + scroll zooms. On: scroll zooms directly.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
+
+      {directWheelZoom ? <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="wheel-zoom-title">Direct wheel zoom</h3>
           <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
         </div>
         <button
@@ -392,7 +414,7 @@ function CanvasPanel() {
             Reset to standard
           </button>
         </div>
-      </section>
+      </section> : null}
 
       <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
         <div className="systemsketch-settings__appearance-heading">
