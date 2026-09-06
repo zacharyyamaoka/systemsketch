@@ -1,10 +1,14 @@
 {
-  "generatedAt": "2026-09-05T21:01:48.776Z",
+  "generatedAt": "2026-09-06T10:19:39.005Z",
   "checks": [
     "the saved stress board has five real component children and 18 real Async connection records",
     "a real Frame move keeps the numbered cue attached and carries the entire stress topology",
     "Tag edges separates three Actions, three Services, two Topics, and one Stream with no name bleed",
     "Components collapses the graph to nine relationships and carries A2 on the move.goal track",
+    "Service and Action selectors change only their aggregate carrier while Topic and Stream stay on data",
+    "an Action without optional feedback falls back to its initiating goal instead of disappearing",
+    "Shortest measures the real routed polyline, excludes Action cancel, and never mutates canonical wiring",
+    "representative selectors become unavailable when Straight makes every carrier the same centre line",
     "clicking A2 isolates only the four-leg move Action from eight unrelated relationships",
     "the A2 focus expands back to exactly goal, cancel, feedback, and result in Tagged view",
     "a real alerts port drag adds a nineteenth wire with the region Async default and provenance",

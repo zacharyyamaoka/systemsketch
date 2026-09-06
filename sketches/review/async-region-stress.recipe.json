@@ -1153,9 +1153,9 @@
       }
     },
     {
-      "id": "step-focus",
+      "id": "step-carrier",
       "kind": "step",
-      "text": "3 · Switch to Components and click A2. Exactly move.goal, cancel, feedback, and result belong to that focus.",
+      "text": "3 · Switch to Components. Use Service edge and Action edge to choose the request/response or goal/feedback/result carrier.",
       "x": 20,
       "y": 500,
       "w": 380,
@@ -1167,9 +1167,23 @@
       }
     },
     {
-      "id": "step-wire",
+      "id": "step-shortest",
       "kind": "step",
-      "text": "4 · Return to Dataflow. Drag Camera gateway.alerts onto Telemetry UI.alerts. The nineteenth wire should default to Async.",
+      "text": "4 · Choose Shortest for both families. Every A#/S# should independently reuse its shortest routed leg; Topic and Stream stay on data.",
+      "x": 20,
+      "y": 780,
+      "w": 380,
+      "h": 190,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "left",
+        "dy": 250
+      }
+    },
+    {
+      "id": "step-focus",
+      "kind": "step",
+      "text": "5 · Click A2. Exactly move.goal, cancel, feedback, and result belong to that focus even when a different carrier is drawn.",
       "x": 2300,
       "y": 500,
       "w": 440,
@@ -1181,9 +1195,23 @@
       }
     },
     {
+      "id": "step-wire",
+      "kind": "step",
+      "text": "6 · Return to Dataflow. Drag Camera gateway.alerts onto Telemetry UI.alerts. The nineteenth wire should default to Async.",
+      "x": 2300,
+      "y": 780,
+      "w": 440,
+      "h": 190,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "right",
+        "dy": 250
+      }
+    },
+    {
       "id": "step-dismiss",
       "kind": "step",
-      "text": "5 · Click outside the frame. The contextual controls should close while every wire and component remains.",
+      "text": "7 · Click outside the frame. The contextual controls should close while every wire and component remains.",
       "x": 520,
       "y": 1400,
       "w": 650,
@@ -1197,7 +1225,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Nine relationships collapse from 18 correctly grouped protocol legs, A2 isolates four move legs, and the new alerts wire is Async by default.",
+      "text": "PASS WHEN · Carrier choices follow their named or shortest existing tracks without moving the graph; A2 still isolates four legs; the new alerts wire defaults Async.",
       "x": 1500,
       "y": 1400,
       "w": 650,

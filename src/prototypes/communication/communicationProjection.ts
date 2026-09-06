@@ -18,6 +18,8 @@ export const COMMUNICATION_PROTOTYPE_QUERY = 'communication'
 export type CommunicationProjectionMode = 'wiring' | 'tagged' | 'components'
 export type CommunicationComponentView = 'simple' | 'port'
 export type CommunicationRouteStyle = 'elbow' | 'straight'
+export type CommunicationServiceTrack = 'request' | 'response' | 'shortest'
+export type CommunicationActionTrack = 'goal' | 'feedback' | 'result' | 'shortest'
 export type CommunicationFamily = 'topic' | 'stream' | 'service' | 'action'
 export type CommunicationPhase =
 	| 'publish'
@@ -33,6 +35,8 @@ export interface CommunicationProjectionState {
 	mode: CommunicationProjectionMode
 	componentView: CommunicationComponentView
 	routeStyle: CommunicationRouteStyle
+	serviceTrack: CommunicationServiceTrack
+	actionTrack: CommunicationActionTrack
 	focusedGroupKey: string | null
 	/** Null is the legacy query-gated whole-board prototype. */
 	activeRegionId: TLShapeId | null
@@ -44,6 +48,8 @@ export const communicationProjection = new EditorAtom<CommunicationProjectionSta
 		mode: 'wiring',
 		componentView: 'simple',
 		routeStyle: 'elbow',
+		serviceTrack: 'request',
+		actionTrack: 'goal',
 		focusedGroupKey: null,
 		activeRegionId: null,
 	}),
@@ -80,8 +86,14 @@ export interface CommunicationRelation extends CommunicationDescriptor {
 	representativeId: TLShapeId
 	edgeCount: number
 	memberIds: TLShapeId[]
+	memberDescriptors: CommunicationDescriptor[]
 	displayId: string
 	lane: number
+}
+
+export interface CommunicationRepresentativeCandidate {
+	descriptor: CommunicationDescriptor
+	pathLength: number
 }
 
 export type CommunicationAssociationIssueKind =
@@ -131,6 +143,46 @@ const REPRESENTATIVE_PHASE_PRIORITY: Readonly<Record<CommunicationPhase, number>
 	feedback: 2,
 	response: 3,
 	result: 4,
+}
+
+function compareRepresentativeCandidates(
+	a: CommunicationRepresentativeCandidate,
+	b: CommunicationRepresentativeCandidate,
+): number {
+	return REPRESENTATIVE_PHASE_PRIORITY[a.descriptor.phase]
+		- REPRESENTATIVE_PHASE_PRIORITY[b.descriptor.phase]
+		|| String(a.descriptor.connectionId).localeCompare(String(b.descriptor.connectionId))
+}
+
+/**
+ * Pick the real protocol leg whose existing geometry carries a collapsed edge.
+ *
+ * `pathLength` is supplied by the renderer because it owns the routed cable
+ * geometry. Keeping the policy here leaves the communication model independent
+ * of ConnectionShapeUtil and avoids a semantic↔presentation import cycle.
+ */
+export function chooseCommunicationRepresentative(
+	family: CommunicationFamily,
+	candidates: readonly CommunicationRepresentativeCandidate[],
+	policy: CommunicationServiceTrack | CommunicationActionTrack,
+): CommunicationDescriptor | null {
+	if (candidates.length === 0) return null
+	const ordered = [...candidates].sort(compareRepresentativeCandidates)
+	const fallback = ordered[0].descriptor
+	if (family === 'topic' || family === 'stream') return fallback
+	if (policy !== 'shortest') {
+		return ordered.find((candidate) => candidate.descriptor.phase === policy)?.descriptor ?? fallback
+	}
+	const eligible = family === 'action'
+		? ordered.filter((candidate) => candidate.descriptor.phase !== 'cancel')
+		: ordered
+	// WHY: Cancel is a coordination side-channel, not the work or outcome a
+	// compact Action line normally stands for. It remains visible on expansion,
+	// but does not unexpectedly win merely because its ports happen to be close.
+	const measurable = (eligible.length > 0 ? eligible : ordered)
+		.filter((candidate) => Number.isFinite(candidate.pathLength))
+		.sort((a, b) => a.pathLength - b.pathLength || compareRepresentativeCandidates(a, b))
+	return measurable[0]?.descriptor ?? fallback
 }
 
 function finalToken(name: string): string {
@@ -361,6 +413,7 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 			representativeId: members[0].connectionId,
 			edgeCount: members.length,
 			memberIds: members.map((member) => member.connectionId),
+			memberDescriptors: [...members],
 			displayId: '',
 			lane: 0,
 		}
@@ -550,6 +603,14 @@ export function applyCommunicationComponentView(
 
 export function applyCommunicationRouteStyle(editor: Editor, routeStyle: CommunicationRouteStyle): void {
 	communicationProjection.update(editor, (state) => ({ ...state, routeStyle }))
+}
+
+export function applyCommunicationServiceTrack(editor: Editor, serviceTrack: CommunicationServiceTrack): void {
+	communicationProjection.update(editor, (state) => ({ ...state, serviceTrack }))
+}
+
+export function applyCommunicationActionTrack(editor: Editor, actionTrack: CommunicationActionTrack): void {
+	communicationProjection.update(editor, (state) => ({ ...state, actionTrack }))
 }
 
 export function applyCommunicationFocus(editor: Editor, groupKey: string | null): void {

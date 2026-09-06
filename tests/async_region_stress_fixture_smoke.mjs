@@ -62,6 +62,36 @@ async function semanticIdFor(page, connectionId) {
   return evaluate(page, `document.querySelector('[data-shape-id="${connectionId}"] [data-communication-id]')?.getAttribute('data-communication-id') ?? null`)
 }
 
+async function renderedPathLengths(page, connectionIds) {
+  return JSON.parse(await evaluate(page, `JSON.stringify(Object.fromEntries(${JSON.stringify(connectionIds)}.map((id) => {
+    const root = document.querySelector('[data-shape-id="' + id + '"] [data-communication-mode="tagged"]')
+    const path = root?.querySelector(':scope > path:not([data-communication-focus-hit])')
+    return [id, path?.getTotalLength() ?? Number.POSITIVE_INFINITY]
+  })))`))
+}
+
+async function representativeState(page, displayId) {
+  return JSON.parse(await evaluate(page, `JSON.stringify((() => {
+    const node = document.querySelector('[data-communication-mode="components"][data-communication-id="${displayId}"]')
+    return {
+      phase: node?.getAttribute('data-communication-representative-phase') ?? null,
+      id: node?.getAttribute('data-communication-representative-id') ?? null,
+      policy: node?.getAttribute('data-communication-representative-policy') ?? null,
+    }
+  })())`))
+}
+
+async function selectTrack(page, testId, value) {
+  await evaluate(page, `(() => {
+    const element = document.querySelector('[data-testid="${testId}"]')
+    if (!(element instanceof HTMLSelectElement)) throw new Error('Missing ${testId}')
+    const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set
+    setter.call(element, ${JSON.stringify(value)})
+    element.dispatchEvent(new Event('change', { bubbles: true }))
+    return true
+  })()`)
+}
+
 async function main() {
   await ensureDir(ASSETS)
   const app = await startApp({
@@ -98,6 +128,7 @@ async function main() {
     assert.ok(initial.connections.every((edge) => edge.parentId === REGION && edge.temporal === 'async'))
     assert.ok(initial.childParents.every((parentId) => parentId === REGION))
     assert.equal(initial.cueBindings, 1)
+    const seededGraph = await evaluate(app.page, `JSON.stringify(window.__systemsketch.editor.getCurrentPageShapes())`)
     pass('the saved stress board has five real component children and 18 real Async connection records')
 
     const regionBounds = JSON.parse(await evaluate(app.page, `JSON.stringify(window.__systemsketch.editor.getShapePageBounds(${JSON.stringify(REGION)}))`))
@@ -129,6 +160,9 @@ async function main() {
     assert.equal(await semanticIdFor(app.page, 'shape:edge-status-action-goal'), 'A3')
     assert.equal(await semanticIdFor(app.page, 'shape:edge-status-service-request'), 'S3')
     for (const edgeId of MOVE_EDGES) assert.equal(await semanticIdFor(app.page, edgeId), 'A2')
+    const moveLengths = await renderedPathLengths(app.page, MOVE_EDGES)
+    const poseEdges = ['shape:edge-pose-request', 'shape:edge-pose-response']
+    const poseLengths = await renderedPathLengths(app.page, poseEdges)
     pass('Tag edges separates three Actions, three Services, two Topics, and one Stream with no name bleed')
 
     await shot(app.page, '01-nine-groups-across-eighteen-legs.png')
@@ -149,6 +183,54 @@ async function main() {
     assert.equal(moveRelation.representative, 'goal')
     assert.deepEqual(new Set(moveRelation.members), new Set(MOVE_EDGES))
     pass('Components collapses the graph to nine relationships and carries A2 on the move.goal track')
+
+    assert.deepEqual(await representativeState(app.page, 'S2'), {
+      phase: 'request', id: 'shape:edge-pose-request', policy: 'request',
+    })
+    await selectTrack(app.page, 'communication-service-track', 'response')
+    await selectTrack(app.page, 'communication-action-track', 'result')
+    await waitFor(app.page, `document.querySelector('[data-communication-id="A2"]')?.getAttribute('data-communication-representative-phase') === 'result'`, 'Action result representative')
+    assert.deepEqual(await representativeState(app.page, 'A2'), {
+      phase: 'result', id: 'shape:edge-move-result', policy: 'result',
+    })
+    assert.deepEqual(await representativeState(app.page, 'S2'), {
+      phase: 'response', id: 'shape:edge-pose-response', policy: 'response',
+    })
+    assert.deepEqual(await representativeState(app.page, 'T1'), {
+      phase: 'publish', id: 'shape:edge-detections', policy: 'data',
+    })
+    assert.deepEqual(await representativeState(app.page, 'ST1'), {
+      phase: 'stream', id: 'shape:edge-preview', policy: 'data',
+    })
+    pass('Service and Action selectors change only their aggregate carrier while Topic and Stream stay on data')
+    await shot(app.page, '02a-result-and-response-tracks.png')
+
+    await selectTrack(app.page, 'communication-action-track', 'feedback')
+    await waitFor(app.page, `document.querySelector('[data-communication-id="A2"]')?.getAttribute('data-communication-representative-phase') === 'feedback'`, 'Action feedback representative')
+    assert.deepEqual(await representativeState(app.page, 'A2'), {
+      phase: 'feedback', id: 'shape:edge-move-feedback', policy: 'feedback',
+    })
+    assert.equal((await representativeState(app.page, 'A3')).phase, 'goal')
+    pass('an Action without optional feedback falls back to its initiating goal instead of disappearing')
+
+    await selectTrack(app.page, 'communication-service-track', 'shortest')
+    await selectTrack(app.page, 'communication-action-track', 'shortest')
+    const shortestMoveId = Object.entries(moveLengths)
+      .filter(([id]) => id !== 'shape:edge-move-cancel')
+      .sort(([, a], [, b]) => a - b)[0][0]
+    const shortestPoseId = Object.entries(poseLengths).sort(([, a], [, b]) => a - b)[0][0]
+    await waitFor(app.page, `document.querySelector('[data-communication-id="A2"]')?.getAttribute('data-communication-representative-policy') === 'shortest'`, 'shortest representatives')
+    assert.equal((await representativeState(app.page, 'A2')).id, shortestMoveId)
+    assert.equal((await representativeState(app.page, 'S2')).id, shortestPoseId)
+    assert.equal(await evaluate(app.page, `JSON.stringify(window.__systemsketch.editor.getCurrentPageShapes())`), seededGraph)
+    pass('Shortest measures the real routed polyline, excludes Action cancel, and never mutates canonical wiring')
+    await shot(app.page, '02b-shortest-tracks.png')
+
+    await clickElement(app.page, '[data-testid="communication-route-straight"]')
+    await waitFor(app.page, `document.querySelector('[data-testid="communication-service-track"]')?.disabled === true`, 'straight-route selector guard')
+    assert.equal(await evaluate(app.page, `document.querySelector('[data-testid="communication-action-track"]')?.disabled === true`), true)
+    await clickElement(app.page, '[data-testid="communication-route-elbow"]')
+    pass('representative selectors become unavailable when Straight makes every carrier the same centre line')
 
     const focusHit = await elementBox(app.page, '[data-communication-mode="components"][data-communication-id="A2"] [data-communication-focus-hit]')
     await clickAt(app.page, focusHit.cx, focusHit.cy)

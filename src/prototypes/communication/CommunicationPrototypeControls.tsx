@@ -5,10 +5,12 @@ import {
 	COMMUNICATION_FAMILY_PAINT,
 	activeCommunicationRegionId,
 	applyActiveCommunicationRegion,
+	applyCommunicationActionTrack,
 	applyCommunicationComponentView,
 	applyCommunicationFocus,
 	applyCommunicationProjectionMode,
 	applyCommunicationRouteStyle,
+	applyCommunicationServiceTrack,
 	collectCommunicationRelations,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
@@ -19,6 +21,8 @@ import {
 	type CommunicationComponentView,
 	type CommunicationProjectionMode,
 	type CommunicationRouteStyle,
+	type CommunicationActionTrack,
+	type CommunicationServiceTrack,
 } from './communicationProjection'
 import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
 import './communication-prototype.css'
@@ -42,6 +46,23 @@ const COMPONENT_VIEWS: readonly { id: CommunicationComponentView; label: string 
 	{ id: 'simple', label: 'Simple' },
 	{ id: 'port', label: 'Port' },
 ]
+
+const SERVICE_TRACKS: readonly { id: CommunicationServiceTrack; label: string }[] = [
+	{ id: 'request', label: 'Request' },
+	{ id: 'response', label: 'Response' },
+	{ id: 'shortest', label: 'Shortest' },
+]
+
+const ACTION_TRACKS: readonly { id: CommunicationActionTrack; label: string }[] = [
+	{ id: 'goal', label: 'Goal' },
+	{ id: 'feedback', label: 'Feedback' },
+	{ id: 'result', label: 'Result' },
+	{ id: 'shortest', label: 'Shortest' },
+]
+
+function titleCase(value: string): string {
+	return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
+}
 
 function stopCanvasEvent(event: React.SyntheticEvent) {
 	event.stopPropagation()
@@ -205,6 +226,42 @@ export function CommunicationPrototypeControls() {
 								</button>
 							))}
 						</div>
+						<div
+							className="communication-prototype-track-selectors"
+							aria-label="Representative protocol edges"
+							title={state.routeStyle === 'straight' ? 'Representative edges apply to Elbow routing' : undefined}
+						>
+							<label>
+								<span>Service edge</span>
+								<select
+									aria-label="Service representative edge"
+									data-testid="communication-service-track"
+									value={state.serviceTrack}
+									disabled={state.routeStyle === 'straight'}
+									onChange={(event) => applyCommunicationServiceTrack(
+										editor,
+										event.target.value as CommunicationServiceTrack,
+									)}
+								>
+									{SERVICE_TRACKS.map((track) => <option key={track.id} value={track.id}>{track.label}</option>)}
+								</select>
+							</label>
+							<label>
+								<span>Action edge</span>
+								<select
+									aria-label="Action representative edge"
+									data-testid="communication-action-track"
+									value={state.actionTrack}
+									disabled={state.routeStyle === 'straight'}
+									onChange={(event) => applyCommunicationActionTrack(
+										editor,
+										event.target.value as CommunicationActionTrack,
+									)}
+								>
+									{ACTION_TRACKS.map((track) => <option key={track.id} value={track.id}>{track.label}</option>)}
+								</select>
+							</label>
+						</div>
 					</>
 				) : null}
 			</section>
@@ -247,7 +304,9 @@ export function CommunicationPrototypeControls() {
 						<strong>{summary.relations.length} component relationships</strong>
 						<span>
 							{state.componentView === 'simple' ? 'Same Port-sized Simple cards' : 'Port cards'} ·{' '}
-							{state.routeStyle === 'elbow' ? 'canonical tracks' : 'centre lines'} · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
+							{state.routeStyle === 'elbow'
+								? `${titleCase(state.serviceTrack)} service · ${titleCase(state.actionTrack)} action tracks`
+								: 'centre lines'} · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
 						</span>
 					</>
 				)}

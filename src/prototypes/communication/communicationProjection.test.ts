@@ -2,13 +2,38 @@ import { describe, expect, it } from 'vitest'
 import { createShapeId } from 'tldraw'
 
 import {
+	chooseCommunicationRepresentative,
 	inspectCommunicationChannel,
 	parseCommunicationChannel,
 	selectedCommunicationGroupKey,
+	type CommunicationDescriptor,
+	type CommunicationFamily,
+	type CommunicationPhase,
 	type CommunicationSummary,
 } from './communicationProjection'
 
 const inferred = { provenance: 'strict-port-name' as const }
+
+function descriptor(
+	id: string,
+	family: CommunicationFamily,
+	phase: CommunicationPhase,
+): CommunicationDescriptor {
+	return {
+		connectionId: createShapeId(id),
+		family,
+		phase,
+		name: 'move',
+		sourceShapeId: createShapeId('source'),
+		targetShapeId: createShapeId('target'),
+		sourcePortName: `move.${phase}`,
+		targetPortName: `move.${phase}`,
+		bidirectional: family === 'action' || family === 'service',
+		groupKey: `${family}:move`,
+		pairKey: 'source:target',
+		...inferred,
+	}
+}
 
 describe('communication channel parsing', () => {
 	it('groups service request and response names under one relationship', () => {
@@ -79,5 +104,44 @@ describe('communication focus selection', () => {
 		expect(selectedCommunicationGroupKey(summary, [])).toBeNull()
 		expect(selectedCommunicationGroupKey(summary, [createShapeId('unrelated')])).toBeNull()
 		expect(selectedCommunicationGroupKey(summary, [goal, result])).toBeNull()
+	})
+})
+
+describe('communication representative edge policy', () => {
+	const goal = descriptor('goal', 'action', 'goal')
+	const cancel = descriptor('cancel', 'action', 'cancel')
+	const feedback = descriptor('feedback', 'action', 'feedback')
+	const result = descriptor('result', 'action', 'result')
+	const actionCandidates = [
+		{ descriptor: goal, pathLength: 150 },
+		{ descriptor: cancel, pathLength: 5 },
+		{ descriptor: feedback, pathLength: 40 },
+		{ descriptor: result, pathLength: 90 },
+	]
+
+	it('uses the explicitly requested Action phase', () => {
+		expect(chooseCommunicationRepresentative('action', actionCandidates, 'feedback')).toBe(feedback)
+		expect(chooseCommunicationRepresentative('action', actionCandidates, 'result')).toBe(result)
+	})
+
+	it('uses the initiating leg when an optional requested phase is absent', () => {
+		expect(chooseCommunicationRepresentative(
+			'action',
+			actionCandidates.filter((candidate) => candidate.descriptor.phase !== 'feedback'),
+			'feedback',
+		)).toBe(goal)
+	})
+
+	it('measures shortest across work and outcome legs without letting Cancel win', () => {
+		expect(chooseCommunicationRepresentative('action', actionCandidates, 'shortest')).toBe(feedback)
+	})
+
+	it('can choose the shorter Service response route', () => {
+		const request = descriptor('request', 'service', 'request')
+		const response = descriptor('response', 'service', 'response')
+		expect(chooseCommunicationRepresentative('service', [
+			{ descriptor: request, pathLength: 80 },
+			{ descriptor: response, pathLength: 30 },
+		], 'shortest')).toBe(response)
 	})
 })

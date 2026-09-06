@@ -5,13 +5,13 @@
     "shapes": {
       "block": 5,
       "connection": 18,
-      "geo": 6,
+      "geo": 8,
       "frame": 1,
-      "arrow": 5
+      "arrow": 7
     },
     "bindings": {
       "connection": 36,
-      "arrow": 10
+      "arrow": 14
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -34,7 +34,6 @@
       "com.tldraw.asset.bookmark": 2,
       "com.tldraw.shape.group": 0,
       "com.tldraw.shape.bookmark": 2,
-      "com.tldraw.shape.draw": 5,
       "com.tldraw.shape.note": 13,
       "com.tldraw.shape.frame": 1,
       "com.tldraw.shape.highlight": 4,
@@ -45,12 +44,14 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.block": 12,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.behaviorTree": 0,
       "com.tldraw.shape.behaviorTreeControl": 0,
       "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.floating-port": 0,
       "com.tldraw.shape.branch-arm": 0,
       "com.tldraw.shape.connection": 6,
       "com.tldraw.binding.arrow": 1,
@@ -85,6 +86,9 @@
         "title": "Telemetry UI",
         "description": "Stream consumer; alerts is the live defaulting target",
         "blockType": "component",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "port",
         "views": {
@@ -106,10 +110,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "qtgjmFTmGQ1XNBkocFJrT",
+        "definitionId": "xwaLAuTliLDEj9i5kjAE5",
         "inputs": [
           {
             "id": "preview",
@@ -127,7 +135,7 @@
         "outputs": [],
         "definitionKey": "Telemetry_UI"
       },
-      "index": "aQP2A",
+      "index": "aQ7On",
       "typeName": "shape"
     },
     {
@@ -192,7 +200,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBTV2",
+      "index": "aBXiX",
       "typeName": "shape"
     },
     {
@@ -206,7 +214,7 @@
         "isExact": false,
         "normalizedAnchor": {
           "x": 1,
-          "y": 0.2549019607843137
+          "y": 0.7450980392156863
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -281,7 +289,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3Vwz",
+      "index": "a3q6f",
       "typeName": "shape"
     },
     {
@@ -320,7 +328,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFzBc",
+      "index": "aFZqf",
       "typeName": "shape"
     },
     {
@@ -374,7 +382,7 @@
         "color": "violet"
       },
       "parentId": "page:page",
-      "index": "a12mA",
+      "index": "a1BQE",
       "typeName": "shape"
     },
     {
@@ -411,7 +419,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Nine relationships collapse from 18 correctly grouped protocol legs, A2 isolates four move legs, and the new alerts wire is Async by default."
+                  "text": "PASS WHEN · Carrier choices follow their named or shortest existing tracks without moving the graph; A2 still isolates four legs; the new alerts wire defaults Async."
                 }
               ]
             }
@@ -419,8 +427,16 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7HLE",
+      "index": "a98rb",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:He34HVS0Xlsf_9rrCrWA6",
+      "typeName": "user"
     },
     {
       "x": 0,
@@ -466,16 +482,8 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8exz",
+      "index": "a8z3UV",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#7B66DC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:jcY_6k_-1CcrkCGwqLc6-",
-      "typeName": "user"
     },
     {
       "x": 0,
@@ -513,7 +521,51 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aGmkn",
+      "index": "aGgsU",
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 595,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-carrier-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": -75
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a4yufO",
       "typeName": "shape"
     },
     {
@@ -528,6 +580,24 @@
         "normalizedAnchor": {
           "x": 0.20588235294117646,
           "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-shortest-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-shortest-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.7450980392156863
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -570,11 +640,11 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aLp86",
+      "index": "aLqaf",
       "typeName": "shape"
     },
     {
-      "x": 400,
+      "x": 2300,
       "y": 595,
       "rotation": 0,
       "isLocked": false,
@@ -596,7 +666,7 @@
           "y": 0
         },
         "end": {
-          "x": 100,
+          "x": -100,
           "y": -75
         },
         "arrowheadStart": "none",
@@ -614,7 +684,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4yRY",
+      "index": "a6zsnd",
       "typeName": "shape"
     },
     {
@@ -689,8 +759,16 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aARBQ",
+      "index": "aAbCM",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:0Fxflf4qcCerhXdZPpErS",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -709,6 +787,51 @@
         "terminal": "start"
       },
       "typeName": "binding"
+    },
+    {
+      "x": 20,
+      "y": 500,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-carrier",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Switch to Components. Use Service edge and Action edge to choose the request/response or goal/feedback/result carrier."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4tfM",
+      "typeName": "shape"
     },
     {
       "x": 0,
@@ -746,11 +869,11 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aEsiX",
+      "index": "aEwPQ",
       "typeName": "shape"
     },
     {
-      "x": 20,
+      "x": 2300,
       "y": 500,
       "rotation": 0,
       "isLocked": false,
@@ -759,7 +882,7 @@
       "id": "shape:cue-step-focus",
       "type": "geo",
       "props": {
-        "w": 380,
+        "w": 440,
         "h": 190,
         "geo": "rectangle",
         "dash": "draw",
@@ -783,7 +906,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Switch to Components and click A2. Exactly move.goal, cancel, feedback, and result belong to that focus."
+                  "text": "5 · Click A2. Exactly move.goal, cancel, feedback, and result belong to that focus even when a different carrier is drawn."
                 }
               ]
             }
@@ -791,7 +914,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4DA2",
+      "index": "a6qFz",
       "typeName": "shape"
     },
     {
@@ -830,7 +953,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aKDy6",
+      "index": "aK3TA",
       "typeName": "shape"
     },
     {
@@ -866,6 +989,24 @@
     },
     {
       "meta": {},
+      "id": "binding:cue-step-shortest-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-shortest-arrow",
+      "toId": "shape:cue-step-shortest",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
       "id": "binding:cue-step-count-arrow-start",
       "type": "arrow",
       "fromId": "shape:cue-step-count-arrow",
@@ -884,7 +1025,7 @@
     },
     {
       "x": 2300,
-      "y": 595,
+      "y": 875,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -906,7 +1047,7 @@
         },
         "end": {
           "x": -100,
-          "y": -75
+          "y": 145
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -923,7 +1064,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5yd44",
+      "index": "a7zdEV",
       "typeName": "shape"
     },
     {
@@ -936,7 +1077,7 @@
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
-          "x": 0,
+          "x": 1,
           "y": 0.2549019607843137
         },
         "snap": "edge-point",
@@ -980,8 +1121,26 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aH9vf",
+      "index": "aHjqr",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-carrier-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-carrier-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.2549019607843137
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
     },
     {
       "x": 0,
@@ -1019,7 +1178,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a71ff",
+      "index": "a7W1X",
       "typeName": "shape"
     },
     {
@@ -1058,7 +1217,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aMZbQ",
+      "index": "aM7cb",
       "typeName": "shape"
     },
     {
@@ -1077,6 +1236,9 @@
         "title": "Mission orchestrator",
         "description": "Three Actions + three Services share one component pair",
         "blockType": "component",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "port",
         "views": {
@@ -1098,10 +1260,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "ZZyxmh6O561s6sJ1ifQsM",
+        "definitionId": "kjy2viFnYisHEeOLwKmQa",
         "inputs": [
           {
             "id": "detections",
@@ -1204,12 +1370,12 @@
         ],
         "definitionKey": "Mission_orchestrator"
       },
-      "index": "aROYj",
+      "index": "aRffz",
       "typeName": "shape"
     },
     {
       "x": 2300,
-      "y": 500,
+      "y": 780,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1241,7 +1407,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "4 · Return to Dataflow. Drag Camera gateway.alerts onto Telemetry UI.alerts. The nineteenth wire should default to Async."
+                  "text": "6 · Return to Dataflow. Drag Camera gateway.alerts onto Telemetry UI.alerts. The nineteenth wire should default to Async."
                 }
               ]
             }
@@ -1249,7 +1415,51 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5vzUV",
+      "index": "a77SA",
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 875,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-shortest-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 145
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a5wqhl",
       "typeName": "shape"
     },
     {
@@ -1293,7 +1503,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2zcyV",
+      "index": "a2zZNV",
       "typeName": "shape"
     },
     {
@@ -1332,7 +1542,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aIaZr",
+      "index": "aI36Q",
       "typeName": "shape"
     },
     {
@@ -1371,7 +1581,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6MSQ",
+      "index": "a6JNA",
       "typeName": "shape"
     },
     {
@@ -1410,8 +1620,26 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9oUm",
+      "index": "a9mSU",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-carrier-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-carrier-arrow",
+      "toId": "shape:cue-step-carrier",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
     },
     {
       "meta": {},
@@ -1423,7 +1651,7 @@
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
-          "x": 1,
+          "x": 0,
           "y": 0.5
         },
         "snap": "edge-point",
@@ -1493,7 +1721,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCCQ2",
+      "index": "aCRD6",
       "typeName": "shape"
     },
     {
@@ -1538,7 +1766,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a22Hn",
+      "index": "a2IzP",
       "typeName": "shape"
     },
     {
@@ -1608,7 +1836,52 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6ug9",
+      "index": "a8ur4G",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 780,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-shortest",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Choose Shortest for both families. Every A#/S# should independently reuse its shortest routed leg; Topic and Stream stay on data."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5bC6",
       "typeName": "shape"
     },
     {
@@ -1710,8 +1983,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 2800,
-        "h": 1650
+        "w": 1920,
+        "h": 1100
       },
       "insets": [
         false,
@@ -1827,7 +2100,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aJStX",
+      "index": "aJtPX",
       "typeName": "shape"
     },
     {
@@ -1916,7 +2189,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "5 · Click outside the frame. The contextual controls should close while every wire and component remains."
+                  "text": "7 · Click outside the frame. The contextual controls should close while every wire and component remains."
                 }
               ]
             }
@@ -1924,7 +2197,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a673j",
+      "index": "a8l9X",
       "typeName": "shape"
     },
     {
@@ -2015,7 +2288,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aNFcQ",
+      "index": "aN1BI",
       "typeName": "shape"
     },
     {
@@ -2059,7 +2332,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3xiUG",
+      "index": "a3xvNd",
       "typeName": "shape"
     },
     {
@@ -2130,6 +2403,9 @@
         "title": "Camera gateway",
         "description": "Topic + Stream producer; alerts is intentionally unwired",
         "blockType": "component",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "port",
         "views": {
@@ -2151,10 +2427,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "UgTVBgdOKzUvHoUdj0opu",
+        "definitionId": "NVRvodBaTLT0ZC6nTcMVZ",
         "inputs": [],
         "outputs": [
           {
@@ -2178,7 +2458,7 @@
         ],
         "definitionKey": "Camera_gateway"
       },
-      "index": "aObnj",
+      "index": "aOOlz",
       "typeName": "shape"
     },
     {
@@ -2197,6 +2477,9 @@
         "title": "Perception",
         "description": "Consumes frames and publishes detections",
         "blockType": "component",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "port",
         "views": {
@@ -2218,10 +2501,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "Ln3lGxXnKHceglI4f1eVp",
+        "definitionId": "EzyN0_4xyciwz36kcUg8e",
         "inputs": [
           {
             "id": "frame",
@@ -2240,7 +2527,7 @@
         ],
         "definitionKey": "Perception"
       },
-      "index": "aPTh6",
+      "index": "aPUC7",
       "typeName": "shape"
     },
     {
@@ -2298,6 +2585,9 @@
         "title": "Robot runtime",
         "description": "Server for every Action and Service on the left",
         "blockType": "component",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "port",
         "views": {
@@ -2319,10 +2609,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "BpGPWEPg6_7xC3MEupoCz",
+        "definitionId": "C92Mw2zqcKeiV_5ZRLoSL",
         "inputs": [
           {
             "id": "dock_goal",
@@ -2419,7 +2713,7 @@
         ],
         "definitionKey": "Robot_runtime"
       },
-      "index": "aSoz9",
+      "index": "aSVOI",
       "typeName": "shape"
     },
     {
@@ -2458,7 +2752,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aDGDb",
+      "index": "aDBl6",
       "typeName": "shape"
     },
     {

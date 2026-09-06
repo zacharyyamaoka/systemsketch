@@ -161,6 +161,7 @@ import { findFieldDiff } from '../../diff/fieldDiff'
 import { wordDiff, type DiffToken } from '../../diff/wordDiff'
 import {
 	COMMUNICATION_FAMILY_PAINT,
+	chooseCommunicationRepresentative,
 	collectCommunicationRelations,
 	applyCommunicationFocus,
 	communicationProjection,
@@ -169,6 +170,7 @@ import {
 	isCommunicationPrototypeEnabled,
 	phaseLabel,
 	type CommunicationDescriptor,
+	type CommunicationProjectionState,
 	type CommunicationRelation,
 	type CommunicationRouteStyle,
 } from '../../prototypes/communication/communicationProjection'
@@ -1084,20 +1086,21 @@ function componentRelationshipGeometry(
 	editor: Editor,
 	connection: ConnectionShape,
 	relation: CommunicationRelation,
+	representative: CommunicationDescriptor,
 	routeStyle: CommunicationRouteStyle,
 ) {
 	if (routeStyle === 'elbow') {
 		const points = getConnectionRenderPoints(editor, connection)
 		return {
-			// WHY: the aggregate Action rides its goal cable and Service rides its
-			// request cable. Topic and Stream each retain their existing data cable.
-			// This exact path is the visible proof of which leg was selected.
+			// WHY: the aggregate relationship must ride one authored cable verbatim.
+			// A selected phase or measured shortest route therefore remains visible
+			// proof of the semantic parse without inventing a second graph geometry.
 			path: getConnectionShapePath(editor, connection),
 			label: pointAtFraction(points, 0.5),
 		}
 	}
-	const sourceBounds = editor.getShapePageBounds(relation.sourceShapeId)
-	const targetBounds = editor.getShapePageBounds(relation.targetShapeId)
+	const sourceBounds = editor.getShapePageBounds(representative.sourceShapeId)
+	const targetBounds = editor.getShapePageBounds(representative.targetShapeId)
 	if (!sourceBounds || !targetBounds) return null
 	const sourceCenter = sourceBounds.center
 	const targetCenter = targetBounds.center
@@ -1121,22 +1124,48 @@ function componentRelationshipGeometry(
 	}
 }
 
+function resolveCommunicationRepresentative(
+	editor: Editor,
+	relation: CommunicationRelation,
+	projection: CommunicationProjectionState,
+): CommunicationDescriptor | null {
+	const policy = relation.family === 'action'
+		? projection.actionTrack
+		: relation.family === 'service'
+			? projection.serviceTrack
+			: 'shortest'
+	const candidates = relation.memberDescriptors.map((descriptor) => {
+		const member = editor.getShape<ConnectionShape>(descriptor.connectionId)
+		return {
+			descriptor,
+			pathLength: member?.type === CONNECTION_SHAPE_TYPE
+				? polylineLength(getConnectionRenderPoints(editor, member))
+				: Number.POSITIVE_INFINITY,
+		}
+	})
+	return chooseCommunicationRepresentative(relation.family, candidates, policy)
+}
+
 function ComponentCommunicationConnection({
 	connection,
 	relation,
+	representative,
+	representativePolicy,
 	routeStyle,
 	focusedGroupKey,
 }: {
 	connection: ConnectionShape
 	relation: CommunicationRelation
+	representative: CommunicationDescriptor
+	representativePolicy: string
 	routeStyle: CommunicationRouteStyle
 	focusedGroupKey: string | null
 }) {
 	const editor = useEditor()
 	const geometry = useValue(
 		'component communication relationship geometry',
-		() => componentRelationshipGeometry(editor, connection, relation, routeStyle),
-		[editor, connection, relation, routeStyle],
+		() => componentRelationshipGeometry(editor, connection, relation, representative, routeStyle),
+		[editor, connection, relation, representative, routeStyle],
 	)
 	if (!geometry) return null
 	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
@@ -1155,7 +1184,9 @@ function ComponentCommunicationConnection({
 			data-communication-mode="components"
 			data-communication-family={relation.family}
 			data-communication-edges={relation.edgeCount}
-			data-communication-representative-phase={relation.phase}
+			data-communication-representative-phase={representative.phase}
+			data-communication-representative-id={representative.connectionId}
+			data-communication-representative-policy={representativePolicy}
 			data-communication-route={routeStyle}
 			data-communication-id={relation.displayId}
 			data-communication-member-ids={relation.memberIds.join(',')}
@@ -1229,6 +1260,11 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		},
 		[editor, descriptor, projection.mode, inCommunicationScope],
 	)
+	const representativeDescriptor = useValue(
+		'communication representative edge',
+		() => relation ? resolveCommunicationRepresentative(editor, relation, projection) : null,
+		[editor, relation, projection.actionTrack, projection.serviceTrack],
+	)
 	if (inCommunicationScope && projection.mode === 'tagged' && descriptor && relation) {
 		return (
 			<TaggedCommunicationConnection
@@ -1240,8 +1276,8 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		)
 	}
 	if (inCommunicationScope && projection.mode === 'components') {
-		if (!relation) return null
-		const representative = relation.representativeId === connection.id
+		if (!relation || !representativeDescriptor) return null
+		const representative = representativeDescriptor.connectionId === connection.id
 		const focusedMember = projection.focusedGroupKey === relation.groupKey
 		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
 		return (
@@ -1259,6 +1295,10 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 					<ComponentCommunicationConnection
 						connection={connection}
 						relation={relation}
+						representative={representativeDescriptor}
+						representativePolicy={relation.family === 'action'
+							? projection.actionTrack
+							: relation.family === 'service' ? projection.serviceTrack : 'data'}
 						routeStyle={projection.routeStyle}
 						focusedGroupKey={projection.focusedGroupKey}
 					/>

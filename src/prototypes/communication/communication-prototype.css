@@ -45,7 +45,8 @@
 }
 
 .communication-prototype-tabs,
-.communication-prototype-routes {
+.communication-prototype-routes,
+.communication-prototype-track-selectors {
 	display: flex;
 	align-items: center;
 	gap: 3px;
@@ -93,6 +94,47 @@
 .communication-prototype-routes button[aria-pressed="true"] {
 	background: var(--ss-accent);
 	color: var(--ss-text-inverse);
+}
+
+.communication-prototype-track-selectors {
+	gap: 4px;
+	padding: 4px;
+}
+
+.communication-prototype-track-selectors label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.communication-prototype-track-selectors span {
+	padding-left: 4px;
+	color: var(--ss-text-faint);
+	font-size: 8px;
+	font-weight: 800;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.communication-prototype-track-selectors select {
+	min-height: 27px;
+	padding: 0 23px 0 8px;
+	border: 1px solid var(--ss-border);
+	border-radius: 7px;
+	background: var(--ss-surface);
+	color: var(--ss-text);
+	cursor: pointer;
+	font: 700 9px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.communication-prototype-track-selectors select:focus-visible {
+	outline: 2px solid color-mix(in srgb, var(--ss-accent) 60%, transparent);
+	outline-offset: 1px;
+}
+
+.communication-prototype-track-selectors select:disabled {
+	cursor: not-allowed;
+	opacity: .45;
 }
 
 .communication-prototype-status {
@@ -194,4 +236,5 @@
 	.communication-prototype-bar__context,
 	.communication-prototype-status { display: none; }
 	.communication-prototype-bar { max-width: calc(100vw - 160px); }
+	.communication-prototype-track-selectors span { display: none; }
 }
