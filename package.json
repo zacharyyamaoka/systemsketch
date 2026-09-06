@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:python": "python3 -m unittest discover -s tests -v",
     "test:bt-runtime-lab": "node docs/labs/test_bt_runtime_lab.mjs",
+    "test:bt-run": "node tests/behavior_tree_run_mode_smoke.mjs",
     "test:context-menu": "node tests/block_context_menu_smoke.mjs",
     "test:click-to-edit": "node tests/block_click_to_edit_smoke.mjs",
     "test:fields": "node tests/inspector_live_commit_smoke.mjs",

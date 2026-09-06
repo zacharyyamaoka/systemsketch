@@ -46,7 +46,7 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
-import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree } from '../behaviorTree'
+import { BtRunOverlays, EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree } from '../behaviorTree'
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
@@ -845,6 +845,7 @@ export function SystemSketchSurfaceHost() {
       ) : null}
 
       <SelectionMiniMenu />
+      <BtRunOverlays />
       <CodeResizeIndicator />
     </div>
   )

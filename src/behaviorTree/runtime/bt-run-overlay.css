@@ -1,0 +1,168 @@
+/**
+ * Run-mode paint, in the visual language decided 2026-09-05: Flowstate's
+ * sampled fills (running/done/pending), Groot2's failure red, MoveIt's
+ * rotating dotted ring on every RUNNING node, and a mode frame that says
+ * "this is a run, not an edit". Every colour is an --ss-run-* token from
+ * src/theme/tokens.css — the one home the theme gate allows literals.
+ */
+
+
+.BtRun-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  z-index: 210;
+}
+
+/* ---- the mode boundary ---- */
+.BtRun-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 3px solid var(--ss-run-running-edge);
+  border-radius: 10px;
+  box-shadow: inset 0 0 42px color-mix(in srgb, var(--ss-run-running-edge) 10%, transparent);
+}
+.BtRun-frame[data-phase='stale'],
+.BtRun-frame[data-phase='refused'] {
+  border-color: var(--ss-run-halted);
+  box-shadow: none;
+}
+/* Top-right corner: the region's own header title owns the top-left. */
+.BtRun-tag {
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  font: 700 12px/1 Inter, ui-sans-serif, system-ui;
+  letter-spacing: 0.05em;
+  color: var(--ss-accent-text);
+  background: var(--ss-run-running-edge);
+  border-radius: 0 8px 0 8px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+.BtRun-frame[data-phase='stale'] .BtRun-tag,
+.BtRun-frame[data-phase='refused'] .BtRun-tag {
+  background: var(--ss-run-halted);
+}
+
+/* ---- per-node status ---- */
+.BtRun-node {
+  position: absolute;
+  border-radius: 12px;
+  outline: 2.5px solid transparent;
+  outline-offset: 1px;
+  transition: outline-color 0.22s ease;
+}
+/* WHY low-alpha fills, not the lab's `mix-blend-mode: multiply`: this overlay
+ * lives in a transformed front layer, which is an isolated stacking context —
+ * a blend can never reach the canvas beneath it, so multiply rendered as an
+ * opaque swatch and erased the card text (caught live by the run-mode
+ * journey's screenshot). Each rgba below is solved so that OVER A WHITE CARD
+ * it composites to the exact sampled Flowstate swatch — running → #E2D9FC,
+ * done → #CAFCD0, pending → #DEDEDE — while the card's own text keeps
+ * (1 − α) of its contrast. */
+.BtRun-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  transition: background-color 0.25s ease;
+}
+.BtRun-node[data-status='pending'] .BtRun-fill { background: var(--ss-run-pending-veil); }
+.BtRun-node[data-status='running'] .BtRun-fill { background: var(--ss-run-running-veil); }
+.BtRun-node[data-status='running'] { outline-color: var(--ss-run-running-edge); }
+.BtRun-node[data-status='success'] .BtRun-fill { background: var(--ss-run-done-veil); }
+.BtRun-node[data-status='failure'] .BtRun-fill { background: var(--ss-run-failure-veil); }
+.BtRun-node[data-status='failure'] { outline-color: var(--ss-run-failure); }
+.BtRun-node[data-status='halted'] .BtRun-fill { background: var(--ss-run-pending-veil); }
+.BtRun-node[data-status='halted'] { outline: 2px dashed var(--ss-run-halted); }
+
+.BtRun-badge {
+  position: absolute;
+  top: -11px;
+  right: -9px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 11px;
+  font: 600 12px/22px Inter, ui-sans-serif, system-ui;
+  text-align: center;
+  color: var(--ss-accent-text);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.BtRun-node[data-status='running'] .BtRun-badge {
+  background: var(--ss-surface);
+  border: 1.5px solid var(--ss-run-running-edge);
+  opacity: 1;
+  transform: scale(1);
+  padding: 0;
+  width: 22px;
+}
+.BtRun-node[data-status='success'] .BtRun-badge { background: var(--ss-run-success); opacity: 1; transform: scale(1); }
+.BtRun-node[data-status='failure'] .BtRun-badge { background: var(--ss-run-failure); opacity: 1; transform: scale(1); }
+.BtRun-node[data-status='halted'] .BtRun-badge { background: var(--ss-run-halted); opacity: 1; transform: scale(1); }
+
+.BtRun-spinner { display: block; width: 19px; height: 19px; margin: 0 auto; }
+.BtRun-spinner g {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: btRunSpin 1.1s linear infinite;
+}
+.BtRun-spinner circle {
+  fill: none;
+  stroke: var(--ss-run-running-edge);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 0.1 6.19;
+}
+@keyframes btRunSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .BtRun-spinner g { animation: none; }
+}
+
+/* ---- transport strip ---- */
+.BtRun-stripSlot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+.BtRun-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ss-surface);
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: var(--ss-shadow-2);
+  pointer-events: auto;
+  font: 600 13px Inter, ui-sans-serif, system-ui;
+  color: var(--ss-text);
+  white-space: nowrap;
+}
+.BtRun-strip button {
+  font: 600 13px Inter, ui-sans-serif, system-ui;
+  color: var(--ss-text);
+  background: var(--ss-surface);
+  border: 1px solid var(--ss-border);
+  border-radius: 7px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.BtRun-strip button:hover { background: var(--ss-surface-sunken); }
+.BtRun-strip button:disabled { opacity: 0.45; cursor: default; }
+.BtRun-scrub { width: 150px; accent-color: var(--ss-run-running-edge); }
+.BtRun-clock { font: 600 11.5px ui-monospace, monospace; color: var(--ss-text-muted); }
+.BtRun-outcome { font: 700 12px Inter; padding: 2px 8px; border-radius: 7px; }
+.BtRun-outcome[data-outcome='success'] { color: var(--ss-run-success); background: color-mix(in srgb, var(--ss-run-success) 10%, transparent); }
+.BtRun-outcome[data-outcome='failure'] { color: var(--ss-run-failure); background: color-mix(in srgb, var(--ss-run-failure) 10%, transparent); }
+.BtRun-stripNotice { font: 600 12.5px Inter; color: var(--ss-warning); max-width: 340px; white-space: normal; }
+.BtRun-live {
+  color: var(--ss-run-running-edge) !important;
+  border-color: var(--ss-run-running-edge) !important;
+}
+.BtRun-exit { color: var(--ss-danger) !important; }

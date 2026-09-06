@@ -1,5 +1,8 @@
-import { SAMPLE_BEHAVIOR_TREE_XML } from './behaviorTree/btcppXml'
+import { SAMPLE_BEHAVIOR_TREE_XML, parseBehaviorTreeXml } from './behaviorTree/btcppXml'
 import { reconcileBehaviorTree } from './behaviorTree/installBehaviorTreeRegions'
+import { createMockEngine, lastIndexAtOrBeforeTick, reconstructAt } from './behaviorTree/runtime/btMockEngine'
+import { getBtRun, scrubBtRunToTick, startBtRun, stepBtRunTransition, stopBtRun } from './behaviorTree/runtime/runStore'
+import { isBehaviorTreeShape } from './behaviorTree/behaviorTreeModel'
 import { serializeTldrawJson, type Editor } from 'tldraw'
 import { renderWithStockTldraw } from './export/stockTldrawPrimitives'
 import { getPropagationRelationMetrics } from './propagation'
@@ -23,7 +26,27 @@ import { getPropagationRelationMetrics } from './propagation'
  */
 export interface SystemSketchDevelopmentSeam {
 	/** The journeys seed a region from the shipped sample without retyping it. */
-	behaviorTree: { SAMPLE_BEHAVIOR_TREE_XML: string; reconcile(regionId: string): unknown }
+	behaviorTree: {
+		SAMPLE_BEHAVIOR_TREE_XML: string
+		reconcile(regionId: string): unknown
+		/**
+		 * Mock-run probes for the run-mode journey: drive the store like the UI
+		 * does, read the canonical log, and fold it independently — plus a
+		 * pure-engine runner so the statistical claim (a 30% node succeeds in
+		 * ~30% of runs) can be measured over hundreds of runs without the UI.
+		 */
+		runtime: {
+			start(regionId: string, options?: { seed?: number; debugSnapshots?: boolean }): { phase: string; refusedReasons: string[] }
+			stop(regionId: string): void
+			state(regionId: string): unknown
+			log(regionId: string): unknown[]
+			scrubToTick(regionId: string, tick: number): void
+			stepTransition(regionId: string, delta: 1 | -1): void
+			foldAtTick(regionId: string, tick: number): Record<string, string>
+			snapshotAtTick(regionId: string, tick: number): Record<string, string> | null
+			engineOutcomes(xml: string, seeds: number[]): Array<'success' | 'failure' | null>
+		}
+	}
 	editor: Editor
 	/** Ids of the overlays currently on screen, e.g. `handle:shape:x:bend`. */
 	overlayIds(): string[]
@@ -46,9 +69,67 @@ declare global {
 export function installDevelopmentSeam(editor: Editor): () => void {
 	if (!import.meta.env.DEV) return () => undefined
 
+	const runRegion = (regionId: string) => {
+		const shape = editor.getShape(regionId as never)
+		return isBehaviorTreeShape(shape) ? shape : null
+	}
 	window.__systemsketch = {
 		editor,
-		behaviorTree: { SAMPLE_BEHAVIOR_TREE_XML, reconcile: (regionId) => reconcileBehaviorTree(editor, regionId as never) },
+		behaviorTree: {
+			SAMPLE_BEHAVIOR_TREE_XML,
+			reconcile: (regionId) => reconcileBehaviorTree(editor, regionId as never),
+			runtime: {
+				start: (regionId, options) => {
+					const region = runRegion(regionId)
+					if (!region) return { phase: 'refused', refusedReasons: ['no region'] }
+					const state = startBtRun(region, options)
+					return { phase: state.phase, refusedReasons: state.refusedReasons }
+				},
+				stop: (regionId) => stopBtRun(regionId as never),
+				state: (regionId) => {
+					const state = getBtRun(regionId as never)
+					if (!state) return null
+					return {
+						phase: state.phase, seed: state.seed, latestTick: state.latestTick,
+						outcome: state.outcome, cursor: state.cursor, live: state.live,
+						transitions: state.log.length, treeId: state.treeId,
+					}
+				},
+				log: (regionId) => (getBtRun(regionId as never)?.log ?? []).map((entry) => ({ ...entry })),
+				scrubToTick: (regionId, tick) => scrubBtRunToTick(regionId as never, tick),
+				stepTransition: (regionId, delta) => stepBtRunTransition(regionId as never, delta),
+				foldAtTick: (regionId, tick) => {
+					const state = getBtRun(regionId as never)
+					if (!state) return {}
+					const folded = reconstructAt(state.log, lastIndexAtOrBeforeTick(state.log, tick), state.rootKey)
+					const out: Record<string, string> = {}
+					for (const [key, held] of folded.statuses) out[key] = held.status
+					return out
+				},
+				snapshotAtTick: (regionId, tick) => {
+					const state = getBtRun(regionId as never)
+					const snapshot = state?.debugSnapshots?.[tick - 1]
+					if (!snapshot) return null
+					const out: Record<string, string> = {}
+					for (const [key, status] of snapshot) out[key] = status
+					return out
+				},
+				engineOutcomes: (xml, seeds) => {
+					const document = parseBehaviorTreeXml(xml)
+					return seeds.map((seed) => {
+						const engine = createMockEngine(document, { seed })
+						if (engine.unsupportedReasons.length > 0) return null
+						let result = engine.step()
+						let guard = 0
+						while (!result.outcome && guard < 500) {
+							result = engine.step()
+							guard += 1
+						}
+						return result.outcome
+					})
+				},
+			},
+		},
 		overlayIds: () => editor.overlays.getCurrentOverlays().map((overlay) => overlay.id),
 		shapeIndex: (shapeId) => editor.getShape(shapeId as never)?.index ?? null,
 		renderStockTldraw: async (json) => {

@@ -7,14 +7,17 @@
 import { type Editor, useValue } from 'tldraw'
 
 import { getSelectedBehaviorTree, setBehaviorTreeView, tidyBehaviorTree } from '../behaviorTreeCommands'
+import { getBtRun, startBtRun, stopBtRun, useBtRunVersion } from '../runtime/runStore'
 import '../../blocks/ui/block-inspector.css'
 import './behavior-tree-inspector.css'
 
 export function EditorBehaviorTreeSelectionMiniMenu({ editor }: { editor: Editor }) {
 	const selection = useValue('SystemSketch selected Behavior Tree mini menu', () => getSelectedBehaviorTree(editor), [editor])
+	useBtRunVersion()
 	if (!selection) return null
 	const { region } = selection
 	const { projection, orientation, nodeFace, dataLens, offsets } = region.props
+	const run = getBtRun(region.id)
 	const set = (patch: Parameters<typeof setBehaviorTreeView>[2]) => void setBehaviorTreeView(editor, region.id, patch)
 
 	return (
@@ -59,6 +62,23 @@ export function EditorBehaviorTreeSelectionMiniMenu({ editor }: { editor: Editor
 				<button type="button" data-testid="bt-pill-tidy" disabled={Object.keys(offsets).length === 0} onClick={() => void tidyBehaviorTree(editor, region.id)}>
 					⌗<span>tidy</span>
 				</button>
+			</div>
+			{/* WHY here: Zach's own placement — "perhaps it's just like a play
+			    button on the Behavior Tree contextual menu." The pill is where
+			    Tree/Process already lives, costs no at-rest chrome, and every
+			    button on it is a command. Entering run mode docks the transport
+			    strip on the region (runtime/BtRunOverlay.tsx); the runner-up
+			    trigger placements live in docs/bt-run-mode-proposals-2026-09-05.html. */}
+			<div className="block-mini-menu__views" role="group" aria-label="Mock run">
+				{run ? (
+					<button type="button" aria-pressed="true" data-testid="bt-pill-stop" title="Exit run mode" onClick={() => stopBtRun(region.id)}>
+						■<span>stop</span>
+					</button>
+				) : (
+					<button type="button" data-testid="bt-pill-run" title="Run this tree against the mock backend" onClick={() => startBtRun(region)}>
+						▶<span>run</span>
+					</button>
+				)}
 			</div>
 		</div>
 	)
