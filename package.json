@@ -94,6 +94,7 @@
     "test:detach-primitives-stress": "node tests/detach_primitives_stress_smoke.mjs",
     "test:stock-tldr-richness": "node tests/stock_tldr_richness_smoke.mjs",
     "test:detach-fixture": "node tests/detach_primitives_fixture_smoke.mjs",
+    "test:detach-hierarchy": "node tests/detach_hierarchy_smoke.mjs",
     "test:detach-edge-fidelity": "node tests/detach_edge_fidelity_smoke.mjs",
     "test:detached-arrow-reflow": "node tests/detached_arrow_reflow_smoke.mjs",
     "test:detached-connection-presentation": "node tests/detached_connection_presentation_smoke.mjs",
