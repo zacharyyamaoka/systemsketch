@@ -66,6 +66,19 @@ export function edgeColor(kind: BtSceneEdge['kind']): string {
 	}
 }
 
+/**
+ * `retryLoop` keeps the same ink as every other control-flow wire (this
+ * app's rule: wire colour is document content, not a coding axis — see
+ * `behavior-tree.css`) but dashes, the one other axis this diagramming style
+ * already uses for "a different kind of line" (a decorator chip's border, a
+ * `use` edge). The backward geometry itself is the primary signal; the dash
+ * is a second, colour-independent cue for print/greyscale/colour-blind
+ * viewing.
+ */
+export function edgeDash(kind: BtSceneEdge['kind']): string | undefined {
+	return kind === 'retryLoop' ? '7 4' : undefined
+}
+
 function esc(text: string): string {
 	return text.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char] ?? char)
 }
@@ -94,8 +107,9 @@ export function sceneToSvg(scene: BtScene, options: SceneSvgOptions = {}): strin
 	const wireOpacity = options.controlWireOpacity ?? 1
 	for (const edge of scene.edges) {
 		const color = edgeColor(edge.kind)
-		const opacity = edge.kind === 'control' || edge.kind === 'recovery' || edge.kind === 'merge' ? wireOpacity : 1
-		parts.push(`<path d="${edgePathData(edge)}" fill="none" stroke="${color}" stroke-width="2" opacity="${opacity}"/>`)
+		const opacity = edge.kind === 'control' || edge.kind === 'recovery' || edge.kind === 'retryLoop' || edge.kind === 'merge' ? wireOpacity : 1
+		const dash = edgeDash(edge.kind)
+		parts.push(`<path d="${edgePathData(edge)}" fill="none" stroke="${color}" stroke-width="2" opacity="${opacity}"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`)
 		if (edge.arrowEnd) {
 			parts.push(`<path d="${arrowHeadPath(edge.points[edge.points.length - 1], edgeEndAngle(edge))}" fill="${color}" opacity="${opacity}"/>`)
 		}

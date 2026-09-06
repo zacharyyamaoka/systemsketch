@@ -24,6 +24,12 @@ interface MenuRow {
 const CONTROL_ROWS: Array<{ template: BtInsertTemplate; label: string; detail: string }> = [
 	{ template: { id: 'Sequence', kind: 'control' }, label: 'Sequence', detail: 'Group · run children in order' },
 	{ template: { id: 'Fallback', kind: 'control' }, label: 'Fallback', detail: 'Branch · try the next on failure' },
+	// WHY: a distinct primitive from Fallback on purpose, not a relabel of it —
+	// Fallback falls forward through alternatives and never looks back; this
+	// loops back to retry the FIRST step after a one-step fix succeeds (Zach's
+	// own contrast). Placed right after Fallback so the two sit side by side
+	// where a reader is comparing them.
+	{ template: { id: 'RecoveryNode', kind: 'control', attrs: { number_of_retries: '3' } }, label: 'Recovery', detail: 'Loop · one-step fix, then retry' },
 	{ template: { id: 'Parallel', kind: 'control' }, label: 'Parallel', detail: 'Lanes · tick children together' },
 	{ template: { id: 'RetryUntilSuccessful', kind: 'decorator', attrs: { num_attempts: '3' } }, label: 'Retry', detail: 'Retry the next node' },
 	{ template: { id: 'Repeat', kind: 'decorator', attrs: { num_cycles: '3' } }, label: 'Loop', detail: 'Repeat the next node' },
@@ -47,11 +53,25 @@ function skillRows(document: BtDocument): MenuRow[] {
 	return rows
 }
 
-export function BtInsertMenu({ at, document, onChoose, onClose }: {
+export function BtInsertMenu({ at, document, onChoose, onClose, openUpward }: {
 	at: BtPoint
 	document: BtDocument
 	onChoose(template: BtInsertTemplate): void
 	onClose(): void
+	/**
+	 * WHY: a "prepend before this node" insert (the recovery rail's turn-down
+	 * gap, the Start→root gap) always has its target node immediately BELOW
+	 * it and clear room above — the mirror of every other insert, whose
+	 * target is above and whose room is below. Opening downward there would
+	 * put the menu's own rows underneath a real Block shape's DOM, which
+	 * sits in a later, higher stacking position than this region's own
+	 * overlay: a click meant for a menu row lands on the node instead (see
+	 * `docs/peps/` for this project's tldraw-stock boundary — the fix is a
+	 * plain CSS flip, not a z-index fight with tldraw's own shape stacking).
+	 * `translateY(-100%)` anchors the menu's BOTTOM edge instead of its top,
+	 * so it grows upward regardless of its own content height.
+	 */
+	openUpward?: boolean
 }) {
 	const [page, setPage] = useState<Page>('root')
 	const [query, setQuery] = useState('')
@@ -72,7 +92,7 @@ export function BtInsertMenu({ at, document, onChoose, onClose }: {
 				label: row.label,
 				detail: row.detail,
 				template: row.template,
-				glyph: <BtGlyphSvg glyph={btGlyphFor({ id: row.template.id, kind: row.template.kind, controlKind: row.template.id === 'Sequence' ? 'sequence' : row.template.id === 'Fallback' ? 'fallback' : row.template.id === 'Parallel' ? 'parallel' : row.template.id === 'IfThenElse' ? 'branch' : null })} orientation="down" size={18} />,
+				glyph: <BtGlyphSvg glyph={btGlyphFor({ id: row.template.id, kind: row.template.kind, controlKind: row.template.id === 'Sequence' ? 'sequence' : row.template.id === 'Fallback' ? 'fallback' : row.template.id === 'Parallel' ? 'parallel' : row.template.id === 'IfThenElse' ? 'branch' : row.template.id === 'RecoveryNode' ? 'recoveryLoop' : null })} orientation="down" size={18} />,
 			}))
 		}
 		const needle = query.trim().toLowerCase()
@@ -122,7 +142,10 @@ export function BtInsertMenu({ at, document, onChoose, onClose }: {
 			role="menu"
 			aria-label="Add process"
 			data-testid="bt-insert-menu"
-			style={{ left: at.x - 16, top: at.y + 22 }}
+			data-open-upward={openUpward || undefined}
+			style={openUpward
+				? { left: at.x - 16, top: at.y - 22, transform: 'translateY(-100%)' }
+				: { left: at.x - 16, top: at.y + 22 }}
 			onPointerDown={(event) => event.stopPropagation()}
 			onKeyDown={onKeyDown}
 			tabIndex={-1}

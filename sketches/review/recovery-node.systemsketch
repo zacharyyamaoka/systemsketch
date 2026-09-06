@@ -1,0 +1,967 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 4,
+      "geo": 5,
+      "block": 4,
+      "behaviorTree": 1
+    },
+    "bindings": {
+      "arrow": 8
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 2,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.systemsketch-bt-insert-glyph": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 2320,
+      "y": 495,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -860,
+          "y": 305
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a3zNdG",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 1130,
+      "y": 220,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 140,
+          "y": 140
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a4sgFV",
+      "typeName": "shape"
+    },
+    {
+      "x": 1130,
+      "y": 1560,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 280,
+          "y": -600
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a5sLhV",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 460,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 12,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · ComputePathToPose is the PRIMARY step. On FAILURE it enters the recovery arm via this “Failure” chip — same mechanism a Fallback uses"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a2XhM",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 980,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 260,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · The Retry ×3 wire is dashed, travels backward, and lands on ComputePathToPose's own entry — AND the menu's “Recovery” row reads as its own primitive beside “Fallback”, not a relabel of it"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a60Bz",
+      "typeName": "shape"
+    },
+    {
+      "x": 2320,
+      "y": 380,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 230,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · THE WHOLE POINT — the only backward wire in this app. When “Clear and retry” SUCCEEDS, it loops back to re-run ComputePathToPose (up to Retry ×3) instead of merging forward like a Fallback arm"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3c6E",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 900,
+      "y": 20,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 200,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Open Add-process on any “+”, choose Control flow — “Recovery” sits beside “Fallback” with its own label and icon, not a Fallback variant"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4b96",
+      "typeName": "shape"
+    },
+    {
+      "x": 900,
+      "y": 1560,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Flip to Tree view in the pill — RecoveryNode wears its own glyph, never Fallback's branch icon or Retry's full circle"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5M8A",
+      "typeName": "shape"
+    },
+    {
+      "x": 60,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.0.0",
+        "btRole": "node"
+      },
+      "id": "shape:EcNKECr-2sKjV7zNY4A1t",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 555,
+        "h": 112,
+        "title": "ComputePathToPose",
+        "description": "",
+        "blockType": "Skill",
+        "icon": "Zap",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 555,
+            "h": 112
+          },
+          "port": {
+            "w": 555,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "85XhRIq7jodvq01ymiZm3",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:ComputePathToPose"
+      },
+      "index": "a1a5I",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.8333333333333334
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 825,
+      "y": 500,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.0.1.0",
+        "btRole": "node"
+      },
+      "id": "shape:m80OaKGtf4iOviM1XUHbf",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 640,
+        "h": 162,
+        "title": "WouldAPlannerRecoveryHelp",
+        "description": "",
+        "blockType": "Condition",
+        "icon": "Braces",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 640,
+            "h": 162
+          },
+          "port": {
+            "w": 640,
+            "h": 162
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "xTldJJKbxRBosz0C6HpJi",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:WouldAPlannerRecoveryHelp"
+      },
+      "index": "a2tze",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.7333333333333333
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.7888888888888889,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-4-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-4-arrow",
+      "toId": "shape:subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.9444444444444444,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 560,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:subject",
+      "type": "behaviorTree",
+      "props": {
+        "w": 1662,
+        "h": 1048,
+        "title": "NavigateWithRecovery",
+        "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"NavigateWithRecovery\">\n  <BehaviorTree ID=\"NavigateWithRecovery\">\n    <Sequence name=\"Navigate with recovery\">\n      <RecoveryNode number_of_retries=\"3\" name=\"ComputePathToPose\">\n        <ComputePathToPose goal=\"{goal}\" path=\"{path}\"/>\n        <Sequence name=\"Clear and retry\">\n          <WouldAPlannerRecoveryHelp error_code=\"{compute_path_error_code}\"/>\n          <ClearEntireCostmap name=\"ClearGlobalCostmap-Context\"/>\n        </Sequence>\n      </RecoveryNode>\n      <FollowPath path=\"{path}\"/>\n    </Sequence>\n  </BehaviorTree>\n  <TreeNodesModel>\n    <Action ID=\"ComputePathToPose\"><input_port name=\"goal\" type=\"Pose\"/><output_port name=\"path\" type=\"Path\"/></Action>\n    <Condition ID=\"WouldAPlannerRecoveryHelp\"><input_port name=\"error_code\"/></Condition>\n    <Action ID=\"ClearEntireCostmap\"/>\n    <Action ID=\"FollowPath\"><input_port name=\"path\" type=\"Path\"/></Action>\n  </TreeNodesModel>\n</root>\n",
+        "treeId": "NavigateWithRecovery",
+        "treeStack": [],
+        "projection": "process",
+        "orientation": "down",
+        "nodeFace": "simple",
+        "controlFace": "expanded",
+        "edgeStyle": "straight",
+        "dataLens": "none",
+        "blackboardLayout": "rail",
+        "arrangement": "tidy",
+        "controlWireOpacity": 1,
+        "spacingScale": 1,
+        "offsets": {},
+        "insertVisibility": "hover",
+        "nodeViewOverrides": {}
+      },
+      "parentId": "page:page",
+      "index": "a1U9a",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-4-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-4-arrow",
+      "toId": "shape:cue-step-4",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:oAz4NI0ymYYKJmTB6FZ91",
+      "typeName": "user"
+    },
+    {
+      "name": "",
+      "color": "#11B3A3",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:mCr2TrMHhZZ18orOXkxXC",
+      "typeName": "user"
+    },
+    {
+      "x": 153,
+      "y": 564,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.1",
+        "btRole": "node"
+      },
+      "id": "shape:dmRrj8gPMb1dA56glVHKi",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 369,
+        "h": 112,
+        "title": "FollowPath",
+        "description": "",
+        "blockType": "Skill",
+        "icon": "Zap",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 369,
+            "h": 112
+          },
+          "port": {
+            "w": 369,
+            "h": 112
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "jt1oSAnu72igGRaxSHwI_",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:FollowPath"
+      },
+      "index": "a4PdA",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:gt-7M-HHGhTlwRvc-zpZW",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1141.3333740234375,
+        "h": 1192
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1.5,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 825,
+      "y": 722,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "btRegion": "shape:subject",
+        "btPath": "0.0.1.1",
+        "btRole": "node"
+      },
+      "id": "shape:C-Qa13RLd3sD2DNOr0PDr",
+      "type": "block",
+      "parentId": "shape:subject",
+      "props": {
+        "w": 640,
+        "h": 162,
+        "title": "ClearGlobalCostmap-Context",
+        "description": "",
+        "blockType": "Skill",
+        "icon": "Zap",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 640,
+            "h": 162
+          },
+          "port": {
+            "w": 640,
+            "h": 162
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": false,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "lbFf7shMyvDrz_IyZLyc-",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "bt:ClearEntireCostmap"
+      },
+      "index": "a3DlM",
+      "typeName": "shape"
+    },
+    {
+      "x": 460,
+      "y": 545,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 315
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2mAmV",
+      "typeName": "shape"
+    }
+  ]
+}
