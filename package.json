@@ -163,6 +163,7 @@
     "test:async-region-stress": "node tests/async_region_stress_fixture_smoke.mjs",
     "test:async-region-gallery": "node tests/async_region_gallery_smoke.mjs",
     "test:communication-authoring": "node tests/communication_authoring_smoke.mjs",
+    "test:edge-crossing": "node tests/communication_edge_crossing_smoke.mjs",
     "capture:async-region-carrier-hero": "node docs/capture_async_region_representative_edge_hero.mjs",
     "test:semantic-roles": "node tests/semantic_role_inheritance_smoke.mjs",
     "test:named-landmarks": "node tests/named_landmarks_smoke.mjs",

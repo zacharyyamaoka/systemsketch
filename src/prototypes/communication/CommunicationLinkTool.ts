@@ -122,6 +122,8 @@ class Pointing extends StateNode {
 			family: communicationProjection.get(this.editor).drawFamily,
 			initiatorId: draft.initiatorId,
 			responderId,
+			// The line the person drew decides which walls the sockets land on.
+			stroke: draft.origin ? { from: draft.origin, to: point } : undefined,
 		})
 		if (!result.ok) return
 		// WHY: stay on the tool. Drawing a communication topology is a repeated

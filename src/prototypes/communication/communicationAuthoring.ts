@@ -13,6 +13,7 @@ import { getPortHostPort } from '../../blocks/connections/blockPorts'
 import { pairBlockFaces } from '../../blocks/connections/connectionScope'
 import { CONNECTION_SHAPE_TYPE } from '../../blocks/connections/connectionModel'
 import { applyAsyncRegionConnectionDefault } from '../../asyncRegion/asyncRegionModel'
+import { arrowEntryEdge, arrowExitEdge, type CrossingRect } from './arrowEdgeCrossing'
 import type { CommunicationFamily, CommunicationPhase, CommunicationRelation } from './communicationProjection'
 
 /**
@@ -139,6 +140,13 @@ export function communicationPortId(
 	return `comm:${family}:${communicationNameSlug(name)}:${phase}`
 }
 
+function pageRect(editor: Editor, shapeId: TLShapeId): CrossingRect {
+	const bounds = editor.getShapePageBounds(shapeId)
+	return bounds
+		? { x: bounds.x, y: bounds.y, w: bounds.w, h: bounds.h }
+		: { x: 0, y: 0, w: 1, h: 1 }
+}
+
 function blockTitleSlug(editor: Editor, shapeId: TLShapeId): string {
 	const shape = editor.getShape(shapeId)
 	return isBlockShape(shape) ? communicationNameSlug(shape.props.title) : ''
@@ -209,6 +217,15 @@ export interface MaterializeCommunicationLinkOptions {
 	responderId: TLShapeId
 	/** Omitted means the responder-title default. */
 	name?: string
+	/**
+	 * The line the person actually drew, in page space.
+	 *
+	 * Given it, the sockets land on the two walls that line crosses — "the ports
+	 * should appear on the two edges that your arrow intersects when wiring".
+	 * Omitted, the placement falls back to comparing card centres, which is all
+	 * a caller without a gesture (a command, a test fixture) can honestly say.
+	 */
+	stroke?: { from: { x: number; y: number }; to: { x: number; y: number } }
 }
 
 export interface MaterializedCommunicationLeg {
@@ -314,6 +331,28 @@ export function materializeCommunicationLink(
 	const faces = pairBlockFaces(editor, initiator, responder, { requireLive: false })
 	if (!faces) return { ok: false, reason: 'unpairable-scope' }
 
+	// Where the drawn line crosses each card, falling back to the centre-to-centre
+	// reading when there is no line to read (a command, or a drag that never left
+	// the card it began in).
+	const crossings = options.stroke
+		? {
+			initiator: arrowExitEdge(
+				pageRect(editor, initiatorId),
+				options.stroke.from,
+				options.stroke.to,
+			),
+			responder: arrowEntryEdge(
+				pageRect(editor, responderId),
+				options.stroke.from,
+				options.stroke.to,
+			),
+		}
+		: { initiator: null, responder: null }
+	const initiatorEdge = crossings.initiator?.edge
+		?? facingRail(editor, initiatorId, responderId)
+	const responderEdge = crossings.responder?.edge
+		?? facingRail(editor, responderId, initiatorId)
+
 	const name = communicationNameSlug(options.name ?? '')
 		|| defaultCommunicationName(editor, family, initiatorId, responderId)
 	const legs = COMMUNICATION_PROTOCOL_LEGS[family]
@@ -327,9 +366,11 @@ export function materializeCommunicationLink(
 		const sourceShapeId = leg.direction === 'forward' ? initiatorId : responderId
 		const targetShapeId = leg.direction === 'forward' ? responderId : initiatorId
 		const base = { id: portId, name: portName, type: '', visible: true, row: FIRST_BODY_ROW }
-		// Each end's socket goes on the face pointing at the other component.
-		const sourceRail = facingRail(editor, sourceShapeId, targetShapeId)
-		const targetRail = facingRail(editor, targetShapeId, sourceShapeId)
+		// Every leg of one interaction lands on the same pair of walls, because
+		// the arrow crossed those walls once — the legs are that one arrow told
+		// in full, so they must not scatter around the card.
+		const sourceRail = sourceShapeId === initiatorId ? initiatorEdge : responderEdge
+		const targetRail = targetShapeId === initiatorId ? initiatorEdge : responderEdge
 		// The rail is a COMMUNICATION-lens placement. Dataflow is untouched: the
 		// port keeps its ordinary row and lands on the left or right lane there.
 		pending.push({
