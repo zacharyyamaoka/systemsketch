@@ -187,6 +187,18 @@ async function main() {
     assert.deepEqual(await representativeState(app.page, 'S2'), {
       phase: 'request', id: 'shape:edge-pose-request', policy: 'request',
     })
+    const serviceFocusHit = await elementBox(app.page, '[data-communication-mode="components"][data-communication-id="S1"] [data-communication-focus-hit]')
+    await clickAt(app.page, serviceFocusHit.cx, serviceFocusHit.cy)
+    await waitFor(app.page, `document.querySelector('[data-testid="communication-prototype-status"]')?.textContent.includes('S1 focused · 2 legs')`, 'S1 focus')
+    const focusedServiceLabels = JSON.parse(await evaluate(app.page, `JSON.stringify([
+      ...document.querySelectorAll('[data-communication-id="S1"][data-communication-focus="active"] [data-communication-label="S1"] text')
+    ].map((node) => node.textContent))`))
+    assert.deepEqual(new Set(focusedServiceLabels), new Set(['S1 · request', 'S1 · response']))
+    pass('focused Service tags identify the exact request and response legs instead of repeating the aggregate relationship')
+    await shot(app.page, '02-service-focus-exact-phases.png')
+    await clickElement(app.page, '[data-testid="communication-focus-clear"]')
+    await waitFor(app.page, `!document.querySelector('[data-testid="communication-prototype-status"]')?.textContent.includes('S1 focused')`, 'cleared S1 focus')
+
     await selectTrack(app.page, 'communication-service-track', 'response')
     await selectTrack(app.page, 'communication-action-track', 'result')
     await waitFor(app.page, `document.querySelector('[data-communication-id="A2"]')?.getAttribute('data-communication-representative-phase') === 'result'`, 'Action result representative')

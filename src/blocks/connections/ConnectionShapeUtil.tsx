@@ -1169,10 +1169,15 @@ function ComponentCommunicationConnection({
 	)
 	if (!geometry) return null
 	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
-	const label = `${relation.displayId} · ${relation.family} · ${relation.name}`
 	const focusState = focusedGroupKey === null
 		? 'none'
 		: focusedGroupKey === relation.groupKey ? 'active' : 'dim'
+	// WHY: a focused relationship is an inspection of its constituent legs, so
+	// its carrier must stop repeating the aggregate family/name and identify the
+	// exact phase beside the other expanded phase labels.
+	const label = focusState === 'active'
+		? `${relation.displayId} · ${phaseLabel(representative.phase)}`
+		: `${relation.displayId} · ${relation.family} · ${relation.name}`
 	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
 		if (event.button !== 0) return
 		event.stopPropagation()

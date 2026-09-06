@@ -1183,7 +1183,7 @@
     {
       "id": "step-focus",
       "kind": "step",
-      "text": "5 · Click A2. Exactly move.goal, cancel, feedback, and result belong to that focus even when a different carrier is drawn.",
+      "text": "5 · Click S1. Its two focused tags should say S1 request and S1 response—not the aggregate Service health label.",
       "x": 2300,
       "y": 500,
       "w": 440,
@@ -1225,7 +1225,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Carrier choices follow their named or shortest existing tracks without moving the graph; A2 still isolates four legs; the new alerts wire defaults Async.",
+      "text": "PASS WHEN · Carrier choices do not move the graph; S1 focus names request/response exactly; A2 still isolates four legs; the new alerts wire defaults Async.",
       "x": 1500,
       "y": 1400,
       "w": 650,

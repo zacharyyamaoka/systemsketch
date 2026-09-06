@@ -117,7 +117,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "xwaLAuTliLDEj9i5kjAE5",
+        "definitionId": "ocNAf0-9dR3vxJqZbm4Cf",
         "inputs": [
           {
             "id": "preview",
@@ -135,7 +135,7 @@
         "outputs": [],
         "definitionKey": "Telemetry_UI"
       },
-      "index": "aQ7On",
+      "index": "aQJ7A",
       "typeName": "shape"
     },
     {
@@ -200,7 +200,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBXiX",
+      "index": "aBwQU",
       "typeName": "shape"
     },
     {
@@ -289,7 +289,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3q6f",
+      "index": "a3Guj",
       "typeName": "shape"
     },
     {
@@ -328,7 +328,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFZqf",
+      "index": "aFYQr",
       "typeName": "shape"
     },
     {
@@ -382,7 +382,7 @@
         "color": "violet"
       },
       "parentId": "page:page",
-      "index": "a1BQE",
+      "index": "a1zcB",
       "typeName": "shape"
     },
     {
@@ -419,7 +419,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Carrier choices follow their named or shortest existing tracks without moving the graph; A2 still isolates four legs; the new alerts wire defaults Async."
+                  "text": "PASS WHEN · Carrier choices do not move the graph; S1 focus names request/response exactly; A2 still isolates four legs; the new alerts wire defaults Async."
                 }
               ]
             }
@@ -427,16 +427,8 @@
         }
       },
       "parentId": "page:page",
-      "index": "a98rb",
+      "index": "a9g5X",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#BD54C6",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:He34HVS0Xlsf_9rrCrWA6",
-      "typeName": "user"
     },
     {
       "x": 0,
@@ -482,7 +474,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8z3UV",
+      "index": "a8JQM",
       "typeName": "shape"
     },
     {
@@ -521,7 +513,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aGgsU",
+      "index": "aG6k2",
       "typeName": "shape"
     },
     {
@@ -565,7 +557,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4yufO",
+      "index": "a4v9qV",
       "typeName": "shape"
     },
     {
@@ -640,7 +632,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aLqaf",
+      "index": "aL0cM",
       "typeName": "shape"
     },
     {
@@ -684,7 +676,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6zsnd",
+      "index": "a6VZe",
       "typeName": "shape"
     },
     {
@@ -759,16 +751,8 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAbCM",
+      "index": "aAVs6",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#F2555A",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:0Fxflf4qcCerhXdZPpErS",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -830,7 +814,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4tfM",
+      "index": "a4Vwr",
       "typeName": "shape"
     },
     {
@@ -869,7 +853,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aEwPQ",
+      "index": "aEzsw",
       "typeName": "shape"
     },
     {
@@ -906,7 +890,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "5 · Click A2. Exactly move.goal, cancel, feedback, and result belong to that focus even when a different carrier is drawn."
+                  "text": "5 · Click S1. Its two focused tags should say S1 request and S1 response—not the aggregate Service health label."
                 }
               ]
             }
@@ -914,7 +898,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6qFz",
+      "index": "a60s2",
       "typeName": "shape"
     },
     {
@@ -953,7 +937,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aK3TA",
+      "index": "aKomE",
       "typeName": "shape"
     },
     {
@@ -1064,7 +1048,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a7zdEV",
+      "index": "a7yU0l",
       "typeName": "shape"
     },
     {
@@ -1121,7 +1105,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aHjqr",
+      "index": "aHJMb",
       "typeName": "shape"
     },
     {
@@ -1178,7 +1162,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7W1X",
+      "index": "a7Ojn",
       "typeName": "shape"
     },
     {
@@ -1217,7 +1201,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aM7cb",
+      "index": "aMOAE",
       "typeName": "shape"
     },
     {
@@ -1267,7 +1251,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "kjy2viFnYisHEeOLwKmQa",
+        "definitionId": "IUW5ngDtaohomUjHoUngZ",
         "inputs": [
           {
             "id": "detections",
@@ -1370,7 +1354,7 @@
         ],
         "definitionKey": "Mission_orchestrator"
       },
-      "index": "aRffz",
+      "index": "aRvNQ",
       "typeName": "shape"
     },
     {
@@ -1415,7 +1399,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a77SA",
+      "index": "a7N4z",
       "typeName": "shape"
     },
     {
@@ -1459,7 +1443,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5wqhl",
+      "index": "a5kUWl",
       "typeName": "shape"
     },
     {
@@ -1503,7 +1487,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2zZNV",
+      "index": "a2rBYV",
       "typeName": "shape"
     },
     {
@@ -1542,7 +1526,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aI36Q",
+      "index": "aIq42",
       "typeName": "shape"
     },
     {
@@ -1581,7 +1565,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6JNA",
+      "index": "a6KEE",
       "typeName": "shape"
     },
     {
@@ -1620,7 +1604,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9mSU",
+      "index": "a94Vf",
       "typeName": "shape"
     },
     {
@@ -1640,6 +1624,14 @@
         "terminal": "start"
       },
       "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:l4dq6jhEQq3kYl-0mg0Vz",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -1721,7 +1713,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCRD6",
+      "index": "aC7Rz",
       "typeName": "shape"
     },
     {
@@ -1766,7 +1758,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2IzP",
+      "index": "a2ZWj",
       "typeName": "shape"
     },
     {
@@ -1836,7 +1828,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a8ur4G",
+      "index": "a8zzkTGV",
       "typeName": "shape"
     },
     {
@@ -1881,7 +1873,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5bC6",
+      "index": "a5BIv",
       "typeName": "shape"
     },
     {
@@ -1983,8 +1975,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1920,
-        "h": 1100
+        "w": 2800,
+        "h": 1650
       },
       "insets": [
         false,
@@ -2100,7 +2092,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aJtPX",
+      "index": "aJEzY",
       "typeName": "shape"
     },
     {
@@ -2197,7 +2189,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a8l9X",
+      "index": "a8zzTV",
       "typeName": "shape"
     },
     {
@@ -2288,7 +2280,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aN1BI",
+      "index": "aN8jX",
       "typeName": "shape"
     },
     {
@@ -2332,7 +2324,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3xvNd",
+      "index": "a3khF",
       "typeName": "shape"
     },
     {
@@ -2434,7 +2426,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "NVRvodBaTLT0ZC6nTcMVZ",
+        "definitionId": "IN-IoCzUPHoUXvZ6i2_6v",
         "inputs": [],
         "outputs": [
           {
@@ -2458,7 +2450,7 @@
         ],
         "definitionKey": "Camera_gateway"
       },
-      "index": "aOOlz",
+      "index": "aOW22",
       "typeName": "shape"
     },
     {
@@ -2508,7 +2500,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "EzyN0_4xyciwz36kcUg8e",
+        "definitionId": "NEV3mpTFuRFtUYLhKtG6E",
         "inputs": [
           {
             "id": "frame",
@@ -2527,7 +2519,7 @@
         ],
         "definitionKey": "Perception"
       },
-      "index": "aPUC7",
+      "index": "aPyvb",
       "typeName": "shape"
     },
     {
@@ -2616,7 +2608,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "C92Mw2zqcKeiV_5ZRLoSL",
+        "definitionId": "gsCc21o0E-hhHlL7p8hfU",
         "inputs": [
           {
             "id": "dock_goal",
@@ -2713,7 +2705,7 @@
         ],
         "definitionKey": "Robot_runtime"
       },
-      "index": "aSVOI",
+      "index": "aSYIb",
       "typeName": "shape"
     },
     {
@@ -2752,7 +2744,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aDBl6",
+      "index": "aDnME",
       "typeName": "shape"
     },
     {
