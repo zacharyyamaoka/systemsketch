@@ -23,6 +23,7 @@ import {
 } from '../behaviorTree/behaviorTreeCommands'
 import { withCalloutTool } from '../callout'
 import { withCodeTool } from '../code'
+import { withFloatingPortTool } from '../floatingPort/floatingPortToolUi'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
@@ -266,7 +267,7 @@ function overrideTools(
  */
 function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
   const next: TLUiToolsContextType = { ...tools }
-  for (const id of ['block', 'branch', 'loop', 'behaviorTree', 'code', 'pill', 'type', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
+  for (const id of ['block', 'branch', 'loop', 'behaviorTree', 'code', 'pill', 'type', 'floating-port', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
     const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
     if (wrapped) next[id] = wrapped
   }
@@ -377,8 +378,9 @@ function overrideGroupActionForBehaviorTrees(
 
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
-    rememberSystemTools(withCalloutTool(editor, withCodeTool(editor, withBehaviorTreeTool(editor, withLoopTool(editor,
-      withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))))))),
+    rememberSystemTools(withCalloutTool(editor, withCodeTool(editor, withFloatingPortTool(editor,
+      withBehaviorTreeTool(editor, withLoopTool(editor, withBranchTool(editor,
+        withBlockTool(editor, overrideTools(editor, tools))))))))),
   actions: (editor, actions, helpers) =>
     overrideGroupActionForBehaviorTrees(editor, overrideRegionExportActions(editor, actions, helpers)),
   translations: {

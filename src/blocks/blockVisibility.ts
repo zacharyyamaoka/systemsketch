@@ -1,6 +1,6 @@
 import { isShapeId, type Editor, type TLShape } from 'tldraw'
 
-import { isBlockShape } from './blockModel'
+import { blockIsFolded, isBlockShape } from './blockModel'
 import { isBranchShape } from '../branch/branchModel'
 import {
 	foldedUnderCaseView,
@@ -42,7 +42,9 @@ export function getBlockShapeVisibility(
 	}
 	if (isShapeId(shape.parentId)) {
 		const parent = editor.getShape(shape.parentId)
-		if (isBlockShape(parent) && parent.props.view !== 'expanded') return 'hidden'
+		if (isBlockShape(parent) && (parent.props.view !== 'expanded' || blockIsFolded(parent.props))) {
+			return 'hidden'
+		}
 	}
 	if (shape.type === CONNECTION_SHAPE_TYPE) {
 		return connectionHiddenByBranch(editor, shape) ? 'hidden' : 'inherit'

@@ -7,7 +7,7 @@
  * to the drawn glyph, which is the honest outcome: inventing a FigJam-looking
  * icon for a state FigJam does not have would be worse than not matching.
  */
-import type { AppearanceControlId } from './appearanceModel'
+import type { AppearanceControlId } from '../contextualMenus/contextualControlRegistry'
 
 type ValueToIcon = Readonly<Record<string, string>>
 

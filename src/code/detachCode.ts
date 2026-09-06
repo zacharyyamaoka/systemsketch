@@ -20,7 +20,7 @@ import {
 } from 'tldraw'
 
 import { DETACH_FORMAT_VERSION, toJsonSafe } from '../blocks/detach/detachModel'
-import type { CodeShape } from './codeModel'
+import { codeFontPixels, type CodeShape } from './codeModel'
 
 export interface DetachedCodePrimitives {
 	/** Selectable stock group that replaced the Code block, when grouping held. */
@@ -59,7 +59,7 @@ export function detachCodeToPrimitives(
 				autoSize: false,
 				color: 'white',
 				font: 'mono',
-				scale: code.props.fontSize / 18,
+				scale: codeFontPixels(code.props.size, code.props.fontScale) / 18,
 				size: 's',
 				textAlign: 'start',
 				w: Math.max(1, code.props.w - inset - 14),

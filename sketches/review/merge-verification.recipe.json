@@ -1,0 +1,214 @@
+{
+  "feature": "Pre-merge verification: Type primitive, Type Mapping, and Code block together",
+  "viewport": {
+    "width": 2060,
+    "height": 1900
+  },
+  "shapes": [
+    {
+      "id": "pose",
+      "type": "block",
+      "x": 40,
+      "y": 340,
+      "props": {
+        "title": "Pose",
+        "blockType": "type",
+        "view": "port",
+        "w": 340,
+        "h": 320,
+        "attributeSource": "x: Pose\ny: float = 10\nz: float"
+      },
+      "meta": {
+        "babbleVariant": 1
+      }
+    },
+    {
+      "id": "v1default",
+      "type": "block",
+      "x": 420,
+      "y": 340,
+      "props": {
+        "title": "V1 (default, trailing chevron)",
+        "blockType": "type",
+        "view": "port",
+        "w": 380,
+        "h": 320,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": {
+        "babbleVariant": 1
+      }
+    },
+    {
+      "id": "priorart",
+      "type": "block",
+      "x": 840,
+      "y": 340,
+      "props": {
+        "title": "V1 Prior Art (leading chevron)",
+        "blockType": "type",
+        "view": "port",
+        "w": 380,
+        "h": 320,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": {
+        "babbleVariant": 8
+      }
+    },
+    {
+      "id": "mapping",
+      "type": "block",
+      "x": 40,
+      "y": 1000,
+      "props": {
+        "title": "Type Mapping — chained aliases",
+        "blockType": "type",
+        "view": "port",
+        "w": 540,
+        "h": 220,
+        "attributeSource": "Pair = Tuple[Pose, Pose]\nPairs = Iterable[Pair]\nEstimator = Callable[[Frame, float], Pose]"
+      },
+      "meta": {
+        "typeMappingBabbleVariant": 1
+      }
+    },
+    {
+      "id": "code1",
+      "type": "code",
+      "x": 40,
+      "y": 1580,
+      "props": {
+        "w": 460,
+        "h": 240,
+        "code": "def greet(name: str) -> str:\n    return f\"Hello, {name}!\"",
+        "language": "python",
+        "size": "m",
+        "showLineNumbers": true,
+        "characterWidth": 48
+      }
+    },
+    {
+      "id": "code2",
+      "type": "code",
+      "x": 540,
+      "y": 1580,
+      "props": {
+        "w": 460,
+        "h": 240,
+        "code": "function greet(name) {\n  return `Hello, ${name}!`\n}",
+        "language": "javascript",
+        "size": "l",
+        "showLineNumbers": false,
+        "characterWidth": 32
+      }
+    },
+    {
+      "id": "code3",
+      "type": "code",
+      "x": 1040,
+      "y": 1580,
+      "props": {
+        "w": 460,
+        "h": 240,
+        "code": "{\n  \"name\": \"Pose\",\n  \"fields\": [\"x\", \"y\", \"z\"]\n}",
+        "language": "json",
+        "size": "s",
+        "showLineNumbers": true,
+        "characterWidth": 64
+      }
+    },
+    {
+      "id": "code4",
+      "type": "code",
+      "x": 1540,
+      "y": 1580,
+      "props": {
+        "w": 460,
+        "h": 240,
+        "code": "select id, name\nfrom poses\nwhere active = true;",
+        "language": "sql",
+        "size": "xl",
+        "showLineNumbers": true,
+        "characterWidth": 72
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step1",
+      "kind": "step",
+      "text": "1 · Click \"pose: Pose\" to expand — self-referential, so click the nested \"x: Pose\" again to go as deep as you like. With the block selected, click any row text (not the chevron, not the blue link) — Source mode opens with the cursor AT THE CLICK. A nested row (e.g. \"y: float = 10\") jumps to the block that OWNS it (Pose) and lands the cursor on that field’s line, at your click position.",
+      "x": 420,
+      "y": 20,
+      "w": 420,
+      "h": 300,
+      "target": {
+        "shapeId": "v1default",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step2",
+      "kind": "step",
+      "text": "2 · Same engine, prior-art chevron styling. In Source mode, type a type name (e.g. \"Po\") — the autocomplete popup now paints ON TOP of everything on the canvas: drag an arrow straight through it and the list stays fully readable.",
+      "x": 890,
+      "y": 20,
+      "w": 420,
+      "h": 220,
+      "target": {
+        "shapeId": "priorart",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "note-pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Clicking row text opens Source with the cursor at the clicked character (nested rows open the OWNER block’s source, never the row’s own type); the blue link still just jumps; the autocomplete popup is never hidden behind any shape; and a Custom px typed in the Font size menu visibly renders at that exact size on Text shapes AND Code blocks, with presets snapping back.",
+      "x": 1370,
+      "y": 20,
+      "w": 460,
+      "h": 330
+    },
+    {
+      "id": "step3",
+      "kind": "step",
+      "text": "3 · Type Mapping: click the blue \"Pose\" token to jump to its real definition above. \"Pairs\" chains off \"Pair\", defined earlier in the same block — a mapping can reference its own prior aliases.",
+      "x": 40,
+      "y": 745,
+      "w": 460,
+      "h": 170,
+      "target": {
+        "shapeId": "mapping",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step4",
+      "kind": "step",
+      "text": "4 · Four Code blocks, four different settings. Select any one — ONE shared pill controls language, text size, line numbers, and character width. NEW: the Font size menu has a Custom row under the presets — type any px (say 29) and the text renders at exactly that size; it works the same on a plain Text shape or a sticky note. Clicking a preset snaps cleanly back.",
+      "x": 40,
+      "y": 1272,
+      "w": 460,
+      "h": 280,
+      "target": {
+        "shapeId": "code1",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step5",
+      "kind": "step",
+      "text": "5 · Drag a Code block's corner handle and watch the live \"N ch\" badge update — width is real and derived from the drag, not just a label. The rightmost block already uses a custom (non-preset) width.",
+      "x": 1540,
+      "y": 1300,
+      "w": 460,
+      "h": 170,
+      "target": {
+        "shapeId": "code4",
+        "anchor": "top"
+      }
+    }
+  ]
+}

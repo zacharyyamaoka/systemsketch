@@ -26,8 +26,9 @@ function releaseShortcut(tools: TLUiToolsContextType, shortcut: string): TLUiToo
 }
 
 /**
- * Add Block, Pill, and Type to tldraw's UI-tool registry. Type deliberately
- * has no shortcut: T remains stock text, while its tool stays discoverable.
+ * Add Block, Pill, and Type to tldraw's UI-tool registry. Block and Pill keep
+ * the donor's shortcuts, B and P; Type deliberately has none, so T remains
+ * stock text while the tool stays reachable from the toolbar and palette.
  *
  * The drawing state nodes are registered separately through Tldraw's `tools`
  * prop. This helper is the shared presentation seam used by Stable and the

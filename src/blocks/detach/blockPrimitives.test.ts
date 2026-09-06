@@ -201,4 +201,16 @@ describe('a Block as stock primitives', () => {
 		expect((typeShape!.props as { w: number }).w).toBeGreaterThan(70)
 		expect(typeShape!.meta).toBeUndefined()
 	})
+
+	it('projects centered header placement into the detached stock title', () => {
+		const base = blockProps({
+			view: 'port', title: 'decode', blockType: 'Function', icon: 'SquareFunction',
+		})
+		const title = (props: BlockShapeProps) => primitivesForBlock(props, { x: 0, y: 0 }).shapes
+			.find((shape) => shape.type === 'text'
+				&& JSON.stringify((shape.props as { richText: unknown }).richText).includes('decode'))!
+
+		expect(title({ ...base, headerAlign: 'center' }).x!)
+			.toBeGreaterThan(title(base).x! + 30)
+	})
 })

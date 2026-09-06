@@ -1,0 +1,26 @@
+[
+  {
+    "label": "the cold-reopened review fixture keeps its instructional cue bound after a real target drag",
+    "ok": true
+  },
+  {
+    "label": "the untouched stock toolbar renders all six tldraw range commands in SystemSketch dark chrome",
+    "ok": true
+  },
+  {
+    "label": "stock Bold still changes only the selected character range",
+    "ok": true
+  },
+  {
+    "label": "tldraw link editing remains stock and gains a legible dark input treatment",
+    "ok": true
+  },
+  {
+    "label": "range and whole-shape menus share one dark contextual surface while retaining separate scopes",
+    "ok": true
+  },
+  {
+    "label": "the real browser journey produced zero local console errors",
+    "ok": true
+  }
+]

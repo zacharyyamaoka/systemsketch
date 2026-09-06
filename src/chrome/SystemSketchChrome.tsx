@@ -26,6 +26,11 @@ import {
   getOnlySelectedBlock,
   selectionHasBlockStyles,
 } from '../blocks'
+import {
+  FLOATING_PORT_TOOL_ID,
+  FloatingPortInspector,
+  getOnlySelectedFloatingPort,
+} from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
@@ -33,12 +38,14 @@ import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
+  BlockTitleFormattingControls,
   canShowBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
   HitAreaOverlay,
   OnCanvasBlockPicker,
   TunnelLayerBar,
+  getEditingBlockTitle,
 } from '../blocks/ui'
 import {
   BRANCH_TOOL_ID,
@@ -51,9 +58,10 @@ import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSe
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
-  getOnlySelectedCode,
+  getSelectedCodeShapes,
 } from '../code'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import { DraftsControl } from '../drafts/DraftsControl'
 import {
   PropagationFocusControls,
   PropagationFocusDomLens,
@@ -88,8 +96,10 @@ import {
   getSelectionLayoutActionAvailability,
   SelectionLayoutActions,
 } from './SelectionLayoutActions'
+import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import './systemsketch-chrome.css'
+import './rich-text-toolbar.css'
 
 function PanelIcon() {
   return (
@@ -113,6 +123,10 @@ export function SystemSketchMenuPanel() {
       data-systemsketch-chrome
     >
       {MainMenu ? <MainMenu /> : null}
+      {/* Between the file identity and the breadcrumb — never after it. Zach's
+          explicit requirement: the breadcrumb stays the rightmost element of
+          this cluster, so Drafts goes here rather than appended below. */}
+      <DraftsControl />
       <DepthStackNavigator placement="menu" />
     </nav>
   )
@@ -233,6 +247,7 @@ function InspectorDock({
 }) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'port') return <FloatingPortInspector editor={editor} />
   if (subject === 'behaviorTree') return <EditorBehaviorTreeInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
@@ -254,7 +269,7 @@ function InspectorEmptyState() {
       <span aria-hidden="true">▣</span>
       <strong>Nothing selected</strong>
       <p>
-        Select a Block, a Branch or a cable to edit it here. Any other shape shows
+        Select a Block, Port, Branch, Behavior Tree or cable to edit it here. Any other shape shows
         what the board knows about it.
       </p>
     </div>
@@ -305,8 +320,8 @@ function SelectionMiniMenu() {
     [editor],
   )
   const hasCode = useValue(
-    'systemsketch selection is one Code block',
-    () => getOnlySelectedCode(editor) !== null,
+    'systemsketch selection has Code blocks',
+    () => getSelectedCodeShapes(editor).length > 0,
     [editor],
   )
   const layoutActions = useValue(
@@ -346,6 +361,7 @@ function SelectionMiniMenu() {
     || hasBranch
     || hasBehaviorTree
     || hasBlockMiniMenu
+    || hasCode
     || hasAppearance
     || canWrap
     || propagationSeed !== null
@@ -364,37 +380,28 @@ function SelectionMiniMenu() {
     )
   }
 
-  if (hasBranch) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Selection actions"
-      >
-        <EditorBranchSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
-  if (hasBehaviorTree) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Behavior Tree actions"
-      >
-        <EditorBehaviorTreeSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
-  if (hasCode) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Code block actions"
-      >
-        <EditorCodeSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
+  const surface = hasBehaviorTree
+    ? 'behavior-tree-selection'
+    : hasBranch ? 'branch-selection'
+      : hasBlocks ? 'block-selection' : 'shape-selection'
+  const items = {
+    'behavior-tree-actions': <EditorBehaviorTreeSelectionMiniMenu editor={editor} />,
+    'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
+    'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
+    appearance: <AppearanceControls />,
+    // Code contributes ONLY what is unique to it (line numbers, the character
+    // width) into this same pill — its language and text size are already
+    // ordinary appearance rows above. One menu, never a second floating surface.
+    'code-actions': hasCode ? <EditorCodeSelectionMiniMenu editor={editor} /> : null,
+    wrap: <WrapSelectionControl />,
+    layout: (
+      <SelectionLayoutActions
+        {...layoutActions}
+        onTidyEdges={runTidyEdges}
+        onOrganizeNodes={() => void runOrganizeNodes()}
+      />
+    ),
+    'propagation-focus': <PropagationFocusControls />,
   }
 
   return (
@@ -402,39 +409,29 @@ function SelectionMiniMenu() {
       className="systemsketch-selection-menu"
       label="Selection actions"
     >
-      {/* Appearance rides on both branches. A Block carries no tldraw styles of
-          its own, so it contributes nothing here — but a Block selected
-          *alongside* a rectangle must not put the rectangle's colour out of
-          reach. The control renders nothing when the selection has no styles,
-          so the Block-only pill is unchanged. */}
-      {hasBlocks ? (
-        <>
-          <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      ) : (
-        <>
-          {/* Appearance first, the way FigJam leads with what the thing looks
-              like. There is no Inspect button on either branch any more: the
-              dock follows the selection, so the pill only carries the things
-              that change the shape. */}
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      )}
+      <ContextualSurface surface={surface} items={items} />
+    </SelectionContextualMenu>
+  )
+}
+
+/** The title formatter occupies the selection pill while its text is live. */
+function EditingBlockTitleMenu() {
+  const editor = useEditor()
+  const isEditingTitle = useValue(
+    'systemsketch editing Block title menu',
+    () => getEditingBlockTitle(editor) !== null,
+    [editor],
+  )
+  if (!isEditingTitle) return null
+  return (
+    <SelectionContextualMenu
+      className="systemsketch-selection-menu systemsketch-title-formatting-menu"
+      label="Block title formatting"
+    >
+      <ContextualSurface
+        surface="block-title-editing"
+        items={{ 'title-formatting': <BlockTitleFormattingControls /> }}
+      />
     </SelectionContextualMenu>
   )
 }
@@ -471,6 +468,8 @@ export function SystemSketchSurfaceHost() {
       // never changed it.
       const loop = getOnlySelectedLoop(editor)
       if (loop) return `loop:${loop.id}`
+      const port = getOnlySelectedFloatingPort(editor)
+      if (port) return `port:${port.id}`
       const tree = getSelectedBehaviorTree(editor)
       if (tree) return `behaviorTree:${tree.region.id}:${tree.path ?? ''}`
       const context = getBlockInspectorContext(editor)
@@ -505,6 +504,7 @@ export function SystemSketchSurfaceHost() {
     () => readInspectorSubject(editor, {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
+      getOnlySelectedFloatingPort,
       getSelectedBehaviorTree,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
@@ -562,11 +562,19 @@ export function SystemSketchSurfaceHost() {
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
       },
       {
+        id: 'insert-floating-port',
+        label: 'Insert Port',
+        description: 'Switch to the free, wireable Port primitive',
+        keywords: ['port', 'input', 'output', 'connector'],
+        icon: '◉',
+        run: () => editor.setCurrentTool(FLOATING_PORT_TOOL_ID),
+      },
+      {
         id: 'insert-type',
         label: 'Insert Type',
         description: 'Switch to the compact Type definition tool',
         keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
-        icon: '⌘',
+        icon: '{}',
         run: () => editor.setCurrentTool(TYPE_TOOL_ID),
       },
       {
@@ -834,6 +842,7 @@ export function SystemSketchSurfaceHost() {
         />
       ) : null}
 
+      <EditingBlockTitleMenu />
       <SelectionMiniMenu />
       <CodeResizeIndicator />
     </div>

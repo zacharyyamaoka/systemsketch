@@ -95,13 +95,20 @@ function TypeDevelopmentToolbarItem() {
   const tool = tools[TYPE_TOOL_ID]
   const isSelected = useIsToolSelected(tool)
   if (!tool) return null
-  return <TldrawUiMenuItem {...tool} isSelected={isSelected} data-testid="type-development-tool" />
+
+  return (
+    <TldrawUiMenuItem
+      {...tool}
+      isSelected={isSelected}
+      data-testid="type-development-tool"
+    />
+  )
 }
 
 /**
- * Stock tldraw toolbar with one additive seam: Block and Pill are visible in
- * slots 8–10. Asset moves to slot 11 and every remaining stock item keeps
- * its stock order in the overflow menu.
+ * Stock tldraw toolbar with one additive seam: Block, Pill, and Type are
+ * visible in slots 8–10. Asset moves to slot 11 and every remaining stock
+ * item keeps its stock order in the overflow menu.
  */
 export function BlockDevelopmentToolbar() {
   return (

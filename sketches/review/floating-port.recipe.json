@@ -1,0 +1,154 @@
+{
+  "feature": "Floating Port primitive",
+  "viewport": { "width": 1600, "height": 900 },
+  "pages": [{ "id": "review", "name": "Floating Port review" }],
+  "shapes": [
+    {
+      "id": "source",
+      "type": "floating-port",
+      "x": 500,
+      "y": 450,
+      "props": {
+        "w": 1,
+        "h": 1,
+        "name": "velocity",
+        "type": "Number",
+        "value": "3.5",
+        "direction": "output",
+        "textLayout": "offset",
+        "fill": "auto"
+      }
+    },
+    {
+      "id": "integrate",
+      "type": "block",
+      "x": 780,
+      "y": 330,
+      "props": {
+        "title": "integrate()",
+        "description": "A regular Block — the Port is a separate primitive.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 320,
+        "h": 180,
+        "inputs": [{ "id": "in_velocity", "name": "velocity", "type": "Number", "visible": true }],
+        "outputs": [{ "id": "out_result", "name": "result", "type": "Number", "visible": true }]
+      }
+    },
+    {
+      "id": "sink",
+      "type": "floating-port",
+      "x": 1240,
+      "y": 450,
+      "props": {
+        "w": 1,
+        "h": 1,
+        "name": "state",
+        "type": "Number",
+        "value": "",
+        "direction": "input",
+        "textLayout": "offset",
+        "fill": "auto"
+      }
+    },
+    {
+      "id": "source-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "sink-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "source-cable-start",
+      "type": "connection",
+      "fromId": "source-cable",
+      "toId": "source",
+      "props": { "portId": "port", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "source-cable-end",
+      "type": "connection",
+      "fromId": "source-cable",
+      "toId": "integrate",
+      "props": { "portId": "in_velocity", "terminal": "end", "face": "outer" }
+    },
+    {
+      "id": "sink-cable-start",
+      "type": "connection",
+      "fromId": "sink-cable",
+      "toId": "integrate",
+      "props": { "portId": "out_result", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "sink-cable-end",
+      "type": "connection",
+      "fromId": "sink-cable",
+      "toId": "sink",
+      "props": { "portId": "port", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "configure-source",
+      "kind": "step",
+      "text": "1 · Click velocity. Edit name, type, value, direction, or text placement in the Port panel.",
+      "x": 30,
+      "y": 250,
+      "w": 390,
+      "h": 126,
+      "target": { "shapeId": "source", "anchor": "left" }
+    },
+    {
+      "id": "override-fill",
+      "kind": "step",
+      "text": "2 · In Filled, choose Empty then Auto. Auto immediately follows this real cable again.",
+      "x": 500,
+      "y": 650,
+      "w": 440,
+      "h": 126,
+      "target": { "shapeId": "source", "anchor": "bottom" }
+    },
+    {
+      "id": "move-sink",
+      "kind": "step",
+      "text": "3 · Drag state by its text. It is a free input Port, so the wire follows its position.",
+      "x": 1160,
+      "y": 190,
+      "w": 400,
+      "h": 126,
+      "target": { "shapeId": "sink", "anchor": "top" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Ports stay small, wire in either direction, expose their own settings, and move independently of the Block.",
+      "x": 1000,
+      "y": 700,
+      "w": 560,
+      "h": 112
+    }
+  ]
+}

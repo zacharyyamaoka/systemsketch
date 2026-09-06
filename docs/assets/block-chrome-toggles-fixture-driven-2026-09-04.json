@@ -1,0 +1,30 @@
+{
+  "before": {
+    "target": {
+      "x": 560,
+      "y": 290
+    },
+    "cueArrowsBoundToShown": 2,
+    "footer": true,
+    "headerDivider": "shown"
+  },
+  "moved": {
+    "target": {
+      "x": 650,
+      "y": 332
+    },
+    "cueArrowsBoundToShown": 2,
+    "footer": true,
+    "headerDivider": "shown"
+  },
+  "after": {
+    "target": {
+      "x": 650,
+      "y": 332
+    },
+    "cueArrowsBoundToShown": 2,
+    "footer": false,
+    "headerDivider": "hidden"
+  },
+  "consoleErrors": []
+}

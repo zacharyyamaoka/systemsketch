@@ -46,7 +46,17 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	DiffState: 5,
 	FieldDiffs: 6,
 	SemanticRolesAndStockConfig: 7,
+	// `TypeAttributes` (main) and the Type-primitive branch's own
+	// `AttributeSource` migration were the same transform — both strip a
+	// stray `attributeSource` on the way down — added independently for the
+	// same feature. Keeping main's numbering/name here; the duplicate was
+	// dropped rather than renumbered, since it did nothing TypeAttributes
+	// doesn't already do.
 	TypeAttributes: 8,
+	BlockChrome: 9,
+	FoldAndAutoResize: 10,
+	MemberLayout: 11,
+	InsetBackground: 12,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -239,6 +249,22 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
 	return next
 }
 
+/** v9 → v10: compact folding and auto-fit are off until an author opts in. */
+export function upgradeBlockPropsV9ToV10(props: BlockMigrationProps): BlockMigrationProps {
+	return {
+		...props,
+		...(props.foldable === undefined ? { foldable: false } : {}),
+		...(props.folded === undefined ? { folded: false } : {}),
+		...(props.autoResize === undefined ? { autoResize: false } : {}),
+	}
+}
+
+/** v10 → v9: presentation-only controls did not exist in the older schema. */
+export function downgradeBlockPropsV10ToV9(props: BlockMigrationProps): BlockMigrationProps {
+	const { foldable: _foldable, folded: _folded, autoResize: _autoResize, ...rest } = props
+	return rest
+}
+
 /**
  * v6 → v7: reserve one persisted vocabulary seam. Role claims need no default;
  * curated stock config is normalized when legacy experiments supplied one.
@@ -282,6 +308,50 @@ export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigr
 		if (Array.isArray(ports)) next = { ...next, [side]: ports.map(withoutSemanticRoleClaims) }
 	}
 	return next.blockType === 'unbundle' ? { ...next, blockType: 'projection' } : next
+}
+
+/** v10 → v11: existing Expanded Blocks keep their separated-card presentation. */
+export function upgradeBlockPropsV10ToV11(props: BlockMigrationProps): BlockMigrationProps {
+	return props.memberLayout === undefined ? { ...props, memberLayout: 'inset' } : props
+}
+
+/** v11 → v10: older readers do not know the direct-child presentation policy. */
+export function downgradeBlockPropsV11ToV10(props: BlockMigrationProps): BlockMigrationProps {
+	const { memberLayout: _memberLayout, ...rest } = props
+	return rest
+}
+
+/** v11 → v12: existing inset layouts keep the white production default. */
+export function upgradeBlockPropsV11ToV12(props: BlockMigrationProps): BlockMigrationProps {
+	return props.insetBackground === undefined ? { ...props, insetBackground: 'white' } : props
+}
+
+/** v12 → v11: older readers do not know the optional inset well treatment. */
+export function downgradeBlockPropsV12ToV11(props: BlockMigrationProps): BlockMigrationProps {
+	const { insetBackground: _insetBackground, ...rest } = props
+	return rest
+}
+
+/**
+ * v8 → v9: preserve the old painted face when chrome becomes configurable.
+ *
+ * Older boards always had both marks. Explicit `true` values make that visual
+ * contract survive loading, duplication, and later batch-style edits.
+ */
+export function upgradeBlockPropsV8ToV9(props: BlockMigrationProps): BlockMigrationProps {
+	return props.showFooter === undefined || props.showHeaderDivider === undefined
+		? {
+			...props,
+			showFooter: props.showFooter ?? true,
+			showHeaderDivider: props.showHeaderDivider ?? true,
+		}
+		: props
+}
+
+/** v9 → v8: remove the presentation fields the old validator does not know. */
+export function downgradeBlockPropsV9ToV8(props: BlockMigrationProps): BlockMigrationProps {
+	const { showFooter: _showFooter, showHeaderDivider: _showHeaderDivider, ...rest } = props
+	return rest
 }
 
 /** v7 → v8: the Type body is optional, so ordinary Blocks need no new stored value. */
@@ -349,5 +419,21 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.TypeAttributes,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV7ToV8),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV8ToV7),
+	}, {
+		id: blockVersions.BlockChrome,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV8ToV9),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV9ToV8),
+	}, {
+		id: blockVersions.FoldAndAutoResize,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV9ToV10),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV10ToV9),
+	}, {
+		id: blockVersions.MemberLayout,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV10ToV11),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV11ToV10),
+	}, {
+		id: blockVersions.InsetBackground,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV11ToV12),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV12ToV11),
 	}],
 })

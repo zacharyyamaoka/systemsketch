@@ -4,7 +4,7 @@ export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
 /** P creates the separate `value` literal-pill representation. */
 export const PILL_TOOL_ID = 'pill' as const
-/** Type uses the same Block geometry, with one compact annotation body. */
+/** Type shares the Block box gesture; its one addition is a Type-shaped starting body. */
 export const TYPE_TOOL_ID = 'type' as const
 
 /**
@@ -15,6 +15,26 @@ export const TYPE_TOOL_ID = 'type' as const
  */
 export const BLOCK_VIEWS = ['simple', 'port', 'expanded', 'value'] as const
 export type BlockView = (typeof BLOCK_VIEWS)[number]
+
+/**
+ * A Block's title is one semantic string, but every canvas occurrence may give
+ * that string its own readable presentation. These names intentionally match
+ * tldraw's typography vocabulary so the FigJam-derived controls stay familiar.
+ */
+export const BLOCK_TITLE_SIZES = ['s', 'm', 'l', 'xl'] as const
+export type BlockTitleSize = (typeof BLOCK_TITLE_SIZES)[number]
+export const BLOCK_TITLE_FONTS = ['sans', 'serif', 'mono', 'draw'] as const
+export type BlockTitleFont = (typeof BLOCK_TITLE_FONTS)[number]
+export const BLOCK_TITLE_ALIGNS = ['start', 'middle', 'end'] as const
+export type BlockTitleAlign = (typeof BLOCK_TITLE_ALIGNS)[number]
+
+/** Coarse placement of the identity inside Port and Expanded header bands. */
+export const BLOCK_HEADER_ALIGNS = ['left', 'center'] as const
+export type BlockHeaderAlign = (typeof BLOCK_HEADER_ALIGNS)[number]
+
+/** Disclosure chrome is independent of the Block's title/icon identity group. */
+export const BLOCK_FOLD_CONTROL_SIDES = ['left', 'right'] as const
+export type BlockFoldControlSide = (typeof BLOCK_FOLD_CONTROL_SIDES)[number]
 
 /** The source grammar of a call expression's variadic contribution. */
 export const BLOCK_VARIADIC_KINDS = ['positional', 'keyword'] as const
@@ -83,6 +103,26 @@ export const PORT_LAYOUTS = ['offset', 'inline'] as const
 export type PortLayout = (typeof PORT_LAYOUTS)[number]
 
 /**
+ * How an Expanded Block presents its direct child Blocks.
+ *
+ * `inset` keeps class-like members as separate cards with breathing room.
+ * `edge-to-edge` turns branch-like members into one continuous stack. This is
+ * presentation only: membership stays in tldraw's ordinary parentId graph.
+ */
+export const BLOCK_MEMBER_LAYOUTS = ['inset', 'edge-to-edge'] as const
+export type BlockMemberLayout = (typeof BLOCK_MEMBER_LAYOUTS)[number]
+
+/**
+ * The non-semantic surface behind inset member cards.
+ *
+ * This is intentionally a tiny choice rather than the full colour palette:
+ * white is the quiet default, while soft gray adds containment contrast using
+ * the active theme's existing sunken-surface token.
+ */
+export const BLOCK_INSET_BACKGROUNDS = ['white', 'soft-gray'] as const
+export type BlockInsetBackground = (typeof BLOCK_INSET_BACKGROUNDS)[number]
+
+/**
  * tldraw's documented seam for a prop that batches across a multi-selection.
  *
  * Registering a prop as a `StyleProp` is not decoration. It is what makes
@@ -106,6 +146,22 @@ export const BlockPortLayoutStyle = StyleProp.defineEnum('systemsketch:blockPort
 })
 
 export const BlockShowDescriptionStyle = StyleProp.define('systemsketch:blockShowDescription', {
+	defaultValue: true,
+	type: T.boolean,
+})
+
+/**
+ * Block chrome is presentation, like its view and description—not part of the
+ * callable's identity. Making it a StyleProp keeps a multi-selection honest:
+ * one deliberate gesture can clean up a row of Blocks without copying titles,
+ * ports, or source-facing meaning between them.
+ */
+export const BlockShowFooterStyle = StyleProp.define('systemsketch:blockShowFooter', {
+	defaultValue: true,
+	type: T.boolean,
+})
+
+export const BlockShowHeaderDividerStyle = StyleProp.define('systemsketch:blockShowHeaderDivider', {
 	defaultValue: true,
 	type: T.boolean,
 })
@@ -304,8 +360,29 @@ export const BLOCK_SHAPE_PROPS = {
 	w: T.number,
 	h: T.number,
 	title: T.string,
+	/**
+	 * Occurrence-local title presentation. Optional fields preserve the exact
+	 * established face for every existing board; readers derive those defaults
+	 * from the current Block view until an author makes an explicit choice.
+	 */
+	titleSize: T.literalEnum(...BLOCK_TITLE_SIZES).optional(),
+	titleFont: T.literalEnum(...BLOCK_TITLE_FONTS).optional(),
+	titleAlign: T.literalEnum(...BLOCK_TITLE_ALIGNS).optional(),
+	titleBold: T.boolean.optional(),
+	/** Named FigJam/tldraw colour, including self-describing `custom-rrggbb`. */
+	titleColor: T.string.optional(),
+	/** Header composition, separate from alignment inside the title text box. */
+	headerAlign: T.literalEnum(...BLOCK_HEADER_ALIGNS).optional(),
 	description: T.string,
 	blockType: T.string,
+	/** Whether this occurrence exposes the compact header fold affordance. */
+	foldable: T.boolean,
+	/** The current compact-header state. Only meaningful while `foldable` is true. */
+	folded: T.boolean,
+	/** Optional so every existing Block keeps the established left-side control. */
+	foldControlSide: T.literalEnum(...BLOCK_FOLD_CONTROL_SIDES).optional(),
+	/** Expanded occurrences derive their box from their direct contents when true. */
+	autoResize: T.boolean,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
 	icon: T.string.optional(),
 	view: BlockViewStyle,
@@ -316,11 +393,17 @@ export const BLOCK_SHAPE_PROPS = {
 		value: BlockViewSize,
 	}),
 	showDescription: BlockShowDescriptionStyle,
+	/** The Port / Expanded action strip; Simple and Value are intentionally chromeless. */
+	showFooter: BlockShowFooterStyle,
+	/** The rule between the Port / Expanded heading and its body. */
+	showHeaderDivider: BlockShowHeaderDividerStyle,
 	/** Detailed Markdown from the donor Notes tab. */
 	notes: T.string.optional(),
 	/**
-	 * The canonical body of a Type definition. Its compact outline in Port and
-	 * Expanded views is parsed presentation, never a second editable schema.
+	 * The canonical body of a `type` Block: exact Python-annotation source, one
+	 * attribute per line. Its nested tree in Port and Expanded views is parsed
+	 * presentation only — never a second editable schema. Optional so every
+	 * earlier Block still loads.
 	 */
 	attributeSource: T.string.optional(),
 	/**
@@ -329,6 +412,10 @@ export const BLOCK_SHAPE_PROPS = {
 	 * to decide whether a selection is shared or mixed.
 	 */
 	portLayout: BlockPortLayoutStyle,
+	/** Direct-child presentation; old boards migrate to the separated-card default. */
+	memberLayout: T.literalEnum(...BLOCK_MEMBER_LAYOUTS),
+	/** Theme-aware well behind inset direct-child cards; ignored by edge-to-edge. */
+	insetBackground: T.literalEnum(...BLOCK_INSET_BACKGROUNDS),
 	/**
 	 * The lens's verdict on this Block. `normal` in every ordinary document;
 	 * a style prop cannot be optional, so the migration makes it explicit.
@@ -365,8 +452,18 @@ declare module 'tldraw' {
 			w: number
 			h: number
 			title: string
+			titleSize?: BlockTitleSize
+			titleFont?: BlockTitleFont
+			titleAlign?: BlockTitleAlign
+			titleBold?: boolean
+			titleColor?: string
+			headerAlign?: BlockHeaderAlign
 			description: string
 			blockType: string
+			foldable: boolean
+			folded: boolean
+			foldControlSide?: BlockFoldControlSide
+			autoResize: boolean
 			icon?: string
 			view: BlockView
 			views: {
@@ -376,9 +473,13 @@ declare module 'tldraw' {
 				value: BlockViewSize
 			}
 			showDescription: boolean
+			showFooter: boolean
+			showHeaderDivider: boolean
 			notes?: string
 			attributeSource?: string
 			portLayout: PortLayout
+			memberLayout: BlockMemberLayout
+			insetBackground: BlockInsetBackground
 			state: BlockState
 			fieldDiffs?: BlockFieldDiff[]
 			priorPose?: BlockPriorPose
@@ -416,12 +517,19 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		title: '',
 		description: '',
 		blockType: '',
+		foldable: false,
+		folded: false,
+		autoResize: false,
 		icon: '',
 		view: 'simple',
 		views,
 		showDescription: true,
+		showFooter: true,
+		showHeaderDivider: true,
 		notes: '',
 		portLayout: 'inline',
+		memberLayout: 'inset',
+		insetBackground: 'white',
 		state: 'normal',
 		definitionId: createShapeId().slice('shape:'.length),
 		inputs: [],
@@ -432,6 +540,11 @@ export function getDefaultBlockProps(): BlockShapeProps {
 /** The one reader for the optional donor icon field. */
 export function blockIcon(props: BlockShapeProps): string {
 	return props.icon ?? ''
+}
+
+/** Existing boards and newly placed Blocks retain the established left header. */
+export function blockHeaderAlign(props: BlockShapeProps): BlockHeaderAlign {
+	return props.headerAlign ?? 'left'
 }
 
 /** The one reader for the optional donor Notes field. */
@@ -448,6 +561,32 @@ export function blockNotes(props: BlockShapeProps): string {
  */
 export function blockPortLayout(props: BlockShapeProps): PortLayout {
 	return props.portLayout ?? 'inline'
+}
+
+/** Legacy records read as the previously visible chrome until their migration runs. */
+export function blockShowsFooter(props: Pick<BlockShapeProps, 'showFooter'>): boolean {
+	return props.showFooter ?? true
+}
+
+/** Legacy records read as the previously visible header/body rule until migration. */
+export function blockShowsHeaderDivider(
+	props: Pick<BlockShapeProps, 'showHeaderDivider'>,
+): boolean {
+	return props.showHeaderDivider ?? true
+}
+
+/** One compatibility reader for pre-migration and hand-assembled records. */
+export function blockMemberLayout(
+	props: Partial<Pick<BlockShapeProps, 'memberLayout'>>,
+): BlockMemberLayout {
+	return props.memberLayout === 'edge-to-edge' ? 'edge-to-edge' : 'inset'
+}
+
+/** One compatibility reader for boards and draft records created before v9. */
+export function blockInsetBackground(
+	props: Partial<Pick<BlockShapeProps, 'insetBackground'>>,
+): BlockInsetBackground {
+	return props.insetBackground === 'soft-gray' ? 'soft-gray' : 'white'
 }
 
 /** The one reader for optional expanded divider weights. */
@@ -840,7 +979,7 @@ export function isBlockShape(shape: TLShape | null | undefined): shape is BlockS
 }
 
 export function isExpandedBlockShape(shape: TLShape | null | undefined): shape is BlockShape {
-	return isBlockShape(shape) && shape.props.view === 'expanded'
+	return isBlockShape(shape) && shape.props.view === 'expanded' && !blockIsFolded(shape.props)
 }
 
 /** A literal argument: a Block wearing the capsule. */
@@ -853,6 +992,76 @@ export function canBlockContainChildren(view: BlockView): boolean {
 }
 
 /**
+ * A fold is a presentation affordance for the two headed faces. Simple is
+ * already a compact card, while a Value pill has no interior to collapse.
+ */
+export function canBlockFold(props: Pick<BlockShapeProps, 'view' | 'foldable'>): boolean {
+	return props.foldable && (props.view === 'port' || props.view === 'expanded')
+}
+
+/** Existing boards and newly placed Blocks retain the established left control. */
+export function blockFoldControlSide(
+	props: Pick<BlockShapeProps, 'foldControlSide'>,
+): BlockFoldControlSide {
+	return props.foldControlSide ?? 'left'
+}
+
+/** A stale `folded` bit is harmless outside the headed foldable faces. */
+export function blockIsFolded(props: Pick<BlockShapeProps, 'view' | 'foldable' | 'folded'>): boolean {
+	return canBlockFold(props) && props.folded
+}
+
+/** The headed compact face is deliberately one stable row, not a squeezed body. */
+export const BLOCK_FOLDED_HEIGHT_PX = 48
+
+/**
+ * Opting out of folding always restores the parked view box. Otherwise a
+ * hidden interior would leave a Block permanently stranded at header height.
+ */
+export function setBlockFoldableProps(
+	props: BlockShapeProps,
+	foldable: boolean,
+): BlockShapeProps {
+	if (props.foldable === foldable) return props
+	if (!foldable && blockIsFolded(props)) {
+		const remembered = props.views[props.view]
+		return { ...props, foldable: false, folded: false, w: remembered.w, h: remembered.h }
+	}
+	return { ...props, foldable, ...(foldable ? {} : { folded: false }) }
+}
+
+/**
+ * Folding parks the live headed box in that view's memory, then shows only
+ * the header. Unfolding restores it exactly; this is not a lossy resize.
+ */
+export function setBlockFoldedProps(
+	props: BlockShapeProps,
+	folded: boolean,
+): BlockShapeProps {
+	if (!canBlockFold(props) || props.folded === folded) return props
+	if (!folded) {
+		const remembered = props.views[props.view]
+		return { ...props, folded: false, w: remembered.w, h: remembered.h }
+	}
+	return {
+		...props,
+		folded: true,
+		h: BLOCK_FOLDED_HEIGHT_PX,
+		views: {
+			...props.views,
+			[props.view]: { w: props.w, h: props.h },
+		},
+	}
+}
+
+export function setBlockAutoResizeProps(
+	props: BlockShapeProps,
+	autoResize: boolean,
+): BlockShapeProps {
+	return props.autoResize === autoResize ? props : { ...props, autoResize }
+}
+
+/**
  * Project a view switch through the remembered per-view boxes. The current
  * box is parked before the target box is restored, so resizing one view never
  * destroys the dimensions of another.
@@ -860,20 +1069,37 @@ export function canBlockContainChildren(view: BlockView): boolean {
 export function setBlockViewProps(props: BlockShapeProps, view: BlockView): BlockShapeProps {
 	const views = {
 		...props.views,
-		[props.view]: { w: props.w, h: props.h },
+		// While folded, the live height is just the header. Keep the parked body
+		// box rather than accidentally replacing it with that compact height.
+		[props.view]: blockIsFolded(props)
+			? props.views[props.view]
+			: { w: props.w, h: props.h },
 	}
 	const target = views[view]
+	const remainsFolded = props.foldable && (view === 'port' || view === 'expanded') && props.folded
 	return {
 		...props,
 		view,
 		views,
 		w: target.w,
-		h: target.h,
+		h: remainsFolded ? BLOCK_FOLDED_HEIGHT_PX : target.h,
+		folded: remainsFolded,
 	}
 }
 
 /** Keep tldraw's canonical box and the active remembered box in lockstep. */
 export function resizeBlockProps(props: BlockShapeProps, w: number, h: number): BlockShapeProps {
+	if (blockIsFolded(props)) {
+		return {
+			...props,
+			w,
+			h: BLOCK_FOLDED_HEIGHT_PX,
+			views: {
+				...props.views,
+				[props.view]: { w, h: props.views[props.view].h },
+			},
+		}
+	}
 	return {
 		...props,
 		w,

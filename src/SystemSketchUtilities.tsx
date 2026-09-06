@@ -513,7 +513,7 @@ export function SystemSketchNavigationPanel() {
             />
             <span>
               <b>Chevrons in code gutter</b>
-              <small>Type attributes: align fold controls left instead of placing them beside text</small>
+              <small>Fold controls: align left in a fixed column instead of beside the text</small>
             </span>
           </label>
 

@@ -1,0 +1,29 @@
+[
+  {
+    "t": 1641.6,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000022",
+    "frame": "frames/f-013808.png"
+  },
+  {
+    "t": 3877.6,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000045",
+    "frame": "frames/f-013808.png"
+  },
+  {
+    "t": 6173.7,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000103",
+    "frame": "frames/f-013808.png"
+  }
+]

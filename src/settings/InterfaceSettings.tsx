@@ -7,6 +7,7 @@ import {
 } from 'tldraw'
 import { Settings } from 'lucide-react'
 import {
+  useEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -56,6 +57,7 @@ import {
   removeToolAlias,
   useToolAliases,
 } from '../library/toolAliases'
+import { readFileAccessSettings, writeFileAccessSettings } from '../workspace/workspaceClient'
 import './interface-settings.css'
 
 export function SettingsGearIcon(props: ComponentProps<'svg'>) {
@@ -105,7 +107,7 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'canvas', 'interface', 'shortcuts']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'interface', 'shortcuts']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -152,7 +154,9 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
             )
           })}
         </nav>
-        {category === 'appearance'
+        {category === 'general'
+          ? <GeneralPanel />
+          : category === 'appearance'
           ? <AppearancePanel />
           : category === 'canvas'
             ? <CanvasPanel />
@@ -251,6 +255,104 @@ function ToolAliasesPanel() {
         <div>
           <strong>Saved on this computer</strong>
           <p>Aliases enrich S search and the Shapes library. They are personal vocabulary, not board content.</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Off by default. Enabling this defeats the fence in workspace_store.py that
+ * confines every board open/save/rename/reveal to the configured workspace
+ * root — the same fence a hostile web page would need to escape, so the
+ * toggle is explained rather than buried, and persisted on the local
+ * SystemSketch server (not this browser) since Stable and Preview both
+ * enforce it independently and both need to see the same choice immediately.
+ */
+function GeneralPanel() {
+  const [allowAnyPath, setAllowAnyPath] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const [pending, setPending] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    readFileAccessSettings()
+      .then((settings) => {
+        if (cancelled) return
+        setAllowAnyPath(settings.allowAnyPath)
+        setLoaded(true)
+      })
+      .catch((cause) => {
+        if (cancelled) return
+        setMessage(cause instanceof Error ? cause.message : String(cause))
+        setLoaded(true)
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  const toggle = () => {
+    const next = !allowAnyPath
+    setPending(true)
+    setAllowAnyPath(next)
+    writeFileAccessSettings(next)
+      .then((settings) => {
+        setAllowAnyPath(settings.allowAnyPath)
+        setMessage(null)
+      })
+      .catch((cause) => {
+        setAllowAnyPath(!next)
+        setMessage(cause instanceof Error ? cause.message : String(cause))
+      })
+      .finally(() => setPending(false))
+  }
+
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="file-access-title" data-testid="systemsketch-general-panel">
+      <div className="systemsketch-settings__eyebrow">General</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="file-access-title">File access</h2>
+          <p>SystemSketch normally only opens, saves, and browses boards inside your workspace folder.</p>
+        </div>
+      </div>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="allow-any-path-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="allow-any-path-title">Allow opening files anywhere</h3>
+          <p>
+            Lets a board link (<code>?board=</code>), Save As, or Rename reach any path on this
+            computer — not just your workspace folder. Turn this on only if you need to open a
+            board from somewhere else, like an agent worktree; leave it off otherwise.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={allowAnyPath}
+          disabled={!loaded || pending}
+          data-testid="systemsketch-allow-any-path"
+          onClick={toggle}
+        >
+          <span>
+            <strong>Allow opening files anywhere</strong>
+            <small>Off by default. Takes effect immediately, in both Stable and Preview.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+        {message ? (
+          <p className="systemsketch-settings__message is-error" role="alert" data-testid="systemsketch-allow-any-path-message">
+            {message}
+          </p>
+        ) : null}
+      </section>
+
+      <div className="systemsketch-settings__note">
+        <span className="systemsketch-settings__saved-dot" aria-hidden="true" />
+        <div>
+          <strong>Saved by the local SystemSketch server</strong>
+          <p>This changes what the local SystemSketch server itself will read or write — it is not part of any board file.</p>
         </div>
       </div>
     </section>

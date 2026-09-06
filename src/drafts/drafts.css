@@ -1,0 +1,703 @@
+/* Document-draft branching chrome — the Drafts chip/popover in the top-left
+ * shell, and the full-width draft-mode bar. Every colour is a `--ss-*` token
+ * from `src/theme/tokens.css`; nothing here names a value directly. */
+
+/* -------------------------------------------------------------------------
+ * The chip, inserted between the file identity and the breadcrumb inside
+ * `.systemsketch-top-left-shell`. Same footprint as the file-title button
+ * beside it: 36px tall inside the 46px shell, a trailing separator instead
+ * of its own border/background, so the row reads as one continuous strip of
+ * segments rather than three separate pills.
+ * ---------------------------------------------------------------------- */
+.systemsketch-drafts-trigger {
+  display: flex;
+  height: 36px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 0;
+  border-right: 1px solid var(--ss-border);
+  border-radius: 0;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.systemsketch-drafts-trigger:hover,
+.systemsketch-drafts-trigger[aria-expanded='true'] {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-drafts-trigger[data-active='true'] {
+  background: var(--ss-accent-soft);
+}
+
+.systemsketch-drafts-trigger svg {
+  flex: 0 0 auto;
+  stroke: currentColor;
+}
+
+/* A surface, not accent text — see the tokens.css note on --ss-accent-soft. */
+.systemsketch-drafts-badge {
+  display: grid;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--ss-accent-soft);
+  color: var(--ss-text);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------------------------
+ * The popover — same geometry family as the breadcrumb's own
+ * (`depth-stack-navigator.css`'s `.systemsketch-depth-popover`).
+ * ---------------------------------------------------------------------- */
+.systemsketch-drafts-popover {
+  z-index: var(--tl-layer-panels);
+  width: min(300px, calc(100vw - 28px));
+  box-sizing: border-box;
+  padding: 9px;
+  border: 1px solid var(--ss-border);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--ss-surface-raised) 98%, transparent);
+  box-shadow: var(--ss-shadow-2);
+  backdrop-filter: blur(18px);
+  color: var(--ss-text);
+}
+
+.systemsketch-drafts-popover header {
+  padding: 4px 5px 9px;
+  color: var(--ss-text-muted);
+  /* Was 8px — under the 11px floor this app holds body text to (measured
+   * ~3.9:1 against --ss-text-muted, sub-AA at that size). */
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.systemsketch-drafts-popover header b {
+  font: inherit;
+}
+
+.systemsketch-drafts-popover__list {
+  display: grid;
+  gap: 2px;
+  max-height: min(50vh, 360px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.systemsketch-drafts-popover__new {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 8px;
+  border: 1px dashed var(--ss-border);
+  border-radius: 9px;
+  color: var(--ss-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.systemsketch-drafts-popover__new:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+/* -------------------------------------------------------------------------
+ * A row — "Main" (a plain button, no actions) and each draft (its own
+ * main-button plus a rename/discard action cluster).
+ * ---------------------------------------------------------------------- */
+.systemsketch-drafts-row,
+.systemsketch-drafts-row__main {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.systemsketch-drafts-row {
+  padding: 2px;
+  gap: 2px;
+}
+
+/* The "Main" row has no rename/discard actions to make room for, so it is
+ * one plain button rather than a wrapper plus a nested `__main` — restore
+ * the roomier padding the generic rule above gave up for that split. */
+.systemsketch-drafts-row--main {
+  padding: 6px 8px;
+  gap: 8px;
+}
+
+.systemsketch-drafts-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 4px 6px;
+}
+
+.systemsketch-drafts-row:hover,
+.systemsketch-drafts-row__main:hover {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-drafts-row[data-current='true'],
+.systemsketch-drafts-row[data-current='true'] .systemsketch-drafts-row__main {
+  background: var(--ss-accent-soft);
+  box-shadow: inset 3px 0 0 var(--ss-accent);
+}
+
+.systemsketch-drafts-row > i,
+.systemsketch-drafts-row__main > i {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  border: 2px solid var(--ss-border-strong);
+  border-radius: 50%;
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-drafts-row[data-current='true'] > i,
+.systemsketch-drafts-row[data-current='true'] .systemsketch-drafts-row__main > i {
+  border-color: var(--ss-accent);
+  background: var(--ss-accent);
+}
+
+.systemsketch-drafts-row span,
+.systemsketch-drafts-row__main span {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.systemsketch-drafts-row b,
+.systemsketch-drafts-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-drafts-row b {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.systemsketch-drafts-row small {
+  color: var(--ss-text-muted);
+  /* Was 9px — same 11px floor as the header above. */
+  font-size: 11px;
+}
+
+.systemsketch-drafts-row__actions {
+  display: flex;
+  flex: 0 0 auto;
+  /* Was 2px — too close together for a benign action (rename) beside a
+   * destructive one (discard). */
+  gap: 6px;
+}
+
+.systemsketch-drafts-row__action {
+  display: grid;
+  /* Was 22x22 — under the 24px minimum touch target. */
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ss-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.systemsketch-drafts-row__action:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+/*
+ * The discard button is invisible until the row is hovered/focused (or
+ * mid-confirm) — the rename pencil beside it stays always-visible, since only
+ * discard is destructive. Opacity only, never display/visibility: a hidden
+ * button must still be reachable by Tab, and `:focus-within` on the row
+ * already fires the instant Tab lands on it, so keyboard users see it appear
+ * exactly when they reach it.
+ */
+.systemsketch-drafts-row__action--danger {
+  opacity: 0;
+}
+
+.systemsketch-drafts-row:hover .systemsketch-drafts-row__action--danger,
+.systemsketch-drafts-row:focus-within .systemsketch-drafts-row__action--danger,
+.systemsketch-drafts-row__action--danger[data-confirming='true'] {
+  opacity: 1;
+}
+
+.systemsketch-drafts-row__action--danger:hover,
+.systemsketch-drafts-row__action--danger[data-confirming='true'] {
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-drafts-row__action {
+    transition: none;
+  }
+}
+
+.systemsketch-drafts-row__confirm-label {
+  padding: 0 4px;
+  /* Was 9px — same 11px floor as the header/row-secondary text above. */
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Wraps the rename `<input>` plus its visually-hidden (until an error)
+ * keyboard-help text — same structure as `.systemsketch-file-title-editor`
+ * in local-workspace.css, scaled to this popover's own geometry. */
+.systemsketch-drafts-rename {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+}
+
+.systemsketch-drafts-rename-help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.systemsketch-drafts-rename[data-error='true'] .systemsketch-drafts-rename-help {
+  z-index: 1;
+  top: calc(100% + 4px);
+  left: 0;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 40px));
+  height: auto;
+  padding: 5px 7px;
+  overflow: visible;
+  clip: auto;
+  border: 1px solid var(--ss-border);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.systemsketch-drafts-rename-input {
+  min-width: 0;
+  width: 100%;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--ss-accent);
+  border-radius: 6px;
+  color: var(--ss-text);
+  caret-color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  font: inherit;
+  font-weight: 700;
+  outline: none;
+}
+
+/* -------------------------------------------------------------------------
+ * The draft-mode bar — a full-width chrome row above the canvas, at the same
+ * height as the top shells. Quiet on purpose: `--ss-surface-raised` plus a
+ * bottom border, not an inverted or hazard-striped treatment (an explicit
+ * prior rejection — see docs/peps and DraftModeBar.tsx's own header comment).
+ * ---------------------------------------------------------------------- */
+.systemsketch-draft-bar {
+  position: relative;
+  /*
+   * `--systemsketch-layer-modal`, not `--tl-layer-panels`.
+   *
+   * This bar renders OUTSIDE `.tl-container` — a sibling above
+   * `.systemsketch-app__canvas`, not inside `<Tldraw>` — so `--tl-*` custom
+   * properties never resolve here (see the WHY note in tokens.css); a
+   * borrowed `--tl-layer-panels` would silently fall back to a bare 300.
+   * That number happens to equal the real panel z-index tldraw's own
+   * top-right shell uses INSIDE the canvas, and a tie at equal z-index is
+   * broken by DOM order — the shell, being inside the canvas div that comes
+   * AFTER this bar, would then win it. Harmless for the bar's own row (it
+   * never overlaps the canvas), but its dropdowns (`__menu`) open downward
+   * into the canvas's top edge: measured live, a click on "Rebase" landed on
+   * a covering tldraw shell icon instead, because a child's z-index cannot
+   * escape the stacking context its ancestor already lost. Raising the
+   * WHOLE bar's context above 300/400 fixes every menu it opens at once.
+   */
+  z-index: var(--systemsketch-layer-modal);
+  display: flex;
+  height: var(--systemsketch-top-height);
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--systemsketch-chrome-inset);
+  border-bottom: 1px solid var(--ss-border);
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-draft-bar__left,
+.systemsketch-draft-bar__right {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.systemsketch-draft-bar__divider {
+  width: 1px;
+  height: 22px;
+  flex: 0 0 auto;
+  background: var(--ss-border);
+}
+
+.systemsketch-draft-bar button {
+  font: inherit;
+}
+
+.systemsketch-draft-bar__exit,
+.systemsketch-draft-bar__name,
+.systemsketch-draft-bar__compare {
+  display: flex;
+  height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.systemsketch-draft-bar__exit:hover,
+.systemsketch-draft-bar__name:hover {
+  background: var(--ss-surface-hover);
+}
+
+/*
+ * A thin outline (secondary) button, not the filled pill this used to be.
+ * Zach's objection: sitting next to the solid accent Merge▾ split button, a
+ * borderless "Compare 2" read as a static badge rather than something you
+ * could click. The border/background pairing is copied from this app's one
+ * other secondary-vs-primary pair
+ * (`systemsketch-utilities.css`'s `[data-emphasis='secondary']`, the Preview
+ * bar's "Return" beside its filled "Make Stable") rather than invented here:
+ * an accent-tinted border plus a raised surface reads as "clickable, but not
+ * the primary action" the same way there. Merge▾ stays the only filled
+ * control in this row, so the hierarchy between the two reads at a glance.
+ */
+.systemsketch-draft-bar__compare {
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-draft-bar__compare:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  background: var(--ss-surface-active);
+}
+
+.systemsketch-draft-bar__compare:disabled {
+  border-color: var(--ss-border);
+  color: var(--ss-text-faint);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.systemsketch-draft-bar__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Wraps the rename `<input>` plus its visually-hidden (until an error)
+ * keyboard-help text — same structure as `.systemsketch-file-title-editor`
+ * in local-workspace.css. */
+.systemsketch-draft-bar__rename {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.systemsketch-draft-bar__rename-help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.systemsketch-draft-bar__rename[data-error='true'] .systemsketch-draft-bar__rename-help {
+  /* `--systemsketch-layer-modal` + 1, not `--tl-layer-panels` — same reason
+   * as the bar's own z-index above: this renders outside `.tl-container`. */
+  z-index: calc(var(--systemsketch-layer-modal) + 1);
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  height: auto;
+  padding: 6px 8px;
+  overflow: visible;
+  clip: auto;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.systemsketch-draft-bar__rename-input {
+  min-width: 0;
+  width: min(220px, 30vw);
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--ss-accent);
+  border-radius: 8px;
+  color: var(--ss-text);
+  caret-color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  font: inherit;
+  font-weight: 650;
+  outline: none;
+}
+
+/*
+ * Ink text on the tint, plus a colored left bar — this app's own established
+ * pattern for a warning on a tinted background (`compare.css`'s
+ * `.systemsketch-compare__problem`), not `--ss-warning` text directly on
+ * `--ss-warning-soft`: that pairing measured ~3.03:1 here, sub-AA at 11px.
+ *
+ * `min-width: 0` plus the truncating `span` below is the other half of the
+ * fix: this is a flex child of `.systemsketch-draft-bar__left`, and the OLD
+ * `white-space: nowrap` with no `min-width` forced this banner's full,
+ * un-wrapped text width into the row's minimum content size — at ~760px that
+ * alone was wider than the viewport, pushing the Merge▾ chevron off-screen
+ * and hard-clipping the draft name to make room. Truncating the text lets
+ * the row (and the name button beside it, which already shrinks) actually
+ * fit down to about 900px before either one runs out of room to give.
+ */
+.systemsketch-draft-bar__conflict {
+  display: flex;
+  min-width: 0;
+  flex-shrink: 1;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 0 8px 8px 0;
+  color: var(--ss-text);
+  background: var(--ss-warning-soft);
+  border-left: 3px solid var(--ss-warning);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.systemsketch-draft-bar__conflict svg {
+  flex: 0 0 auto;
+}
+
+.systemsketch-draft-bar__conflict span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-draft-bar__status {
+  overflow: hidden;
+  max-width: 320px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-draft-bar__icon-button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.systemsketch-draft-bar__icon-button:hover,
+.systemsketch-draft-bar__icon-button[aria-expanded='true'] {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-draft-bar__overflow,
+.systemsketch-draft-bar__split {
+  position: relative;
+}
+
+.systemsketch-draft-bar__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1;
+  min-width: 168px;
+  padding: 4px;
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ss-surface-raised) 98%, transparent);
+  box-shadow: var(--ss-shadow-2);
+  backdrop-filter: blur(18px);
+}
+
+.systemsketch-draft-bar__menu--right {
+  right: 0;
+  left: auto;
+}
+
+.systemsketch-draft-bar__menu-item {
+  display: block;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.systemsketch-draft-bar__menu-item:hover {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-draft-bar__menu-item--danger {
+  color: var(--ss-danger);
+}
+
+.systemsketch-draft-bar__menu-item--danger:hover {
+  background: var(--ss-danger-soft);
+}
+
+/* The GitHub merge-button shape: one solid primary segment, a hairline
+ * separator, then a narrow chevron segment — visually one control, two
+ * independent click targets. */
+.systemsketch-draft-bar__split {
+  display: flex;
+  height: 30px;
+  align-items: stretch;
+  border-radius: 8px;
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+.systemsketch-draft-bar__split[data-disabled='true'] {
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-faint);
+}
+
+/*
+ * `hasConflict` reads as "probably about to be refused", not "definitely
+ * blocked" — the flag is only advisory (see DraftProvider's WHY on
+ * `refreshConflict`), so this is a LOOK, not a `disabled` attribute: the
+ * button stays genuinely clickable, and `merge()` runs its own fresh check
+ * regardless. Same muted tokens `[data-disabled='true']` already uses above,
+ * so a stale-and-actually-fine conflict reads identically to "nothing to
+ * merge" rather than inventing a third treatment — the chevron is what gets
+ * to keep its accent, pointing at Rebase as the way forward.
+ */
+.systemsketch-draft-bar__split[data-blocked='true'] {
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-faint);
+}
+
+.systemsketch-draft-bar__split[data-blocked='true']:not([data-disabled='true']) .systemsketch-draft-bar__split-chevron {
+  color: var(--ss-accent);
+  border-left-color: var(--ss-border);
+}
+
+.systemsketch-draft-bar__split-primary,
+.systemsketch-draft-bar__split-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.systemsketch-draft-bar__split-primary {
+  padding: 0 12px;
+  border-radius: 8px 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.systemsketch-draft-bar__split-chevron {
+  padding: 0 8px;
+  border-left: 1px solid color-mix(in srgb, var(--ss-accent-text) 30%, transparent);
+  border-radius: 0 8px 8px 0;
+}
+
+.systemsketch-draft-bar__split[data-disabled='true'] .systemsketch-draft-bar__split-chevron {
+  border-left-color: var(--ss-border);
+}
+
+.systemsketch-draft-bar__split-primary:not(:disabled):hover,
+.systemsketch-draft-bar__split-chevron:not(:disabled):hover {
+  background: color-mix(in srgb, var(--ss-accent-text) 14%, transparent);
+}
+
+.systemsketch-draft-bar__split-primary:disabled,
+.systemsketch-draft-bar__split-chevron:disabled {
+  cursor: not-allowed;
+}
+
+.systemsketch-draft-bar button:focus-visible,
+.systemsketch-drafts-trigger:focus-visible,
+.systemsketch-drafts-row__main:focus-visible,
+.systemsketch-drafts-row__action:focus-visible,
+.systemsketch-drafts-popover__new:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}

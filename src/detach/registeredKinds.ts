@@ -15,6 +15,7 @@ import { codeDetachable } from '../code/codeDetachable'
 import { branchDetachable } from '../branch/branchDetachable'
 import { loopDetachable } from '../loop/loopDetachable'
 import { behaviorTreeDetachable } from '../behaviorTree/behaviorTreeDetachable'
+import { floatingPortDetachable } from '../floatingPort/floatingPortDetachable'
 
 export const DETACHABLE_KINDS: readonly DetachableKind[] = [
 	connectionDetachable,
@@ -23,4 +24,5 @@ export const DETACHABLE_KINDS: readonly DetachableKind[] = [
 	branchDetachable,
 	loopDetachable,
 	behaviorTreeDetachable,
+	floatingPortDetachable,
 ]

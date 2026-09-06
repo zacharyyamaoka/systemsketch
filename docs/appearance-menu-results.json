@@ -48,7 +48,7 @@
   "ok": true
  },
  {
-  "label": "Font size lists each rung at its own size and names the chosen one on its trigger; Typeface keeps Aa",
+  "label": "Typeface is the shared registered Aa + one-label list, composed into the shape recipe",
   "ok": true
  },
  {

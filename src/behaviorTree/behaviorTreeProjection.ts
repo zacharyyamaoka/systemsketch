@@ -118,8 +118,36 @@ function leafPorts(node: BtNode): { inputs: BlockPort[]; outputs: BlockPort[] } 
 	return { inputs, outputs }
 }
 
+/**
+ * Block defaults for a projected child, with `definitionId` deliberately absent.
+ *
+ * WHY: `getDefaultBlockProps()` mints a fresh random `definitionId` on every
+ * call, and this projection re-runs on every load, every reconcile and every
+ * XML edit. Carrying that value made the projection hand `desiredRecordProps`
+ * a different `definitionId` each pass, so `sameProps` never matched and the
+ * installer rewrote every leaf every time — `reconcileBehaviorTree`'s
+ * documented idempotency ("a second call with nothing changed writes nothing")
+ * was quietly false, and any raw record-level diff of two loads of the same
+ * board reported every projected Block as modified. That churn is what defeats
+ * a three-way merge: draft and Main each roll their own random ids, so every
+ * leaf reads as a genuine same-field conflict and a BT board can never rebase.
+ *
+ * Omitting the field is what makes it stable, rather than deriving one from
+ * the node path. An existing leaf keeps whatever id it was persisted with
+ * (a spread cannot overwrite a key it does not carry, and `sameProps` only
+ * compares the keys the projection names), and a brand-new leaf is stamped
+ * once by `installDefinitionLinking`'s beforeCreate handler — the same
+ * one-time mint every hand-drawn Block in the app gets. A path-derived id
+ * would instead collide across two regions showing the same tree, silently
+ * linking their leaves into one Definition.
+ */
+function projectedBlockDefaults(): BlockShapeProps {
+	const { definitionId: _minted, ...withoutDefinitionId } = getDefaultBlockProps()
+	return withoutDefinitionId as BlockShapeProps
+}
+
 function leafBlockProps(node: BtNode, rect: BtRect, face: 'simple' | 'port'): BlockShapeProps {
-	const base = getDefaultBlockProps()
+	const base = projectedBlockDefaults()
 	const ports = face === 'port' ? leafPorts(node) : { inputs: [], outputs: [] }
 	const views = { ...base.views, simple: { w: rect.w, h: rect.h }, port: { w: rect.w, h: rect.h } }
 	return {
@@ -240,7 +268,7 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 	if (dataflow && dataflow.rootInputs.length > 0) {
 		// The tree's own inputs arrive through one unbundle, the way Zach drew
 		// `self → unbundle → value`: one outlet per key, wired to every reader.
-		const unbundle = createUnbundleProps()
+		const unbundle = createUnbundleProps(projectedBlockDefaults())
 		const outputs: BlockPort[] = dataflow.rootInputs.map((key, index) => ({
 			id: `${BT_OUT_PORT}${key}`, name: key, type: '', visible: true, row: index + 1,
 		}))
@@ -300,7 +328,7 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 
 /** A Blackboard key as a value pill: the key is the variable name, the declared type its type. */
 function keyPillProps(label: string, type: string): BlockShapeProps {
-	const pill = createValueBlockProps(getDefaultBlockProps(), '', label)
+	const pill = createValueBlockProps(projectedBlockDefaults(), '', label)
 	return {
 		...pill,
 		inputs: pill.inputs.map((port) => ({ ...port, type })),

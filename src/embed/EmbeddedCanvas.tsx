@@ -16,12 +16,15 @@ import {
   PillTool,
   TypeTool,
   getBlockShapeVisibility,
-  installBlockClickToEdit,
+	installBlockAutoResize,
+	installBlockChildSelection,
+	installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
 } from '../blocks'
 import { CalloutAddLeaderTool, CalloutTool } from '../callout'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from '../code'
+import { FloatingPortShapeUtil, FloatingPortTool } from '../floatingPort'
 import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from '../behaviorTree'
 import { BlockContextMenu } from '../blocks/ui'
 import {
@@ -133,10 +136,11 @@ const EMBEDDED_SHAPE_UTILS = [
   BehaviorTreeShapeUtil,
   BtControlShapeUtil,
   CodeShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
@@ -246,10 +250,12 @@ function EmbeddedSurface({
 
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
+		const stopBlockAutoResize = installBlockAutoResize(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockChildSelection = installBlockChildSelection(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
@@ -349,14 +355,16 @@ function EmbeddedSurface({
       stopBlockPortMenuTarget()
       stopBehaviorTreeRegions()
       stopBranchRegions()
-      stopBranchClickToEdit()
       stopCodeClickToEdit()
+      stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
       stopCanvasNavigation()
+      stopBlockAutoResize()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 

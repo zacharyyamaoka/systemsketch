@@ -90,6 +90,21 @@ describe('layoutBlock donor geometry', () => {
 		expect(layout.footerTop).toBe(198 - NODE_FOOTER_HEIGHT_PX)
 	})
 
+	it('hiding a Port or Expanded footer frees its full strip for the body', () => {
+		for (const view of ['port', 'expanded'] as const) {
+			const shown = layoutBlock(makeBlock({ view, showFooter: true }))
+			const hidden = layoutBlock(makeBlock({ view, showFooter: false }))
+			expect(shown.footer?.h).toBe(NODE_FOOTER_HEIGHT_PX)
+			expect(hidden.footer).toBeNull()
+			expect(hidden.footerTop).toBe(hidden.height)
+			expect(hidden.footerTop - hidden.bodyTop)
+				.toBe(shown.footerTop - shown.bodyTop + NODE_FOOTER_HEIGHT_PX)
+		}
+		// Simple's lower type strip is content, not the Port/Expanded footer.
+		expect(layoutBlock(makeBlock({ view: 'simple', showFooter: false })).footerTop)
+			.toBe(layoutBlock(makeBlock({ view: 'simple', showFooter: true })).footerTop)
+	})
+
 	it('compresses pitch rather than changing a too-short authored box', () => {
 		const layout = layoutBlock(withBox(makeBlock({ portLayout: 'offset' }), 260, 150))
 		expect(layout.height).toBe(150)

@@ -1,0 +1,66 @@
+{
+  "feature": "Type primitive",
+  "viewport": { "width": 1400, "height": 900 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 700,
+      "y": 330,
+      "props": {
+        "title": "EstimatePairOut",
+        "description": "",
+        "blockType": "type",
+        "icon": "Braces",
+        "view": "port",
+        "w": 380,
+        "h": 264,
+        "attributeSource": "pose: Pose\n  position: Position\n    x: float\n    y: float\nquality: float",
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-fold",
+      "kind": "step",
+      "text": "1 · Hover pose, then click its chevron. The nested position tree folds; the closed chevron stays visible.",
+      "x": 60,
+      "y": 380,
+      "w": 440,
+      "h": 140,
+      "target": { "shapeId": "subject", "anchor": "left" }
+    },
+    {
+      "id": "step-source",
+      "kind": "step",
+      "text": "2 · Select EstimatePairOut, then click any attribute line. It becomes one normal source field: paste, type, and press Enter wherever you need.",
+      "x": 640,
+      "y": 90,
+      "w": 620,
+      "h": 130,
+      "target": { "shapeId": "subject", "anchor": "top" }
+    },
+    {
+      "id": "step-gutter",
+      "kind": "step",
+      "text": "3 · Open Dev and enable Chevrons in code gutter. Fold handles align left; turn it off to return them beside text.",
+      "x": 1160,
+      "y": 380,
+      "w": 440,
+      "h": 140,
+      "target": { "shapeId": "subject", "anchor": "right" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The Type stays compact in Port view, source edits preserve the exact text, nested attributes fold and reopen, and both chevron placements stay readable.",
+      "x": 640,
+      "y": 700,
+      "w": 620,
+      "h": 130
+    }
+  ]
+}

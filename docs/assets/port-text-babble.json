@@ -1,0 +1,138 @@
+[
+  {
+    "id": "V1-READ",
+    "label": "the read view shows both lanes with a connection bullet",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "V1-RENAME",
+    "label": "a same-position retype keeps the old port id (cable-preserving rename)",
+    "observed": "in_1",
+    "desired": "in_1",
+    "ok": true
+  },
+  {
+    "id": "V1-BRANCH",
+    "label": "a named divider on the output lane opens a new branch, and the label itself is not persisted",
+    "observed": [
+      [
+        "result",
+        null
+      ],
+      [
+        "message",
+        1
+      ]
+    ],
+    "desired": [
+      [
+        "result",
+        null
+      ],
+      [
+        "message",
+        1
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "id": "V1-AUTOCOMPLETE",
+    "label": "the live board-type registry surfaces Pose with its kind pill",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "V2-SHARED-ROW",
+    "label": "an input and an output written between the same dividers share one row",
+    "observed": [
+      2,
+      2
+    ],
+    "desired": [
+      2,
+      2
+    ],
+    "ok": true
+  },
+  {
+    "id": "V3-COLUMNS",
+    "label": "the read view lays out two columns for the inline port layout",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "V3-NO-DIAGNOSTIC-FOR-VALID",
+    "label": "a restricted-subset default raises no diagnostic",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "V3-CALL-DEFAULT",
+    "label": "a call-shaped default in the restricted subset is stored verbatim",
+    "observed": "Component(var=0.1)",
+    "desired": "Component(var=0.1)",
+    "ok": true
+  },
+  {
+    "id": "V3-DIAGNOSTIC-LIVE",
+    "label": "an out-of-subset expression is flagged live, before commit",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "V3-KEEP-INVALID",
+    "label": "the flagged default is still written verbatim, never dropped",
+    "observed": "1 + 2",
+    "desired": "1 + 2",
+    "ok": true
+  },
+  {
+    "id": "V4-NO-TOGGLE",
+    "label": "V4 has no UI/Source toggle — the source editor is already there",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "V4-LIVE-BEFORE-COMMIT",
+    "label": "the preview reflects the draft before any blur/commit",
+    "observed": [
+      "pose",
+      "window"
+    ],
+    "desired": [
+      "pose",
+      "window"
+    ],
+    "ok": true
+  },
+  {
+    "id": "V4-COMMIT",
+    "label": "clicking away commits the live draft into real ports",
+    "observed": [
+      "pose",
+      "window",
+      "newinput"
+    ],
+    "desired": [
+      "pose",
+      "window",
+      "newinput"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

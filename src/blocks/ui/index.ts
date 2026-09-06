@@ -1,6 +1,7 @@
 export * from './BlockInspector'
 export * from './BlockBatchInspector'
 export * from './BlockSelectionMiniMenu'
+export { BlockTitleFormattingControls, getEditingBlockTitle } from './BlockTitleFormattingMenu'
 export * from './BlockContextMenu'
 export { OnCanvasBlockPicker } from './OnCanvasBlockPicker'
 export { EditorConnectionInspector, getConnectionInspectorContext } from './ConnectionInspector'

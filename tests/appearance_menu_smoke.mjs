@@ -45,6 +45,7 @@ const FRAMES = {
   custom: join(ROOT, 'docs', 'appearance-menu-5-custom-applied-2026-09-01.png'),
   lineStyle: join(ROOT, 'docs', 'appearance-menu-6-line-style-2026-09-01.png'),
   fontSize: join(ROOT, 'docs', 'appearance-menu-7-font-size-2026-09-01.png'),
+  font: join(ROOT, 'docs', 'assets', 'contextual-menu-text-font-2026-09-04.png'),
   // A shape's Line style is now FigJam's Stroke popover — chips over a
   // palette — so this captures the new panel under its own date. The
   // 2026-09-01 frame beside it stays as the record of what it replaced.
@@ -99,6 +100,8 @@ async function readMenu(page) {
     }
     const cell = (b) => ({
       value: b.dataset.value, checked: b.getAttribute('aria-checked') === 'true',
+      preview: b.querySelector('.systemsketch-appearance__font')?.textContent ?? null,
+      label: b.querySelector('.systemsketch-appearance__label')?.textContent ?? null,
       // Which glyph this option drew: a traced FigJam icon, or one of ours.
       glyph: b.querySelector('[data-icon]')?.dataset.icon
         ?? (b.querySelector('[data-dash]') ? 'dash/' + b.querySelector('[data-dash]').dataset.dash : null),
@@ -110,11 +113,17 @@ async function readMenu(page) {
     })
     const custom = panel && panel.querySelector('.systemsketch-appearance__custom')
     const disc = custom && custom.querySelector('.systemsketch-appearance__custom-disc')
+    const contextual = document.querySelector('[data-testid="systemsketch-appearance"]')
     return JSON.stringify({
+      recipe: contextual?.dataset.contextualRecipe ?? null,
+      groups: contextual ? [...contextual.querySelectorAll('[data-contextual-group]')].map((group) => ({
+        id: group.dataset.contextualGroup,
+        kinds: [...group.querySelectorAll(':scope > [data-kind]')].map((item) => item.dataset.kind),
+      })) : [],
       controls: triggers.map((t) => t.dataset.control),
       labels: Object.fromEntries(triggers.map((t) => [t.dataset.control, t.getAttribute('aria-label')])),
       triggers: triggers.map((t) => ({
-        control: t.dataset.control, kind: t.dataset.trigger, ...box(t),
+        control: t.dataset.control, kind: t.dataset.trigger, registeredKind: t.dataset.kind, ...box(t),
         text: t.querySelector('.systemsketch-appearance__trigger-text')?.textContent ?? null,
         icon: t.querySelector('[data-icon]')?.dataset.icon ?? null,
       })),
@@ -552,12 +561,17 @@ async function main() {
 
     const font = await openControl(page, 'font')
     assert.deepEqual(font.panel.options.map((o) => o.value), ['sans', 'serif', 'mono', 'draw'])
+    assert.deepEqual(font.panel.options.map((o) => o.preview), ['Aa', 'Aa', 'Aa', 'Aa'])
+    assert.deepEqual(font.panel.options.map((o) => o.label), ['Simple', 'Bookish', 'Technical', 'Scribbled'])
+    assert.equal(font.recipe, 'shape')
+    assert.deepEqual(font.groups.map((group) => group.id), ['identity', 'paint', 'type', 'alignment'])
+    await frame(page, 'font')
     await pickOption(page, 'font', 'mono')
     const faced = await readMenu(page)
     assert.equal(faced.labels.font, 'Typeface, technical')
     assert.equal(faced.triggers.find((t) => t.control === 'font').icon, 'trigger/Typeface')
     await closeControl(page, 'font')
-    pass('Font size lists each rung at its own size and names the chosen one on its trigger; Typeface keeps Aa')
+    pass('Typeface is the shared registered Aa + one-label list, composed into the shape recipe')
 
     // 12. The shape picker turns one geo into another.
     const geo = await openControl(page, 'geo')

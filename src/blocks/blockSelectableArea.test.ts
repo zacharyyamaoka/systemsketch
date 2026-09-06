@@ -70,6 +70,13 @@ const port = (props: BlockShapeProps, id: string) => {
 }
 
 describe('Expanded Block selectable area', () => {
+	it('keeps auto-fit geometry independent from editor interaction state', () => {
+		const props = { ...mergeProps(), autoResize: true }
+		const geometry = geometryOf(props)
+
+		expect(geometry.bounds).toMatchObject({ x: 0, y: 0, w: props.w, h: props.h })
+	})
+
 	it('measures a port label down to the flex-row content it paints', () => {
 		const props = mergeProps()
 		const layout = layoutBlock(props)

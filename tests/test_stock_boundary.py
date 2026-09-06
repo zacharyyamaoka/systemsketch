@@ -23,6 +23,15 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("SharePanel: SystemSketchSharePanel", source)
         self.assertIn("StylePanel: null", source)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", source)
+        # Selected-text formatting stays tldraw's native Tiptap toolbar; the
+        # product changes its chrome with a scoped stylesheet, never a second
+        # command implementation or selection transaction.
+        self.assertNotIn("RichTextToolbar:", source)
+        rich_text_skin = (
+            PROJECT_ROOT / "src" / "chrome" / "rich-text-toolbar.css"
+        ).read_text(encoding="utf-8")
+        self.assertIn(".tlui-rich-text__toolbar", rich_text_skin)
+        self.assertIn("--ss-surface-inverse", rich_text_skin)
         self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", source)
         self.assertIn("components={SYSTEMSKETCH_COMPONENTS}", product_source)
         self.assertIn("shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}", product_source)
@@ -40,8 +49,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("TypeTool", source)
         self.assertIn("CalloutTool", source)
         self.assertIn("CalloutAddLeaderTool", source)
+        self.assertIn("FloatingPortShapeUtil", source)
+        self.assertIn("FloatingPortTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -80,6 +91,7 @@ class StockBoundaryTests(unittest.TestCase):
         # The Loop region joins the same family slot as Block and Branch, one
         # click deeper. It must not become a top-level toolbar slot of its own.
         self.assertIn("label: 'Loop', icon: <LoopIcon />", toolbar_source)
+        self.assertIn("label: 'Port', icon: <FloatingPortIcon />", toolbar_source)
         self.assertIn("label: 'Behavior Tree', icon: <BehaviorTreeIcon />", toolbar_source)
         self.assertNotIn('title="Behavior Tree"', toolbar_source)
         self.assertNotIn('title="Loop"', toolbar_source)
@@ -90,7 +102,7 @@ class StockBoundaryTests(unittest.TestCase):
         integration = (
             PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
         ).read_text(encoding="utf-8")
-        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withBehaviorTreeTool", "withCodeTool", "withCalloutTool"):
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withBehaviorTreeTool", "withCodeTool", "withFloatingPortTool", "withCalloutTool"):
             self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
@@ -106,7 +118,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("CodeShapeUtil,", source)
         self.assertIn("TypeTool,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -152,10 +164,12 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("PillTool,", embedded)
         self.assertIn("CodeShapeUtil,", embedded)
         self.assertIn("CodeBlockTool,", embedded)
+        self.assertIn("FloatingPortShapeUtil,", embedded)
+        self.assertIn("FloatingPortTool", embedded)
         self.assertIn("TypeTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)
@@ -183,6 +197,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BranchArmShapeUtil", store_factory)
         self.assertIn("SYSTEMSKETCH_ARROW_SHAPE_UTILS", store_factory)
         self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
+        self.assertIn("FloatingPortShapeUtil", store_factory)
 
         arrow_util = (
             PROJECT_ROOT / "src" / "systemSketchArrow.tsx"
@@ -208,10 +223,25 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("LoopShapeUtil", portable_export)
         self.assertIn("BehaviorTreeShapeUtil", portable_export)
         self.assertIn("BtControlShapeUtil", portable_export)
+        self.assertIn("detachLoopToPrimitives", portable_export)
+        self.assertIn("isLoopShape", portable_export)
+        # A Code block is a custom CodeMirror record; the portable export must
+        # lower it to stock primitives the way every other custom shape is.
         self.assertIn("CodeShapeUtil", portable_export)
+        self.assertIn("detachCodeToPrimitives", portable_export)
+        self.assertIn("isCodeShape", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)
+        # The free semantic endpoint lowers alongside Blocks and regions; a
+        # portable .tldr must never depend on the custom Port shape type.
+        self.assertIn("FloatingPortShapeUtil", portable_export)
+
+        floating_port_detachable = (
+            PROJECT_ROOT / "src" / "floatingPort" / "floatingPortDetachable.ts"
+        ).read_text(encoding="utf-8")
+        self.assertIn("detachFloatingPortToPrimitives", floating_port_detachable)
+        self.assertIn("isFloatingPortShape", floating_port_detachable)
 
         # The registry is deliberately the only enumeration of detachable
         # kinds: each shape kind carries its own reduction, and every surface
@@ -227,6 +257,7 @@ class StockBoundaryTests(unittest.TestCase):
             "branchDetachable",
             "loopDetachable",
             "behaviorTreeDetachable",
+            "floatingPortDetachable",
         ):
             self.assertIn(kind, registered_kinds)
 
