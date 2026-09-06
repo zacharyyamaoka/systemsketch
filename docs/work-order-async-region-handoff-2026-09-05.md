@@ -1,10 +1,10 @@
 # Work order: take over contextual Async regions
 
-**Status:** implemented, verified, committed, reconciled through `main` commit
-`da392448`, and intentionally not integrated. The focused review now has an
-adversarial companion with five components, 18 protocol legs, nine semantic
-relationships, and a live nineteenth-wire defaulting gesture. Do not rebuild
-the feature from scratch.
+**Status:** implemented, verified, committed at `ff3d4cbd`, reconciled through
+`main` commit `3a648701`, and intentionally not integrated. The adversarial
+review has five components, 18 protocol legs, nine semantic relationships,
+selectable fixed/shortest carrier edges, and a live nineteenth-wire defaulting
+gesture. Do not rebuild the feature from scratch.
 
 ## Objective
 
@@ -20,6 +20,12 @@ semantic region:
 - a wire crossing the region boundary is unchanged;
 - an explicit Async, Delayed, or later Data choice wins permanently.
 
+In the Components projection, Service relationships can ride Request,
+Response, or their independently shortest rendered leg. Actions can ride Goal,
+Feedback, Result, or shortest. Topic and Stream stay on their single data leg.
+These are transient presentation choices: no connection, binding, port, or
+component record is rewritten.
+
 The crucial distinction is **authoring default, not enforcement**. The region
 helps create a wire; it does not continuously reinterpret existing wires as
 components move, boards load, or users edit temporal behavior.
@@ -29,10 +35,12 @@ components move, boards load, or users edit temporal behavior.
 | Item | Value |
 |---|---|
 | Repository | `/home/bam/systemsketch` |
-| Feature worktree | `/home/bam/.codex/worktrees/7110/systemsketch-track-communication-projection-prototype` |
-| Branch | `track/communication-projection-prototype` |
+| Feature worktree | `/home/bam/.codex/worktrees/7110/systemsketch-track-communication-representative-edge` |
+| Branch | `codex/communication-representative-edge` |
 | Original implementation and focused browser proof | `7a959d11d2ed7adce989a2a26e99944b9de6cc80` |
-| Latest reconciled `main` baseline | `da3924480479ed6cf9d053881175f4f3bcb2fe18` |
+| Reconciled communication/Async-region predecessor | `9a36d399893a2087f6c678afd819f7bf258e1f8a` |
+| Representative-edge implementation and proof | `ff3d4cbde0aa6000d8bbcc130d341185682b36d8` |
+| Latest reconciled `main` baseline | `3a648701a31c13705d01fb457fc4b2f61286e295` |
 | Integration state | Not merged into `main`; no integration was authorized |
 | Retained review | Run `python3 scripts/review_runtime.py list` for the current commit-pinned stress URL |
 
@@ -46,7 +54,7 @@ lane.
 
 - The active retained review's exact board and report URLs are printed by
   `python3 scripts/review_runtime.py list`; use the entry whose name starts
-  `async-region-stress`.
+  `communication-representative-edge`.
 - Committed board:
   `sketches/review/async-region.systemsketch`
 - Committed stress board:
@@ -58,7 +66,10 @@ If the retained review is down, relaunch it from the feature worktree using
 the exact name reported by `list`, for example:
 
 ```bash
-python3 scripts/review_runtime.py up async-region-stress-20260905
+python3 scripts/review_runtime.py up communication-representative-edge-20260906 \
+  --ref ff3d4cbde0aa6000d8bbcc130d341185682b36d8 \
+  --board sketches/review/async-region-stress.systemsketch \
+  --report docs/async-region-2026-09-05.html
 ```
 
 If the app reports unresolved CodeMirror imports, the review worktree's
@@ -88,6 +99,13 @@ unrelated review runtimes.
 6. **Scope projections, not the canonical graph.** Dataflow, semantic tags,
    simple component cards, and focus are projections over the same stored
    Blocks and Connections. They must not duplicate or rewrite the graph.
+7. **Choose carriers from authored routes.** In Elbow mode, fixed phases reuse
+   that constituent connection's exact rendered route. Shortest measures the
+   real elbow polyline for each relationship independently; it is not
+   center-to-center distance. Action cancel is a coordination side-channel and
+   cannot win Shortest while goal, feedback, or result exists. A missing
+   optional phase falls back to the initiating leg. Straight disables both
+   selectors because every candidate becomes the same center line.
 
 These decisions match `docs/project-preferences.md`: one canonical definition,
 dataflow first, and a strict boundary between semantics and canvas
@@ -103,7 +121,9 @@ presentation.
 | Apply default after both port bindings exist | `src/blocks/connections/ConnectionShapeUtil.tsx` — `applyNewConnectionRegionDefault` |
 | Keep wires painted above the Frame | `src/blocks/connections/connectionScope.ts` |
 | Region-scoped projection state and filtering | `src/prototypes/communication/communicationProjection.ts` |
+| Carrier policy and phase fallback | `src/prototypes/communication/communicationProjection.ts` — `chooseCommunicationRepresentative` |
 | Contextual controls and click-away lifecycle | `src/prototypes/communication/CommunicationPrototypeControls.tsx` |
+| Rendered-route measurement and carrier painting | `src/blocks/connections/ConnectionShapeUtil.tsx` — `resolveCommunicationRepresentative` |
 | Same-size Simple/Port Block projection | `src/blocks/BlockShapeUtil.tsx`, `src/blocks/blockVisibility.ts` |
 | Product and embedded registration | `src/App.tsx`, `src/embed/EmbeddedCanvas.tsx` |
 
@@ -129,6 +149,12 @@ The next change is acceptable only if all of these remain true:
 - Nested membership chooses the nearest common Async region.
 - The embedded canvas registers the same semantic tool and opens the document
   without a missing-tool or schema error.
+- In Components + Elbow, Service and Action selectors switch each collapsed
+  relationship onto the requested existing phase route.
+- Shortest is resolved per A#/S# from actual rendered polyline length, excludes
+  cancel when an Action has a work/outcome leg, and leaves all authored shape
+  records byte-identical.
+- Topic and Stream remain on data, and Straight makes both selectors disabled.
 
 ## Verification commands
 
@@ -140,14 +166,18 @@ npm run check
 npm run test:async-region
 npm run test:async-region-fixture
 npm run test:async-region-stress
+npm run capture:async-region-carrier-hero
+python3 docs/build_async_region.py
 npm run test:async-region-gallery
 git diff --check
 ```
 
 The stress journey additionally proves that 18 legs resolve to A1–A3, S1–S3,
-T1–T2, and ST1; A2 contains exactly the four move legs; and a real alerts port
-drag creates an Async nineteenth wire. Treat a browser journey as required
-evidence; a TypeScript build alone is insufficient.
+T1–T2, and ST1; fixed Service/Action phases, missing-phase fallback, and
+per-relationship shortest carriers choose the expected real connection IDs;
+A2 contains exactly the four move legs; and a real alerts port drag creates an
+Async nineteenth wire. Treat a browser journey as required evidence; a
+TypeScript build alone is insufficient.
 
 If UI behavior changes, refresh `sketches/review/async-region.systemsketch`
 through the repo's `systemsketch-review-fixture` skill, drive that exact saved
@@ -181,10 +211,12 @@ visually inspect the result. Never hand-edit tldraw schema JSON.
 > Take over the SystemSketch Async-region work using
 > `docs/work-order-async-region-handoff-2026-09-05.md` as the authoritative
 > handoff. Start by inspecting the exact branch/worktree and opening the retained
-> board and report. Do not recreate the feature: it is implemented and verified
-> at commit `7a959d11d2ed7adce989a2a26e99944b9de6cc80`. Preserve the central contract
-> that a region supplies a one-time creation default, not continuous semantic
-> enforcement. Check current `main` and concurrent work before editing, run the
+> board and report. Do not recreate the feature: the Async-region base started
+> at `7a959d11`, and representative-edge selection plus its current proof is at
+> `ff3d4cbd`. Preserve both central contracts: a region supplies a one-time
+> creation default rather than continuous semantic enforcement, and carrier
+> selection is a transient projection over authored data edges rather than a
+> second graph. Check current `main` and concurrent work before editing. Run the
 > full verification listed in the work order after any change, and do not merge
 > or promote anything unless I explicitly authorize integration. Report the
 > exact branch, commit, worktree, test results, and retained-review URL when you
