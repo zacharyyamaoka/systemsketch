@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-09-06T02:51:51.214Z",
+  "passed": 1,
+  "total": 10,
+  "results": [
+    {
+      "id": "nested.cards",
+      "label": "all six leaves project as Blocks",
+      "observed": 0,
+      "desired": 6,
+      "ok": false
+    },
+    {
+      "id": "nested.no-overlap",
+      "label": "no insert box intersects any node card",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0:0.exists",
+      "label": "lane-start:0.0:0 is rendered",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "nested.lane-start:0.0.1:0.exists",
+      "label": "lane-start:0.0.1:0 is rendered",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "nested.lane-start:0.0.1.1:0.exists",
+      "label": "lane-start:0.0.1.1:0 is rendered",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "nested.lane-end-bare.column",
+      "label": "bare arm terminus \"+\" shares its own card's column",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "nested.lane-end-bare.half-unit",
+      "label": "bare arm terminus \"+\" centers half a unit below its card",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "nested.lane-end-nested.on-flow-column",
+      "label": "nested-arm terminus \"+\" sits on its arm's own rail column, not the horizontal leg",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "nested.start.midpoint",
+      "label": "the Start-gap \"+\" centers in its own gap on the rail column",
+      "observed": false,
+      "desired": true,
+      "ok": false
+    },
+    {
+      "id": "flowstate.cards",
+      "label": "all six branch leaves project",
+      "observed": 0,
+      "desired": 6,
+      "ok": false
+    }
+  ],
+  "aborted": "TypeError: Cannot read properties of undefined (reading 'y')"
+}

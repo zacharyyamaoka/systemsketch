@@ -1,0 +1,163 @@
+{
+  "generatedAt": "2026-09-06T13:44:21.127Z",
+  "passed": 21,
+  "total": 21,
+  "results": [
+    {
+      "id": "setup.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "item1.default",
+      "label": "Process view defaults to Show on hover",
+      "observed": "hover",
+      "desired": "hover",
+      "ok": true
+    },
+    {
+      "id": "item1.interior-hidden-at-rest",
+      "label": "an interior \"+\" is invisible with the pointer far away",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "item1.end-persistent",
+      "label": "the terminal \"+\" stays visible regardless",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "item1.interior-hover-reveal",
+      "label": "the interior \"+\" fades in once the pointer is near (not on) it",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "item1.toggle-all",
+      "label": "the inspector toggle sets insertVisibility to all",
+      "observed": "all",
+      "desired": "all",
+      "ok": true
+    },
+    {
+      "id": "item1.all-reveals-everything",
+      "label": "\"Show all\" reveals the interior target with the pointer away",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "item1.toggle-back",
+      "label": "the toggle switches back to hover-reveal",
+      "observed": "hover",
+      "desired": "hover",
+      "ok": true
+    },
+    {
+      "id": "item1.tree-untouched",
+      "label": "Tree view still shows its targets once the region is selected",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "item2.override-recorded",
+      "label": "the region remembers the Expanded leaf as a node view override",
+      "observed": "expanded",
+      "desired": "expanded",
+      "ok": true
+    },
+    {
+      "id": "item2.child-is-expanded-box",
+      "label": "the projected child actually carries the Expanded box (560 wide)",
+      "observed": 560,
+      "desired": 560,
+      "ok": true
+    },
+    {
+      "id": "item2.survives-reconcile",
+      "label": "the override survives an explicit reconcile pass",
+      "observed": "expanded",
+      "desired": "expanded",
+      "ok": true
+    },
+    {
+      "id": "item2.override-forgotten",
+      "label": "reverting to Simple forgets the override",
+      "ok": true
+    },
+    {
+      "id": "item3.stepped-in",
+      "label": "the SAME region now projects the Charge tree",
+      "observed": "Charge",
+      "desired": "Charge",
+      "ok": true
+    },
+    {
+      "id": "item3.stack-recorded",
+      "label": "the outer tree is remembered for Step out",
+      "observed": [
+        ""
+      ],
+      "desired": [
+        ""
+      ],
+      "ok": true
+    },
+    {
+      "id": "item3.charge-contents",
+      "label": "Charge's own two actions are what got projected",
+      "observed": [
+        "DockRobot",
+        "MoveToCharger"
+      ],
+      "desired": [
+        "DockRobot",
+        "MoveToCharger"
+      ],
+      "ok": true
+    },
+    {
+      "id": "item3.breadcrumb",
+      "label": "the header shows a Step out breadcrumb",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "item3.inspector-reused",
+      "label": "the region's own View section is showing (same Inspector, new treeId)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "item3.stepped-out",
+      "label": "Step out restores the calling tree",
+      "observed": "",
+      "desired": "",
+      "ok": true
+    },
+    {
+      "id": "item3.stack-cleared",
+      "label": "the stack is empty again after stepping back out",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

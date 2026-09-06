@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T17:43:02.138Z",
+  "generatedAt": "2026-09-06T13:43:26.282Z",
   "passed": 43,
   "total": 43,
   "results": [
@@ -438,7 +438,7 @@
     },
     {
       "id": "tidy.clears",
-      "label": "Tidy forgets the offset",
+      "label": "Arrange now forgets the offset",
       "observed": [],
       "desired": [],
       "ok": true

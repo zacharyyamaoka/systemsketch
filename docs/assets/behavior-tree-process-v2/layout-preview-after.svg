@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1411.5" height="1502" viewBox="-40 -40 1411.5 1502" font-family="Inter, ui-sans-serif, system-ui" font-size="18">
+<rect x="-40" y="-40" width="1411.5" height="1502" fill="#f7f7f8"/>
+<path d="M 786.5 340 L 1134 340 L 1134 400" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 1134 400 L 1130.095046347942 391.8912801888782 L 1137.904953652058 391.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 1134 512 L 1134 552 L 602.5 552" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 400 L 602.5 552" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 228 L 602.5 288" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 288 L 598.595046347942 279.8912801888782 L 606.404953652058 279.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 602.5 552 L 602.5 612" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 612 L 598.595046347942 603.8912801888782 L 606.404953652058 603.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 602.5 724 L 602.5 784" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 784 L 598.595046347942 775.8912801888782 L 606.404953652058 775.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 171 956 L 171 1012" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 171 1012 L 167.09504634794197 1003.8912801888782 L 174.90495365205803 1003.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 171 1124 L 171 1352" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 171 1352 L 167.09504634794197 1343.8912801888782 L 174.90495365205803 1343.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 609 1124 L 609 1184" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 609 1184 L 605.095046347942 1175.8912801888782 L 612.904953652058 1175.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 609 956 L 609 1012" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 609 1012 L 605.095046347942 1003.8912801888782 L 612.904953652058 1003.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 609 1296 L 609 1352" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 609 1352 L 605.095046347942 1343.8912801888782 L 612.904953652058 1343.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 1034 956 L 1034 1012" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 1034 1012 L 1030.095046347942 1003.8912801888782 L 1037.904953652058 1003.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 1034 1124 L 1034 1352" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 1034 1352 L 1030.095046347942 1343.8912801888782 L 1037.904953652058 1343.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 602.5 896 L 602.5 956" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 956 L 598.595046347942 947.8912801888782 L 606.404953652058 947.8912801888782 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 602.5 52 L 602.5 116" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<path d="M 602.5 116 L 598.595046347942 107.89128018887823 L 606.404953652058 107.89128018887823 Z" fill="#3f3f46" opacity="1"/>
+<path d="M 602.5 1352 L 602.5 1394" fill="none" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<line x1="171" y1="953" x2="1034" y2="953" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<line x1="171" y1="959" x2="1034" y2="959" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<line x1="171" y1="1349" x2="1034" y2="1349" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<line x1="171" y1="1355" x2="1034" y2="1355" stroke="#3f3f46" stroke-width="2" opacity="1"/>
+<rect x="527.5" y="0" width="150" height="52" rx="26" fill="#ffffff" stroke="#27272a" stroke-width="1.6"/>
+<text x="602.5" y="32" text-anchor="middle" font-weight="600">Start</text>
+<rect x="431.5" y="116" width="342" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="602.5" y="160" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">MoveToObj</text>
+<text x="602.5" y="190" text-anchor="middle" fill="#71717a" font-size="15">Sub Tree</text>
+<rect x="418.5" y="288" width="368" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="602.5" y="332" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">GraspValid</text>
+<text x="602.5" y="362" text-anchor="middle" fill="#71717a" font-size="15">Condition</text>
+<rect x="936.5" y="400" width="395" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="1134" y="444" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">CorrectGrip</text>
+<text x="1134" y="474" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="431.5" y="612" width="342" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="602.5" y="656" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">CloseGrip</text>
+<text x="602.5" y="686" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="444.5" y="784" width="316" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="602.5" y="828" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">MoveHome</text>
+<text x="602.5" y="858" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="0" y="1012" width="342" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="171" y="1056" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">CloseGrip</text>
+<text x="171" y="1086" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="438" y="1012" width="342" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="609" y="1056" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">CloseGrip</text>
+<text x="609" y="1086" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="451" y="1184" width="316" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="609" y="1228" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">MoveHome</text>
+<text x="609" y="1258" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="876" y="1012" width="316" height="112" rx="9" fill="#ffffff" stroke="#c9ccd3"/>
+<text x="1034" y="1056" text-anchor="middle" font-weight="600" font-size="28" font-family="ui-monospace, monospace">MoveHome</text>
+<text x="1034" y="1086" text-anchor="middle" fill="#71717a" font-size="15">Skill</text>
+<rect x="908.25" y="323" width="104" height="34" rx="5" fill="#ffffff" stroke="#27272a" stroke-width="1.4"/>
+<text x="960.25" y="346" text-anchor="middle" font-size="16" font-weight="500">Failure</text>
+<rect x="1121" y="357" width="26" height="26" rx="4" fill="#5b4bdb"/>
+<path d="M 1128 370 H 1140 M 1134 364 V 376" stroke="#fff" stroke-width="2.2"/>
+<rect x="1121" y="499" width="26" height="26" rx="4" fill="#5b4bdb"/>
+<path d="M 1128 512 H 1140 M 1134 506 V 518" stroke="#fff" stroke-width="2.2"/>
+<rect x="589.5" y="71" width="26" height="26" rx="4" fill="#5b4bdb"/>
+<path d="M 596.5 84 H 608.5 M 602.5 78 V 90" stroke="#fff" stroke-width="2.2"/>
+<rect x="589.5" y="1395" width="26" height="26" rx="4" fill="#5b4bdb"/>
+<path d="M 596.5 1408 H 608.5 M 602.5 1402 V 1414" stroke="#fff" stroke-width="2.2"/>
+</svg>

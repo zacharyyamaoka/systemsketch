@@ -1,0 +1,183 @@
+{
+  "generatedAt": "2026-09-06T13:44:06.272Z",
+  "passed": 25,
+  "total": 25,
+  "results": [
+    {
+      "id": "nested.cards",
+      "label": "all six leaves project as Blocks",
+      "observed": 6,
+      "desired": 6,
+      "ok": true
+    },
+    {
+      "id": "nested.no-overlap",
+      "label": "no insert box intersects any node card",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0:0.exists",
+      "label": "lane-start:0.0:0 is rendered",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0:0.column",
+      "label": "prepend \"+\" shares CorrectGrip's column center",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0:0.half-unit",
+      "label": "prepend \"+\" centers half a unit above CorrectGrip",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0.1:0.exists",
+      "label": "lane-start:0.0.1:0 is rendered",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0.1:0.column",
+      "label": "prepend \"+\" shares RetryGrasp's column center",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0.1:0.half-unit",
+      "label": "prepend \"+\" centers half a unit above RetryGrasp",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0.1.1:0.exists",
+      "label": "lane-start:0.0.1.1:0 is rendered",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0.1.1:0.column",
+      "label": "prepend \"+\" shares ReleaseAndRetry's column center",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-start:0.0.1.1:0.half-unit",
+      "label": "prepend \"+\" centers half a unit above ReleaseAndRetry",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-end-bare.column",
+      "label": "bare arm terminus \"+\" shares its own card's column",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-end-bare.half-unit",
+      "label": "bare arm terminus \"+\" centers half a unit below its card",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-end-nested.on-flow-column",
+      "label": "nested-arm terminus \"+\" sits on its arm's own rail column, not the horizontal leg",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-inserts.found",
+      "label": "every nesting level contributed its own lane-start and lane-end (3 levels x 2 = 6)",
+      "observed": 6,
+      "desired": 6,
+      "ok": true
+    },
+    {
+      "id": "nested.lane-inserts.none-persistent",
+      "label": "none of them are persistent — all hover-reveal",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "nested.start.midpoint",
+      "label": "the Start-gap \"+\" centers in its own gap on the rail column",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "flowstate.cards",
+      "label": "all six branch leaves project",
+      "observed": 6,
+      "desired": 6,
+      "ok": true
+    },
+    {
+      "id": "flowstate.stack-gaps",
+      "label": "all three branch stacks use exactly the unit",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "flowstate.between-count",
+      "label": "three branches offer exactly two between-branch inserts",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "flowstate.bar-to-node",
+      "label": "fork bar→first node is the unit on every branch",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "flowstate.branch-gap",
+      "label": "branch→branch box gap equals the unit",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "flowstate.no-overlap",
+      "label": "no insert box intersects any card",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "flowstate.end-persistent",
+      "label": "the end \"+\" is always visible",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

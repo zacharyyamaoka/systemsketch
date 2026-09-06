@@ -347,7 +347,12 @@ async function main() {
     check('insert.undo', 'a second undo takes back the insertion', await regionXml(page), xmlBefore)
 
     // ---- free arrangement and Tidy --------------------------------------------
-    await setView(page, { projection: 'tree' })
+    // Item 6: Tree view now defaults to Auto layout on (`arrangement: 'tidy'`,
+    // see `tests/behavior_tree_tree_drag_reorder_smoke.mjs` for that drag's
+    // own live-reorder behaviour) — this section is specifically about the
+    // OTHER mode, so it asks for `'free'` explicitly rather than relying on
+    // whatever a fresh region starts with.
+    await setView(page, { projection: 'tree', arrangement: 'free' })
     await fitRegion(page)
     // Press on the card's corner padding: a press on the title would open
     // click-to-edit instead of a translate, exactly as it does for any Block.
@@ -373,9 +378,11 @@ async function main() {
     check('drag.xml-stable', 'a drag never touches the XML', await regionXml(page), xmlBefore)
     await shot(page, 'tree-free-offset.png')
     await selectRegion(page)
-    await clickElement(page, '[data-testid="bt-pill-tidy"]')
+    // Item 6: Tidy is now "Arrange now", behind the Auto layout pill's chevron.
+    await clickElement(page, '[data-testid="bt-auto-layout-chevron"]')
+    await clickElement(page, '[data-testid="bt-auto-layout-arrange-now"]')
     await delay(350)
-    check('tidy.clears', 'Tidy forgets the offset', Object.keys((await region(page)).offsets), [])
+    check('tidy.clears', 'Arrange now forgets the offset', Object.keys((await region(page)).offsets), [])
 
     // ---- inspector rename through the XML ----------------------------------------
     await selectPath(page, '0.1.0')

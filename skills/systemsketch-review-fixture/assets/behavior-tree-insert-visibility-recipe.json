@@ -1,0 +1,98 @@
+{
+  "feature": "Behavior Tree insert-icon hover-gating + nested recovery branches",
+  "viewport": {
+    "width": 2600,
+    "height": 1700
+  },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "behaviorTree",
+      "x": 760,
+      "y": 240,
+      "props": {
+        "title": "PickAndPlace",
+        "treeId": "PickAndPlace",
+        "projection": "process",
+        "orientation": "down",
+        "nodeFace": "simple",
+        "controlFace": "expanded",
+        "edgeStyle": "straight",
+        "dataLens": "none",
+        "blackboardLayout": "pytrees",
+        "insertVisibility": "hover",
+        "w": 1400,
+        "h": 1100,
+        "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"PickAndPlace\">\n    <BehaviorTree ID=\"PickAndPlace\">\n        <Sequence name=\"Pick and place\">\n            <SubTree ID=\"MoveToObj\" target=\"{object_pose}\"/>\n            <Fallback name=\"Grasp or correct\">\n                <GraspValid pose=\"{object_pose}\" quality=\"{quality}\"/>\n                <Fallback>\n                    <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n                    <Sequence>\n                        <Fallback>\n                            <CorrectGrip pose=\"{object_pose}\" corrected=\"{object_pose}\"/>\n                            <Sequence>\n                                <PlanPath target=\"{target}\" path=\"{path}\"/>\n                            </Sequence>\n                        </Fallback>\n                    </Sequence>\n                </Fallback>\n            </Fallback>\n            <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n            <MoveHome home=\"{home_pose}\"/>\n            <Parallel success_count=\"2\">\n                <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                <Sequence>\n                    <CloseGrip force=\"{grip_force}\" state=\"{grip_state}\"/>\n                    <MoveHome home=\"{home_pose}\"/>\n                </Sequence>\n                <MoveHome home=\"{home_pose}\"/>\n            </Parallel>\n        </Sequence>\n    </BehaviorTree>\n    <BehaviorTree ID=\"MoveToObj\">\n        <Sequence>\n            <PlanPath target=\"{target}\" path=\"{path}\"/>\n            <FollowPath path=\"{path}\"/>\n        </Sequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"GraspValid\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"quality\" type=\"double\"/>\n        </Condition>\n        <Action ID=\"CorrectGrip\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n            <output_port name=\"corrected\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"CloseGrip\">\n            <input_port name=\"force\" type=\"double\" default=\"20\"/>\n            <output_port name=\"state\" type=\"GripState\"/>\n        </Action>\n        <Action ID=\"MoveHome\">\n            <input_port name=\"home\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"PlanPath\">\n            <input_port name=\"target\" type=\"Pose\"/>\n            <output_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <Action ID=\"FollowPath\">\n            <input_port name=\"path\" type=\"Path\"/>\n        </Action>\n        <SubTree ID=\"MoveToObj\">\n            <input_port name=\"target\" type=\"Pose\"/>\n        </SubTree>\n    </TreeNodesModel>\n</root>\n"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Exactly one blue “+” shows with the pointer off the board — the true end-of-tree terminus at the bottom. Every Failure/CorrectGrip/convergence “+”, at all 3 levels, stays hidden until hovered. Tree view still renders the same chain cleanly.",
+      "x": 40,
+      "y": 40,
+      "w": 400,
+      "h": 260
+    },
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · At rest, pointer away — count the blue “+” icons. Before tonight's fix, every Failure hand-off and CorrectGrip terminus had one, all visible at once.",
+      "x": 40,
+      "y": 380,
+      "w": 400,
+      "h": 220,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left",
+        "dy": 120
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · This chain nests 3 levels: GraspValid fails into a Fallback, whose own CorrectGrip fails into ANOTHER Fallback, down to PlanPath. Built live via “Add failure recovery”, twice — not hand-written XML.",
+      "x": 40,
+      "y": 680,
+      "w": 400,
+      "h": 220,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left",
+        "dy": 400
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Hover near a Failure label or a CorrectGrip's trailing gap — its own “+” fades in on approach, and disappears the moment the pointer leaves. True at every nesting level.",
+      "x": 40,
+      "y": 980,
+      "w": 400,
+      "h": 220,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left",
+        "dy": 680
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Follow the trunk past CloseGrip / MoveHome / the Parallel — the one persistent icon in the whole board lives at the very bottom, after everything else.",
+      "x": 40,
+      "y": 1280,
+      "w": 400,
+      "h": 220,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left",
+        "dy": 960
+      }
+    }
+  ]
+}

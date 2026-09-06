@@ -1,0 +1,232 @@
+{
+  "generatedAt": "2026-09-06T12:37:07.544Z",
+  "passed": 30,
+  "total": 30,
+  "results": [
+    {
+      "id": "setup.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "setup.one-fallback",
+      "label": "the sample tree starts with exactly one Fallback",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "setup.one-failure-chip",
+      "label": "and paints exactly one Failure chip",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "level2.finds-correctgrip",
+      "label": "the sample's CorrectGrip (Fallback0's recovery content) resolves to a path",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "level2.selected-correctgrip",
+      "label": "the inspector confirms CorrectGrip is selected",
+      "observed": "CorrectGrip",
+      "desired": "CorrectGrip",
+      "ok": true
+    },
+    {
+      "id": "level2.no-crash",
+      "label": "the edit landed (XML still readable, non-empty)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "level2.two-fallbacks",
+      "label": "wrapping CorrectGrip added exactly one new Fallback (now 2 total)",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "level2.wraps-in-place",
+      "label": "CorrectGrip is now Fallback1's own primary child, still inside Fallback0's recovery arm, with an empty Sequence beside it",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "level2.two-failure-chips",
+      "label": "Process view now paints two Failure chips, one per nesting level",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "level2.correctgrip-added",
+      "label": "a second CorrectGrip landed inside the new recovery Sequence",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "level2.still-two-fallbacks",
+      "label": "filling the empty Sequence did not add a Fallback",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "level3.finds-nested-correctgrip",
+      "label": "the freshly-inserted CorrectGrip (itself already inside a recovery arm) resolves to a path",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "level3.selected-correctgrip",
+      "label": "the inspector confirms the nested CorrectGrip is selected",
+      "observed": "CorrectGrip",
+      "desired": "CorrectGrip",
+      "ok": true
+    },
+    {
+      "id": "level3.three-fallbacks",
+      "label": "wrapping the nested CorrectGrip added a THIRD Fallback — nesting inside nesting works",
+      "observed": 3,
+      "desired": 3,
+      "ok": true
+    },
+    {
+      "id": "level3.three-failure-chips",
+      "label": "Process view now paints three Failure chips, one per nesting level",
+      "observed": 3,
+      "desired": 3,
+      "ok": true
+    },
+    {
+      "id": "level3.planpath-added",
+      "label": "PlanPath landed inside the depth-3 recovery Sequence",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "final.three-fallbacks-total",
+      "label": "still exactly three Fallbacks after filling the last arm",
+      "observed": 3,
+      "desired": 3,
+      "ok": true
+    },
+    {
+      "id": "final.full-nesting-shape",
+      "label": "the whole chain nests correctly: Fallback0 > Fallback1 > Fallback2, each arm feeding the next",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "final.rest-of-tree-intact",
+      "label": "CloseGrip/MoveHome/Parallel after the Fallback are untouched",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "hover.lane-inserts-found",
+      "label": "all three nesting levels contributed their own lane-start + lane-end (3 x 2 = 6)",
+      "observed": 6,
+      "desired": 6,
+      "ok": true
+    },
+    {
+      "id": "hover.lane-inserts-not-persistent",
+      "label": "none of them are persistent, at any nesting depth",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "hover.lane-inserts-hidden-at-rest",
+      "label": "none of them are visible with the pointer far away",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "hover.exactly-one-persistent",
+      "label": "the only always-visible \"+\" in the whole 3-level tree is the true end-of-tree terminus",
+      "observed": [
+        "bt-insert-end"
+      ],
+      "desired": [
+        "bt-insert-end"
+      ],
+      "ok": true
+    },
+    {
+      "id": "convergence.merge-edges",
+      "label": "3 merge edges per nesting level x 3 levels",
+      "observed": 9,
+      "desired": 9,
+      "ok": true
+    },
+    {
+      "id": "convergence.merge-arrowheads",
+      "label": "2 arrowheads per nesting level x 3 levels (the headless rail continuation excluded)",
+      "observed": 6,
+      "desired": 6,
+      "ok": true
+    },
+    {
+      "id": "convergence.no-node-overlap",
+      "label": "no projected card intersects any other at 3 levels of nesting",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "console.process",
+      "label": "no local console errors after all Process-view edits",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "tree.renders-every-node",
+      "label": "Tree view paints one Block per node, matching the final XML's node count",
+      "observed": 19,
+      "desired": 19,
+      "ok": true
+    },
+    {
+      "id": "tree.labels-present",
+      "label": "every real node id from the 3-level chain is painted somewhere in Tree view",
+      "observed": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "console.tree",
+      "label": "no local console errors after switching to Tree view",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

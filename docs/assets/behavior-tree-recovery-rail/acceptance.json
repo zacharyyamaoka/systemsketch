@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-09-06T13:44:13.079Z",
+  "passed": 12,
+  "total": 12,
+  "results": [
+    {
+      "id": "setup.projection",
+      "label": "the region opens in Process view",
+      "observed": "process",
+      "desired": "process",
+      "ok": true
+    },
+    {
+      "id": "lane-start.hidden-at-rest",
+      "label": "the prepend \"+\" above CorrectGrip is invisible with the pointer far away — no longer an always-on exemption",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "lane-start.hover-reveal",
+      "label": "it fades in once the pointer is near (not on) it, same as any other interior insert",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "lane-start.wraps-bare-leaf-before",
+      "label": "CorrectGrip is wrapped in a Sequence with the new node BEFORE it, not a third Fallback alternative",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "lane-start.node-count",
+      "label": "exactly one PlanPath was added",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "start.hidden-at-rest",
+      "label": "the Start→root prepend \"+\" is invisible with the pointer far away",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "start.hover-reveal",
+      "label": "the Start→root prepend \"+\" fades in once the pointer is near (not on) it",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "start.all-reveals-it",
+      "label": "\"Show all\" reveals the Start→root prepend \"+\" with the pointer away",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "start.toggle-back",
+      "label": "the toggle switches back to hover-reveal",
+      "observed": "hover",
+      "desired": "hover",
+      "ok": true
+    },
+    {
+      "id": "start.prepends-before-first-child",
+      "label": "MoveHome is now the root sequence's first child, MoveToObj shifted to second",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "start.node-count",
+      "label": "exactly one MoveHome was added",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

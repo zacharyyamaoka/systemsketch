@@ -8,6 +8,7 @@
  */
 import {
 	Rectangle2d,
+	createShapePropsMigrationIds,
 	createShapePropsMigrationSequence,
 	type RecordProps,
 	type TLShape,
@@ -27,6 +28,40 @@ import { projectBehaviorTree, projectedEdges } from './behaviorTreeProjection'
 import { arrowHeadPath, edgeColor, edgeEndAngle, edgePathData } from './sceneSvg'
 
 const REGION_RADIUS = 8
+
+const behaviorTreeVersions = createShapePropsMigrationIds(BEHAVIOR_TREE_SHAPE_TYPE, {
+	InsertVisibilityNodeOverridesAndTreeStack: 1,
+	SpacingScale: 2,
+})
+
+export const behaviorTreeShapeMigrations = createShapePropsMigrationSequence({
+	sequence: [{
+		id: behaviorTreeVersions.InsertVisibilityNodeOverridesAndTreeStack,
+		up(props) {
+			// Regions saved before hover-reveal landed painted every "+" at rest,
+			// which is Process view's old (undesired) behaviour — 'all' keeps a
+			// loaded file looking the way it did the moment before this shipped.
+			if (props.insertVisibility === undefined) props.insertVisibility = 'all'
+			if (props.nodeViewOverrides === undefined) props.nodeViewOverrides = {}
+			if (props.treeStack === undefined) props.treeStack = []
+		},
+		down(props) {
+			delete props.insertVisibility
+			delete props.nodeViewOverrides
+			delete props.treeStack
+		},
+	}, {
+		id: behaviorTreeVersions.SpacingScale,
+		up(props) {
+			// Regions saved before the Inspector's Spacing slider: 1 is the gap
+			// constants exactly as they were, so a loaded file does not move.
+			if (props.spacingScale === undefined) props.spacingScale = 1
+		},
+		down(props) {
+			delete props.spacingScale
+		},
+	}],
+})
 
 function BehaviorTreeExportSvg({ shape }: { shape: BehaviorTreeShape }) {
 	const projection = projectBehaviorTree(shape.props)
@@ -68,7 +103,7 @@ function BehaviorTreeExportSvg({ shape }: { shape: BehaviorTreeShape }) {
 export class BehaviorTreeShapeUtil extends RegionShapeUtil<BehaviorTreeShape> {
 	static override type = BEHAVIOR_TREE_SHAPE_TYPE
 	static override props: RecordProps<BehaviorTreeShape> = BEHAVIOR_TREE_SHAPE_PROPS
-	static override migrations = createShapePropsMigrationSequence({ sequence: [] })
+	static override migrations = behaviorTreeShapeMigrations
 
 	override getDefaultProps(): BehaviorTreeShape['props'] {
 		return getDefaultBehaviorTreeProps()
