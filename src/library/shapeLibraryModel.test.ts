@@ -98,4 +98,23 @@ describe('shared shape library catalog', () => {
     }
   })
 
+  it('lists the Behavior Tree insert glyph and inserts it as its own custom shape type', () => {
+    expect(SHAPE_LIBRARY_ITEMS.filter((item) => item.section === 'Behavior Tree').map((item) => item.id))
+      .toEqual(['bt-insert'])
+    expect(filterShapeLibraryItems('behavior tree').map((item) => item.id)).toEqual(['bt-insert'])
+    expect(filterShapeLibraryItems('insert point').map((item) => item.id)).toEqual(['bt-insert'])
+
+    const { editor, createShape } = insertionEditor()
+    const item = shapeLibraryItemById('bt-insert')!
+    const id = insertShapeLibraryItem(editor, item, memoryStorage())
+
+    expect(createShape).toHaveBeenCalledWith(expect.objectContaining({
+      id,
+      type: 'systemsketch-bt-insert-glyph',
+      x: 486,
+      y: 346,
+      props: { w: 28, h: 28 },
+    }))
+  })
+
 })

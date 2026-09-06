@@ -11,6 +11,7 @@ import { BranchArmShapeUtil, BranchShapeUtil } from '../branch'
 import { LoopShapeUtil } from '../loop'
 import { BehaviorTreeShapeUtil, BtControlShapeUtil } from '../behaviorTree'
 import { CodeShapeUtil } from '../code'
+import { BtInsertGlyphShapeUtil } from '../library/BtInsertGlyphShapeUtil'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -41,6 +42,7 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
     BtControlShapeUtil,
     CodeShapeUtil,
     BranchArmShapeUtil,
+    BtInsertGlyphShapeUtil,
     ...blockConnectionShapeUtils,
   ],
 )

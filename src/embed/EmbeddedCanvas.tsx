@@ -22,6 +22,7 @@ import {
 import { CalloutAddLeaderTool, CalloutTool } from '../callout'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from '../code'
 import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from '../behaviorTree'
+import { BtInsertGlyphShapeUtil } from '../library/BtInsertGlyphShapeUtil'
 import { BlockContextMenu } from '../blocks/ui'
 import {
   BranchArmShapeUtil,
@@ -132,6 +133,7 @@ const EMBEDDED_SHAPE_UTILS = [
   BehaviorTreeShapeUtil,
   BtControlShapeUtil,
   CodeShapeUtil,
+  BtInsertGlyphShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]

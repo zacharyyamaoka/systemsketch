@@ -45,4 +45,13 @@ describe('shape library tool activation', () => {
     expect(activateShapeLibraryTool(tools, item, memoryStorage())).toBe('arrow-curve')
     expect(onSelect).toHaveBeenCalledWith('toolbar')
   })
+
+  it('arms the custom Behavior Tree insert glyph tool, not just a no-op id', () => {
+    const { tools, onSelect } = oneTool('systemsketch-bt-insert-glyph')
+    const item = shapeLibraryItemById('bt-insert')!
+
+    expect(shapeLibraryToolId(item)).toBe('systemsketch-bt-insert-glyph')
+    expect(activateShapeLibraryTool(tools, item, memoryStorage())).toBe('systemsketch-bt-insert-glyph')
+    expect(onSelect).toHaveBeenCalledWith('toolbar')
+  })
 })
