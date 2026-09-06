@@ -68,7 +68,7 @@ the exact name reported by `list`, for example:
 
 ```bash
 python3 scripts/review_runtime.py up communication-representative-edge-20260906 \
-  --ref ff3d4cbde0aa6000d8bbcc130d341185682b36d8 \
+  --ref 2a6f4bfdc9f4abc3140583429120d9055cbc58dd \
   --board sketches/review/async-region-stress.systemsketch \
   --report docs/async-region-2026-09-05.html
 ```
