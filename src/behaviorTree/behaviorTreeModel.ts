@@ -29,7 +29,7 @@ export const BT_NODE_FACES = ['simple', 'port'] as const
 export type BtNodeFace = (typeof BT_NODE_FACES)[number]
 export const BT_CONTROL_FACES = ['expanded', 'compact'] as const
 export type BtControlFace = (typeof BT_CONTROL_FACES)[number]
-export const BT_EDGE_STYLES = ['straight', 'elbow'] as const
+export const BT_EDGE_STYLES = ['straight', 'elbow', 'curved', 'slanted'] as const
 export type BtEdgeStyle = (typeof BT_EDGE_STYLES)[number]
 export const BT_DATA_LENSES = ['none', 'blackboard', 'dataflow'] as const
 export type BtDataLens = (typeof BT_DATA_LENSES)[number]
@@ -185,16 +185,31 @@ export function keyPath(key: string, global: boolean): string {
 /* --------------------------------- glyphs ---------------------------------- */
 
 export const BT_GLYPHS = [
-	'sequence', 'fallback', 'parallel', 'branch', 'switch', 'generic',
+	'sequence', 'sequence-reactive', 'fallback', 'fallback-reactive', 'parallel', 'branch', 'switch', 'generic',
 	'inverter', 'retry', 'repeat', 'timeout', 'delay', 'force-success', 'force-failure',
-	'run-once', 'keep-running', 'loop', 'precondition', 'recovery-loop',
+	'run-once', 'keep-running', 'loop', 'precondition', 'recovery-loop', 'breakpoint',
 ] as const
 export type BtGlyph = (typeof BT_GLYPHS)[number]
 export type BtControlTone = 'control' | 'decorator' | 'unknown'
 
-/** Which glyph a control or decorator wears, from its registration ID. */
+/**
+ * Which glyph a control or decorator wears, from its registration ID.
+ *
+ * WHY: `ReactiveSequence`/`ReactiveFallback` share `controlKind` with their
+ * latched siblings (`Sequence`/`Fallback`) — Process-view layout treats both
+ * pairs the same way — but BT.CPP's own runtime does not: `Fallback` latches
+ * `current_child_idx_` across ticks (src/controls/fallback_node.cpp) and does
+ * not re-check an earlier child while a later one is RUNNING, while the
+ * Reactive variant re-evaluates every child from index 0 on every tick. That
+ * is a real behavioral fork a person reading the tree needs to see without
+ * opening the inspector, so the reactive id forks to its own glyph name here
+ * rather than collapsing onto `controlKind` like everything else in this
+ * switch.
+ */
 export function btGlyphFor(node: Pick<BtNode, 'id' | 'kind' | 'controlKind'>): BtGlyph {
 	if (node.kind === 'control' || (node.kind === 'unknown' && node.controlKind)) {
+		if (node.id === 'ReactiveSequence') return 'sequence-reactive'
+		if (node.id === 'ReactiveFallback') return 'fallback-reactive'
 		switch (node.controlKind) {
 			case 'sequence': return 'sequence'
 			case 'fallback': return 'fallback'
@@ -216,6 +231,11 @@ export function btGlyphFor(node: Pick<BtNode, 'id' | 'kind' | 'controlKind'>): B
 		case 'RunOnce': return 'run-once'
 		case 'KeepRunningUntilFailure': return 'keep-running'
 		case 'Precondition': return 'precondition'
+		// WHY its own glyph and not the generic decorator box: Breakpoint is a
+		// debugging aid, not tree logic, and the IDE breakpoint dot is the one
+		// mark every editor already taught people to read that way — see
+		// docs/behavior-tree-node-survey-2026-09-05.html.
+		case 'Breakpoint': return 'breakpoint'
 		default: return node.id.startsWith('Loop') ? 'loop' : 'generic'
 	}
 }
@@ -372,7 +392,13 @@ export interface BtSceneEdge {
 	id: string
 	kind: BtEdgeKind
 	points: BtPoint[]
-	/** Cubic curve through the points (py_trees splines) rather than a polyline. */
+	/**
+	 * Cubic curve through the points rather than a polyline. Two shapes: the
+	 * Blackboard lens's py_trees splines give the two endpoints only and let
+	 * `sceneSvg` infer a bend from the reading direction; the Tree view's
+	 * `curved` wire style is explicit about its own control points, giving
+	 * all four — p0, c1, c2, p3 — so no heuristic has to guess the axis.
+	 */
 	curve?: boolean
 	arrowEnd: boolean
 	from?: string

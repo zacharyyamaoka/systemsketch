@@ -3,12 +3,29 @@
  * or Fail on the first page; a searchable list of the registered skills, or
  * the control vocabulary, on the second. Keyboard: arrows move, Enter
  * chooses, Escape steps back then closes.
+ *
+ * WHY a real Radix `Popover.Content`, not a plain positioned `div`: the first
+ * version painted this menu inside the region's own `HTMLContainer`, which
+ * tldraw stacks BELOW its projected children — the menu sat under the very
+ * cards it was meant to add beside. Portaling through `useContainer()` fixes
+ * the z-order, but a hand-rolled portal also means hand-rolling outside-click
+ * dismissal, Escape, Tab trapping and focus return — all of which Radix's
+ * `Popover` already does, and which `BtInsertControl` (in
+ * `BehaviorTreeCanvas.tsx`) already gets for free from `TldrawUiPopover`'s
+ * `Popover.Root`/`Trigger`. This file owns only the `Popover.Content`: the
+ * tldraw wrapper (`TldrawUiPopoverContent`) doesn't expose `onEscapeKeyDown`,
+ * and the "Escape steps back before it closes" rule needs that hook — Radix's
+ * dismissable layer resolves Escape in a capture-phase listener that runs
+ * before any bubble handler here, so back-navigation has to live there, not
+ * in `onKeyDown` below.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Popover as RadixPopover } from 'radix-ui'
+import { useContainer } from 'tldraw'
 
 import { type BtDocument, type BtInsertTemplate, type BtNodeModel } from '../btcppXml'
 import { BtGlyphSvg } from '../btGlyphs'
-import { btGlyphFor, type BtPoint } from '../behaviorTreeModel'
+import { btGlyphFor } from '../behaviorTreeModel'
 
 type Page = 'root' | 'skills' | 'control'
 
@@ -53,26 +70,23 @@ function skillRows(document: BtDocument): MenuRow[] {
 	return rows
 }
 
-export function BtInsertMenu({ at, document, onChoose, onClose, openUpward }: {
-	at: BtPoint
+export function BtInsertMenu({ document, onChoose, openUpward }: {
 	document: BtDocument
 	onChoose(template: BtInsertTemplate): void
-	onClose(): void
 	/**
 	 * WHY: a "prepend before this node" insert (the recovery rail's turn-down
 	 * gap, the Start→root gap) always has its target node immediately BELOW
 	 * it and clear room above — the mirror of every other insert, whose
 	 * target is above and whose room is below. Opening downward there would
-	 * put the menu's own rows underneath a real Block shape's DOM, which
-	 * sits in a later, higher stacking position than this region's own
-	 * overlay: a click meant for a menu row lands on the node instead (see
-	 * `docs/peps/` for this project's tldraw-stock boundary — the fix is a
-	 * plain CSS flip, not a z-index fight with tldraw's own shape stacking).
-	 * `translateY(-100%)` anchors the menu's BOTTOM edge instead of its top,
-	 * so it grows upward regardless of its own content height.
+	 * drop the menu's rows over that node's own card; `side="top"` asks the
+	 * Radix popover to grow upward there instead (and Radix still
+	 * collision-flips either way, so a cramped canvas never clips the menu —
+	 * the portal already ended the old z-order fight with tldraw's own shape
+	 * stacking that the positioned-div version had to dodge).
 	 */
 	openUpward?: boolean
 }) {
+	const container = useContainer()
 	const [page, setPage] = useState<Page>('root')
 	const [query, setQuery] = useState('')
 	const [cursor, setCursor] = useState(0)
@@ -114,14 +128,9 @@ export function BtInsertMenu({ at, document, onChoose, onClose, openUpward }: {
 		}
 		if (row.template) onChoose(row.template)
 	}
+	// Root-page Escape is left to Radix's own dismiss (below); this only
+	// covers the arrow/Enter nav that Escape doesn't reach.
 	const onKeyDown = (event: React.KeyboardEvent) => {
-		if (event.key === 'Escape') {
-			event.preventDefault()
-			event.stopPropagation()
-			if (page === 'root') onClose()
-			else setPage('root')
-			return
-		}
 		if (event.key === 'ArrowDown') {
 			event.preventDefault()
 			setCursor((value) => Math.min(rows.length - 1, value + 1))
@@ -134,61 +143,71 @@ export function BtInsertMenu({ at, document, onChoose, onClose, openUpward }: {
 			if (row) activate(row)
 		}
 	}
+	// Capture-phase, ahead of `DismissableLayer`'s own Escape handling: on a
+	// sub-page this steps back and swallows the key so the popover stays
+	// open; on the root page it does nothing and Radix closes as usual.
+	const onEscapeKeyDown = (event: KeyboardEvent) => {
+		if (page === 'root') return
+		event.preventDefault()
+		setPage('root')
+	}
 
 	return (
-		<div
-			className="BehaviorTree-menu"
-			data-page={page}
-			role="menu"
-			aria-label="Add process"
-			data-testid="bt-insert-menu"
-			data-open-upward={openUpward || undefined}
-			style={openUpward
-				? { left: at.x - 16, top: at.y - 22, transform: 'translateY(-100%)' }
-				: { left: at.x - 16, top: at.y + 22 }}
-			onPointerDown={(event) => event.stopPropagation()}
-			onKeyDown={onKeyDown}
-			tabIndex={-1}
-			ref={(node) => { if (node && page === 'root') node.focus() }}
-		>
-			<div className="BehaviorTree-menuTitle">
-				{page === 'root' ? (
-					<><span className="BehaviorTree-menuTitleGlyph">＋</span>Add process</>
-				) : (
-					<button type="button" className="BehaviorTree-menuBack" onClick={() => setPage('root')} data-testid="bt-insert-back">‹ Back</button>
-				)}
-			</div>
-			{page === 'skills' ? (
-				<input
-					ref={searchRef}
-					className="BehaviorTree-menuSearch"
-					placeholder="Search"
-					value={query}
-					onChange={(event) => setQuery(event.target.value)}
-					data-testid="bt-insert-search"
-				/>
-			) : null}
-			<div className="BehaviorTree-menuRows">
-				{rows.map((row, index) => (
-					<button
-						type="button"
-						key={row.id}
-						className="BehaviorTree-menuRow"
-						role="menuitem"
-						data-active={index === cursor}
-						data-testid={`bt-insert-row-${row.id}`}
-						onMouseEnter={() => setCursor(index)}
-						onClick={() => activate(row)}
-					>
-						<span className="BehaviorTree-menuRowGlyph">{row.glyph ?? <span className="BehaviorTree-menuDot" />}</span>
-						<span className="BehaviorTree-menuRowLabel">{row.label}</span>
-						{row.detail ? <span className="BehaviorTree-menuRowDetail">{row.detail}</span> : null}
-						{row.page ? <span className="BehaviorTree-menuRowChevron">›</span> : null}
-					</button>
-				))}
-				{rows.length === 0 ? <div className="BehaviorTree-menuEmpty">Nothing matches</div> : null}
-			</div>
-		</div>
+		<RadixPopover.Portal container={container}>
+			<RadixPopover.Content
+				className="BehaviorTree-menu"
+				data-page={page}
+				role="menu"
+				aria-label="Add process"
+				data-testid="bt-insert-menu"
+				side={openUpward ? 'top' : 'bottom'}
+				data-open-upward={openUpward || undefined}
+				align="start"
+				sideOffset={8}
+				collisionPadding={12}
+				onPointerDown={(event) => event.stopPropagation()}
+				onKeyDown={onKeyDown}
+				onEscapeKeyDown={onEscapeKeyDown}
+			>
+				<div className="BehaviorTree-menuTitle">
+					{page === 'root' ? (
+						<><span className="BehaviorTree-menuTitleGlyph">＋</span>Add process</>
+					) : (
+						<button type="button" className="BehaviorTree-menuBack" onClick={() => setPage('root')} data-testid="bt-insert-back">‹ Back</button>
+					)}
+				</div>
+				{page === 'skills' ? (
+					<input
+						ref={searchRef}
+						className="BehaviorTree-menuSearch"
+						placeholder="Search"
+						value={query}
+						onChange={(event) => setQuery(event.target.value)}
+						data-testid="bt-insert-search"
+					/>
+				) : null}
+				<div className="BehaviorTree-menuRows">
+					{rows.map((row, index) => (
+						<button
+							type="button"
+							key={row.id}
+							className="BehaviorTree-menuRow"
+							role="menuitem"
+							data-active={index === cursor}
+							data-testid={`bt-insert-row-${row.id}`}
+							onMouseEnter={() => setCursor(index)}
+							onClick={() => activate(row)}
+						>
+							<span className="BehaviorTree-menuRowGlyph">{row.glyph ?? <span className="BehaviorTree-menuDot" />}</span>
+							<span className="BehaviorTree-menuRowLabel">{row.label}</span>
+							{row.detail ? <span className="BehaviorTree-menuRowDetail">{row.detail}</span> : null}
+							{row.page ? <span className="BehaviorTree-menuRowChevron">›</span> : null}
+						</button>
+					))}
+					{rows.length === 0 ? <div className="BehaviorTree-menuEmpty">Nothing matches</div> : null}
+				</div>
+			</RadixPopover.Content>
+		</RadixPopover.Portal>
 	)
 }
 

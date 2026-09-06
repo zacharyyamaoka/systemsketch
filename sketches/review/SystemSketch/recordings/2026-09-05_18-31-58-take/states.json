@@ -1,0 +1,6 @@
+{
+  "select": "node_modules/tldraw/dist-esm/lib/tools/SelectTool/SelectTool.mjs",
+  "idle": "node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/Idle.mjs",
+  "pointing_shape": "node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/PointingShape.mjs",
+  "pointing_canvas": "node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/PointingCanvas.mjs"
+}

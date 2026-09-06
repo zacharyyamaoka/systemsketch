@@ -86,6 +86,7 @@ describe('toolbar preference parsing', () => {
     expect(parseToolbarPreferences({ lastSystemTool: 'branch' }).lastSystemTool).toBe('branch')
     // The Loop joined the system family on 2026-09-03 and is now a valid value.
     expect(parseToolbarPreferences({ lastSystemTool: 'loop' }).lastSystemTool).toBe('loop')
+    expect(parseToolbarPreferences({ lastSystemTool: 'async-region' }).lastSystemTool).toBe('async-region')
   })
 
   it('falls back safely for corrupt storage values', () => {
@@ -93,4 +94,3 @@ describe('toolbar preference parsing', () => {
     expect(parseToolbarPreferences('not an object')).toBe(DEFAULT_TOOLBAR_PREFERENCES)
   })
 })
-

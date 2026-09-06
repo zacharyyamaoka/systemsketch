@@ -25,15 +25,18 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from release_lib import (
     PRODUCT,
+    FileAccessSettings,
     ReleaseError,
     controller_fingerprint,
     default_release_home,
     installed_launcher_path,
     project_metadata,
     read_channels,
+    read_file_access_settings,
     read_manifest,
     rollback_stable,
     source_mtime,
+    write_file_access_settings,
 )
 from recording_store import (
     FrameSidecar,
@@ -302,7 +305,13 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             try:
                 values = parse_qs(parsed.query).get("dir", [])
                 requested = values[0] if len(values) == 1 else None
-                self._json(list_documents(requested, self.app.files_root))
+                self._json(
+                    list_documents(
+                        requested,
+                        self.app.files_root,
+                        allow_any_path=self.app.file_access_settings().allow_any_path,
+                    )
+                )
             except WorkspacePathError as cause:
                 self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.BAD_REQUEST)
@@ -317,6 +326,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         values[0],
                         self.app.files_root,
                         additional_roots=self.app.additional_document_roots,
+                        allow_any_path=self.app.file_access_settings().allow_any_path,
                     )
                 )
             except FileNotFoundError:
@@ -335,6 +345,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         values[0],
                         self.app.files_root,
                         additional_roots=self.app.additional_document_roots,
+                        allow_any_path=self.app.file_access_settings().allow_any_path,
                     )
                 )
             except FileNotFoundError:
@@ -342,6 +353,13 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             except WorkspacePathError as cause:
                 self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.BAD_REQUEST)
+            return
+        if path == "/api/settings/file-access":
+            try:
+                self._json({"allowAnyPath": self.app.file_access_settings().allow_any_path})
+            except ReleaseError as cause:
+                self._record_exception(cause)
+                self._json({"error": str(cause)}, HTTPStatus.CONFLICT)
             return
         if path == "/":
             self.path = "/index.html"
@@ -359,6 +377,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             "/api/workspace/rename",
             "/api/workspace/trash",
             "/api/workspace/reveal",
+            "/api/settings/file-access",
         }:
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
             return
@@ -391,6 +410,16 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             if path == "/api/recordings":
                 self._json(self.app.save_recording(payload))
                 return
+            if path == "/api/settings/file-access":
+                raw_allow_any_path = payload.get("allowAnyPath")
+                if not isinstance(raw_allow_any_path, bool):
+                    raise ValueError("allowAnyPath must be a boolean")
+                write_file_access_settings(
+                    self.app.release_home, FileAccessSettings(allow_any_path=raw_allow_any_path)
+                )
+                self._json({"allowAnyPath": raw_allow_any_path})
+                return
+            allow_any_path = self.app.file_access_settings().allow_any_path
             if path == "/api/workspace/file":
                 base_digest = payload.get("baseDigest")
                 if base_digest is not None and not isinstance(base_digest, str):
@@ -404,13 +433,17 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         base_digest=base_digest,
                         force=payload.get("force") is True,
                         lock_root=self.app.workspace_lock_root,
+                        allow_any_path=allow_any_path,
                     )
                 )
                 return
             if path == "/api/workspace/directory":
                 self._json(
                     create_directory(
-                        payload.get("parent"), payload.get("name"), self.app.files_root
+                        payload.get("parent"),
+                        payload.get("name"),
+                        self.app.files_root,
+                        allow_any_path=allow_any_path,
                     )
                 )
                 return
@@ -428,6 +461,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                         lock_root=self.app.workspace_lock_root,
+                        allow_any_path=allow_any_path,
                     )
                 )
                 return
@@ -439,6 +473,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                         lock_root=self.app.workspace_lock_root,
+                        allow_any_path=allow_any_path,
                     )
                 )
                 return
@@ -558,11 +593,18 @@ class SystemSketchServer(ThreadingHTTPServer):
             "recorderFrames": self.frames.availability()[0],
         }
 
+    def file_access_settings(self) -> FileAccessSettings:
+        """Read fresh every call: Stable and Preview are separate processes
+        that both read/write this file, and a toggle in one must take effect
+        in the other without a restart."""
+        return read_file_access_settings(self.release_home)
+
     def reveal_document(self, raw_path: object) -> dict:
         path = resolve_document_path(
             raw_path,
             self.files_root,
             additional_roots=self.additional_document_roots,
+            allow_any_path=self.file_access_settings().allow_any_path,
         )
         target = path.parent
         opener = next((value for value in ("xdg-open", "gio") if shutil.which(value)), None)

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Real-browser proof for default, tuned, and flipped plain-wheel zoom. */
+/** Real-browser proof for stock canvas navigation and opt-in direct wheel zoom. */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -19,13 +19,15 @@ import {
 } from './browser_harness.mjs'
 
 const ASSETS = join(ROOT, 'docs', 'assets')
-const RESULTS = join(ASSETS, 'wheel-zoom-results.json')
-const BEFORE = join(ASSETS, 'wheel-zoom-before.png')
-const AFTER = join(ASSETS, 'wheel-zoom-after.png')
-const SETTING = join(ASSETS, 'wheel-zoom-direction-setting.png')
-const FLIPPED = join(ASSETS, 'wheel-zoom-flipped.png')
-const SENSITIVITY_SETTING = join(ASSETS, 'wheel-zoom-sensitivity-setting.png')
-const TUNED = join(ASSETS, 'wheel-zoom-tuned.png')
+const RESULTS = join(ASSETS, 'canvas-navigation-controls-results.json')
+const STOCK = join(ASSETS, 'canvas-navigation-stock.png')
+const PAN = join(ASSETS, 'canvas-navigation-pan.png')
+const MODIFIER_ZOOM = join(ASSETS, 'canvas-navigation-modifier-zoom.png')
+const DEFAULT_SETTING = join(ASSETS, 'canvas-navigation-default-setting.png')
+const DIRECT_SETTING = join(ASSETS, 'canvas-navigation-direct-setting.png')
+const DIRECT = join(ASSETS, 'canvas-navigation-direct-zoom.png')
+const DIRECT_MODIFIER = join(ASSETS, 'canvas-navigation-direct-modifier-zoom.png')
+const RESTORED = join(ASSETS, 'canvas-navigation-restored.png')
 
 const { checks, pass } = makeChecklist()
 
@@ -49,6 +51,18 @@ async function screenshot(page, path) {
   await writeFile(path, Buffer.from(capture.data, 'base64'))
 }
 
+async function wheel(page, { ctrl = false, deltaY = 120 } = {}) {
+  await page.send('Input.dispatchMouseEvent', {
+    type: 'mouseWheel',
+    x: 640,
+    y: 440,
+    deltaX: 0,
+    deltaY,
+    modifiers: ctrl ? 2 : 0,
+  })
+  await delay(500)
+}
+
 async function openCanvasSettings(page) {
   await waitFor(page, `document.querySelector('[data-testid="main-menu.button"]')`, 'the main menu button')
   await clickElement(page, '[data-testid="main-menu.button"]')
@@ -57,11 +71,16 @@ async function openCanvasSettings(page) {
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog')
   await clickElement(page, '[data-testid="systemsketch-settings-category-appearance"]')
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-theme-list"]')`, 'the Appearance settings')
-  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')`, 'Wheel zoom to stay out of Appearance')
+  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')`, 'Canvas controls to stay out of Appearance')
   await clickElement(page, '[data-testid="systemsketch-settings-category-canvas"]')
-  await waitFor(page, `document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')`, 'the wheel sensitivity preference')
-  await evaluate(page, `document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity-control"]')?.scrollIntoView({ block: 'center' })`)
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')`, 'the direct-wheel preference')
+  await evaluate(page, `document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')?.scrollIntoView({ block: 'center' })`)
   await delay(180)
+}
+
+async function closeSettings(page) {
+  await clickElement(page, '.systemsketch-settings__header .tlui-button')
+  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog to close')
 }
 
 async function setSensitivity(page, percent) {
@@ -74,193 +93,157 @@ async function setSensitivity(page, percent) {
   })()`)
 }
 
-async function closeSettings(page) {
-  await clickElement(page, '.systemsketch-settings__header .tlui-button')
-  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog to close')
-}
-
 async function main() {
-  process.stdout.write('  SETUP starting isolated app\n')
-  const app = await startApp({ label: 'wheel-zoom', build: 'wheel-zoom-smoke', width: 1280, height: 820 })
+  const app = await startApp({ label: 'canvas-navigation', build: 'canvas-navigation-smoke', width: 1280, height: 820 })
   try {
-    const board = join(app.filesRoot, 'SystemSketch', 'wheel-zoom.systemsketch')
-    process.stdout.write('  SETUP opening scratch board\n')
+    const board = join(app.filesRoot, 'SystemSketch', 'canvas-navigation.systemsketch')
     await openApp(app.page, app.port, `?board=${encodeURIComponent(board)}`)
     await waitFor(app.page, 'window.__systemsketch?.editor', 'the SystemSketch editor')
 
-    // Seed visible scale cues through stock shape interaction, not through the model seam.
-    process.stdout.write('  SETUP drawing scale cue\n')
+    // Seed an on-board scale cue through the public tool interaction, not the model.
     await key(app.page, 'r', 'KeyR')
     await drag(app.page, { x: 390, y: 270 }, { x: 860, y: 610 })
     await key(app.page, 'Escape', 'Escape')
     await waitFor(
       app.page,
       `document.querySelector('.systemsketch-file-title i')?.dataset.state === 'clean'`,
-      'the scale cue autosave before remount',
+      'the scale cue autosave before navigation proof',
     )
 
-    // Reproduce the saved setting that overrides tldraw camera options, then
-    // prove a fresh SystemSketch mount takes the wheel contract back.
-    process.stdout.write('  SETUP reproducing stale Trackpad mode\n')
-    await evaluate(app.page, `window.__systemsketch.editor.user.updateUserPreferences({ inputMode: 'trackpad' })`)
-    process.stdout.write('  SETUP remounting scratch board\n')
+    // A previous direct-wheel session may have left tldraw's global preference
+    // in mouse mode. The product default must explicitly restore stock pan.
+    await evaluate(app.page, `window.__systemsketch.editor.user.updateUserPreferences({ inputMode: 'mouse' })`)
     await app.page.send('Page.reload', { ignoreCache: true })
     await waitFor(
       app.page,
-      `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'mouse'
-        && window.__systemsketch?.editor?.user.getUserPreferences().isZoomDirectionInverted === true`,
-      'the reloaded SystemSketch wheel contract',
+      `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'trackpad'`,
+      'the reloaded stock navigation contract',
     )
     await delay(350)
 
-    const before = await cameraState(app.page)
-    assert.equal(before.wheelBehavior, 'zoom')
-    pass('the mounted stock camera declares plain-wheel zoom behavior')
-    assert.equal(before.zoomSpeed, 1)
-    pass('first run keeps tldraw’s standard wheel zoom sensitivity')
-    assert.equal(before.inputMode, 'mouse')
-    pass('a stale Trackpad preference cannot override wheel zoom after remount')
-    assert.equal(before.isZoomDirectionInverted, true)
-    assert.equal(before.appearance, null)
-    pass('scroll down to zoom in is the first-run default')
-    await screenshot(app.page, BEFORE)
+    const stockBefore = await cameraState(app.page)
+    assert.equal(stockBefore.wheelBehavior, 'pan')
+    assert.equal(stockBefore.zoomSpeed, 1)
+    assert.equal(stockBefore.inputMode, 'trackpad')
+    assert.equal(stockBefore.appearance, null)
+    pass('first run restores stock wheel pan with standard Ctrl/Cmd zoom gain and no app preference')
+    await screenshot(app.page, STOCK)
 
-    await app.page.send('Input.dispatchMouseEvent', {
-      type: 'mouseWheel',
-      x: 640,
-      y: 440,
-      deltaX: 0,
-      deltaY: 120,
-      modifiers: 0,
-    })
-    await delay(500)
+    await wheel(app.page)
+    const panned = await cameraState(app.page)
+    assert.notEqual(panned.camera.y, stockBefore.camera.y)
+    assert.equal(panned.camera.z, stockBefore.camera.z)
+    assert.equal(panned.zoomLabel, stockBefore.zoomLabel)
+    pass('a plain scroll changes page position but leaves the scale unchanged')
+    await screenshot(app.page, PAN)
 
-    const after = await cameraState(app.page)
-    assert.ok(after.camera.z > before.camera.z)
-    pass(`a plain scroll-down gesture zooms in (${before.camera.z.toFixed(2)} → ${after.camera.z.toFixed(2)})`)
-    assert.notEqual(after.zoomLabel, before.zoomLabel)
-    pass(`the visible zoom readout follows the gesture (${before.zoomLabel} → ${after.zoomLabel})`)
-    await screenshot(app.page, AFTER)
+    await wheel(app.page, { ctrl: true })
+    const modifierZoomed = await cameraState(app.page)
+    assert.notEqual(modifierZoomed.camera.z, panned.camera.z)
+    pass('Ctrl/Cmd + scroll changes the stock camera scale')
+    await screenshot(app.page, MODIFIER_ZOOM)
 
     await openCanvasSettings(app.page)
-    const checked = await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-scroll-down-zooms-in"]')?.getAttribute('aria-checked')`)
-    assert.equal(checked, 'true')
-    pass('Canvas settings expose the enabled Scroll down to zoom in default')
-    const standardSensitivity = await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')?.value`)
-    assert.equal(standardSensitivity, '100')
-    pass('Canvas settings expose standard wheel sensitivity as 100%')
-    await screenshot(app.page, SETTING)
+    const initialToggle = await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')?.getAttribute('aria-checked')`)
+    assert.equal(initialToggle, 'false')
+    assert.equal(await evaluate(app.page, `Boolean(document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]'))`), false)
+    assert.equal(await evaluate(app.page, `Boolean(document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]'))`), false)
+    pass('Canvas says Direct wheel zoom is off and keeps direct-only controls out of the way')
+    await screenshot(app.page, DEFAULT_SETTING)
 
+    await clickElement(app.page, '[data-testid="systemsketch-direct-wheel-zoom"]')
+    await waitFor(
+      app.page,
+      `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'mouse'
+        && document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')`,
+      'direct wheel zoom and its controls',
+    )
+    const enabled = await cameraState(app.page)
+    assert.equal(enabled.wheelBehavior, 'zoom')
+    assert.equal(enabled.zoomSpeed, 1)
+    assert.equal(enabled.appearance.directWheelZoom, true)
+    assert.equal(await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.getAttribute('aria-checked')`), 'false')
+    pass('enabling Direct wheel zoom switches the live stock camera and reveals the optional modifier inversion')
+
+    await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(180)
+    await clickElement(app.page, '[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')
+    await waitFor(
+      app.page,
+      `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.getAttribute('aria-checked') === 'true'`,
+      'the modifier inversion switch to turn on',
+    )
+    assert.equal(
+      await evaluate(app.page, `JSON.parse(localStorage.getItem('systemsketch.appearance.v1'))?.modifierWheelZoomsOppositely`),
+      true,
+      'the modifier inversion preference should persist',
+    )
+    pass('Canvas can opt Ctrl/Cmd + scroll into the opposite direct-zoom direction')
+    await screenshot(app.page, DIRECT_SETTING)
+    await closeSettings(app.page)
+
+    const directBefore = await cameraState(app.page)
+    await wheel(app.page)
+    const directAfter = await cameraState(app.page)
+    assert.ok(directAfter.camera.z > directBefore.camera.z)
+    pass('with direct mode enabled, a plain scroll-down zooms in')
+    await screenshot(app.page, DIRECT)
+
+    await wheel(app.page, { ctrl: true })
+    const directModifierZoomed = await cameraState(app.page)
+    assert.ok(
+      directModifierZoomed.camera.z < directAfter.camera.z,
+      `expected Ctrl/Cmd down to zoom out: ${JSON.stringify({ directAfter, directModifierZoomed })}`,
+    )
+    pass('with the option enabled, Ctrl/Cmd + scroll-down zooms out instead of panning')
+    await screenshot(app.page, DIRECT_MODIFIER)
+
+    await wheel(app.page, { ctrl: true, deltaY: -120 })
+    const modifierReverse = await cameraState(app.page)
+    assert.ok(modifierReverse.camera.z > directModifierZoomed.camera.z)
+    pass('Ctrl/Cmd + scroll-up zooms in, opposite the direct wheel convention')
+
+    await openCanvasSettings(app.page)
     await setSensitivity(app.page, 150)
+    await waitFor(app.page, `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 1.5`, 'the direct 150% sensitivity')
+    await clickElement(app.page, '[data-testid="systemsketch-direct-wheel-zoom"]')
     await waitFor(
       app.page,
-      `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 1.5`,
-      'the live 150% wheel sensitivity',
+      `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'trackpad'
+        && window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 1
+        && !document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')`,
+      'the restored stock navigation contract',
     )
-    const tunedSetting = await cameraState(app.page)
-    assert.equal(tunedSetting.appearance.wheelZoomSensitivityPercent, 150)
-    pass('changing sensitivity updates the live stock zoomSpeed and local storage')
-    await screenshot(app.page, SENSITIVITY_SETTING)
+    const restored = await cameraState(app.page)
+    assert.equal(restored.appearance.directWheelZoom, false)
+    pass('turning direct mode back off restores pan, hides its tuning controls, and resets modifier zoom to stock gain')
+    await screenshot(app.page, RESTORED)
     await closeSettings(app.page)
-
-    const tunedBefore = await cameraState(app.page)
-    await app.page.send('Input.dispatchMouseEvent', {
-      type: 'mouseWheel',
-      x: 640,
-      y: 440,
-      deltaX: 0,
-      deltaY: 120,
-      modifiers: 0,
-    })
-    await delay(500)
-    const tunedAfter = await cameraState(app.page)
-    const tunedGain = tunedAfter.camera.z / tunedBefore.camera.z - 1
-    assert.ok(Math.abs(tunedGain - 0.15) < 0.0001)
-    pass(`150% sensitivity makes one scroll step 15% (${tunedBefore.camera.z.toFixed(3)} → ${tunedAfter.camera.z.toFixed(3)})`)
-    await screenshot(app.page, TUNED)
-
-    await openCanvasSettings(app.page)
-    await setSensitivity(app.page, 75)
-    await waitFor(
-      app.page,
-      `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 0.75`,
-      'the live 75% wheel sensitivity',
-    )
-    await closeSettings(app.page)
-    await app.page.send('Page.reload', { ignoreCache: true })
-    // Let the dev-only React remount settle before sampling evidence; the
-    // first editor instance can satisfy the predicate immediately before its
-    // StrictMode cleanup clears the debug handle.
-    await delay(300)
-    await waitFor(
-      app.page,
-      `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 0.75
-        && document.querySelector('.systemsketch-utility-strip .tlui-zoom-menu__button')`,
-      'the persisted 75% wheel sensitivity',
-    )
-    const reloadedSensitivity = await cameraState(app.page)
-    assert.equal(reloadedSensitivity.zoomSpeed, 0.75)
-    assert.equal(reloadedSensitivity.appearance.wheelZoomSensitivityPercent, 75)
-    pass('a tuned sensitivity survives a full reload')
-
-    await openCanvasSettings(app.page)
-    await clickElement(app.page, '.systemsketch-settings__sensitivity-reset')
-    await waitFor(
-      app.page,
-      `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 1`,
-      'the restored standard wheel sensitivity',
-    )
-    pass('Reset to standard restores tldraw’s 100% wheel sensitivity')
-
-    await clickElement(app.page, '[data-testid="systemsketch-scroll-down-zooms-in"]')
-    await waitFor(
-      app.page,
-      `window.__systemsketch?.editor?.user.getUserPreferences().isZoomDirectionInverted === false`,
-      'the flipped live wheel direction',
-    )
-    const switched = await cameraState(app.page)
-    assert.equal(switched.appearance.scrollDownZoomsIn, false)
-    pass('flipping the setting updates the live stock camera preference and local storage')
-    await closeSettings(app.page)
-
-    const flippedBefore = await cameraState(app.page)
-    await app.page.send('Input.dispatchMouseEvent', {
-      type: 'mouseWheel',
-      x: 640,
-      y: 440,
-      deltaX: 0,
-      deltaY: -120,
-      modifiers: 0,
-    })
-    await delay(500)
-    const flippedAfter = await cameraState(app.page)
-    assert.ok(flippedAfter.camera.z > flippedBefore.camera.z)
-    pass(`after the flip, a plain scroll-up gesture zooms in (${flippedBefore.camera.z.toFixed(2)} → ${flippedAfter.camera.z.toFixed(2)})`)
-    await screenshot(app.page, FLIPPED)
 
     await app.page.send('Page.reload', { ignoreCache: true })
     await waitFor(
       app.page,
-      `window.__systemsketch?.editor?.user.getUserPreferences().isZoomDirectionInverted === false`,
-      'the persisted flipped wheel direction',
+      `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'trackpad'
+        && JSON.parse(localStorage.getItem('systemsketch.appearance.v1')).directWheelZoom === false`,
+      'the persisted restored stock navigation mode',
     )
-    pass('the flipped direction survives a full reload')
+    pass('stock navigation survives a full reload after opting out of direct zoom')
 
     const errors = localConsoleErrors(app.page)
     assert.deepEqual(errors, [])
-    pass('the wheel journey emits no local console errors')
+    pass('the canvas navigation journey emits no local console errors')
 
     await writeFile(RESULTS, `${JSON.stringify({
       ranAt: new Date().toISOString(),
-      before,
-      after,
-      tunedSetting,
-      tunedBefore,
-      tunedAfter,
-      reloadedSensitivity,
-      switched,
-      flippedBefore,
-      flippedAfter,
+      stockBefore,
+      panned,
+      directModifierZoomed,
+      enabled,
+      directBefore,
+      directAfter,
+      modifierZoomed,
+      modifierReverse,
+      restored,
       checks,
     }, null, 2)}\n`)
     process.stdout.write(`\n${checks.length} checks passed · ${RESULTS}\n`)

@@ -128,15 +128,9 @@
     },
     {
       "id": "L7",
-      "label": "a delayed cable paints dashes; a data cable paints none",
-      "observed": [
-        true,
-        true
-      ],
-      "desired": [
-        true,
-        true
-      ],
+      "label": "a delayed cable and a data cable paint two distinct dash cadences",
+      "observed": 2,
+      "desired": 2,
       "ok": true
     },
     {

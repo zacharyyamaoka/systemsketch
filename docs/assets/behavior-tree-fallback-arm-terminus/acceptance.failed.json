@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-06T11:52:28.370Z",
-  "passed": 9,
-  "total": 10,
+  "generatedAt": "2026-09-06T23:38:21.049Z",
+  "passed": 7,
+  "total": 7,
   "results": [
     {
       "id": "setup.projection",
@@ -48,31 +48,10 @@
     {
       "id": "lane-end.stays-hover-only-on-longer-chain",
       "label": "the terminus insert stays hidden at rest once the arm already has a Sequence",
-      "observed": 1,
+      "observed": 0,
       "desired": 0,
-      "ok": false
-    },
-    {
-      "id": "lane-end.grows-in-place",
-      "label": "the second append lands inside the same Sequence — no nested Sequence(Sequence(...))",
-      "observed": true,
-      "desired": true,
-      "ok": true
-    },
-    {
-      "id": "lane-end.no-nested-sequence",
-      "label": "never a Sequence directly inside another",
-      "observed": false,
-      "desired": false,
-      "ok": true
-    },
-    {
-      "id": "console",
-      "label": "no local console errors",
-      "observed": [],
-      "desired": [],
       "ok": true
     }
   ],
-  "aborted": null
+  "aborted": "Error: Missing element [data-testid=\"bt-insert-row-skills\"]"
 }

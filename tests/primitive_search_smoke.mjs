@@ -24,6 +24,7 @@ import {
 
 const SHOTS = join(ROOT, 'docs', 'assets')
 const OUT = join(SHOTS, 'primitive-search-smoke.json')
+const SCALE_EVIDENCE = join(SHOTS, 'primitive-search-cursor-160-2026-09-06.json')
 const FIXTURE = join(ROOT, 'sketches', 'review', 'primitive-search.systemsketch')
 const { checks, pass } = makeChecklist()
 
@@ -35,17 +36,35 @@ async function screenshot(page, name) {
 async function geometry(page) {
   return JSON.parse(await evaluate(page, `(() => {
     const search = document.querySelector('[data-testid="systemsketch-primitive-search"]')
+    const target = document.querySelector('.systemsketch-primitive-search__target')
     const toolbar = document.querySelector('[data-testid="systemsketch-tool-library"]')?.closest('.tlui-main-toolbar')
     const rect = search?.getBoundingClientRect()
+    const targetRect = target?.getBoundingClientRect()
     const toolbarRect = toolbar?.getBoundingClientRect()
     return JSON.stringify({
       search: rect && { x: rect.x, y: rect.y, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      target: targetRect && { x: targetRect.x + targetRect.width / 2, y: targetRect.y + targetRect.height / 2 },
       toolbarTop: toolbarRect?.top ?? innerHeight,
       viewport: { width: innerWidth, height: innerHeight },
       horizontal: search?.dataset.horizontal,
       vertical: search?.dataset.vertical,
     })
   })()`))
+}
+
+/**
+ * Reboot under the persisted preference so React's scale hook and the CSS
+ * coordinate system agree. Writing only the CSS variables can prove the
+ * cancellation layer, but it cannot exercise the scale-aware placement input.
+ */
+async function reopenAtInterfaceScale(page, percent) {
+  await evaluate(page, `(() => {
+    localStorage.setItem('systemsketch.interface-scale.v1', JSON.stringify({ version: 1, percent: ${percent} }))
+  })()`)
+  await page.send('Page.reload')
+  await waitFor(page, `document.querySelector('[data-interface-scale="${percent}"]')`, `${percent}% interface scale`)
+  await waitFor(page, `window.__systemsketch?.editor`, 'reloaded product canvas')
+  await delay(300)
 }
 
 async function main() {
@@ -85,7 +104,7 @@ async function main() {
     await shortcut(page, 's', 'KeyS')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'S primitive search')
     assert.equal(await evaluate(page,
-      `document.activeElement?.getAttribute('aria-label')`), 'Search primitives')
+      `document.activeElement?.getAttribute('aria-label')`), 'Search tools')
     const initial = await geometry(page)
     assert.ok(initial.search.width <= 304 && initial.search.height < 100)
     assert.ok(initial.search.x >= point.x && initial.search.y >= point.y)
@@ -154,14 +173,42 @@ async function main() {
     await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(drawn.id)})`, 'one-step drawing undo')
     pass('ArrowDown + Enter arms the real Curved arrow tool without inserting; the following canvas drag draws it, and one Undo removes it')
 
-    await clickElement(page, '[title="Shapes library"]')
-    await waitFor(page, `document.querySelector('[data-testid="systemsketch-left-popout"] input[aria-label="Search shapes"]')`, 'library search input')
-    await clickElement(page, '[data-testid="systemsketch-left-popout"] input[aria-label="Search shapes"]')
+    const toolbarToolNames = [
+      'Cursor', 'Frame',
+      'Block', 'Branch', 'Loop', 'Behavior Tree', 'Code', 'Pill', 'Type', 'Callout',
+      'Rectangle', 'Ellipse', 'Triangle', 'Diamond', 'Line',
+      'Straight arrow', 'Curved arrow', 'Elbow arrow',
+      'Pen', 'Highlighter', 'Text',
+    ]
+    for (const label of toolbarToolNames) {
+      await evaluate(page, `(() => { window.__systemsketch.editor.focus(); return true })()`)
+      await shortcut(page, 's', 'KeyS')
+      await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, `${label} tool search`)
+      await typeSlowly(page, label)
+      await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"] [data-library-item]')`, `${label} search result`)
+      const first = await evaluate(page,
+        `document.querySelector('[data-testid="systemsketch-primitive-search"] [data-library-item] strong')?.textContent`)
+      assert.equal(first, label, `${label} should be the literal-first S-search result`)
+      if (label === 'Type') {
+        await screenshot(page, 'primitive-search-toolbar-tools-2026-09-06.png')
+        await key(page, 'Enter', 'Enter')
+        await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'Type tool search closing')
+        assert.equal(await evaluate(page, `window.__systemsketch.editor.getCurrentToolId()`), 'type')
+      } else {
+        await key(page, 'Escape', 'Escape')
+        await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, `${label} tool search closing`)
+      }
+    }
+    pass('S finds every visible toolbar tool by its displayed name; Type ranks ahead of Text and arms the registered Type tool')
+
+    await clickElement(page, '[data-testid="systemsketch-tool-library"]')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-library-panel"] input[aria-label="Search shapes"]')`, 'library search input')
+    await clickElement(page, '[data-testid="systemsketch-library-panel"] input[aria-label="Search shapes"]')
     await shortcut(page, 's', 'KeyS')
     assert.equal(await evaluate(page,
       `Boolean(document.querySelector('[data-testid="systemsketch-primitive-search"]'))`), false)
     pass('S remains ordinary typing while a library input owns focus')
-    await clickElement(page, '[aria-label="Close shapes library"]')
+    await clickElement(page, '[title="Close library"]')
 
     await shortcut(page, 'p', 'KeyP', 2)
     await waitFor(page, `document.querySelector('.systemsketch-command-palette')`, 'existing command palette')
@@ -188,6 +235,33 @@ async function main() {
     assert.ok(cornerGeometry.search.y >= 0 && cornerGeometry.search.bottom < cornerGeometry.toolbarTop)
     await screenshot(page, 'primitive-search-corner-2026-09-04.png')
     pass('the result stack flips above-left at the corner and stays inside the canvas above the toolbar')
+
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'corner search closing')
+    await reopenAtInterfaceScale(page, 160)
+    const scaledPointer = { x: 540, y: 360 }
+    await mouse(page, 'mouseMoved', scaledPointer.x, scaledPointer.y)
+    await evaluate(page, `(() => { window.__systemsketch.editor.focus(); return true })()`)
+    await shortcut(page, 's', 'KeyS')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'scaled primitive search')
+    const scaledGeometry = await geometry(page)
+    assert.ok(Math.abs(scaledGeometry.target.x - scaledPointer.x) <= 2)
+    assert.ok(Math.abs(scaledGeometry.target.y - scaledPointer.y) <= 2)
+    assert.ok(scaledGeometry.search.x >= scaledPointer.x && scaledGeometry.search.y >= scaledPointer.y)
+    assert.ok(scaledGeometry.search.right <= scaledGeometry.viewport.width)
+    assert.ok(scaledGeometry.search.bottom < scaledGeometry.toolbarTop)
+    assert.ok(scaledGeometry.search.width >= 480)
+    await writeFile(SCALE_EVIDENCE, JSON.stringify({
+      interfaceScale: 160,
+      pointer: scaledPointer,
+      targetCenter: scaledGeometry.target,
+      panel: scaledGeometry.search,
+      viewport: scaledGeometry.viewport,
+      toolbarTop: scaledGeometry.toolbarTop,
+    }, null, 2))
+    await screenshot(page, 'primitive-search-cursor-160-2026-09-06.png')
+    pass('at 160% interface scale, the search target and panel still open beside the pointer in canvas pixels')
+    await key(page, 'Escape', 'Escape')
 
     const errors = localConsoleErrors(page)
     assert.deepEqual(errors, [])

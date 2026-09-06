@@ -240,7 +240,10 @@ async function main() {
     assert.equal(calm.statedLabels, 0, 'an ordinary board has no stated rows')
     assert.equal(calm.badge, null, 'an ordinary Block wears no diff badge')
     assert.equal(calm.liveCable.state, null, 'an ordinary cable writes no diff state')
-    assert.equal(calm.liveCable.dash, null, 'an ordinary cable is not dashed')
+    // WHY: `'5'` replaces the old `null` — 2026-09-05's always-on marching-ants
+    // cadence for a plain `data` cable (DataCablePath in ConnectionShapeUtil.tsx).
+    // Still no DIFF dash: `diffCableDashArray` only fires on a `removed` cable.
+    assert.equal(calm.liveCable.dash, '5', "an ordinary cable carries the data cable's own marching dash, not a diff dash")
     await capture(app.page, CALM_SHOT)
     pass('a board with no lens on it paints exactly what it painted before')
 
@@ -343,7 +346,9 @@ async function main() {
       Number(marked.ghostCable.opacity) < 1,
       `a ghost cable is set back (opacity ${marked.ghostCable.opacity})`,
     )
-    assert.equal(marked.liveCable.dash, null, 'the live cable beside it is untouched')
+    // WHY: `'5'` replaces `null` — the live cable's own marching-ants dash
+    // (2026-09-05, always on for `data` cables), untouched by the diff lens.
+    assert.equal(marked.liveCable.dash, '5', 'the live cable beside it is untouched')
     assert.equal(marked.liveCable.state, null)
     assert.notEqual(marked.ghostCable.stroke, marked.liveCable.stroke,
       'a ghost cable is not the ink of a live one')

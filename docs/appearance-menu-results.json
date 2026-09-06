@@ -20,6 +20,10 @@
   "ok": true
  },
  {
+  "label": "the three fills are three visibly different things, in both directions",
+  "ok": true
+ },
+ {
   "label": "Custom opens FigJam's 184x310 picker flush under the palette, on the current colour",
   "ok": true
  },
@@ -40,11 +44,11 @@
   "ok": true
  },
  {
-  "label": "a shape's Line style is a row of labelled chips offering every dash the document can hold",
+  "label": "a shape's Line style holds the chips over a palette of its own, and async paints the cable cadence",
   "ok": true
  },
  {
-  "label": "Font size lists each rung at its own size and names the chosen one on its trigger; Typeface keeps Aa",
+  "label": "Typeface is the shared registered Aa + one-label list, composed into the shape recipe",
   "ok": true
  },
  {
@@ -73,6 +77,18 @@
  },
  {
   "label": "a Block selected beside a shape keeps the shape's appearance reachable without a count summary",
+  "ok": true
+ },
+ {
+  "label": "a disagreeing selection shows mixed faces, never the Automatic badge (the two-A pill)",
+  "ok": true
+ },
+ {
+  "label": "a freehand stroke keeps its Line style control instead of silently losing it to the recipe",
+  "ok": true
+ },
+ {
+  "label": "every connector kind composes ONE Line shape control that reads, writes and undoes all of them",
   "ok": true
  },
  {

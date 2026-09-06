@@ -11,6 +11,11 @@
   align-items: stretch;
 }
 
+.systemsketch-contextual-controls__group {
+  display: flex;
+  align-items: stretch;
+}
+
 /* A trigger is 56px: the 24px icon butted against the 16px chevron, 8px
  * either side. The colour trigger comes to 54px because its 18px swatch sits
  * in a 22px ring box instead of a 24px icon. */
@@ -57,6 +62,44 @@
 .systemsketch-appearance__trigger:hover,
 .systemsketch-appearance__trigger[data-state='open'] {
   background: #383838;
+}
+
+.systemsketch-appearance__toggle {
+  width: 40px;
+  flex: 0 0 40px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+}
+
+.systemsketch-appearance__toggle[aria-pressed='true'] {
+  background: var(--ss-accent);
+}
+
+/* WHY: a value-preview trigger with no shared value must not show one option's
+ * crisp glyph as if it were chosen — the colour swatch already has its own
+ * mixed face, so the drawn glyphs fade the same claim down. Fixed-icon
+ * triggers (data-trigger='icon') stay solid: their icon names the control,
+ * not a value. */
+.systemsketch-appearance__trigger[data-mixed][data-trigger='value'] .systemsketch-appearance__glyph {
+  opacity: 0.4;
+}
+
+.systemsketch-appearance__automatic {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  color: currentcolor;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.systemsketch-appearance__panel[data-layout='swatches']
+  .systemsketch-appearance__option[aria-checked='true'] > .systemsketch-appearance__automatic {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--ss-accent);
 }
 
 .systemsketch-appearance__chevron {

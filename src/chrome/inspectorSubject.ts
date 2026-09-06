@@ -13,7 +13,7 @@
  */
 import type { Editor } from 'tldraw'
 
-export type InspectorSubject = 'block' | 'branch' | 'loop' | 'behaviorTree' | 'connection' | 'shape' | 'empty'
+export type InspectorSubject = 'block' | 'branch' | 'loop' | 'behaviorTree' | 'port' | 'connection' | 'shape' | 'empty'
 
 /**
  * The panels that render their own close button — `BlockInspectorContent`'s tab
@@ -29,6 +29,7 @@ export function inspectorSubjectOwnsHeader(subject: InspectorSubject): boolean {
 
 export function inspectorSubjectTitle(subject: InspectorSubject): string {
   switch (subject) {
+    case 'port': return 'Port'
     case 'connection': return 'Connection'
     case 'shape': return 'Selection'
     case 'empty': return 'Inspector'
@@ -41,6 +42,8 @@ export interface InspectorSubjectInputs {
   hasBranch: boolean
   /** A Loop is the only thing selected. */
   hasLoop: boolean
+  /** A free Port is the only selected shape. */
+  hasPort: boolean
   /** A Behavior Tree region, or one of its projected nodes, is the only thing selected. */
   hasBehaviorTree?: boolean
   /** The Block lens has something to say: a Block, a batch, or the armed tool. */
@@ -64,6 +67,7 @@ export function resolveInspectorSubject(inputs: InspectorSubjectInputs): Inspect
   // A projected leaf is a Block, but its truth is the tree's XML, so the
   // tree's panel wins over the Block lens for it.
   if (inputs.hasBehaviorTree) return 'behaviorTree'
+  if (inputs.hasPort) return 'port'
   if (!inputs.hasBlockContext && inputs.hasConnection) return 'connection'
   if (inputs.hasBlockContext) return 'block'
   return inputs.hasSelection ? 'shape' : 'empty'
@@ -72,6 +76,7 @@ export function resolveInspectorSubject(inputs: InspectorSubjectInputs): Inspect
 export interface InspectorSubjectReader {
   getOnlySelectedBranch(editor: Editor): unknown
   getOnlySelectedLoop(editor: Editor): unknown
+  getOnlySelectedFloatingPort(editor: Editor): unknown
   getSelectedBehaviorTree?(editor: Editor): unknown
   getBlockInspectorContextKind(editor: Editor): string
   getConnectionInspectorContext(editor: Editor): unknown
@@ -85,6 +90,7 @@ export function readInspectorSubject(
   return resolveInspectorSubject({
     hasBranch: Boolean(reader.getOnlySelectedBranch(editor)),
     hasLoop: Boolean(reader.getOnlySelectedLoop(editor)),
+    hasPort: Boolean(reader.getOnlySelectedFloatingPort(editor)),
     hasBehaviorTree: Boolean(reader.getSelectedBehaviorTree?.(editor)),
     hasBlockContext: reader.getBlockInspectorContextKind(editor) !== 'empty',
     hasConnection: reader.getConnectionInspectorContext(editor) !== null,

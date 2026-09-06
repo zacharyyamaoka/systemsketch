@@ -1,0 +1,191 @@
+{
+  "feature": "Chevron placement and indent-guide styling, informed by prior art",
+  "viewport": { "width": 2000, "height": 1350 },
+  "shapes": [
+    {
+      "id": "pose",
+      "type": "block",
+      "x": -440,
+      "y": 280,
+      "props": {
+        "title": "Pose",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "x: Pose\ny: float = 10\nz: float"
+      }
+    },
+    {
+      "id": "v1",
+      "type": "block",
+      "x": 40,
+      "y": 280,
+      "props": {
+        "title": "V1 (trailing, accent rail)",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 1 }
+    },
+    {
+      "id": "alta",
+      "type": "block",
+      "x": 520,
+      "y": 280,
+      "props": {
+        "title": "AltA (leading, accent rail)",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 6 }
+    },
+    {
+      "id": "altb",
+      "type": "block",
+      "x": 1000,
+      "y": 280,
+      "props": {
+        "title": "AltB (trailing, dotted)",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 7 }
+    },
+    {
+      "id": "priorart",
+      "type": "block",
+      "x": 40,
+      "y": 700,
+      "props": {
+        "title": "Prior Art (recommended)",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 8 }
+    },
+    {
+      "id": "hoverreveal",
+      "type": "block",
+      "x": 520,
+      "y": 700,
+      "props": {
+        "title": "Hover Reveal",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 9 }
+    },
+    {
+      "id": "dottoggle",
+      "type": "block",
+      "x": 1000,
+      "y": 700,
+      "props": {
+        "title": "Dot Toggle",
+        "blockType": "type",
+        "view": "port",
+        "w": 360,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 10 }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Original pick: trailing chevron, accent-tinted rail. Expand \"pose: Pose\" to compare against the rest of this row.",
+      "x": 40,
+      "y": 30,
+      "w": 400,
+      "h": 150,
+      "target": { "shapeId": "v1", "anchor": "top" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Leading chevron + accent rail — closer to file-browser convention, but the rail still competes with real content for attention.",
+      "x": 520,
+      "y": 30,
+      "w": 400,
+      "h": 150,
+      "target": { "shapeId": "alta", "anchor": "top" }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Trailing chevron (like V1) with a dotted rail instead of a solid one.",
+      "x": 1000,
+      "y": 30,
+      "w": 400,
+      "h": 130,
+      "target": { "shapeId": "altb", "anchor": "top" }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Prior-art recommendation: leading chevron (Explorer/Finder/VS Code/GitHub all agree), always visible, and a faint muted guide instead of an accent one. See the note for citations.",
+      "x": 40,
+      "y": 1060,
+      "w": 420,
+      "h": 195,
+      "target": { "shapeId": "priorart", "anchor": "bottom" }
+    },
+    {
+      "id": "step-5",
+      "kind": "step",
+      "text": "5 · Hover to reveal the chevron — cleaner at rest, but hides the only way to know a row expands until you are already hovering it.",
+      "x": 520,
+      "y": 1060,
+      "w": 420,
+      "h": 150,
+      "target": { "shapeId": "hoverreveal", "anchor": "bottom" }
+    },
+    {
+      "id": "step-6",
+      "kind": "step",
+      "text": "6 · A filled/hollow dot instead of a triangle — does it still read as \"this expands\" at a glance?",
+      "x": 1000,
+      "y": 1060,
+      "w": 400,
+      "h": 130,
+      "target": { "shapeId": "dottoggle", "anchor": "bottom" }
+    },
+    {
+      "id": "note-citations",
+      "kind": "note",
+      "text": "Prior art (full citations in the linked report): VS Code, Finder, Windows Explorer and GitHub all place the disclosure triangle BEFORE the label and keep it always visible — hover-hiding the ONLY expand affordance measurably hurts discoverability (Nielsen Norman Group; Zach's own Information Scent note). VS Code's own indent-guide default is a faint, low-contrast line, not accent-colored. Block 4 applies all three; blocks 1, 2, 3, 5 and 6 show what changes when you depart from it.",
+      "x": 1460,
+      "y": 280,
+      "w": 480,
+      "h": 360
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · For each block you can name the trade-off — which reads fastest as \"this expands\", which best avoids competing with real content — and confirm that collapsing an already-open hover-reveal row never depends on hovering it first.",
+      "x": 1460,
+      "y": 688,
+      "w": 460,
+      "h": 225
+    }
+  ]
+}

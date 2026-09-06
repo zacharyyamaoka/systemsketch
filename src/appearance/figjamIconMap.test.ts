@@ -30,11 +30,13 @@ describe('FigJam icon map', () => {
   })
 
   it('gives a shape and a connector the same Line style icons', () => {
-    // One trigger icon and one set of dash icons, whichever pill they are on:
-    // that is what FigJam does, and what the muscle memory is for.
-    expect(FIGJAM_TRIGGER_ICON.dash).toBe('trigger/Line style')
+    // There is now literally one entry to share: a shape's chips and a
+    // connector's bare row are the same control at two layouts, so the icons
+    // cannot drift the way they had (the connector's Dotted option was being
+    // drawn by the arrowhead renderer).
     expect(FIGJAM_TRIGGER_ICON.lineStyle).toBe('trigger/Line style')
-    expect(FIGJAM_ICON_FOR.lineStyle).toEqual(FIGJAM_ICON_FOR.dash)
+    expect(FIGJAM_TRIGGER_ICON.strokeColor).toBe('trigger/Line style')
+    expect(Object.keys(FIGJAM_ICON_FOR)).not.toContain('dash')
     expect(figjamIconName('lineStyle', 'dashed')).toBe('line-style/Dashed')
   })
 
@@ -46,19 +48,32 @@ describe('FigJam icon map', () => {
     expect(FIGJAM_ICONS['shape/Triangle']).not.toEqual(FIGJAM_ICONS['arrowhead/Triangle'])
   })
 
-  it('gives all three line-shape styles the same three icons', () => {
-    for (const control of ['connectionRouting', 'arrowKind', 'spline'] as const) {
-      const names = Object.values(FIGJAM_ICON_FOR[control] ?? {})
-      expect(names.every((name) => name.startsWith('line-shape/'))).toBe(true)
-    }
-    expect(figjamIconName('connectionRouting', 'straight')).toBe('line-shape/Straight')
-    expect(figjamIconName('spline', 'line')).toBe('line-shape/Straight')
+  it('gives the ONE Line shape control FigJam\'s three icons, one per canonical value', () => {
+    // Three StyleProps (arrow kind, line spline, cable routing) reach the menu
+    // as one control in one vocabulary; only that vocabulary is mapped, so a
+    // raw style value leaking through would fall back to the drawn glyph and
+    // be visible rather than silently passing for FigJam's icon.
+    const names = Object.values(FIGJAM_ICON_FOR.lineShape ?? {})
+    expect(names.every((name) => name.startsWith('line-shape/'))).toBe(true)
+    expect(figjamIconName('lineShape', 'elbow')).toBe('line-shape/Elbowed')
+    expect(figjamIconName('lineShape', 'curve')).toBe('line-shape/Curved')
+    expect(figjamIconName('lineShape', 'straight')).toBe('line-shape/Straight')
+    expect(figjamIconName('lineShape', 'cubic')).toBeUndefined()
   })
 
   it('says nothing for a value FigJam has no icon for', () => {
-    // tldraw has nine arrowheads to FigJam's six, and four sizes to its two.
+    // tldraw has nine arrowheads to FigJam's six, and a `dotted` dash and an
+    // `async` cadence FigJam draws neither of.
     expect(figjamIconName('arrowheadEnd', 'pipe')).toBeUndefined()
-    expect(figjamIconName('size', 'm')).toBeUndefined()
-    expect(figjamIconName('dash', 'draw')).toBeUndefined()
+    expect(figjamIconName('size', 'l')).toBeUndefined()
+    expect(figjamIconName('lineStyle', 'dotted')).toBeUndefined()
+    expect(figjamIconName('lineStyle', 'async')).toBeUndefined()
+  })
+
+  it('gives the two weights SystemSketch offers FigJam\'s two weight icons', () => {
+    // The weight row is the one place these are read: `m` is what everything
+    // is created at, `xl` is the thick rung beside it.
+    expect(figjamIconName('size', 'm')).toBe('line-style/Thin')
+    expect(figjamIconName('size', 'xl')).toBe('line-style/Thick')
   })
 })

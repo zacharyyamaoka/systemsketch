@@ -200,13 +200,13 @@
   padding-top: 12px;
 }
 
-.systemsketch-popout--left .systemsketch-library-browser .systemsketch-library-search {
-  margin-inline: 12px;
-}
-
-.systemsketch-popout--left .systemsketch-library-browser .systemsketch-library-panel__body {
-  padding-inline: 12px;
-}
+/* WHY no left/right override here: these two used to pull the search's
+ * margin and the body's padding in to 12px, one narrower than the 14px this
+ * popout uses everywhere else (header, the Shapes/Behaviors tab strip, the
+ * base `.systemsketch-library-search`/`.systemsketch-library-panel__body`
+ * rules in shape-library.css). Left at 14px like the rest of the panel; see
+ * shape-library.css for why the search's inset has to be padding rather
+ * than margin regardless. */
 
 .systemsketch-library-body section {
   margin-top: 16px;
@@ -912,11 +912,6 @@
   outline-offset: -2px;
 }
 
-.systemsketch-selection-layout-action:disabled {
-  cursor: default;
-  opacity: .45;
-}
-
 .systemsketch-selection-layout-action svg {
   width: 18px;
   height: 18px;
@@ -970,14 +965,6 @@
   }
 }
 
-/* At a narrow desktop width the bottom dock already carries Library. Reclaim
- * that duplicate chrome before truncating the current board/depth label. */
-@media (max-width: 920px) {
-  .systemsketch-top-left-shell .systemsketch-shapes-button {
-    display: none;
-  }
-}
-
 /* A notice uses the top row when it genuinely fits. Side popouts move only
  * when the measured fallback row is occupied. Active REC takes priority over
  * passive Preview status and is the only notice rendered while it runs. */
@@ -989,13 +976,6 @@ body:has(.systemsketch-recorder-indicator[data-placement='below']) .systemsketch
 @media (max-width: 560px) {
   .systemsketch-top-left-shell {
     max-width: calc(100vw - 176px);
-  }
-
-  /* The board name is the one piece of chrome needed to orient and rename a
-   * mobile board. Keep it, and let the bottom tool dock carry the duplicate
-   * shape/command launchers on this tightly constrained row. */
-  .systemsketch-top-left-shell .systemsketch-shell-icon-button {
-    display: none;
   }
 
   .systemsketch-share-button {

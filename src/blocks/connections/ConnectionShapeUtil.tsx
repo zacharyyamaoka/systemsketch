@@ -98,6 +98,7 @@ import {
 	ASYNC_PACKET_DASHARRAY,
 	asyncDashOffsetForLength,
 	cablePresentation,
+	DATA_CABLE_MARCH_DASHARRAY,
 	DELAY_DOT_GAP_PX,
 	DELAY_DOT_PX,
 	DELAY_PILL_HEIGHT,
@@ -114,6 +115,7 @@ import { tunnelDisplayState, tunnelVisualForPoints, type TunnelVisual } from './
 import { getFocusedTunnelLayer } from './tunnelLayers'
 import { BRANCH_FADE_OPACITY } from '../../branch/branchModel'
 import { branchAncestry, branchFadeOpacity } from '../../branch/branchScope'
+import { applyAsyncRegionConnectionDefault } from '../../asyncRegion/asyncRegionModel'
 import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
@@ -157,6 +159,33 @@ import {
 } from '../../diff/diffPresentation'
 import { findFieldDiff } from '../../diff/fieldDiff'
 import { wordDiff, type DiffToken } from '../../diff/wordDiff'
+import {
+	COMMUNICATION_FAMILY_PAINT,
+	chooseCommunicationRepresentative,
+	collectCommunicationRelations,
+	applyCommunicationFocus,
+	communicationProjection,
+	describeCommunicationConnection,
+	isConnectionInCommunicationScope,
+	isCommunicationPrototypeEnabled,
+	phaseLabel,
+	type CommunicationDescriptor,
+	type CommunicationProjectionState,
+	type CommunicationRelation,
+	type CommunicationRouteStyle,
+} from '../../prototypes/communication/communicationProjection'
+
+/** Complete one creation-time default after both semantic bindings exist. */
+function applyNewConnectionRegionDefault(editor: Editor, connectionId: TLShapeId): void {
+	const bindings = getConnectionBindings(editor, connectionId)
+	if (!bindings.start || !bindings.end) return
+	applyAsyncRegionConnectionDefault(
+		editor,
+		connectionId,
+		bindings.start.toId,
+		bindings.end.toId,
+	)
+}
 
 declare module 'tldraw' {
 	export interface TLGlobalShapePropsMap {
@@ -763,6 +792,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			// command makes a requested derivation visible and undoable.
 			normalizeConnectionDirection(this.editor, connection.id)
 			adoptCableTypeIntoProjection(this.editor, connection.id)
+			if (isCreatingShape) applyNewConnectionRegionDefault(this.editor, connection.id)
 			// A cable you just DREW is not left selected. Its terminal handles sit
 			// exactly on the dots it joins, and a selected cable's handle wins the
 			// next press on that dot — so leaving it selected would turn "wire this
@@ -862,7 +892,443 @@ function setAnchoredFace(editor: Editor, binding: ConnectionBinding, face: PortF
 	})
 }
 
+function markerId(connectionId: TLShapeId, end: 'start' | 'end'): string {
+	return `communication-${String(connectionId).replace(/[^a-z0-9_-]/gi, '-')}-${end}`
+}
+
+function CommunicationArrowDefs({
+	connectionId,
+	ink,
+	start,
+}: {
+	connectionId: TLShapeId
+	ink: string
+	start: boolean
+}) {
+	return (
+		<defs>
+			{start ? (
+				<marker
+					id={markerId(connectionId, 'start')}
+					viewBox="0 0 10 10"
+					refX="8"
+					refY="5"
+					markerWidth="7"
+					markerHeight="7"
+					orient="auto-start-reverse"
+				>
+					<path d="M 0 0 L 10 5 L 0 10 z" fill={ink} />
+				</marker>
+			) : null}
+			<marker
+				id={markerId(connectionId, 'end')}
+				viewBox="0 0 10 10"
+				refX="8"
+				refY="5"
+				markerWidth="7"
+				markerHeight="7"
+				orient="auto-start-reverse"
+			>
+				<path d="M 0 0 L 10 5 L 0 10 z" fill={ink} />
+			</marker>
+		</defs>
+	)
+}
+
+function CommunicationLabel({
+	x,
+	y,
+	text,
+	ink,
+	soft,
+	onPointerDown,
+	communicationId,
+}: {
+	x: number
+	y: number
+	text: string
+	ink: string
+	soft: string
+	onPointerDown?: (event: React.PointerEvent<SVGGElement>) => void
+	communicationId?: string
+}) {
+	const width = Math.max(74, text.length * 7.1 + 22)
+	return (
+		<g
+			className="CommunicationEdge-label"
+			transform={`translate(${x} ${y})`}
+			data-communication-label={communicationId}
+			pointerEvents={onPointerDown ? 'all' : 'none'}
+			onPointerDown={onPointerDown}
+			style={onPointerDown ? { cursor: 'pointer' } : undefined}
+		>
+			<rect
+				x={-width / 2}
+				y={-13}
+				width={width}
+				height={26}
+				rx={13}
+				fill="var(--ss-surface, #fff)"
+				stroke={ink}
+				strokeWidth={1.5}
+			/>
+			<rect x={-width / 2 + 4} y={-9} width={18} height={18} rx={9} fill={soft} />
+			<text
+				x={4}
+				y={4}
+				textAnchor="middle"
+				fill={ink}
+				fontFamily="'JetBrains Mono', ui-monospace, monospace"
+				fontSize={10.5}
+				fontWeight={750}
+			>
+				{text}
+			</text>
+		</g>
+	)
+}
+
+function TaggedCommunicationConnection({
+	connection,
+	descriptor,
+	relation,
+	focusedGroupKey,
+	presentation = 'tagged',
+}: {
+	connection: ConnectionShape
+	descriptor: CommunicationDescriptor
+	relation: CommunicationRelation
+	focusedGroupKey: string | null
+	presentation?: 'tagged' | 'focus-member'
+}) {
+	const editor = useEditor()
+	const path = useValue(
+		'communication tagged path',
+		() => getConnectionShapePath(editor, connection),
+		[editor, connection],
+	)
+	const points = useValue(
+		'communication tagged points',
+		() => getConnectionRenderPoints(editor, connection),
+		[editor, connection],
+	)
+	const at = pointAtFraction(points, 0.5)
+	const paint = COMMUNICATION_FAMILY_PAINT[descriptor.family]
+	const detail = descriptor.family === 'topic' || descriptor.family === 'stream'
+		? descriptor.name
+		: phaseLabel(descriptor.phase)
+	const label = `${relation.displayId} · ${detail}`
+	const focusState = focusedGroupKey === null
+		? 'none'
+		: focusedGroupKey === descriptor.groupKey ? 'active' : 'dim'
+	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
+		if (event.button !== 0) return
+		event.stopPropagation()
+		editor.select(connection.id)
+		applyCommunicationFocus(editor, descriptor.groupKey)
+	}
+	return (
+		<SVGContainer
+			data-communication-mode={presentation}
+			data-communication-family={descriptor.family}
+			data-communication-phase={descriptor.phase}
+			data-communication-id={relation.displayId}
+			data-communication-focus={focusState}
+			style={{ opacity: focusState === 'dim' ? 0.12 : 1, transition: 'opacity 120ms ease' }}
+		>
+			<CommunicationArrowDefs connectionId={connection.id} ink={paint.ink} start={false} />
+			<path
+				data-communication-focus-hit
+				d={path}
+				fill="none"
+				stroke="transparent"
+				strokeWidth={18}
+				pointerEvents="stroke"
+				vectorEffect="non-scaling-stroke"
+				onPointerDown={selectFocus}
+			/>
+			<path
+				d={path}
+				fill="none"
+				stroke={paint.ink}
+				strokeWidth={2.6}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				markerEnd={`url(#${markerId(connection.id, 'end')})`}
+				vectorEffect="non-scaling-stroke"
+			/>
+			<CommunicationLabel
+				x={at.x}
+				y={at.y}
+				text={label}
+				ink={paint.ink}
+				soft={paint.soft}
+				communicationId={relation.displayId}
+				onPointerDown={selectFocus}
+			/>
+		</SVGContainer>
+	)
+}
+
+interface PagePoint { x: number; y: number }
+
+function boundaryPoint(bounds: Box, toward: PagePoint): PagePoint {
+	const center = bounds.center
+	const dx = toward.x - center.x
+	const dy = toward.y - center.y
+	const halfW = Math.max(bounds.w / 2, 1)
+	const halfH = Math.max(bounds.h / 2, 1)
+	const scale = 1 / Math.max(Math.abs(dx) / halfW, Math.abs(dy) / halfH, 0.0001)
+	return { x: center.x + dx * scale, y: center.y + dy * scale }
+}
+
+function componentRelationshipGeometry(
+	editor: Editor,
+	connection: ConnectionShape,
+	relation: CommunicationRelation,
+	representative: CommunicationDescriptor,
+	routeStyle: CommunicationRouteStyle,
+) {
+	if (routeStyle === 'elbow') {
+		const points = getConnectionRenderPoints(editor, connection)
+		return {
+			// WHY: the aggregate relationship must ride one authored cable verbatim.
+			// A selected phase or measured shortest route therefore remains visible
+			// proof of the semantic parse without inventing a second graph geometry.
+			path: getConnectionShapePath(editor, connection),
+			label: pointAtFraction(points, 0.5),
+		}
+	}
+	const sourceBounds = editor.getShapePageBounds(representative.sourceShapeId)
+	const targetBounds = editor.getShapePageBounds(representative.targetShapeId)
+	if (!sourceBounds || !targetBounds) return null
+	const sourceCenter = sourceBounds.center
+	const targetCenter = targetBounds.center
+	// The conceptual route is centre-to-centre. Clip its visible endpoints to the
+	// two card boundaries so arrowheads do not paint over component titles.
+	const pageStart = boundaryPoint(sourceBounds, targetCenter)
+	const pageEnd = boundaryPoint(targetBounds, sourceCenter)
+	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
+	const start = Mat.applyToPoint(inverse, pageStart)
+	const end = Mat.applyToPoint(inverse, pageEnd)
+	const labelFraction = Math.max(0.16, Math.min(0.84, 0.5 + relation.lane * 0.095))
+	return {
+		path: `M ${start.x} ${start.y} L ${end.x} ${end.y}`,
+		// Multiple centre lines between one component pair are geometrically
+		// identical. Staggering their clickable labels keeps each exact straight
+		// relationship addressable without pretending the paths are different.
+		label: {
+			x: start.x + (end.x - start.x) * labelFraction,
+			y: start.y + (end.y - start.y) * labelFraction,
+		},
+	}
+}
+
+function resolveCommunicationRepresentative(
+	editor: Editor,
+	relation: CommunicationRelation,
+	projection: CommunicationProjectionState,
+): CommunicationDescriptor | null {
+	const policy = relation.family === 'action'
+		? projection.actionTrack
+		: relation.family === 'service'
+			? projection.serviceTrack
+			: 'shortest'
+	const candidates = relation.memberDescriptors.map((descriptor) => {
+		const member = editor.getShape<ConnectionShape>(descriptor.connectionId)
+		return {
+			descriptor,
+			pathLength: member?.type === CONNECTION_SHAPE_TYPE
+				? polylineLength(getConnectionRenderPoints(editor, member))
+				: Number.POSITIVE_INFINITY,
+		}
+	})
+	return chooseCommunicationRepresentative(relation.family, candidates, policy)
+}
+
+function ComponentCommunicationConnection({
+	connection,
+	relation,
+	representative,
+	representativePolicy,
+	routeStyle,
+	focusedGroupKey,
+}: {
+	connection: ConnectionShape
+	relation: CommunicationRelation
+	representative: CommunicationDescriptor
+	representativePolicy: string
+	routeStyle: CommunicationRouteStyle
+	focusedGroupKey: string | null
+}) {
+	const editor = useEditor()
+	const geometry = useValue(
+		'component communication relationship geometry',
+		() => componentRelationshipGeometry(editor, connection, relation, representative, routeStyle),
+		[editor, connection, relation, representative, routeStyle],
+	)
+	if (!geometry) return null
+	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
+	const focusState = focusedGroupKey === null
+		? 'none'
+		: focusedGroupKey === relation.groupKey ? 'active' : 'dim'
+	// WHY: a focused relationship is an inspection of its constituent legs, so
+	// its carrier must stop repeating the aggregate family/name and identify the
+	// exact phase beside the other expanded phase labels.
+	const label = focusState === 'active'
+		? `${relation.displayId} · ${phaseLabel(representative.phase)}`
+		: `${relation.displayId} · ${relation.family} · ${relation.name}`
+	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
+		if (event.button !== 0) return
+		event.stopPropagation()
+		editor.select(connection.id)
+		applyCommunicationFocus(editor, relation.groupKey)
+	}
+	return (
+		<SVGContainer
+			data-communication-mode="components"
+			data-communication-family={relation.family}
+			data-communication-edges={relation.edgeCount}
+			data-communication-representative-phase={representative.phase}
+			data-communication-representative-id={representative.connectionId}
+			data-communication-representative-policy={representativePolicy}
+			data-communication-route={routeStyle}
+			data-communication-id={relation.displayId}
+			data-communication-member-ids={relation.memberIds.join(',')}
+			data-communication-focus={focusState}
+			style={{ opacity: focusState === 'dim' ? 0.12 : 1, transition: 'opacity 120ms ease' }}
+		>
+			<CommunicationArrowDefs
+				connectionId={connection.id}
+				ink={paint.ink}
+				start={relation.bidirectional}
+			/>
+			<path
+				data-communication-focus-hit
+				d={geometry.path}
+				fill="none"
+				stroke="transparent"
+				strokeWidth={18}
+				pointerEvents="stroke"
+				vectorEffect="non-scaling-stroke"
+				onPointerDown={selectFocus}
+			/>
+			<path
+				data-communication-track-path
+				d={geometry.path}
+				fill="none"
+				stroke={paint.ink}
+				strokeWidth={2.8}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				markerStart={relation.bidirectional ? `url(#${markerId(connection.id, 'start')})` : undefined}
+				markerEnd={`url(#${markerId(connection.id, 'end')})`}
+				vectorEffect="non-scaling-stroke"
+			/>
+			<CommunicationLabel
+				x={geometry.label.x}
+				y={geometry.label.y}
+				text={label}
+				ink={paint.ink}
+				soft={paint.soft}
+				communicationId={relation.displayId}
+				onPointerDown={selectFocus}
+			/>
+		</SVGContainer>
+	)
+}
+
 function ConnectionShapeComponent({ connection }: { connection: ConnectionShape }) {
+	const editor = useEditor()
+	const prototypeEnabled = isCommunicationPrototypeEnabled(editor)
+	const inCommunicationScope = useValue(
+		'connection in communication scope',
+		() => prototypeEnabled && isConnectionInCommunicationScope(editor, connection),
+		[editor, connection, prototypeEnabled],
+	)
+	const projection = useValue(
+		'communication connection projection',
+		() => communicationProjection.get(editor),
+		[editor],
+	)
+	const descriptor = useValue(
+		'communication connection descriptor',
+		() => inCommunicationScope ? describeCommunicationConnection(editor, connection) : null,
+		[editor, connection, inCommunicationScope],
+	)
+	const relation = useValue(
+		'communication relationship',
+		() => {
+			if (!inCommunicationScope || projection.mode === 'wiring' || !descriptor) return null
+			return collectCommunicationRelations(editor).relations
+				.find((candidate) => candidate.groupKey === descriptor.groupKey) ?? null
+		},
+		[editor, descriptor, projection.mode, inCommunicationScope],
+	)
+	const representativeDescriptor = useValue(
+		'communication representative edge',
+		() => relation ? resolveCommunicationRepresentative(editor, relation, projection) : null,
+		[editor, relation, projection.actionTrack, projection.serviceTrack],
+	)
+	if (inCommunicationScope && projection.mode === 'tagged' && descriptor && relation) {
+		return (
+			<TaggedCommunicationConnection
+				connection={connection}
+				descriptor={descriptor}
+				relation={relation}
+				focusedGroupKey={projection.focusedGroupKey}
+			/>
+		)
+	}
+	if (inCommunicationScope && projection.mode === 'components') {
+		if (!relation || !representativeDescriptor) return null
+		const representative = representativeDescriptor.connectionId === connection.id
+		const focusedMember = projection.focusedGroupKey === relation.groupKey
+		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
+		return (
+			<>
+				{showMember && descriptor ? (
+					<TaggedCommunicationConnection
+						connection={connection}
+						descriptor={descriptor}
+						relation={relation}
+						focusedGroupKey={projection.focusedGroupKey}
+						presentation="focus-member"
+					/>
+				) : null}
+				{representative ? (
+					<ComponentCommunicationConnection
+						connection={connection}
+						relation={relation}
+						representative={representativeDescriptor}
+						representativePolicy={relation.family === 'action'
+							? projection.actionTrack
+							: relation.family === 'service' ? projection.serviceTrack : 'data'}
+						routeStyle={projection.routeStyle}
+						focusedGroupKey={projection.focusedGroupKey}
+					/>
+				) : null}
+			</>
+		)
+	}
+	const dimUnrelatedCanonical = inCommunicationScope
+		&& projection.mode === 'tagged'
+		&& projection.focusedGroupKey !== null
+	return (
+		<CanonicalConnectionShapeComponent
+			connection={connection}
+			projectionOpacity={dimUnrelatedCanonical ? 0.12 : 1}
+		/>
+	)
+}
+
+function CanonicalConnectionShapeComponent({
+	connection,
+	projectionOpacity = 1,
+}: {
+	connection: ConnectionShape
+	projectionOpacity?: number
+}) {
 	const editor = useEditor()
 	const path = useValue(
 		'block connection path',
@@ -1028,7 +1494,8 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		const length = polylineLength(renderPoints)
 		return (
 			<SVGContainer
-				style={{ opacity: opacity * diffCableOpacity(diffState) }}
+				style={{ opacity: opacity * diffCableOpacity(diffState) * projectionOpacity }}
+				data-communication-neutral-focus={projectionOpacity < 1 ? 'dim' : undefined}
 				data-temporal={connection.props.temporal}
 				data-channel={effect ? 'effect' : 'return'}
 				data-tunnel={paintedTunnelState}
@@ -1076,7 +1543,8 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	if (hiddenTunnel) {
 		return (
 			<SVGContainer
-				style={{ opacity: opacity * diffCableOpacity(diffState) }}
+				style={{ opacity: opacity * diffCableOpacity(diffState) * projectionOpacity }}
+				data-communication-neutral-focus={projectionOpacity < 1 ? 'dim' : undefined}
 				data-temporal="delayed"
 				data-tunnel="hidden"
 				data-diff-state={diffState === 'normal' ? undefined : diffState}
@@ -1089,7 +1557,8 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	}
 	return (
 		<SVGContainer
-			style={{ opacity: opacity * diffCableOpacity(diffState) }}
+			style={{ opacity: opacity * diffCableOpacity(diffState) * projectionOpacity }}
+			data-communication-neutral-focus={projectionOpacity < 1 ? 'dim' : undefined}
 			data-temporal="delayed"
 			data-tunnel={paintedTunnelState}
 			data-diff-state={diffState === 'normal' ? undefined : diffState}
@@ -1149,17 +1618,27 @@ export function DataCablePath({
 	dashArray?: string
 }) {
 	const async = temporal === 'async' && !tunnel
+	// WHY: React Flow's homepage marching-ants line, on by default for v1 exactly
+	// as Zach asked — a plain `data` cable only, never `async` (its own packet
+	// cadence above) or a tunnel/lens dash override, which already outrank a
+	// kind's own cadence. `.ConnectionShape-marchingData` in app.css owns the
+	// CSS `animation`; the dashoffset is left unset here on purpose so that
+	// animation — not this static attribute — drives it.
+	const marching = temporal === 'data' && !tunnel && !dashArray
 	return (
 		<path
 			d={path}
 			fill="none"
 			stroke={stroke}
-			strokeLinecap={async && !dashArray ? 'butt' : 'round'}
+			strokeLinecap={(async || marching) && !dashArray ? 'butt' : 'round'}
 			strokeLinejoin="round"
 			strokeWidth={strokeWidth}
-			strokeDasharray={dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : undefined)}
+			strokeDasharray={
+				dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : marching ? DATA_CABLE_MARCH_DASHARRAY : undefined)
+			}
 			strokeDashoffset={async && !dashArray ? asyncDashOffsetForLength(length) : undefined}
 			vectorEffect={vectorEffect}
+			className={marching ? 'ConnectionShape-marchingData' : undefined}
 			data-edge-type={temporal}
 		/>
 	)
@@ -1923,6 +2402,7 @@ export function offerBlockForLooseTerminal(
 				// explicit command is the only path that copies its type into a pill.
 				normalizeConnectionDirection(editor, connectionId)
 				adoptCableTypeIntoProjection(editor, connectionId)
+				if (creationMark) applyNewConnectionRegionDefault(editor, connectionId)
 			})
 			if (creationMark) {
 				editor.markHistoryStoppingPoint('finish_block_connection')

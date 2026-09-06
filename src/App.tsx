@@ -8,7 +8,10 @@ import {
   BlockShapeUtil,
   BlockTool,
   PillTool,
+  TypeTool,
   getBlockShapeVisibility,
+  installBlockAutoResize,
+  installBlockChildSelection,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
@@ -27,6 +30,7 @@ import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { BtInsertGlyphShapeUtil } from './library/BtInsertGlyphShapeUtil'
 import { BtInsertGlyphTool } from './library/BtInsertGlyphTool'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
+import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -74,12 +78,16 @@ import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
+import { seedDefaultLineStyle } from './appearance/strokeMeta'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
 import { CompareProvider } from './compare'
+import { DraftModeBar } from './drafts/DraftModeBar'
+import { DraftProvider, useDrafts } from './drafts/DraftProvider'
+import { AsyncRegionTool } from './asyncRegion'
 import {
-  installSystemSketchWheelZoom,
+  installSystemSketchCanvasNavigation,
   SYSTEMSKETCH_EDITOR_OPTIONS,
 } from './canvasCamera'
 
@@ -107,10 +115,11 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BtControlShapeUtil,
   CodeShapeUtil,
   BtInsertGlyphShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool, BtInsertGlyphTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool, BtInsertGlyphTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -131,9 +140,10 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BtControlShapeUtil,
   CodeShapeUtil,
   BtInsertGlyphShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -145,6 +155,7 @@ const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
  */
 function SystemSketchCanvas() {
   const { attach, path } = useLocalWorkspace()
+  const { attachEditor, isDraftMode } = useDrafts()
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
   const [store] = useState(createSystemSketchStore)
@@ -152,10 +163,15 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     setMountedEditor(editor)
-    const stopWheelZoom = installSystemSketchWheelZoom(editor)
+    seedDefaultLineStyle(editor)
+    const stopCanvasNavigation = installSystemSketchCanvasNavigation(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
+		const stopBlockAutoResize = installBlockAutoResize(editor)
     const stopWorkspace = attach(editor)
+    // Right after attach, same tick: a resumed draft must swap its content in
+    // before the first paint, or reload flashes Main first. See DraftProvider.tsx.
+    const stopDrafts = attachEditor(editor)
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
@@ -163,6 +179,7 @@ function SystemSketchCanvas() {
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockChildSelection = installBlockChildSelection(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
@@ -178,8 +195,9 @@ function SystemSketchCanvas() {
       stopBlockPortMenuTarget()
       stopBehaviorTreeRegions()
       stopBranchRegions()
-      stopBranchClickToEdit()
       stopCodeClickToEdit()
+      stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopArrowClickToPlace()
       stopInstantTextEditing()
@@ -187,12 +205,14 @@ function SystemSketchCanvas() {
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+		stopBlockAutoResize()
       stopBoardTheme()
+      stopDrafts()
       stopWorkspace()
-      stopWheelZoom()
+      stopCanvasNavigation()
       setMountedEditor(null)
     }
-  }, [attach])
+  }, [attach, attachEditor])
 
   return (
     <main
@@ -215,20 +235,30 @@ function SystemSketchCanvas() {
         either one owning the other.
       */}
       <CompareProvider editor={mountedEditor} currentPath={path}>
-        <Tldraw
-          assetUrls={ASSET_URLS}
-          bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
-          components={SYSTEMSKETCH_COMPONENTS}
-          getShapeVisibility={getBlockShapeVisibility}
-          licenseKey={TLDRAW_LICENSE_KEY}
-          onMount={onMount}
-          options={SYSTEMSKETCH_EDITOR_OPTIONS}
-          overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
-          shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
-          store={store}
-          themes={SYSTEMSKETCH_THEMES}
-          tools={SYSTEMSKETCH_TOOLS}
-        />
+        {/*
+          The draft-mode bar is a sibling of the canvas wrapper, both inside
+          CompareProvider (its Compare button needs `useCompare()`) — pushing
+          the canvas down rather than overlaying it, confirmed with Zach. See
+          DraftModeBar.tsx's own header comment for why it has no access to
+          tldraw's own UI context.
+        */}
+        {isDraftMode ? <DraftModeBar /> : null}
+        <div className="systemsketch-app__canvas">
+          <Tldraw
+            assetUrls={ASSET_URLS}
+            bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
+            components={SYSTEMSKETCH_COMPONENTS}
+            getShapeVisibility={getBlockShapeVisibility}
+            licenseKey={TLDRAW_LICENSE_KEY}
+            onMount={onMount}
+            options={SYSTEMSKETCH_EDITOR_OPTIONS}
+            overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
+            shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+            store={store}
+            themes={SYSTEMSKETCH_THEMES}
+            tools={SYSTEMSKETCH_TOOLS}
+          />
+        </div>
       </CompareProvider>
     </main>
   )
@@ -237,7 +267,7 @@ function SystemSketchCanvas() {
 function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId, 'product'> }) {
   const isBlockDevelopment = profile === 'block-dev'
   const onMount = useCallback((editor: Editor) => {
-    const stopWheelZoom = installSystemSketchWheelZoom(editor)
+    const stopCanvasNavigation = installSystemSketchCanvasNavigation(editor)
     enablePasteAtCursor(editor)
     // The development profiles keep tldraw's stock toolbar, so they cannot
     // cycle the preset — but they must still open on the same arrow and the
@@ -252,11 +282,17 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopDefinitionLinking = isBlockDevelopment
       ? installDefinitionLinking(editor)
       : () => undefined
+		const stopBlockAutoResize = isBlockDevelopment
+			? installBlockAutoResize(editor)
+			: () => undefined
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
       : () => undefined
     const stopBlockClickToEdit = isBlockDevelopment
       ? installBlockClickToEdit(editor)
+      : () => undefined
+    const stopBlockChildSelection = isBlockDevelopment
+      ? installBlockChildSelection(editor)
       : () => undefined
     const stopBranchClickToEdit = isBlockDevelopment
       ? installBranchClickToEdit(editor)
@@ -277,15 +313,17 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopDevelopmentSeam()
       stopBlockPortMenuTarget()
       stopBranchRegions()
-      stopBranchClickToEdit()
       stopCodeClickToEdit()
+      stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+		stopBlockAutoResize()
       stopBoardTheme()
-      stopWheelZoom()
+      stopCanvasNavigation()
     }
   }, [isBlockDevelopment])
 
@@ -372,9 +410,11 @@ export function App() {
   return (
     <ThemeRoot>
       <SystemSketchWorkspaceProvider>
-        <ChromeProvider>
-          <SystemSketchCanvas />
-        </ChromeProvider>
+        <DraftProvider>
+          <ChromeProvider>
+            <SystemSketchCanvas />
+          </ChromeProvider>
+        </DraftProvider>
       </SystemSketchWorkspaceProvider>
     </ThemeRoot>
   )

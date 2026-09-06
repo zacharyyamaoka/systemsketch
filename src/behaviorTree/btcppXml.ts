@@ -291,10 +291,16 @@ function model(id: string, kind: BtNodeKind, ports: BtPortModel[] = [], extra: P
  */
 export const BT_BUILTIN_MODELS: readonly BtNodeModel[] = [
 	model('Sequence', 'control', [], { controlKind: 'sequence', description: 'Run children in order; fail on the first failure.' }),
+	// WHY AsyncSequence/AsyncFallback exist here: they are current BT.CPP v4.8
+	// registry members (Groot2's own palette shows AsyncFallback) that the
+	// pinned reference list predated — see
+	// docs/behavior-tree-node-survey-2026-09-05.html, "Gaps worth closing".
+	model('AsyncSequence', 'control', [], { controlKind: 'sequence', description: 'Sequence that yields after each child succeeds.' }),
 	model('SequenceWithMemory', 'control', [], { controlKind: 'sequence', description: 'Sequence that resumes from the running child.' }),
 	model('ReactiveSequence', 'control', [], { controlKind: 'sequence', description: 'Sequence that re-ticks every child from the first.' }),
 	model('SequenceStar', 'control', [], { controlKind: 'sequence', description: 'BT.CPP v3 name for SequenceWithMemory.' }),
 	model('Fallback', 'control', [], { controlKind: 'fallback', description: 'Try children in order until one succeeds.' }),
+	model('AsyncFallback', 'control', [], { controlKind: 'fallback', description: 'Fallback that yields after each child fails.' }),
 	model('ReactiveFallback', 'control', [], { controlKind: 'fallback', description: 'Fallback that re-ticks from the first child.' }),
 	model('Parallel', 'control', [port('success_count', 'input', 'int', '-1'), port('failure_count', 'input', 'int', '1')], { controlKind: 'parallel', description: 'Tick every child; succeed on a threshold.' }),
 	model('ParallelAll', 'control', [port('max_failures', 'input', 'int', '1')], { controlKind: 'parallel', description: 'Tick every child to completion.' }),
@@ -343,6 +349,13 @@ export const BT_BUILTIN_MODELS: readonly BtNodeModel[] = [
 	model('LoopInt', 'decorator', [port('queue', 'inout'), port('if_empty', 'input', 'NodeStatus', 'SUCCESS'), port('value', 'output', 'int')]),
 	model('LoopBool', 'decorator', [port('queue', 'inout'), port('if_empty', 'input', 'NodeStatus', 'SUCCESS'), port('value', 'output', 'bool')]),
 	model('EntryUpdatedDecorator', 'decorator', [port('entry', 'input')]),
+	// WHY Breakpoint is authoring-time only: SystemSketch has no live BT.CPP
+	// executor yet (no Run/Pause/Step), so this is SystemSketch's own marker —
+	// not a BT.CPP registry member — a plain passthrough that stakes out where
+	// a pause will land once execution exists. Flowstate's backend has the
+	// same shape (a Debug node plus BEFORE/AFTER breakpoints); see
+	// docs/behavior-tree-node-survey-2026-09-05.html, "Debug / breakpoint tooling".
+	model('Breakpoint', 'decorator', [], { description: 'Marks a pause point for a future live executor; passes the child through unchanged today.' }),
 
 	model('AlwaysSuccess', 'action', [], { description: 'Return SUCCESS.' }),
 	model('AlwaysFailure', 'action', [], { description: 'Return FAILURE.' }),
@@ -373,6 +386,24 @@ const EXPLICIT_TAGS: Record<string, BtNodeKind> = {
 /** Attributes that are never ports. `_` is reserved by BT.CPP for pre/post conditions. */
 export function isReservedAttribute(name: string): boolean {
 	return name === 'name' || name === 'ID' || name.startsWith('_')
+}
+
+/**
+ * The comment-out marker, MoveIt Pro's "Comment out" as an attribute.
+ *
+ * WHY an `_`-prefixed attribute and not deletion or an XML comment: `_…`
+ * attributes ride the parser's reserved channel, so the flag survives every
+ * round trip (save, reload, re-serialize) without becoming a port — an XML
+ * comment would be dropped by this parser, and deleting the node is exactly
+ * what commenting out exists to avoid. Authoring-time only: with no live
+ * executor there are no tick semantics to change — see
+ * docs/behavior-tree-node-survey-2026-09-05.html, "Disable a node without
+ * deleting it".
+ */
+export const BT_DISABLED_ATTR = '_disabled'
+
+export function isBtNodeDisabled(node: Pick<BtNode, 'reserved'>): boolean {
+	return node.reserved.some(([name, value]) => name === BT_DISABLED_ATTR && value !== 'false' && value !== '')
 }
 
 /* ------------------------------ occurrences ------------------------------ */
@@ -892,6 +923,62 @@ export function unwrapBehaviorTreeNode(source: string, treeId: string, path: str
 	}
 	shiftPaths(remap, location.treeElement, `${path}.0`, path, child)
 	return finish(location, path, remap)
+}
+
+/**
+ * Wrap two or more SIBLING nodes in a new control, in their existing order —
+ * Flowstate's "Group" and MoveIt Pro 10.0's Ctrl+G "Group Under Sequence".
+ * The wrapper lands at the first selected sibling's position.
+ */
+export function groupBehaviorTreeSiblings(
+	source: string,
+	treeId: string,
+	paths: string[],
+	template: BtInsertTemplate,
+): BtEditResult {
+	if (template.kind !== 'control') return { ok: false, reason: 'Only a control can group nodes' }
+	const unique = [...new Set(paths)]
+	if (unique.length < 2) return { ok: false, reason: 'Select at least two nodes to group' }
+	const parents = new Set(unique.map((path) => path.split('.').slice(0, -1).join('.')))
+	if (parents.size !== 1 || unique.some((path) => !path.includes('.'))) {
+		return { ok: false, reason: 'Grouped nodes must be siblings under one parent' }
+	}
+	const location = locateTree(source, treeId)
+	if (typeof location === 'string') return { ok: false, reason: location }
+	const located = unique.map((path) => elementAtPath(location.treeElement, path))
+	if (located.some((entry) => entry === null)) return { ok: false, reason: 'A selected node no longer exists' }
+	const parent = located[0]!.parent
+	// Existing left-to-right / top-to-bottom order IS sibling order; the
+	// selection's own order (a shift-click sequence) deliberately does not count.
+	const members = [...located as Array<NonNullable<(typeof located)[number]>>].sort((a, b) => a.index - b.index)
+	// Identity remap, exactly as moveBehaviorTreeNode does it: record every
+	// element's path before, mutate, record after, and pair them up.
+	const pathsOf = (): Map<XmlElement, string> => {
+		const recorded = new Map<XmlElement, string>()
+		const walk = (element: XmlElement, elementPath: string) => {
+			recorded.set(element, elementPath)
+			element.children.forEach((child, childIndex) => walk(child, `${elementPath}.${childIndex}`))
+		}
+		location.treeElement.children.forEach((child, childIndex) => walk(child, `${childIndex}`))
+		return recorded
+	}
+	const before = pathsOf()
+	const wrapper = templateElement(template)
+	wrapper.children = members.map((entry) => entry.element)
+	const grouped = new Set(wrapper.children)
+	const insertAt = members[0].index
+	parent.children = [
+		...parent.children.slice(0, insertAt).filter((child) => !grouped.has(child)),
+		wrapper,
+		...parent.children.slice(insertAt).filter((child) => !grouped.has(child)),
+	]
+	const after = pathsOf()
+	const remap: Record<string, string> = {}
+	for (const [element, fromPath] of before) {
+		const toPath = after.get(element)
+		if (toPath !== undefined) remap[fromPath] = toPath
+	}
+	return finish(location, after.get(wrapper) ?? unique[0], remap)
 }
 
 /** Move a node to become child `index` of `targetParentPath`, keeping its subtree. */

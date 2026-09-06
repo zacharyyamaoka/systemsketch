@@ -11,7 +11,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
@@ -19,25 +19,34 @@ import { canWrapSelection } from '../frames/wrapSelection'
 import {
   BLOCK_TOOL_ID,
   PILL_TOOL_ID,
+  TYPE_TOOL_ID,
   adoptConnectedPillType,
   canAdoptConnectedPillType,
   getBlockInspectorContext,
   getOnlySelectedBlock,
   selectionHasBlockStyles,
 } from '../blocks'
+import {
+  FLOATING_PORT_TOOL_ID,
+  FloatingPortInspector,
+  getOnlySelectedFloatingPort,
+} from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
-import { describeTidyEdgesOutcome, tidyEdges, tidyEdgesOutcomeSeverity } from '../blocks/connections/tidyEdges'
+import { describeResetEdgeRoutingOutcome, resetEdgeRouting } from '../blocks/connections/resetEdges'
+import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
-import { describeOrganizeNodesOutcome, organizeNodes, organizeNodesOutcomeSeverity } from '../blocks/layout'
+import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
+  BlockTitleFormattingControls,
   canShowBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
   HitAreaOverlay,
   OnCanvasBlockPicker,
   TunnelLayerBar,
+  getEditingBlockTitle,
 } from '../blocks/ui'
 import {
   BRANCH_TOOL_ID,
@@ -52,9 +61,10 @@ import { BtDragModelTunerPanel, dragModelTunerOpen } from '../behaviorTree/ui/Bt
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
-  getOnlySelectedCode,
+  getSelectedCodeShapes,
 } from '../code'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import { DraftsControl } from '../drafts/DraftsControl'
 import {
   PropagationFocusControls,
   PropagationFocusDomLens,
@@ -63,6 +73,9 @@ import {
 } from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
+// Imported by path rather than through `../behaviorTree`: the barrel is being
+// edited by a concurrent session, and the panel has no other consumer.
+import { BehaviorTreeLibraryPanel } from '../behaviorTree/ui/BehaviorTreeLibraryPanel'
 import { PrimitiveSearch } from '../library/PrimitiveSearch'
 import { BoardOverview } from './BoardOverview'
 import { LocalCommentsPanel } from '../comments'
@@ -86,8 +99,11 @@ import {
   getSelectionLayoutActionAvailability,
   SelectionLayoutActions,
 } from './SelectionLayoutActions'
+import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
+import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
 import './systemsketch-chrome.css'
+import './rich-text-toolbar.css'
 
 function PanelIcon() {
   return (
@@ -111,6 +127,10 @@ export function SystemSketchMenuPanel() {
       data-systemsketch-chrome
     >
       {MainMenu ? <MainMenu /> : null}
+      {/* Between the file identity and the breadcrumb — never after it. Zach's
+          explicit requirement: the breadcrumb stays the rightmost element of
+          this cluster, so Drafts goes here rather than appended below. */}
+      <DraftsControl />
       <DepthStackNavigator placement="menu" />
     </nav>
   )
@@ -173,6 +193,10 @@ export function SystemSketchSharePanel() {
       >
         <PanelIcon />
       </TldrawUiButton>
+      {/* WHY the library and command launchers do not duplicate in this compact
+          shell: the bottom toolbar owns Library and Ctrl/Cmd+P owns Commands.
+          Keeping this row to collaboration, inspector, and sharing preserves
+          the adjacent controls while removing two competing entry points. */}
       <PortableShareButton />
     </nav>
   )
@@ -227,6 +251,7 @@ function InspectorDock({
 }) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'port') return <FloatingPortInspector editor={editor} />
   if (subject === 'behaviorTree') return <EditorBehaviorTreeInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
@@ -248,7 +273,7 @@ function InspectorEmptyState() {
       <span aria-hidden="true">▣</span>
       <strong>Nothing selected</strong>
       <p>
-        Select a Block, a Branch or a cable to edit it here. Any other shape shows
+        Select a Block, Port, Branch, Behavior Tree or cable to edit it here. Any other shape shows
         what the board knows about it.
       </p>
     </div>
@@ -304,8 +329,8 @@ function SelectionMiniMenu() {
     [],
   )
   const hasCode = useValue(
-    'systemsketch selection is one Code block',
-    () => getOnlySelectedCode(editor) !== null,
+    'systemsketch selection has Code blocks',
+    () => getSelectedCodeShapes(editor).length > 0,
     [editor],
   )
   const layoutActions = useValue(
@@ -333,31 +358,28 @@ function SelectionMiniMenu() {
     [editor],
   )
   const propagationFocus = usePropagationFocus(editor)
-  const [organizingNodes, setOrganizingNodes] = useState(false)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
-    addToast({ title: describeTidyEdgesOutcome(outcome), severity: tidyEdgesOutcomeSeverity(outcome) })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+  }
+  const runResetRouting = () => {
+    const outcome = resetEdgeRouting(editor)
+    addToast({ title: describeResetEdgeRoutingOutcome(outcome), severity: 'info' })
   }
   const runOrganizeNodes = async () => {
-    // The elk layout pass is async and can take a visible moment on a large
-    // graph; without this the trigger stayed clickable and unlabeled mid-run,
-    // inviting a second, redundant pass.
-    setOrganizingNodes(true)
-    try {
-      const outcome = await organizeNodes(editor)
-      addToast({ title: describeOrganizeNodesOutcome(outcome), severity: organizeNodesOutcomeSeverity(outcome) })
-    } finally {
-      setOrganizingNodes(false)
-    }
+    const outcome = await organizeNodes(editor)
+    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
   }
   const hasVisibleActions = hasCode
     || hasBranch
     || hasBehaviorTree
     || hasBlockMiniMenu
+    || hasCode
     || hasAppearance
     || canWrap
     || propagationSeed !== null
     || layoutActions.tidyEdges
+    || layoutActions.resetRouting
     || layoutActions.organizeNodes
   if (!canShow || !hasVisibleActions) return null
 
@@ -372,52 +394,45 @@ function SelectionMiniMenu() {
     )
   }
 
-  if (hasBranch) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Selection actions"
-      >
-        <EditorBranchSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
+  /*
+   * The Drag Model Tuner suppresses this pill (Zach, 2026-09-06: it "sits on
+   * top of and obstructs the overlay marks/labels").
+   *
+   * The pill floats over the selection, and the selection during tuning IS
+   * the region the overlay is drawing on — so the one dock that must be
+   * legible and the one dock that covers it are always in the same place.
+   * Suppressed rather than nudged aside: anywhere it moves is still over the
+   * model. `return null` and not a fall-through, because the registry pill
+   * would take the same spot and obstruct the same marks. Its Auto layout
+   * switch is not lost — the tuner carries one, and so does the inspector
+   * dock on the opposite side. Restored the instant the tuner closes;
+   * nothing here is persisted.
+   */
+  if (hasBehaviorTree && dragModelTunerIsOpen) return null
 
-  if (hasBehaviorTree) {
-    /*
-     * The Drag Model Tuner suppresses this pill (Zach, 2026-09-06: it "sits on
-     * top of and obstructs the overlay marks/labels").
-     *
-     * The pill floats over the selection, and the selection during tuning IS
-     * the region the overlay is drawing on — so the one dock that must be
-     * legible and the one dock that covers it are always in the same place.
-     * Suppressed rather than nudged aside: anywhere it moves is still over the
-     * model. `return null` and not a fall-through, because the generic pill
-     * below would take the same spot and obstruct the same marks. Its Auto
-     * layout switch is not lost — the tuner carries one, and so does the
-     * inspector dock on the opposite side. Restored the instant the tuner
-     * closes; nothing here is persisted.
-     */
-    if (dragModelTunerIsOpen) return null
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Behavior Tree actions"
-      >
-        <EditorBehaviorTreeSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
-  if (hasCode) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Code block actions"
-      >
-        <EditorCodeSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
+  const surface = hasBehaviorTree
+    ? 'behavior-tree-selection'
+    : hasBranch ? 'branch-selection'
+      : hasBlocks ? 'block-selection' : 'shape-selection'
+  const items = {
+    'behavior-tree-actions': <EditorBehaviorTreeSelectionMiniMenu editor={editor} />,
+    'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
+    'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
+    appearance: <AppearanceControls />,
+    // Code contributes ONLY what is unique to it (line numbers, the character
+    // width) into this same pill — its language and text size are already
+    // ordinary appearance rows above. One menu, never a second floating surface.
+    'code-actions': hasCode ? <EditorCodeSelectionMiniMenu editor={editor} /> : null,
+    wrap: <WrapSelectionControl />,
+    layout: (
+      <SelectionLayoutActions
+        {...layoutActions}
+        onTidyEdges={runTidyEdges}
+        onResetRouting={runResetRouting}
+        onOrganizeNodes={() => void runOrganizeNodes()}
+      />
+    ),
+    'propagation-focus': <PropagationFocusControls />,
   }
 
   return (
@@ -425,41 +440,29 @@ function SelectionMiniMenu() {
       className="systemsketch-selection-menu"
       label="Selection actions"
     >
-      {/* Appearance rides on both branches. A Block carries no tldraw styles of
-          its own, so it contributes nothing here — but a Block selected
-          *alongside* a rectangle must not put the rectangle's colour out of
-          reach. The control renders nothing when the selection has no styles,
-          so the Block-only pill is unchanged. */}
-      {hasBlocks ? (
-        <>
-          <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            organizeNodesBusy={organizingNodes}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      ) : (
-        <>
-          {/* Appearance first, the way FigJam leads with what the thing looks
-              like. There is no Inspect button on either branch any more: the
-              dock follows the selection, so the pill only carries the things
-              that change the shape. */}
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            organizeNodesBusy={organizingNodes}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      )}
+      <ContextualSurface surface={surface} items={items} />
+    </SelectionContextualMenu>
+  )
+}
+
+/** The title formatter occupies the selection pill while its text is live. */
+function EditingBlockTitleMenu() {
+  const editor = useEditor()
+  const isEditingTitle = useValue(
+    'systemsketch editing Block title menu',
+    () => getEditingBlockTitle(editor) !== null,
+    [editor],
+  )
+  if (!isEditingTitle) return null
+  return (
+    <SelectionContextualMenu
+      className="systemsketch-selection-menu systemsketch-title-formatting-menu"
+      label="Block title formatting"
+    >
+      <ContextualSurface
+        surface="block-title-editing"
+        items={{ 'title-formatting': <BlockTitleFormattingControls /> }}
+      />
     </SelectionContextualMenu>
   )
 }
@@ -509,6 +512,8 @@ export function SystemSketchSurfaceHost() {
       // never changed it.
       const loop = getOnlySelectedLoop(editor)
       if (loop) return `loop:${loop.id}`
+      const port = getOnlySelectedFloatingPort(editor)
+      if (port) return `port:${port.id}`
       const tree = getSelectedBehaviorTree(editor)
       if (tree) return `behaviorTree:${tree.region.id}:${tree.path ?? ''}`
       const context = getBlockInspectorContext(editor)
@@ -543,6 +548,7 @@ export function SystemSketchSurfaceHost() {
     () => readInspectorSubject(editor, {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
+      getOnlySelectedFloatingPort,
       getSelectedBehaviorTree,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
@@ -600,6 +606,22 @@ export function SystemSketchSurfaceHost() {
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
       },
       {
+        id: 'insert-floating-port',
+        label: 'Insert Port',
+        description: 'Switch to the free, wireable Port primitive',
+        keywords: ['port', 'input', 'output', 'connector'],
+        icon: '◉',
+        run: () => editor.setCurrentTool(FLOATING_PORT_TOOL_ID),
+      },
+      {
+        id: 'insert-type',
+        label: 'Insert Type',
+        description: 'Switch to the compact Type definition tool',
+        keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
+        icon: '{}',
+        run: () => editor.setCurrentTool(TYPE_TOOL_ID),
+      },
+      {
         // Taking the lens off is a safety property, not a convenience. A diff
         // or lint `state` is something a projector said ABOUT a board, and a
         // person can always open that board, like it, and start editing — at
@@ -619,6 +641,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['insert'],
         icon: '◇',
         run: () => setLeft('shapes'),
+      },
+      {
+        id: 'behavior-library',
+        label: 'Open Behaviors library',
+        description: 'Browse skills, conditions, controls and decorators',
+        keywords: ['insert', 'behavior', 'behaviour', 'tree', 'skill'],
+        icon: '⌥',
+        run: () => setLeft('behaviors'),
       },
       {
         id: 'show-problems',
@@ -653,6 +683,18 @@ export function SystemSketchSurfaceHost() {
         run: () => {
           const outcome = tidyEdges(editor)
           addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+        },
+      },
+      {
+        id: 'reset-routing',
+        label: 'Reset routing to automatic',
+        description: 'Clear hand-routed rails and bends on edges — including edges Tidy leaves alone',
+        keywords: ['reset', 'arrows', 'cables', 'connections', 'hand-routed', 'authored', 'straighten', 'layout'],
+        icon: '↺',
+        disabled: () => !getSelectionLayoutActionAvailability(editor).resetRouting,
+        run: () => {
+          const outcome = resetEdgeRouting(editor)
+          addToast({ title: describeResetEdgeRoutingOutcome(outcome), severity: 'info' })
         },
       },
       {
@@ -721,7 +763,6 @@ export function SystemSketchSurfaceHost() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
-      if (event.repeat) return
       const key = event.key.toLowerCase()
       if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()
@@ -769,28 +810,60 @@ export function SystemSketchSurfaceHost() {
       {/* Its dev cockpit: overlay layers, live tuning knobs, measured swap
           costs — opened from Dev → Behavior Tree → Drag Model Tuner. */}
       <BtDragModelTunerPanel />
+      <CommunicationPrototypeControls />
       <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       <PrimitiveSearch />
-      {leftSurface ? (
-        <aside
-          id="systemsketch-left-popout"
-          className="systemsketch-popout systemsketch-popout--left"
-          aria-label="Shapes library"
-          data-testid="systemsketch-left-popout"
-          data-systemsketch-chrome
-          onWheel={(event) => event.stopPropagation()}
-        >
-          <header className="systemsketch-popout__header">
-            <div><span>Library</span><h2>Shapes</h2></div>
-            <button type="button" aria-label="Close shapes library" onClick={() => setLeft(null)}>×</button>
-          </header>
-          <ShapesLibrary />
-        </aside>
-      ) : null}
+      {leftSurface ? (() => {
+        // `files` is declared on LeftSurface but never set; treat anything that
+        // is not the Behaviors surface as Shapes rather than rendering nothing.
+        const surface = leftSurface === 'behaviors' ? 'behaviors' : 'shapes'
+        const title = surface === 'behaviors' ? 'Behaviors' : 'Shapes'
+        return (
+          <aside
+            id="systemsketch-left-popout"
+            className="systemsketch-popout systemsketch-popout--left"
+            aria-label={`${title} library`}
+            data-testid="systemsketch-left-popout"
+            data-left-surface={surface}
+            data-systemsketch-chrome
+            onWheel={(event) => event.stopPropagation()}
+          >
+            <header className="systemsketch-popout__header">
+              <div><span>Library</span><h2>{title}</h2></div>
+              <button type="button" aria-label={`Close ${title.toLowerCase()} library`} onClick={() => setLeft(null)}>×</button>
+            </header>
+            {/* WHY the switcher sits below the header rather than inside it:
+                `systemsketch-chrome.css` styles EVERY `button` in
+                `.systemsketch-popout__header` as a 30×30 icon square, which
+                would squash a labelled tab into an unreadable chip. */}
+            <div className="systemsketch-popout__surfaces" role="tablist" aria-label="Library surface">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={surface === 'shapes'}
+                data-testid="systemsketch-left-surface-shapes"
+                onClick={() => setLeft('shapes')}
+              >
+                Shapes
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={surface === 'behaviors'}
+                data-testid="systemsketch-left-surface-behaviors"
+                onClick={() => setLeft('behaviors')}
+              >
+                Behaviors
+              </button>
+            </div>
+            {surface === 'behaviors' ? <BehaviorTreeLibraryPanel /> : <ShapesLibrary />}
+          </aside>
+        )
+      })() : null}
 
       {rightSurface ? (
         <aside
@@ -838,6 +911,7 @@ export function SystemSketchSurfaceHost() {
         />
       ) : null}
 
+      <EditingBlockTitleMenu />
       <SelectionMiniMenu />
       <CodeResizeIndicator />
     </div>

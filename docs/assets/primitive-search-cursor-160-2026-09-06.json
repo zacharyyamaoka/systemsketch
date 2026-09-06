@@ -1,0 +1,24 @@
+{
+  "interfaceScale": 160,
+  "pointer": {
+    "x": 540,
+    "y": 360
+  },
+  "targetCenter": {
+    "x": 540,
+    "y": 360
+  },
+  "panel": {
+    "x": 554,
+    "y": 374,
+    "right": 1040,
+    "bottom": 515,
+    "width": 486,
+    "height": 141
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "toolbarTop": 808.40625
+}

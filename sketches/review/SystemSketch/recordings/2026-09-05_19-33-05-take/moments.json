@@ -1,0 +1,38 @@
+[
+  {
+    "t": 135.9,
+    "severity": "warn",
+    "kind": "performance-stall",
+    "lane": "perf",
+    "summary": "main thread blocked for 100.0 ms",
+    "detail": "long-task-000004",
+    "frame": "frames/f-011808.png"
+  },
+  {
+    "t": 1093.7,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000011",
+    "frame": "frames/f-011808.png"
+  },
+  {
+    "t": 6990.7,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000045",
+    "frame": "frames/f-011808.png"
+  },
+  {
+    "t": 8892.0,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000059",
+    "frame": "frames/f-011808.png"
+  }
+]

@@ -1,0 +1,209 @@
+{
+  "ranAt": "2026-09-06T11:34:13.870Z",
+  "stockBefore": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "trackpad",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "pan",
+    "zoomSpeed": 1,
+    "zoomLabel": "100%",
+    "appearance": null
+  },
+  "panned": {
+    "camera": {
+      "x": 0,
+      "y": -120,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "trackpad",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "pan",
+    "zoomSpeed": 1,
+    "zoomLabel": "100%",
+    "appearance": null
+  },
+  "directModifierZoomed": {
+    "camera": {
+      "x": 78.29405162738499,
+      "y": -66.17283950617286,
+      "z": 0.891,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "89%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "directWheelZoom": true,
+      "scrollDownZoomsIn": true,
+      "modifierWheelZoomsOppositely": true,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "enabled": {
+    "camera": {
+      "x": 71.11111111111109,
+      "y": -71.11111111111114,
+      "z": 0.9,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "90%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "directWheelZoom": true,
+      "scrollDownZoomsIn": true,
+      "modifierWheelZoomsOppositely": false,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "directBefore": {
+    "camera": {
+      "x": 71.11111111111109,
+      "y": -71.11111111111114,
+      "z": 0.9,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "90%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "directWheelZoom": true,
+      "scrollDownZoomsIn": true,
+      "modifierWheelZoomsOppositely": true,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "directAfter": {
+    "camera": {
+      "x": 6.464646464646421,
+      "y": -115.55555555555554,
+      "z": 0.99,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "99%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "directWheelZoom": true,
+      "scrollDownZoomsIn": true,
+      "modifierWheelZoomsOppositely": true,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "modifierZoomed": {
+    "camera": {
+      "x": 71.11111111111109,
+      "y": -71.11111111111114,
+      "z": 0.9,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "trackpad",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "pan",
+    "zoomSpeed": 1,
+    "zoomLabel": "90%",
+    "appearance": null
+  },
+  "modifierReverse": {
+    "camera": {
+      "x": 12.994592388531828,
+      "y": -111.06621773288441,
+      "z": 0.9801,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "98%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "directWheelZoom": true,
+      "scrollDownZoomsIn": true,
+      "modifierWheelZoomsOppositely": true,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "restored": {
+    "camera": {
+      "x": 12.994592388531828,
+      "y": -111.06621773288441,
+      "z": 0.9801,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "trackpad",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "pan",
+    "zoomSpeed": 1,
+    "zoomLabel": "98%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "directWheelZoom": false,
+      "scrollDownZoomsIn": true,
+      "modifierWheelZoomsOppositely": true,
+      "wheelZoomSensitivityPercent": 150,
+      "punctuatedPortRow": true
+    }
+  },
+  "checks": [
+    "first run restores stock wheel pan with standard Ctrl/Cmd zoom gain and no app preference",
+    "a plain scroll changes page position but leaves the scale unchanged",
+    "Ctrl/Cmd + scroll changes the stock camera scale",
+    "Canvas says Direct wheel zoom is off and keeps direct-only controls out of the way",
+    "enabling Direct wheel zoom switches the live stock camera and reveals the optional modifier inversion",
+    "Canvas can opt Ctrl/Cmd + scroll into the opposite direct-zoom direction",
+    "with direct mode enabled, a plain scroll-down zooms in",
+    "with the option enabled, Ctrl/Cmd + scroll-down zooms out instead of panning",
+    "Ctrl/Cmd + scroll-up zooms in, opposite the direct wheel convention",
+    "turning direct mode back off restores pan, hides its tuning controls, and resets modifier zoom to stock gain",
+    "stock navigation survives a full reload after opting out of direct zoom",
+    "the canvas navigation journey emits no local console errors"
+  ]
+}

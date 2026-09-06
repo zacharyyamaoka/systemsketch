@@ -52,7 +52,7 @@ import {
   selectedDetachableIds,
   selectedConnectionIds,
   selectedDetachedGroupIds,
-} from '../detach'
+} from '../../detach'
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,
@@ -74,6 +74,7 @@ import {
   type ConnectionRoutingKind,
   type ConnectionTemporalKind,
 } from '../connections/connectionModel'
+import { describeResetEdgeRoutingOutcome, resetEdgeRouting } from '../connections/resetEdges'
 import { describeTidyEdgesOutcome, tidyEdges } from '../connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
 import { getSelectionLayoutActionAvailability } from '../../chrome/SelectionLayoutActions'
@@ -93,6 +94,18 @@ import {
 import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
 import { useRunWrap } from '../../frames/WrapSelectionControl'
 import { isCalloutCard, startAddingCalloutLeader } from '../../callout'
+import {
+  removeSelectedFromAutoResizeContainer,
+  selectedAutoResizeMembership,
+} from '../blockAutoResize'
+// Imported by module path, not the `../../behaviorTree` barrel: this file is
+// reachable from the blocks barrel that behaviorTree itself imports, and the
+// narrow paths keep that cycle out of module evaluation.
+import {
+  selectedTreeNode,
+  setBehaviorTreeNodeDisabled,
+} from '../../behaviorTree/behaviorTreeCommands'
+import { isBtNodeDisabled } from '../../behaviorTree/btcppXml'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -149,6 +162,11 @@ function BlockContextMenuItems() {
     () => selectedDetachedGroupIds(editor).length,
     [editor],
   )
+	const removableMembership = useValue(
+		'context-menu auto resize membership',
+		() => selectedAutoResizeMembership(editor),
+		[editor],
+	)
   // Structural commands (Add, depth navigation) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
@@ -164,6 +182,18 @@ function BlockContextMenuItems() {
   const activeDepthScopeId = useValue(
     'context-menu active depth scope',
     () => getActiveDepthScopeId(editor),
+    [editor],
+  )
+  // A projected Behavior Tree occurrence: the comment-out toggle lives here
+  // beside the Block items, in MoveIt Pro's selection-toolbar idiom.
+  const behaviorTreeNode = useValue(
+    'context-menu selected Behavior Tree occurrence',
+    () => {
+      const selection = selectedTreeNode(editor)
+      return selection
+        ? { regionId: selection.region.id, path: selection.node.path, disabled: isBtNodeDisabled(selection.node) }
+        : null
+    },
     [editor],
   )
   const canWrap = useValue(
@@ -266,6 +296,11 @@ function BlockContextMenuItems() {
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+  }
+
+  const runResetRouting = () => {
+    const outcome = resetEdgeRouting(editor)
+    addToast({ title: describeResetEdgeRoutingOutcome(outcome), severity: 'info' })
   }
 
   const runOrganizeNodes = async () => {
@@ -579,6 +614,21 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
+      {behaviorTreeNode ? (
+        <TldrawUiMenuGroup id="systemsketch-behavior-tree-node">
+          <TldrawUiMenuItem
+            id="bt-comment-out"
+            label={behaviorTreeNode.disabled ? 'Comment in' : 'Comment out'}
+            onSelect={() => void setBehaviorTreeNodeDisabled(
+              editor,
+              behaviorTreeNode.regionId,
+              behaviorTreeNode.path,
+              !behaviorTreeNode.disabled,
+            )}
+          />
+        </TldrawUiMenuGroup>
+      ) : null}
+
       {selectedCallout ? (
         <TldrawUiMenuGroup id="systemsketch-callout">
           <TldrawUiMenuItem
@@ -588,6 +638,16 @@ function BlockContextMenuItems() {
           />
         </TldrawUiMenuGroup>
       ) : null}
+
+		{removableMembership ? (
+			<TldrawUiMenuGroup id="systemsketch-auto-resize-membership">
+				<TldrawUiMenuItem
+					id="remove-from-container"
+					label="Remove from container"
+					onSelect={() => void removeSelectedFromAutoResizeContainer(editor)}
+				/>
+			</TldrawUiMenuGroup>
+		) : null}
 
       {detachableConnectionCount > 0 ? (
         <TldrawUiMenuGroup id="systemsketch-connection-detach">
@@ -641,13 +701,24 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {layoutSelection.tidyEdges || layoutSelection.organizeNodes ? (
+      {layoutSelection.tidyEdges || layoutSelection.resetRouting || layoutSelection.organizeNodes ? (
         <TldrawUiMenuGroup id="systemsketch-layout">
           <TldrawUiMenuItem
             id="tidy-edges"
             label="Tidy edges"
             disabled={!layoutSelection.tidyEdges}
             onSelect={runTidyEdges}
+          />
+          {/* The bulk escape hatch Tidy cannot be: Tidy leaves hand-routed and
+              curved/straight bends alone on purpose, so a selection that
+              includes any of those needs a separate command to clear them —
+              reachable from the same mixed node+edge selection Tidy accepts,
+              since selecting only arrows is the hard case in the first place. */}
+          <TldrawUiMenuItem
+            id="reset-routing"
+            label="Reset to automatic"
+            disabled={!layoutSelection.resetRouting}
+            onSelect={runResetRouting}
           />
           <TldrawUiMenuItem
             id="organize-nodes"

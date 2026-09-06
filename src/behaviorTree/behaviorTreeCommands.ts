@@ -19,7 +19,9 @@ import {
 } from './behaviorTreeModel'
 import { reconcileBehaviorTree } from './installBehaviorTreeRegions'
 import {
+	BT_DISABLED_ATTR,
 	deleteBehaviorTreeNode,
+	groupBehaviorTreeSiblings,
 	insertBehaviorTreeNode,
 	insertBehaviorTreeSibling,
 	moveBehaviorTreeNode,
@@ -66,6 +68,31 @@ export function selectedTreeNode(editor: Editor): { region: BehaviorTreeShape; n
 	const tree = selectTree(parseBehaviorTreeXml(selection.region.props.xml), selection.region.props.treeId)
 	const node = tree?.nodes.find((candidate) => candidate.path === selection.path) ?? null
 	return node ? { region: selection.region, node } : null
+}
+
+/**
+ * A multi-selection of projected occurrences that can be grouped: two or more
+ * node children of ONE region, all siblings under the same parent path. The
+ * left-to-right order is the XML's, not the click order.
+ */
+export function getSelectedBehaviorTreeSiblings(editor: Editor): { region: BehaviorTreeShape; paths: string[] } | null {
+	const selected = editor.getSelectedShapes()
+	if (selected.length < 2) return null
+	let region: BehaviorTreeShape | null = null
+	const paths: string[] = []
+	for (const shape of selected) {
+		const meta = readBtChildMeta(shape)
+		if (!meta || meta.btRole !== 'node' || !isShapeId(shape.parentId)) return null
+		const owner = editor.getShape(shape.parentId)
+		if (!isBehaviorTreeShape(owner)) return null
+		if (region && owner.id !== region.id) return null
+		region = owner
+		paths.push(meta[BT_META_PATH])
+	}
+	if (!region) return null
+	const parents = new Set(paths.map((path) => path.split('.').slice(0, -1).join('.')))
+	if (parents.size !== 1 || paths.some((path) => !path.includes('.'))) return null
+	return { region, paths }
 }
 
 export function childShapeForPath(editor: Editor, regionId: TLShapeId, path: string): TLShape | null {
@@ -330,6 +357,35 @@ export function addBehaviorTreeFailureRecovery(editor: Editor, regionId: TLShape
 		if (to !== undefined) remap[from] = to
 	}
 	return applyEdit(editor, region, { ok: true, xml: withRecovery.xml, path: withRecovery.path, remap }, 'add failure recovery')
+}
+
+/**
+ * MoveIt Pro's "Comment out": mark an occurrence disabled without deleting it.
+ * Authoring-time only — a `_disabled="true"` reserved attribute plus a dimmed
+ * projection; with no live executor there are no tick semantics to change
+ * (see `BT_DISABLED_ATTR` in `btcppXml.ts` and the survey report it cites).
+ */
+export function setBehaviorTreeNodeDisabled(editor: Editor, regionId: TLShapeId, path: string, disabled: boolean): BtCommandResult {
+	const region = regionOrFail(editor, regionId)
+	if (!region) return { ok: false, reason: 'No Behavior Tree' }
+	const result = setBehaviorTreeNodeAttribute(region.props.xml, region.props.treeId, path, BT_DISABLED_ATTR, disabled ? 'true' : null)
+	return applyEdit(editor, region, result, disabled ? 'comment out node' : 'comment in node', path)
+}
+
+/**
+ * Flowstate's "Group" / MoveIt Pro 10.0's Ctrl+G: wrap the selected siblings
+ * in one new named Sequence, as ONE undo step — the XML edit, the child
+ * re-stamps and the projection repair all run inside `applyEdit`'s single
+ * `editor.run()`.
+ */
+export function groupSelectedBehaviorTreeNodes(
+	editor: Editor,
+	template: BtInsertTemplate = { id: 'Sequence', kind: 'control', name: 'Group' },
+): BtCommandResult {
+	const selection = getSelectedBehaviorTreeSiblings(editor)
+	if (!selection) return { ok: false, reason: 'Select two or more sibling nodes of one Behavior Tree' }
+	const result = groupBehaviorTreeSiblings(selection.region.props.xml, selection.region.props.treeId, selection.paths, template)
+	return applyEdit(editor, selection.region, result, `group into ${template.id}`)
 }
 
 export function setBehaviorTreeNodeName(editor: Editor, regionId: TLShapeId, path: string, name: string): BtCommandResult {

@@ -1,0 +1,106 @@
+[
+  {
+    "id": "SETUP-1",
+    "label": "created Frame, Pose, and 5 Type Mapping variant blocks",
+    "observed": [
+      "frame",
+      "pose",
+      "v1",
+      "v2",
+      "v3",
+      "v4",
+      "v5"
+    ],
+    "desired": [
+      "frame",
+      "pose",
+      "v1",
+      "v2",
+      "v3",
+      "v4",
+      "v5"
+    ],
+    "ok": true
+  },
+  {
+    "id": "V1-RESOLVE",
+    "label": "V1 read view shows every alias name and resolved token",
+    "observed": {
+      "hasEstimator": true,
+      "hasCallable": true,
+      "hasFrame": true,
+      "hasPose": true,
+      "hasClient": true
+    },
+    "desired": {
+      "hasEstimator": true,
+      "hasCallable": true,
+      "hasFrame": true,
+      "hasPose": true,
+      "hasClient": true
+    },
+    "ok": true
+  },
+  {
+    "id": "V1-EDIT",
+    "label": "clicking the code cell opens the one shared textarea with the exact source",
+    "observed": "Estimator = Callable[[Frame, float], Pose]\nPoses = Iterable[Pose]\nClient = Any",
+    "desired": "Estimator = Callable[[Frame, float], Pose]\nPoses = Iterable[Pose]\nClient = Any",
+    "ok": true
+  },
+  {
+    "id": "V1-GOTO",
+    "label": "clicking a resolved \"Pose\" token selects the real Pose block",
+    "observed": "shape:tmPose",
+    "desired": "shape:tmPose",
+    "ok": true
+  },
+  {
+    "id": "V2-CHIPS",
+    "label": "V2 renders one chip per alias",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "V2-CHIP-EDIT",
+    "label": "clicking a chip opens an inline input scoped to that one line",
+    "observed": "Estimator = Callable[[Frame, float], Pose]",
+    "desired": "Estimator = Callable[[Frame, float], Pose]",
+    "ok": true
+  },
+  {
+    "id": "V3-BOTH",
+    "label": "V3 shows the table AND the live source pane simultaneously, with no toggle",
+    "observed": {
+      "table": true,
+      "source": true
+    },
+    "desired": {
+      "table": true,
+      "source": true
+    },
+    "ok": true
+  },
+  {
+    "id": "V4-DEFAULT",
+    "label": "V4 opens on the pretty rung, not raw source",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "V4-COLLAPSE",
+    "label": "clicking the summary collapses to just the count",
+    "observed": "›3 type aliases",
+    "desired": "›3 type aliases",
+    "ok": true
+  },
+  {
+    "id": "V5-PROMPT",
+    "label": "V5 draws one >>> prompt per line in a fixed gutter, separate from the editable text",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  }
+]

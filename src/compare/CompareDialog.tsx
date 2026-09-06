@@ -50,13 +50,80 @@ export type CompareDock = 'right' | 'bottom'
 
 const KIND_ORDER = ['added', 'removed', 'modified'] as const
 
+/**
+ * An explicit pair of snapshots to compare, bypassing file history entirely.
+ *
+ * The default path (no `source`) discovers `before` from a `.vN.systemsketch`
+ * sibling and takes `after` from the live editor — see the two effects below.
+ * A caller that already holds both sides in memory (e.g. a draft compared
+ * against Main) passes this instead, and the history rail, the
+ * `discoverVersions` effect, and the file-derived captions all step aside for
+ * it. Defined here (not in `CompareLauncher.tsx`, which imports this module
+ * anyway) so `CompareDialogProps` and the type that feeds it stay next to
+ * each other with no import cycle.
+ */
+export interface CompareExplicitSource {
+	beforeLabel: string
+	before: TLStoreSnapshot
+	afterLabel: string
+	after: TLStoreSnapshot
+}
+
+/** What an action reported when the reviewer confirmed it. */
+export interface CompareActionOutcome {
+	readonly ok: boolean
+	/** Why it was refused. Shown in the action bar; the dialog stays open. */
+	readonly reason?: string
+}
+
+/**
+ * Turns the review into a REVIEW-AND-APPLY — IcePanel's "Merge changes" modal.
+ *
+ * WHY this is a prop on the existing dialog rather than a second component:
+ * Zach's ask was literally *"it will again open essentially the compare view —
+ * however in maybe a slightly altered state"*. The same generalisation that let
+ * drafts reuse this dialog for Draft-vs-Main (`source`) applies here — a
+ * second dialog would be a second diff viewer to keep in step, and the two
+ * would drift the first time either one gained a column.
+ *
+ * With no `action` the dialog renders exactly as it always has: no checkboxes,
+ * no bottom bar, the plain Shift+D review.
+ */
+export interface CompareAction {
+	/** The verb. Titles the dialog and names the confirm in fallbacks. */
+	readonly label: string
+	/**
+	 * The confirm button's text, given how many changes are on screen. A
+	 * caller has to handle 0 itself: a draft that only MOVED a shape has no
+	 * display-diff rows at all and is still perfectly mergeable, so "Merge 0
+	 * changes" is a real state and needs real words.
+	 */
+	confirmLabel(changeCount: number): string
+	/**
+	 * Run the REAL action — never a re-derivation from what this dialog is
+	 * showing. Resolving `{ok: true}` closes the dialog; anything else keeps it
+	 * open with `reason` in the bar.
+	 */
+	onConfirm(): Promise<CompareActionOutcome>
+	/**
+	 * Set when there is nothing safe to apply — a Rebase whose three-way merge
+	 * came back conflicted. The review still opens, because the two sides on
+	 * screen ARE what collided, but the confirm is disabled and this says why.
+	 */
+	readonly blockedReason?: string
+}
+
 export interface CompareDialogProps {
 	editor: Editor
 	currentPath: string | null
 	onClose: () => void
+	/** Compare two in-memory snapshots instead of live-editor-vs-file-history. */
+	source?: CompareExplicitSource
+	/** Review-and-apply mode. Absent — the default — is a pure review. */
+	action?: CompareAction
 }
 
-export function CompareDialog({ editor, currentPath, onClose }: CompareDialogProps) {
+export function CompareDialog({ editor, currentPath, onClose, source, action }: CompareDialogProps) {
 	const [steps, setSteps] = useState<VersionStep[]>([])
 	const [beforeId, setBeforeId] = useState<string | null>(null)
 	const [afterSnapshot, setAfterSnapshot] = useState<TLStoreSnapshot | null>(null)
@@ -118,13 +185,37 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 * change lost my place" gets reintroduced one prop at a time.
 	 */
 	const [dock, setDock] = useState<CompareDock>('right')
+	/**
+	 * Which elements the reviewer has UNCHECKED. Empty — the default — means
+	 * every change is accepted, which is the state the confirm requires.
+	 *
+	 * WHY the rejections are held rather than the acceptances: today's actions
+	 * (`merge`, `rebaseDraftAction`) apply everything atomically; there is no
+	 * per-change apply path. Storing the rejects makes "did anyone opt out of
+	 * anything" a single `.size` check, and it keeps the default honest without
+	 * having to enumerate every element id up front — an element that appears
+	 * because the diff was recomputed is accepted, never silently dropped.
+	 *
+	 * The checkbox itself is REAL — it ticks, it unticks, and unticking is what
+	 * disables the confirm and says why. It is not wired to a partial apply,
+	 * because there is no partial apply to wire it to, and a checkbox that
+	 * shrugged off the user's click would be worse than no checkbox at all.
+	 */
+	const [rejectedElementIds, setRejectedElementIds] = useState<ReadonlySet<string>>(() => new Set())
+	const [actionBusy, setActionBusy] = useState(false)
+	const [actionError, setActionError] = useState<string | null>(null)
 
 	useLinkedCameras(afterEditor, beforeEditor)
 
-	// The after side is the live board, frozen the moment the modal opened.
+	// The after side is the live board, frozen the moment the modal opened —
+	// unless an explicit source already carries it, also frozen at open time.
 	useEffect(() => {
+		if (source) {
+			setAfterSnapshot(source.after)
+			return
+		}
 		setAfterSnapshot(editor.store.getStoreSnapshot())
-	}, [editor])
+	}, [editor, source])
 
 	/*
 	 * The whole version chain, loaded once, with each step diffed against the one
@@ -137,6 +228,9 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 * filters, so the two panels cannot disagree about what happened.
 	 */
 	useEffect(() => {
+		// An explicit source supplies both sides directly — there is no file
+		// history to discover, and none of `steps`/`beforeId`/`problem` apply.
+		if (source) return
 		let cancelled = false
 		discoverVersions(currentPath)
 			.then((files) => buildVersionChain(files, editor))
@@ -156,12 +250,12 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 		return () => {
 			cancelled = true
 		}
-	}, [currentPath, editor])
+	}, [currentPath, editor, source])
 
 	// Picking a version is now a lookup, not a fetch — the chain already holds
 	// every snapshot, so the boards swap without a round trip.
 	const beforeStep = steps.find((step) => step.file.id === beforeId) ?? null
-	const beforeSnapshot = beforeStep?.snapshot ?? null
+	const beforeSnapshot = source ? source.before : (beforeStep?.snapshot ?? null)
 	useEffect(() => {
 		setSelectedId(null)
 	}, [beforeId])
@@ -483,7 +577,16 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 * only in fullscreen, where the rail is hidden and something still has to
 	 * answer "against what". One control visible at a time, never two.
 	 */
-	const versionPicker = (
+	// With an explicit source there is nothing to PICK — both sides are fixed by
+	// the caller — so the picker becomes a plain label naming them instead of an
+	// interactive `<select>` over file history.
+	const versionPicker = source ? (
+		<span className="systemsketch-compare__bar-vs" data-testid="compare-bar-source">
+			<span>{source.beforeLabel}</span>
+			<span aria-hidden="true">vs</span>
+			<span>{source.afterLabel}</span>
+		</span>
+	) : (
 		<label className="systemsketch-compare__bar-vs">
 			<span>vs</span>
 			<select
@@ -498,6 +601,53 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 			</select>
 		</label>
 	)
+
+	/*
+	 * The per-element accept/reject affordance, handed to the table only in
+	 * action mode. `undefined` is what keeps a plain review byte-identical —
+	 * `PropertyTable` renders no checkbox column at all when this is absent,
+	 * rather than rendering a disabled one.
+	 */
+	const review = useMemo(
+		() =>
+			// A BLOCKED action gets no boxes: nothing can be applied, so a control
+			// for choosing what to apply would be furniture the reviewer can move
+			// with no effect on anything.
+			action && !action.blockedReason
+				? {
+						isAccepted: (elementId: string) => !rejectedElementIds.has(elementId),
+						onToggle: (elementId: string, accepted: boolean) =>
+							setRejectedElementIds((current) => {
+								const next = new Set(current)
+								if (accepted) next.delete(elementId)
+								else next.add(elementId)
+								return next
+							}),
+					}
+				: undefined,
+		[action, rejectedElementIds],
+	)
+
+	const rejectedCount = rejectedElementIds.size
+	const confirmDisabled = !!action?.blockedReason || rejectedCount > 0 || actionBusy
+
+	const runAction = useCallback(async () => {
+		if (!action || actionBusy) return
+		setActionBusy(true)
+		setActionError(null)
+		const outcome = await action
+			.onConfirm()
+			.catch(() => ({ ok: false, reason: `${action.label} failed — try again.` }))
+		// Deliberately NOT clearing `actionBusy` on the way out: a successful
+		// action unmounts this dialog, and settling state on the far side of that
+		// is how a stray "setState on an unmounted component" gets introduced.
+		if (outcome.ok) {
+			onClose()
+			return
+		}
+		setActionError(outcome.reason ?? `${action.label} was refused.`)
+		setActionBusy(false)
+	}, [action, actionBusy, onClose])
 
 	return (
 		<Dialog.Root
@@ -527,9 +677,14 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 						className="systemsketch-compare"
 						data-testid="compare-dialog"
 						data-fullscreen={fullscreen || undefined}
+						data-action={action?.label.toLowerCase() ?? undefined}
 					>
 						<header className="systemsketch-compare__titlebar">
-							<h2 id="compare-dialog-title">Compare changes</h2>
+							{/* IcePanel titles the same panel by the verb that opened it —
+							  * "Merge changes" — which is the only thing telling a reviewer
+							  * whether this window is going to DO something when they are
+							  * two clicks deep into a diff. */}
+							<h2 id="compare-dialog-title">{action ? `${action.label} changes` : 'Compare changes'}</h2>
 							{comparison ? (
 								<p className="systemsketch-compare__summary" data-testid="compare-summary">
 									{KIND_ORDER.map((kind) => {
@@ -564,43 +719,64 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 							  * first in the DOM, which is how a check for the list silently
 							  * measured its container instead. */}
 							<aside className="systemsketch-compare__history" data-testid="compare-history-panel">
-								<h3>History</h3>
-								{/*
-								  * Figma's own history list, not a rail that merely lists files.
-								  *
-								  * These rows are `src/history/HistoryList` — the SAME component the
-								  * Block inspector's History tab mounts, at a different density. That
-								  * is the point Zach made: *"you only have to understand the
-								  * interaction pattern once."* Two lists that merely looked alike
-								  * would satisfy the screenshot and break the promise the first time
-								  * either one changed.
-								  */}
-								<HistoryList
-									records={historyRecords}
-									selectedId={beforeId}
-									onSelect={setBeforeId}
-									density="comfortable"
-									testidPrefix="compare-history"
-									emptyCopy="No versions found beside this board."
-									// The live board is the fixed `after` endpoint, so it is a label
-									// here rather than a choice — picking it would ask the panel to
-									// diff the board against itself.
-									isDisabled={(record) => record.isCurrent}
-									pinOf={(record) =>
-										record.isCurrent ? 'after' : record.id === beforeId ? 'before' : null
-									}
-								/>
-								<p className="systemsketch-compare__history-foot">
-									Selecting an entry sets it as <strong>before</strong>. The current board is always{' '}
-									<strong>after</strong>. Titles are measured by diffing the files;
-									SystemSketch records no author.
-								</p>
+								{source ? (
+									/*
+									 * An explicit source has no file history to page through — the
+									 * two endpoints are fixed by the caller, not picked here. The
+									 * rail still holds the column's width, so the boards don't
+									 * reflow; it just names the sides instead of listing versions.
+									 */
+									<div
+										className="systemsketch-compare__history-source"
+										data-testid="compare-history-source-panel"
+									>
+										<h3>Comparing</h3>
+										<p>
+											<strong>{source.beforeLabel}</strong> compared with{' '}
+											<strong>{source.afterLabel}</strong>
+										</p>
+									</div>
+								) : (
+									<>
+										<h3>History</h3>
+										{/*
+										  * Figma's own history list, not a rail that merely lists files.
+										  *
+										  * These rows are `src/history/HistoryList` — the SAME component the
+										  * Block inspector's History tab mounts, at a different density. That
+										  * is the point Zach made: *"you only have to understand the
+										  * interaction pattern once."* Two lists that merely looked alike
+										  * would satisfy the screenshot and break the promise the first time
+										  * either one changed.
+										  */}
+										<HistoryList
+											records={historyRecords}
+											selectedId={beforeId}
+											onSelect={setBeforeId}
+											density="comfortable"
+											testidPrefix="compare-history"
+											emptyCopy="No versions found beside this board."
+											// The live board is the fixed `after` endpoint, so it is a label
+											// here rather than a choice — picking it would ask the panel to
+											// diff the board against itself.
+											isDisabled={(record) => record.isCurrent}
+											pinOf={(record) =>
+												record.isCurrent ? 'after' : record.id === beforeId ? 'before' : null
+											}
+										/>
+										<p className="systemsketch-compare__history-foot">
+											Selecting an entry sets it as <strong>before</strong>. The current board is
+											always <strong>after</strong>. Titles are measured by diffing the files;
+											SystemSketch records no author.
+										</p>
+									</>
+								)}
 							</aside>
 
 							<div className="systemsketch-compare__stage" data-mode={stageMode}>
 								<div className="systemsketch-compare__panes" data-mode={stageMode}>
 									<figure className="systemsketch-compare__pane" data-side="before">
-										<figcaption>{beforeEntry?.label ?? 'Previous version'}</figcaption>
+										<figcaption>{source ? source.beforeLabel : (beforeEntry?.label ?? 'Previous version')}</figcaption>
 										<BoardRender
 											snapshot={beforeSnapshot}
 											side="before"
@@ -614,7 +790,7 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 										data-side="after"
 										style={stageMode === 'overlay' ? { opacity: blend / 100 } : undefined}
 									>
-										<figcaption>Current version</figcaption>
+										<figcaption>{source ? source.afterLabel : 'Current version'}</figcaption>
 										<BoardRender
 											snapshot={afterSnapshot}
 											side="after"
@@ -778,14 +954,11 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 								</nav>
 								<div className="systemsketch-compare__detail-body">
 									{problem ? (
-										/* A problem means there is nothing to compare — showing the
-										 * table's own "identical" state and its "select an element"
-										 * invitation alongside it read as contradictory. One calm
-										 * message replaces all three. */
 										<p className="systemsketch-compare__problem" data-testid="compare-problem">
 											{problem}
 										</p>
-									) : tab === 'properties' ? (
+									) : null}
+									{tab === 'properties' ? (
 										<>
 											<div className="systemsketch-review__options">
 												<label
@@ -835,6 +1008,7 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 												layout={layout}
 												selectedElementId={selectedElementId}
 												onSelectElement={pickElement}
+												review={review}
 											/>
 										</>
 									) : (
@@ -843,6 +1017,65 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 								</div>
 							</aside>
 						</div>
+
+						{/*
+						  * The confirm bar — IcePanel's `› Merge N changes`, at the bottom
+						  * of the same modal that shows the diff.
+						  *
+						  * Absent entirely in a plain review, so the Shift+D path keeps the
+						  * layout it has today. Absent in FULLSCREEN too: fullscreen hides
+						  * every other piece of chrome to give the boards the screen, and a
+						  * destructive confirm floating over an otherwise chrome-less
+						  * immersive view is exactly the button someone hits by accident.
+						  * Esc brings the chrome — and this — back.
+						  */}
+						{action && !fullscreen ? (
+							<footer className="systemsketch-compare__actionbar" data-testid="compare-action-bar">
+								<div className="systemsketch-compare__action-note">
+									{action.blockedReason ? (
+										<span data-state="blocked" data-testid="compare-action-blocked">
+											{action.blockedReason}
+										</span>
+									) : actionError ? (
+										<span data-state="error" data-testid="compare-action-error" role="alert">
+											{actionError}
+										</span>
+									) : rejectedCount > 0 ? (
+										/*
+										 * The honest line. `merge()` and `rebaseDraftAction()`
+										 * apply everything atomically — there is no per-change
+										 * apply path in the build today — so an unchecked box
+										 * cannot be honoured. Saying so and refusing is the only
+										 * option that is not a lie; silently applying the change
+										 * anyway would be the worst of the three.
+										 */
+										<span data-state="partial" data-testid="compare-action-note" role="alert">
+											{`Applying only some changes isn’t supported yet — re-check ${
+												rejectedCount === 1 ? 'the unchecked element' : `all ${rejectedCount} unchecked elements`
+											} to continue.`}
+										</span>
+									) : ordered.length > 0 ? (
+										/* No count here — the confirm button beside it already
+										 * carries the number, and "All 1 change selected" is the
+										 * sort of sentence a template writes and nobody reads. */
+										<span data-state="ready" data-testid="compare-action-ready">
+											All changes selected.
+										</span>
+									) : null}
+								</div>
+								<button
+									type="button"
+									className="systemsketch-compare__action-confirm"
+									data-testid="compare-action-confirm"
+									data-busy={actionBusy || undefined}
+									disabled={confirmDisabled}
+									onClick={() => void runAction()}
+								>
+									<span aria-hidden="true">›</span>
+									{action.confirmLabel(ordered.length)}
+								</button>
+							</footer>
+						) : null}
 					</section>
 				</Dialog.Content>
 			</Dialog.Portal>

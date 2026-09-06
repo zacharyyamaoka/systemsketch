@@ -1,5 +1,5 @@
 {
-  "feature": "Wheel zoom direction and sensitivity",
+  "feature": "Stock canvas navigation and direct wheel zoom",
   "viewport": { "width": 1280, "height": 720 },
   "shapes": [
     {
@@ -28,7 +28,7 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Place the pointer over this Block",
+      "text": "1 · Scroll over wheel(): the board pans and the % readout stays put",
       "x": 30,
       "y": 140,
       "w": 360,
@@ -38,7 +38,7 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Scroll down to zoom in — do not hold Ctrl",
+      "text": "2 · Hold Ctrl/Cmd + scroll here: the % readout changes",
       "x": 940,
       "y": 310,
       "w": 340,
@@ -48,8 +48,8 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · 100% feels unchanged; raising sensitivity makes each scroll step visibly larger",
-      "x": 80,
+      "text": "PASS WHEN · Normal scroll pans; Direct mode makes down scroll zoom in; Ctrl/Cmd + down scroll zooms out",
+      "x": 30,
       "y": 540,
       "w": 500,
       "h": 120
@@ -57,7 +57,7 @@
     {
       "id": "sensitivity-note",
       "kind": "note",
-      "text": "OPTION · Settings → Canvas → Wheel zoom: tune 50–150% or Reset to standard",
+      "text": "OPTION · Settings → Canvas → enable Direct wheel zoom and Ctrl/Cmd opposite zoom, then test both gestures here",
       "x": 650,
       "y": 540,
       "w": 520,

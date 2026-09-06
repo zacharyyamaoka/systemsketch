@@ -54,4 +54,16 @@ describe('frame-first Block foundation', () => {
 		}).not.toThrow()
 		expect(reparentShapes).not.toHaveBeenCalled()
 	})
+
+	it('keeps children in an auto-fitting Expanded Block during a drag', () => {
+		const frame = blockShape('auto-frame', 'expanded')
+		const autoFrame = { ...frame, props: { ...frame.props, autoResize: true } }
+		const util = new BlockShapeUtil({} as Editor)
+
+		// `BaseFrameLikeShapeUtil` consults this gate before it calls
+		// onDragShapesOut. Returning false is the supported tldraw way to avoid a
+		// drag-out reparent, while ordinary Expanded Blocks retain stock behavior.
+		expect(util.canRemoveChildrenOfType(autoFrame, 'block')).toBe(false)
+		expect(util.canRemoveChildrenOfType(frame, 'block')).toBe(true)
+	})
 })

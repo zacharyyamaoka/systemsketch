@@ -10,6 +10,7 @@ import { getDefaultBlockProps, setBlockViewProps, type BlockView } from '../bloc
 import { getDefaultBranchProps } from '../../branch/branchModel'
 import { getDefaultLoopProps } from '../../loop/loopModel'
 import { blockScopeId, cableCompositingParent } from './connectionScope'
+import { asyncRegionMeta } from '../../asyncRegion'
 
 const PAGE = 'page:page' as TLParentId
 
@@ -36,6 +37,10 @@ const loop = (id: string, parentId: TLParentId = PAGE) =>
 	shape(id, 'loop', parentId, getDefaultLoopProps())
 const branch = (id: string, parentId: TLParentId = PAGE) =>
 	shape(id, 'branch', parentId, getDefaultBranchProps())
+const asyncRegion = (id: string, parentId: TLParentId = PAGE) => ({
+	...shape(id, 'frame', parentId, { w: 640, h: 420, name: 'Async region', color: 'violet' }),
+	meta: asyncRegionMeta(),
+} as TLShape)
 
 function reader(shapes: TLShape[]) {
 	const byId = new Map(shapes.map((s) => [s.id as string, s]))
@@ -63,6 +68,15 @@ describe('a cable takes the container it paints in', () => {
 		const a = block('a', region.id)
 		const b = block('b', region.id)
 		expect(cableCompositingParent(reader([region, a, b]), a, b, PAGE)).toBe(region.id)
+	})
+
+	it('treats a tagged stock Frame as a paint region without making it a dataflow scope', () => {
+		const region = asyncRegion('async')
+		const a = block('a', region.id)
+		const b = block('b', region.id)
+		const shapes = reader([region, a, b])
+		expect(cableCompositingParent(shapes, a, b, PAGE)).toBe(region.id)
+		expect(blockScopeId(shapes, a.id)).toBe(PAGE)
 	})
 
 	it('takes the region for a cable that crosses in from outside', () => {

@@ -1,5 +1,9 @@
 .systemsketch-primitive-search {
+  --systemsketch-library-search-x: 0px;
+  --systemsketch-library-search-y: 0px;
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: var(--tl-layer-menus);
   box-sizing: border-box;
   overflow: hidden;
@@ -10,16 +14,29 @@
   box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
   pointer-events: auto;
+  transform:
+    translate(var(--systemsketch-library-search-x), var(--systemsketch-library-search-y))
+    scale(var(--systemsketch-interface-scale, 1));
+  transform-origin: 0 0;
   animation: systemsketch-primitive-search-enter 110ms cubic-bezier(.22, .8, .28, 1);
 }
 
 @keyframes systemsketch-primitive-search-enter {
-  from { opacity: 0; transform: translateY(-2px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  /*
+   * Position and interface scale share the element's transform. Animating a
+   * second transform here temporarily replaces that composed transform, which
+   * flashes the panel at the surface origin before it reaches the cursor.
+   */
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .systemsketch-primitive-search__target {
+  --systemsketch-library-search-target-x: 0px;
+  --systemsketch-library-search-target-y: 0px;
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: var(--tl-layer-menus);
   width: 10px;
   height: 10px;
@@ -28,7 +45,11 @@
   background: color-mix(in srgb, var(--ss-accent) 22%, transparent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-accent) 14%, transparent);
   pointer-events: none;
-  transform: translate(-50%, -50%);
+  transform:
+    translate(var(--systemsketch-library-search-target-x), var(--systemsketch-library-search-target-y))
+    translate(-50%, -50%)
+    scale(var(--systemsketch-interface-scale, 1));
+  transform-origin: 50% 50%;
 }
 
 .systemsketch-primitive-search__field {
@@ -90,13 +111,12 @@
   font: 8.5px/1 var(--tl-font-mono, ui-monospace, monospace);
 }
 
+/* Scrolling and the thin themed bar come from `.ss-scroll`. */
 .systemsketch-primitive-search__results {
   max-height: 258px;
   margin: 0;
   padding: 4px;
-  overflow-y: auto;
   list-style: none;
-  overscroll-behavior: contain;
 }
 
 .systemsketch-primitive-search__result {

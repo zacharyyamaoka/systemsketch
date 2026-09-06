@@ -1,0 +1,63 @@
+{
+  "feature": "Searchable toolbar and focused right shell",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "toolbar-target",
+      "type": "block",
+      "x": 470,
+      "y": 250,
+      "props": {
+        "title": "find_every_tool()",
+        "description": "A disposable canvas target for S-search",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [{ "id": "in_1", "name": "query", "type": "Tool name", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "armed", "type": "Tool", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-s-block",
+      "kind": "step",
+      "text": "1 · Hover here, press S, type Block, then press Enter",
+      "x": 30,
+      "y": 160,
+      "w": 360,
+      "h": 110,
+      "target": { "shapeId": "toolbar-target", "anchor": "left", "dy": -36 }
+    },
+    {
+      "id": "step-s-type",
+      "kind": "step",
+      "text": "2 · Repeat with Type: it appears ahead of Text and arms Type",
+      "x": 900,
+      "y": 180,
+      "w": 350,
+      "h": 120,
+      "target": { "shapeId": "toolbar-target", "anchor": "right", "dy": 36 }
+    },
+    {
+      "id": "shell-note",
+      "kind": "note",
+      "text": "SHELL CHECK · Top-right keeps Inspector and Share; the duplicate Shapes and Commands icons are gone",
+      "x": 620,
+      "y": 540,
+      "w": 600,
+      "h": 110
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Every visible toolbar name is found by S, and the focused right shell keeps no duplicate launchers",
+      "x": 30,
+      "y": 540,
+      "w": 500,
+      "h": 110
+    }
+  ]
+}

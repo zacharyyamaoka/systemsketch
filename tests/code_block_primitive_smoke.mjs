@@ -1,241 +1,311 @@
 #!/usr/bin/env node
 /**
- * Real-browser acceptance for the CodeMirror-backed canvas Code primitive.
+ * The Code block primitive, driven in a real browser.
  *
- * It drives the shipped toolbar, tldraw's actual resize overlay and the
- * selected-object ribbon. The assertions inspect the live editor records after
- * those gestures; no component test or DOM mock can prove this composition.
+ *   Code lives in the System family slot (and S-search); drawing one yields a
+ *   real CodeMirror 6 document inside a stock tldraw shape. Its language and
+ *   its text size are ordinary rows in the ONE shared selection menu — the
+ *   language combobox is an appearance row, the size control is the standard
+ *   Font size ladder — while the Code-specific controls (line numbers, the
+ *   character width combobox with presets + custom entry) ride the same pill.
+ *   A stock handle drag reports its live `ch` count, presentation changes
+ *   preserve the authored character measure, and the second click enters the
+ *   existing CodeMirror document instead of placing a stock Text shape.
+ *
+ * Phase two exercises the babble Source editors that now share CodeMirror:
+ * the Type babble V1's Source mode is a CodeMirror document with the
+ * board-registry autocomplete as a real completion source.
  */
-import assert from 'node:assert/strict'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import {
-	ROOT,
 	clickAt,
+	clickElement,
 	delay,
-	elementBox,
 	evaluate,
 	key,
 	localConsoleErrors,
 	mouse,
+	openApp,
 	shortcut,
 	startApp,
 	typeSlowly,
 	waitFor,
 } from './browser_harness.mjs'
+import { SHOTS, box, deselect, shot } from './block_journey_helpers.mjs'
 
-const ASSETS = join(ROOT, 'docs', 'assets')
-const SCREENSHOT = join(ASSETS, 'code-block-primitive-live-2026-09-05.png')
-const LANGUAGE_SCREENSHOT = join(ASSETS, 'code-block-primitive-language-menu-2026-09-05.png')
-const SIZE_SCREENSHOT = join(ASSETS, 'code-block-primitive-text-size-menu-2026-09-05.png')
-const DARK_SCREENSHOT = join(ASSETS, 'code-block-primitive-dark-menu-2026-09-05.png')
-const RESULTS = join(ROOT, 'docs', 'code-block-primitive-results-2026-09-05.json')
+const results = []
 
-async function rect(page, selector) {
-	return elementBox(page, selector)
+function check(id, label, observed, desired) {
+	const ok = JSON.stringify(observed) === JSON.stringify(desired)
+	results.push({ id, label, observed, desired, ok })
+	process.stdout.write(
+		`  ${ok ? 'PASS' : 'FAIL'}  ${id}  ${label}\n`
+		+ (ok ? '' : `        observed=${JSON.stringify(observed)} desired=${JSON.stringify(desired)}\n`),
+	)
+	return ok
 }
 
-async function clickSelector(page, selector) {
-	const box = await rect(page, selector)
-	await clickAt(page, box.x + box.width / 2, box.y + box.height / 2)
+const codeFacts = (page) => evaluate(page, `JSON.stringify((() => {
+	const shape = window.__systemsketch.editor.getCurrentPageShapes().find((item) => item.type === 'code')
+	if (!shape) return null
+	return { id: shape.id, x: shape.x, y: shape.y, props: shape.props }
+})())`).then(JSON.parse)
+
+async function clickCenter(page, selector) {
+	const rect = await box(page, selector)
+	await clickAt(page, rect.x + rect.width / 2, rect.y + rect.height / 2)
 }
 
-async function codeRecord(page) {
-	return JSON.parse(await evaluate(page, `(() => {
-		const shape = window.__systemsketch.editor.getCurrentPageShapes().find((item) => item.type === 'code')
-		return JSON.stringify(shape && { id: shape.id, x: shape.x, y: shape.y, props: shape.props })
-	})()`))
-}
-
-async function capture(page, path) {
-	const screenshot = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
-	await writeFile(path, Buffer.from(screenshot.data, 'base64'))
+async function drag(page, from, to) {
+	await mouse(page, 'mouseMoved', from.x, from.y)
+	await mouse(page, 'mousePressed', from.x, from.y, { buttons: 1 })
+	await mouse(page, 'mouseMoved', (from.x + to.x) / 2, (from.y + to.y) / 2, { buttons: 1 })
+	await mouse(page, 'mouseMoved', to.x, to.y, { buttons: 1 })
+	await mouse(page, 'mouseReleased', to.x, to.y)
 }
 
 async function main() {
-	await mkdir(ASSETS, { recursive: true })
-	const app = await startApp({ label: 'code-block-primitive', width: 1440, height: 900 })
-	const { page, port, filesRoot } = app
-	const checks = []
-	const check = (id, condition, detail) => {
-		checks.push({ id, ok: Boolean(condition), detail })
-		assert.ok(condition, `${id}: ${detail}`)
-	}
-
+	const app = await startApp({ label: 'code-block-primitive', width: 1440, height: 960 })
+	const { page } = app
 	try {
-		const board = join(filesRoot, 'SystemSketch', 'code-block-primitive.systemsketch')
-		await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/?board=${encodeURIComponent(board)}` })
-		await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`, 'product canvas')
-		await delay(700)
+		await openApp(page, app.port, '')
+		await waitFor(page, 'document.querySelector(\'[data-testid="systemsketch-app"] .tl-container\')', 'product canvas')
+		await waitFor(page, 'Boolean(window.__systemsketch?.editor)', 'dev seam')
+		await delay(600)
+		await evaluate(page, 'window.__systemsketch.editor.setCamera({ x: 0, y: 0, z: 1 }); true')
 
-		// Choose Code through the visible system family, then draw it with the
-		// stock BaseBoxShapeTool gesture. This is deliberately not a store write.
-		await clickSelector(page, '[data-testid="systemsketch-tool-system"]')
-		await waitFor(page, `document.querySelector('.systemsketch-tool-menu')`, 'system tool menu')
-		const row = JSON.parse(await evaluate(page, `(() => {
-			const item = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item'))
+		// ---- The System family offers Code; drawing is the stock box gesture ----
+		const familyBox = await box(page, '[data-testid="systemsketch-tool-system"]')
+		await clickAt(page, familyBox.x + familyBox.width - 8, familyBox.y + familyBox.height / 2)
+		await waitFor(page,
+			'document.querySelector(\'[data-testid="systemsketch-tool-system"]\')?.getAttribute(\'aria-expanded\') === \'true\'',
+			'System family menu open')
+		const codeRow = JSON.parse(await evaluate(page, `(() => {
+			const row = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item'))
 				.find((node) => node.textContent.trim().startsWith('Code'))
-			if (!item) return null
-			const box = item.getBoundingClientRect()
-			return JSON.stringify({ x: box.x + box.width / 2, y: box.y + box.height / 2 })
+			if (!row) return null
+			const rect = row.getBoundingClientRect()
+			return JSON.stringify({ cx: rect.x + rect.width / 2, cy: rect.y + rect.height / 2 })
 		})()`))
-		check('TOOL-1', row !== null, 'Code is available from the system family')
-		await clickAt(page, row.x, row.y)
-		await waitFor(page, `window.__systemsketch.editor.getCurrentToolId() === 'code'`, 'Code tool activation')
+		check('TOOL-1', 'the System family menu offers Code', codeRow !== null, true)
+		await clickAt(page, codeRow.cx, codeRow.cy)
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentToolId() === \'code\'', 'Code tool armed')
 
-		await mouse(page, 'mouseMoved', 250, 235)
-		await mouse(page, 'mousePressed', 250, 235, { buttons: 1 })
-		await mouse(page, 'mouseMoved', 780, 500, { buttons: 1 })
-		await mouse(page, 'mouseReleased', 780, 500)
-		await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'code')`, 'Code shape creation')
-		await waitFor(page, `document.querySelector('.code-block-canvas .cm-editor')`, 'CodeMirror surface')
-		let code = await codeRecord(page)
-		check('CREATE-1', code?.props.language === 'python' && code.props.showLineNumbers === true,
-			'new Code block has a real CodeMirror-backed Python document with line numbers')
-		check('CREATE-2', code?.props.characterWidth >= 16,
-			'new Code block persists its readable character width')
+		await drag(page, { x: 260, y: 240 }, { x: 820, y: 470 })
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === \'code\')', 'Code shape created')
+		await waitFor(page, 'document.querySelector(\'.code-block-canvas .cm-editor\')', 'CodeMirror surface')
+		let code = await codeFacts(page)
+		check('CREATE-1', 'a new Code block is a Python CodeMirror document with line numbers, on the shared size style',
+			{ language: code.props.language, size: code.props.size, lines: code.props.showLineNumbers, chars: code.props.characterWidth >= 16 },
+			{ language: 'python', size: 'm', lines: true, chars: true })
+		check('CREATE-2', 'the unselected-state body carries no persistent header chrome',
+			await evaluate(page, 'document.querySelector(\'.code-block-canvas__header\') === null'), true)
 
-		// The compact selection ribbon is composed from four Code-domain controls,
-		// not a browser-native select or ad-hoc text buttons. Its font-size list
-		// deliberately follows the same list treatment as the product's text menu.
-		const chrome = JSON.parse(await evaluate(page, `(() => {
-			const ids = ['code-language', 'code-font-size', 'code-line-numbers', 'code-width-trigger']
-			const controls = ids.map((id) => document.querySelector('[data-testid="' + id + '"]'))
-			return JSON.stringify({
-				nativeSelect: document.querySelector('select[data-testid="code-language"]') !== null,
-				controls: controls.map((node) => node && Math.round(node.getBoundingClientRect().height)),
-			})
-		})()`))
-		check('CHROME-1', !chrome.nativeSelect && chrome.controls.every((height) => height === 40),
-			'Code uses four 40px contextual controls instead of a browser-native select')
+		// ---- ONE shared selection pill; language is an ordinary appearance row ----
+		await waitFor(page, 'document.querySelector(\'[data-testid="systemsketch-selection-menu"]\')?.dataset.visible === \'true\'', 'selection pill')
+		check('MENU-1', 'the Code selection contributes to the ONE shared pill — no second floating menu',
+			JSON.parse(await evaluate(page, `JSON.stringify({
+				menus: document.querySelectorAll('[data-testid="systemsketch-selection-menu"]').length,
+				legacy: document.querySelectorAll('.code-mini-menu').length,
+				language: Boolean(document.querySelector('[data-testid="systemsketch-selection-menu"] .systemsketch-appearance__trigger[data-control="codeLanguage"]')),
+				size: Boolean(document.querySelector('[data-testid="systemsketch-selection-menu"] .systemsketch-appearance__trigger[data-control="size"]')),
+				lines: Boolean(document.querySelector('[data-testid="systemsketch-selection-menu"] [data-testid="code-line-numbers"]')),
+				width: Boolean(document.querySelector('[data-testid="systemsketch-selection-menu"] [data-testid="code-width-trigger"]')),
+			})`)),
+			{ menus: 1, legacy: 0, language: true, size: true, lines: true, width: true })
 
-		await clickSelector(page, '[data-testid="code-language"]')
-		await waitFor(page, `document.querySelector('[data-testid="code-language-option-javascript"]')`, 'Code language menu')
-		await capture(page, LANGUAGE_SCREENSHOT)
-		await clickSelector(page, '[data-testid="code-language-option-javascript"]')
-		await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === 'code')?.props.language === 'javascript'`, 'JavaScript language choice')
-		const beforeFontSize = await codeRecord(page)
-		await clickSelector(page, '[data-testid="code-font-size"]')
-		await waitFor(page, `document.querySelector('[data-testid="code-font-size-option-20"]')`, 'Code text-size list')
-		await capture(page, SIZE_SCREENSHOT)
-		await clickSelector(page, '[data-testid="code-font-size-option-20"]')
-		await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === 'code')?.props.fontSize === 20`, '20 pixel code text size')
-		const afterFontSize = await codeRecord(page)
-		check('CHROME-2', afterFontSize.props.characterWidth === beforeFontSize.props.characterWidth && afterFontSize.props.w > beforeFontSize.props.w,
-			'text-size list preserves the authored character measure while changing scale')
-		const beforeGutter = await codeRecord(page)
-		await clickSelector(page, '[data-testid="code-line-numbers"]')
-		await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === 'code')?.props.showLineNumbers === false`, 'line number toggle')
-		code = await codeRecord(page)
-		check('RIBBON-1', code.props.language === 'javascript', 'language control updates the live CodeMirror mode')
-		check('RIBBON-2', code.props.characterWidth === beforeGutter.props.characterWidth && code.props.w < beforeGutter.props.w,
-			'line-number toggle keeps the authored character width while removing only the gutter')
+		await clickCenter(page, '.systemsketch-appearance__trigger[data-control="codeLanguage"]')
+		await waitFor(page, 'document.querySelector(\'[data-testid="systemsketch-appearance-panel-codeLanguage"]\')', 'language rows')
+		await clickCenter(page, '[data-testid="systemsketch-appearance-panel-codeLanguage"] [data-value="javascript"]')
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === \'code\')?.props.language === \'javascript\'', 'JavaScript applied')
+		check('LANG-1', 'the appearance language row drives the live CodeMirror mode',
+			(await codeFacts(page)).props.language, 'javascript')
+		await key(page, 'Escape', 'Escape')
 
-		// The FigJam-style width sheet accepts a custom number, not just named presets.
-		await clickSelector(page, '[data-testid="code-width-trigger"]')
-		await waitFor(page, `document.querySelector('[data-testid="code-width-custom"]')`, 'Code width chooser')
-		await capture(page, SCREENSHOT)
-		const custom = await rect(page, '[data-testid="code-width-custom"]')
-		await clickAt(page, custom.x + custom.width / 2, custom.y + custom.height / 2)
-		await shortcut(page, 'a', 'KeyA', 2)
+		// Escape may clear the selection along with the popover; the pill only
+		// exists for a selection, so re-assert it between control steps.
+		const reselect = async () => {
+			const facts = await codeFacts(page)
+			await evaluate(page, `window.__systemsketch.editor.select(${JSON.stringify(facts.id)}); true`)
+			await waitFor(page, 'document.querySelector(\'[data-testid="systemsketch-selection-menu"]\')?.dataset.visible === \'true\'', 'selection pill back')
+		}
+		await reselect()
+
+		// ---- The STANDARD Font size ladder is the Code block's size control ----
+		const before = await codeFacts(page)
+		await clickCenter(page, '.systemsketch-appearance__trigger[data-control="size"]')
+		await waitFor(page, 'document.querySelector(\'[data-testid="systemsketch-appearance-panel-size"]\')', 'size ladder')
+		check('SIZE-1', 'the size rows are the standard Small/Medium/Large/Extra large vocabulary',
+			await evaluate(page, `Array.from(document.querySelectorAll('[data-testid="systemsketch-appearance-panel-size"] [data-control="size"]'))
+				.map((node) => node.getAttribute('data-value')).join(',')`),
+			's,m,l,xl')
+		await shot(page, 'code-block-size-ladder.png')
+		await clickCenter(page, '[data-testid="systemsketch-appearance-panel-size"] [data-value="xl"]')
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === \'code\')?.props.size === \'xl\'', 'size applied')
+		code = await codeFacts(page)
+		check('SIZE-2', 'a type-scale change preserves the authored character measure and re-derives pixels',
+			{ chars: code.props.characterWidth === before.props.characterWidth, grew: code.props.w > before.props.w },
+			{ chars: true, grew: true })
+		await key(page, 'Escape', 'Escape')
+		await reselect()
+
+		// ---- Line numbers: toggle keeps ch, sheds only the gutter --------------
+		const beforeGutter = await codeFacts(page)
+		await clickCenter(page, '[data-testid="code-line-numbers"]')
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === \'code\')?.props.showLineNumbers === false', 'gutter off')
+		code = await codeFacts(page)
+		check('LINES-1', 'the gutter toggle keeps the character width while removing only the gutter',
+			{ chars: code.props.characterWidth === beforeGutter.props.characterWidth, shrank: code.props.w < beforeGutter.props.w },
+			{ chars: true, shrank: true })
+
+		// ---- Width: a combobox of checked rows plus exact entry ---------------
+		await clickCenter(page, '[data-testid="code-width-trigger"]')
+		await waitFor(page, 'document.querySelector(\'[data-testid="systemsketch-appearance-panel-codeWidth"]\')', 'width rows')
+		check('WIDTH-1', 'width offers the preset rows in the same list idiom as every other combobox',
+			await evaluate(page, `Array.from(document.querySelectorAll('[data-testid="systemsketch-appearance-panel-codeWidth"] [data-control="codeWidth"]'))
+				.map((node) => node.getAttribute('data-value')).join(',')`),
+			'72,80,100')
+		await shot(page, 'code-block-width-popover.png')
+		await clickCenter(page, '[data-testid="systemsketch-appearance-panel-codeWidth"] [data-value="80"]')
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === \'code\')?.props.characterWidth === 80', '80 ch preset')
+
+		// The popover stays open after a row choice (the appearance idiom); the
+		// custom field lives in the same panel.
+		await waitFor(page, 'document.querySelector(\'[data-testid="code-width-custom"]\')', 'custom width field')
+		await clickCenter(page, '[data-testid="code-width-custom"]')
+		await evaluate(page, 'document.querySelector(\'[data-testid="code-width-custom"]\').select(); true')
 		await typeSlowly(page, '72')
 		await key(page, 'Enter', 'Enter')
-		await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === 'code')?.props.characterWidth === 72`, 'custom character width')
-		code = await codeRecord(page)
-		check('WIDTH-1', code.props.characterWidth === 72,
-			'typed custom width is persisted as a 72-character measure')
+		await waitFor(page, 'window.__systemsketch.editor.getCurrentPageShapes().find((shape) => shape.type === \'code\')?.props.characterWidth === 72', 'custom 72 ch')
+		check('WIDTH-2', 'exact entry persists a 72-character measure', (await codeFacts(page)).props.characterWidth, 72)
+		await key(page, 'Escape', 'Escape')
+		await reselect()
 
-		// A live stock handle drag owns the pixel geometry, and our narrow shape
-		// seam reports its reciprocal ch while tldraw is in select.resizing.
-		await clickSelector(page, '[data-testid="code-width-trigger"]')
-		const resize = JSON.parse(await evaluate(page, `(() => {
-			const editor = window.__systemsketch.editor
-			const overlay = editor.overlays.getCurrentOverlays().find((item) => item.id === 'selection_fg:bottom_right')
-			if (!overlay) return null
-			const point = editor.pageToScreen(editor.overlays.getOverlayGeometry(overlay).bounds.center)
-			return JSON.stringify({ x: point.x, y: point.y })
+		// ---- Stock resize with a live `ch` readout at the handle ---------------
+		// A 72-ch xl block runs under the shape-facts panel at the window's
+		// bottom-right; pan and zoom it clear so the corner handle (and the ch
+		// HUD beside it) are genuinely on screen.
+		code = await codeFacts(page)
+		await evaluate(page, `window.__systemsketch.editor.setCamera({ x: ${Math.round(80 - code.x * 0.7) / 0.7}, y: ${Math.round(140 - code.y * 0.7) / 0.7}, z: 0.7 }); true`)
+		await delay(150)
+		const handle = JSON.parse(await evaluate(page, `(() => {
+			const bounds = window.__systemsketch.editor.getSelectionRotatedScreenBounds()
+			return JSON.stringify(bounds && { x: bounds.x + bounds.w, y: bounds.y + bounds.h })
 		})()`))
-		check('RESIZE-1', resize !== null, 'the Code block exposes tldraw’s stock bottom-right resize overlay')
-		await mouse(page, 'mouseMoved', resize.x, resize.y)
-		await mouse(page, 'mousePressed', resize.x, resize.y, { buttons: 1 })
-		await mouse(page, 'mouseMoved', resize.x + 74, resize.y + 16, { buttons: 1 })
-		await waitFor(page, `document.querySelector('.code-resize-hud')?.textContent.includes('ch')`, 'live character resize readout')
-		check('RESIZE-2', await evaluate(page, `window.__systemsketch.editor.getPath()`) === 'select.resizing',
-			'Code width uses tldraw’s active select.resizing state')
-		await mouse(page, 'mouseReleased', resize.x + 74, resize.y + 16)
-		await waitFor(page, `window.__systemsketch.editor.getPath() === 'select.idle'`, 'resize completion')
-		code = await codeRecord(page)
-		check('RESIZE-3', code.props.characterWidth > 72,
-			'a freely dragged wider shape recalculates its visible character width')
-
-		// The second click must enter the existing CodeMirror document, never
-		// fall through to tldraw’s “place a new Text shape” behavior.
-		const codeCanvas = await rect(page, '.code-block-canvas')
-		const beforeTextCount = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'text').length`)
-		await clickAt(page, codeCanvas.x + 180, codeCanvas.y + 75)
-		await waitFor(page, `(() => {
-			const editor = window.__systemsketch.editor
-			return editor.getEditingShapeId() === ${JSON.stringify(code.id)} || editor.getOnlySelectedShape()?.id === ${JSON.stringify(code.id)}
-		})()`, 'Code block selection or edit entry')
-		if (await evaluate(page, `window.__systemsketch.editor.getEditingShapeId()`) !== code.id) {
-			await waitFor(page, `document.querySelector('.systemsketch-selection-menu[data-visible="true"]')`, 'Code block contextual ribbon')
-			await delay(120)
-			await clickAt(page, codeCanvas.x + 180, codeCanvas.y + 75)
+		check('RESIZE-1', 'the selection exposes stock resize bounds', handle !== null, true)
+		await mouse(page, 'mouseMoved', handle.x, handle.y)
+		await mouse(page, 'mousePressed', handle.x, handle.y, { buttons: 1 })
+		for (let step = 1; step <= 8; step++) {
+			await mouse(page, 'mouseMoved', handle.x + step * 10, handle.y + step * 2, { buttons: 1 })
+			await delay(30)
 		}
+		await waitFor(page, 'document.querySelector(\'.code-resize-hud\')?.textContent.includes(\'ch\')', 'live ch readout')
+		check('RESIZE-2', 'the drag runs in tldraw\'s own select.resizing state',
+			await evaluate(page, 'window.__systemsketch.editor.getPath()'), 'select.resizing')
+		await shot(page, 'code-block-resize-hud.png')
+		await mouse(page, 'mouseReleased', handle.x + 80, handle.y + 14)
+		await waitFor(page, 'window.__systemsketch.editor.getPath() === \'select.idle\'', 'resize done')
+		code = await codeFacts(page)
+		check('RESIZE-3', 'a freely dragged wider shape recalculates its character width', code.props.characterWidth > 72, true)
+
+		// ---- Second click enters the existing CodeMirror document --------------
+		const canvasBox = await box(page, '.code-block-canvas')
+		const textShapesBefore = await evaluate(page, 'window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === \'text\').length')
+		await clickAt(page, canvasBox.x + 200, canvasBox.y + 60)
 		await waitFor(page, `window.__systemsketch.editor.getEditingShapeId() === ${JSON.stringify(code.id)}`, 'CodeMirror edit entry')
-		await typeSlowly(page, '\n// CodeMirror smoke')
-		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(code.id)})?.props.code.includes('// CodeMirror smoke')`, 'CodeMirror text commit')
-		check('EDIT-1', await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'text').length`) === beforeTextCount,
-			'second click edits the existing Code block without creating a stock Text shape')
+		await evaluate(page, 'document.querySelector(\'.code-block-canvas .cm-content\')?.focus(); true')
+		await key(page, 'End', 'End')
+		await typeSlowly(page, ' // smoke')
+		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(code.id)})?.props.code.includes('// smoke')`, 'CodeMirror text commit')
+		check('EDIT-1', 'the click edits the existing Code block without placing a stock Text shape',
+			await evaluate(page, 'window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === \'text\').length'),
+			textShapesBefore)
+		await deselect(page, { x: 1200, y: 850 })
+		await shot(page, 'code-block-primitive-live.png')
 
-		// Theme selection uses the real product settings route. The Code panels use
-		// semantic chrome tokens, so the selected object ribbon and its popover
-		// remain one surface after a live Light → Dark Modern transition.
-		await clickSelector(page, '[data-testid="main-menu.button"]')
-		await waitFor(page, `document.querySelector('[data-testid="main-menu.settings"]')`, 'Settings menu item')
-		await clickSelector(page, '[data-testid="main-menu.settings"]')
-		await waitFor(page, `document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'Settings dialog')
-		await clickSelector(page, '[data-testid="systemsketch-settings-category-appearance"]')
-		await waitFor(page, `document.querySelector('[data-testid="systemsketch-theme-option-dark-modern"]')`, 'Dark Modern theme option')
-		await clickSelector(page, '[data-testid="systemsketch-theme-option-dark-modern"]')
-		await waitFor(page, `document.querySelector('[data-testid="systemsketch-theme-root"]')?.dataset.ssColorScheme === 'dark'`, 'live dark theme')
-		await clickSelector(page, '.systemsketch-settings__header .tlui-button')
-		await waitFor(page, `!document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'Settings dialog close')
-		if (await evaluate(page, `window.__systemsketch.editor.getEditingShapeId()`) === code.id) {
-			await key(page, 'Escape', 'Escape')
-			await waitFor(page, `window.__systemsketch.editor.getEditingShapeId() !== ${JSON.stringify(code.id)}`, 'Code editing exit')
-		}
-		if (await evaluate(page, `window.__systemsketch.editor.getOnlySelectedShape()?.id`) !== code.id) {
-			const codeAfterTheme = await rect(page, '.code-block-canvas')
-			await clickAt(page, codeAfterTheme.x + 180, codeAfterTheme.y + 75)
-			await waitFor(page, `window.__systemsketch.editor.getOnlySelectedShape()?.id === ${JSON.stringify(code.id)}`, 'dark Code block selection')
-		}
-		await waitFor(page, `document.querySelector('[data-testid="code-width-trigger"]')`, 'dark Code contextual ribbon')
-		await clickSelector(page, '[data-testid="code-width-trigger"]')
-		await waitFor(page, `document.querySelector('[data-testid="code-width-custom"]')`, 'dark Code width chooser')
-		const darkChrome = JSON.parse(await evaluate(page, `(() => {
-			const pill = document.querySelector('.systemsketch-selection-menu__bar')
-			const panel = document.querySelector('.code-contextual-panel')
-			return JSON.stringify({
-				scheme: document.querySelector('[data-testid="systemsketch-theme-root"]')?.dataset.ssColorScheme,
-				pill: pill && getComputedStyle(pill).backgroundColor,
-				panel: panel && getComputedStyle(panel).backgroundColor,
-			})
-		})()`))
-		check('CHROME-3', darkChrome.scheme === 'dark' && darkChrome.pill === darkChrome.panel,
-			`live Dark Modern keeps the Code width panel on the selected-object chrome surface: ${JSON.stringify(darkChrome)}`)
-		await capture(page, DARK_SCREENSHOT)
+		check('CLEAN-CODE', 'the Code journey raised no local console errors', localConsoleErrors(page), [])
 
-		check('CONSOLE-1', localConsoleErrors(page).length === 0, 'no browser console errors occurred')
-		await writeFile(RESULTS, `${JSON.stringify({ checks, screenshots: [LANGUAGE_SCREENSHOT, SIZE_SCREENSHOT, SCREENSHOT, DARK_SCREENSHOT] }, null, 2)}\n`)
-		process.stdout.write(`PASS code block primitive real-browser journey\n${SCREENSHOT}\n`)
+		// ---- Phase two: the babble Source editors share the same CodeMirror ----
+		const babbleId = await evaluate(page, `(() => {
+			const editor = window.__systemsketch.editor
+			const { createShapeId } = window.__systemsketch.tldraw ?? {}
+			const poseId = 'shape:smoke-pose'
+			const babbleId = 'shape:smoke-babble'
+			editor.createShapes([
+				{ id: poseId, type: 'block', x: 1400, y: 120, props: { blockType: 'type', view: 'port', title: 'Pose', attributeSource: 'x: float\\ny: float' } },
+				{ id: babbleId, type: 'block', x: 900, y: 120, props: { blockType: 'type', view: 'port', title: 'EstimateOut', attributeSource: 'pose: Pose' }, meta: { babbleVariant: 1 } },
+			])
+			editor.setCamera({ x: -820, y: -40, z: 1 })
+			editor.select(babbleId)
+			return babbleId
+		})()`)
+		await waitFor(page, 'document.querySelector(\'[data-testid="type-babble-v1"]\')', 'babble V1 region')
+		await clickElement(page, '.TypeBabbleV1-toggle button:nth-child(2)')
+		await waitFor(page, 'document.querySelector(\'[data-testid="type-babble-v1-source"] .cm-editor\')', 'babble Source is CodeMirror')
+		check('BABBLE-1', 'the Source editor takes the cursor immediately',
+			await evaluate(page, 'document.activeElement?.closest(\'[data-testid="type-babble-v1-source"]\') !== null'), true)
+		check('BABBLE-2', 'the grammar highlight paints through CodeMirror decorations',
+			await evaluate(page, 'document.querySelector(\'[data-testid="type-babble-v1-source"] .cm-line .TypeBabble-name\') !== null'), true)
+
+		// The board-registry autocomplete is a real completion source now: type a
+		// fresh `name: ` line, query "Po", accept the board type with Tab.
+		await evaluate(page, 'document.querySelector(\'[data-testid="type-babble-v1-source"] .cm-content\')?.focus(); true')
+		await shortcut(page, 'End', 'End', 2)
+		// A real Enter keypress, not an inserted '\n' — contenteditable turns an
+		// inserted literal newline into a stray trailing break.
+		await key(page, 'Enter', 'Enter')
+		await typeSlowly(page, 'next: Po')
+		await waitFor(page, 'document.querySelector(\'.cm-tooltip-autocomplete\')', 'completion tooltip')
+		check('BABBLE-3', 'the completion lists the live board type with its kind pill and the browse escalation',
+			JSON.parse(await evaluate(page, `JSON.stringify((() => {
+				const rows = Array.from(document.querySelectorAll('.cm-tooltip-autocomplete li'))
+				return {
+					pose: rows.some((row) => row.querySelector('.cm-completionLabel')?.textContent === 'Pose'
+						&& row.querySelector('.TypeNameAutocomplete-pill--board-type') !== null),
+					browse: rows.some((row) => (row.querySelector('.cm-completionLabel')?.textContent ?? '').includes('show every type on this board')),
+				}
+			})())`)),
+			{ pose: true, browse: true })
+		await shot(page, 'babble-cm-autocomplete.png')
+		await key(page, 'Tab', 'Tab')
+		await delay(150)
+		check('BABBLE-4', 'Tab accepts the suggestion into the document',
+			await evaluate(page, 'document.querySelector(\'[data-testid="type-babble-v1-source"] .cm-content\').textContent.includes(\'next: Pose\')'), true)
+
+		// Click-elsewhere commits the draft as one history step.
+		await clickAt(page, 400, 850)
+		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(babbleId)})?.props.attributeSource === 'pose: Pose\\nnext: Pose'`, 'babble commit')
+		check('BABBLE-5', 'clicking outside commits the CodeMirror draft',
+			await evaluate(page, `window.__systemsketch.editor.getShape(${JSON.stringify(babbleId)})?.props.attributeSource`),
+			'pose: Pose\nnext: Pose')
+
+		// Escape cancels: reopen, mutate, Escape, source untouched.
+		await evaluate(page, `window.__systemsketch.editor.select(${JSON.stringify(babbleId)}); true`)
+		await clickElement(page, '.TypeBabbleV1-toggle button:nth-child(2)')
+		await waitFor(page, 'document.querySelector(\'[data-testid="type-babble-v1-source"] .cm-editor\')', 'babble Source reopened')
+		await typeSlowly(page, 'zzz')
+		await key(page, 'Escape', 'Escape')
+		await delay(120)
+		await key(page, 'Escape', 'Escape')
+		await waitFor(page, 'document.querySelector(\'[data-testid="type-babble-v1-source"]\') === null', 'Source closed')
+		check('BABBLE-6', 'Escape discards the draft without writing it',
+			await evaluate(page, `window.__systemsketch.editor.getShape(${JSON.stringify(babbleId)})?.props.attributeSource`),
+			'pose: Pose\nnext: Pose')
+
+		check('CLEAN-BABBLE', 'the babble journey raised no local console errors', localConsoleErrors(page), [])
+
+		const failed = results.filter((result) => !result.ok)
+		process.stdout.write(`\n${results.length - failed.length}/${results.length} checks passed\n`)
+		await writeFile(join(SHOTS, 'code-block-primitive.json'), JSON.stringify(results, null, 2))
+		if (failed.length > 0) process.exitCode = 1
 	} finally {
-		app.close()
+		await app.close()
 	}
 }
 
 main().catch((error) => {
-	console.error(error)
+	process.stderr.write(`${error.stack ?? error}\n`)
 	process.exitCode = 1
 })

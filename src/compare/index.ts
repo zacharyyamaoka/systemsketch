@@ -1,6 +1,13 @@
-export { CompareProvider, CompareTrigger, useCompare } from './CompareLauncher'
+export {
+	CompareProvider,
+	CompareTrigger,
+	useCompare,
+	type CompareAction,
+	type CompareActionOutcome,
+	type CompareExplicitSource,
+} from './CompareLauncher'
 export { CompareDialog } from './CompareDialog'
-export { PropertyTable } from './PropertyTable'
+export { PropertyTable, type ElementReview } from './PropertyTable'
 export { CodeView } from './CodeView'
 export { BoardRender, useLinkedCameras } from './BoardRender'
 export {

@@ -22,7 +22,6 @@ interface DefinitionMemberRef {
 interface SharedDefinitionProps {
 	description: string
 	blockType: string
-	icon: string
 	notes: string
 	inputs: BlockShapeProps['inputs']
 	outputs: BlockShapeProps['outputs']
@@ -80,11 +79,12 @@ export function definitionBadge(props: BlockShapeProps): string | null {
 	return props.view === 'value' || props.draftOrdinal === undefined ? null : `Draft ${props.draftOrdinal}`
 }
 
+// WHY: an icon is visual chrome for this canvas occurrence, not Definition
+// content. Linked calls may use different visual cues while sharing one body.
 function sharedDefinitionProps(props: BlockShapeProps): SharedDefinitionProps {
 	return {
 		description: props.description,
 		blockType: props.blockType,
-		icon: props.icon ?? '',
 		notes: props.notes ?? '',
 		inputs: props.inputs,
 		outputs: props.outputs,
@@ -104,7 +104,6 @@ function applySharedDefinitionProps(target: BlockShapeProps, source: BlockShapeP
 		...target,
 		description: source.description,
 		blockType: source.blockType,
-		icon: source.icon,
 		notes: source.notes,
 		inputs: source.inputs.map((port) => ({ ...port })),
 		outputs: source.outputs.map((port) => ({ ...port })),

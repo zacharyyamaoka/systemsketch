@@ -19,14 +19,17 @@ import {
   type TLUiToolItem,
 } from 'tldraw'
 import { useId, useState, type ReactNode } from 'react'
-import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID, TYPE_TOOL_ID } from '../blocks'
 import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
+import { TypeIcon } from '../blocks/TypeIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
 import { BEHAVIOR_TREE_TOOL_ID, BehaviorTreeIcon } from '../behaviorTree'
 import { CODE_TOOL_ID, CodeIcon } from '../code'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
+import { ASYNC_REGION_TOOL_ID, AsyncRegionIcon } from '../asyncRegion'
+import { FLOATING_PORT_TOOL_ID, FloatingPortIcon } from '../floatingPort'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -53,7 +56,7 @@ interface ShapeMenuItem {
 
 const GEO_MENU_ITEMS: readonly ShapeMenuItem[] = [
   { id: 'rectangle', label: 'Rectangle', icon: 'geo-rectangle', shortcut: 'R' },
-  { id: 'ellipse', label: 'Ellipse', icon: 'geo-ellipse', shortcut: 'O' },
+  { id: 'ellipse', label: 'Ellipse', icon: 'geo-ellipse', shortcut: 'C / O' },
   { id: 'triangle', label: 'Triangle', icon: 'geo-triangle' },
   { id: 'diamond', label: 'Diamond', icon: 'geo-diamond' },
   { id: 'line', label: 'Line', icon: 'tool-line', shortcut: 'L' },
@@ -115,14 +118,19 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // same reason: it is used less often than a Block and the toolbar, not the
   // right-click menu, is where the muscle memory forms.
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
+  { id: ASYNC_REGION_TOOL_ID, label: 'Async region', icon: <AsyncRegionIcon /> },
   // A Behavior Tree is a region like Branch and Loop: its nodes are real
   // Blocks, so it lives in the same family slot rather than on its own.
   { id: BEHAVIOR_TREE_TOOL_ID, label: 'Behavior Tree', icon: <BehaviorTreeIcon /> },
-  // Code is an authored literal on the board, so C inserts it directly while
-  // its language and presentational width remain on the selected object.
-  { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon />, shortcut: 'C' },
+  // Code is an authored literal reached from this family or S-search; C/O
+  // intentionally converge on Ellipse for drawing muscle memory.
+  { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+  { id: FLOATING_PORT_TOOL_ID, label: 'Port', icon: <FloatingPortIcon /> },
+  // Type intentionally has no key: T stays stock text, so a Type is reached
+  // from this shared slot rather than a letter collision.
+  { id: TYPE_TOOL_ID, label: 'Type', icon: <TypeIcon /> },
   // Callout intentionally has no key: its two-click interaction is reached from
   // the shared system-design muscle-memory slot, not from a letter collision.
   { id: CALLOUT_TOOL_ID, label: 'Callout', icon: <CalloutIcon /> },
@@ -266,7 +274,7 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
     <FamilyToolSlot
       family="shape"
       icon={currentItem.icon}
-      label={`${currentItem.label} · R O L A`}
+      label={`${currentItem.label} · R C/O L A`}
       active={isActive}
       onSelect={() => selectShapeFamilyTool(tools, current)}
     >
@@ -309,6 +317,8 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     ? BRANCH_TOOL_ID
       : activeToolId === LOOP_TOOL_ID
       ? LOOP_TOOL_ID
+      : activeToolId === ASYNC_REGION_TOOL_ID
+        ? ASYNC_REGION_TOOL_ID
       : activeToolId === BEHAVIOR_TREE_TOOL_ID
       ? BEHAVIOR_TREE_TOOL_ID
       : activeToolId === CODE_TOOL_ID
@@ -317,6 +327,10 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
         ? BLOCK_TOOL_ID
       : activeToolId === PILL_TOOL_ID
           ? PILL_TOOL_ID
+          : activeToolId === FLOATING_PORT_TOOL_ID
+            ? FLOATING_PORT_TOOL_ID
+          : activeToolId === TYPE_TOOL_ID
+            ? TYPE_TOOL_ID
           : activeToolId === CALLOUT_TOOL_ID
             ? CALLOUT_TOOL_ID
           : preferences.lastSystemTool
@@ -324,8 +338,12 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
+    || activeToolId === ASYNC_REGION_TOOL_ID
+    || activeToolId === BEHAVIOR_TREE_TOOL_ID
     || activeToolId === CODE_TOOL_ID
     || activeToolId === PILL_TOOL_ID
+    || activeToolId === FLOATING_PORT_TOOL_ID
+    || activeToolId === TYPE_TOOL_ID
     || activeToolId === CALLOUT_TOOL_ID
 
   return (
@@ -425,10 +443,6 @@ function LibrarySlot() {
         sideOffset={12}
         collisionPadding={12}
         autoFocusFirstButton={false}
-        // ShapeLibraryBrowser owns Escape itself — first clears its search,
-        // second closes via onCancel below — so Radix's own close-on-Escape
-        // must stand down rather than race it.
-        disableEscapeKeyDown
       >
         <aside
           className="systemsketch-library-panel"

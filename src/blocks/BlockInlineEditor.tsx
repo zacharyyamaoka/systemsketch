@@ -9,6 +9,7 @@ import {
 	type BlockInlineField,
 } from './inlineBlockEditing'
 import { VALUE_FONT_PX } from './layoutBlock'
+import { blockTitleAppearance } from './titleAppearance'
 import { BLOCK_ICONS } from './ui/blockIcons'
 import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 
@@ -78,11 +79,15 @@ function updateField(
 }
 
 function editorStyle(
+	editor: ReturnType<typeof useEditor>,
 	props: BlockShapeProps,
 	field: BlockInlineField,
 	box: { x: number; y: number; w: number; h: number },
 	align: 'left' | 'center' | 'right',
 ): CSSProperties {
+	const titleAppearance = field.kind === 'title'
+		? blockTitleAppearance(editor, props)
+		: null
 	const minimumWidth = field.kind === 'icon'
 		? 170
 		: field.kind === 'description'
@@ -100,14 +105,17 @@ function editorStyle(
 		top: box.y + (box.h - height) / 2,
 		width,
 		height,
-		textAlign: align,
-		fontSize: props.view === 'value'
+		textAlign: titleAppearance?.textAlign ?? align,
+		fontFamily: titleAppearance?.fontFamily,
+		fontWeight: titleAppearance?.fontWeight,
+		color: titleAppearance?.color,
+		fontSize: titleAppearance?.fontSize ?? (props.view === 'value'
 			? VALUE_FONT_PX
 			: field.kind === 'title'
 				? (props.view === 'simple' ? 38 : 30)
 				: field.kind.startsWith('port')
 					? 17
-					: 16,
+					: 16),
 	}
 }
 
@@ -179,7 +187,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 
 	if (!placement) return null
 	const value = valueFor(shape.props, field)
-	const style = editorStyle(shape.props, field, placement.box, placement.align)
+	const style = editorStyle(editor, shape.props, field, placement.box, placement.align)
 	const common = {
 		ref: editorRef as never,
 		className: `BlockNode-inlineEditor BlockNode-inlineEditor--${field.kind}${

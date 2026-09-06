@@ -1,9 +1,11 @@
 import type { Editor, TLParentId, TLShape, TLShapeId } from 'tldraw'
 
-import { canBlockContainChildren, isBlockShape } from '../blockModel'
+import { isBlockShape, isExpandedBlockShape } from '../blockModel'
 import { isBranchShape } from '../../branch/branchModel'
 import { isLoopShape } from '../../loop/loopModel'
+import { isFloatingPortShape } from '../../floatingPort/floatingPortModel'
 import { isImportedPageFrame } from '../../singlePageDocument'
+import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
 import type { PortDot, PortFace } from './connectionModel'
 
 /** A shape a cable can weld to: a Block, or a Branch through its control ports. */
@@ -16,7 +18,7 @@ type ScopeHost = TLShape
  * straight from outside into an arm with no tunnel on the way.
  */
 function hostIsLiveScope(host: ScopeHost): boolean {
-	return isBlockShape(host) && canBlockContainChildren(host.props.view)
+	return isExpandedBlockShape(host)
 }
 
 /**
@@ -100,7 +102,7 @@ export function anchorFaceForScope(
 	// from the same dot worked: `offerBlockForLooseTerminal` asks this function
 	// for a face, got null, and bailed silently. The QA sweep caught it by
 	// running the same tap on a Block port as a control.
-	if (!isBlockShape(shape) && !isBranchShape(shape) && !isLoopShape(shape)) return null
+	if (!isBlockShape(shape) && !isBranchShape(shape) && !isLoopShape(shape) && !isFloatingPortShape(shape)) return null
 	if (scopeId === shape.id) return hostIsLiveScope(shape) ? 'inner' : null
 	if (scopeId === blockScopeId(editor, shape.id)) return 'outer'
 	return null
@@ -108,8 +110,9 @@ export function anchorFaceForScope(
 
 /**
  * A container that draws a frame without defining a scope, and that can hold a
- * cable: a Branch, a Loop. Blocks inside one live in the SAME scope as it does,
- * which is what lets a cable run straight in from outside with no tunnel.
+ * cable: a Branch, a Loop, or an Async region. Blocks inside one live in the
+ * SAME scope as it does, which lets a cable run straight in from outside with
+ * no tunnel.
  *
  * A Branch ARM is deliberately not one. An arm folds, and tldraw hides a
  * folded frame's children — so an arm that owned a cable would swallow it on
@@ -118,7 +121,7 @@ export function anchorFaceForScope(
  * Branch instead, which cannot fold.
  */
 export function isRegionShape(shape: TLShape | undefined | null): boolean {
-	return isBranchShape(shape) || isLoopShape(shape)
+	return isBranchShape(shape) || isLoopShape(shape) || isAsyncRegionShape(shape ?? undefined)
 }
 
 /** The regions between a cable end and its scope, innermost first. */

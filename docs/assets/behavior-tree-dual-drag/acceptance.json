@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T21:58:57.168Z",
+  "generatedAt": "2026-09-06T23:44:30.403Z",
   "passed": 33,
   "total": 33,
   "results": [
@@ -55,24 +55,24 @@
         {
           "path": "select.idle",
           "region": "shape:bt-dual-drag",
-          "shape": "shape:FHGM1K_NUpNG-joNQTYnV"
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
         },
         {
           "path": "select.idle",
           "region": "shape:bt-dual-drag",
-          "shape": "shape:FHGM1K_NUpNG-joNQTYnV"
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
         }
       ],
       "desired": [
         {
           "path": "select.idle",
           "region": "shape:bt-dual-drag",
-          "shape": "shape:FHGM1K_NUpNG-joNQTYnV"
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
         },
         {
           "path": "select.idle",
           "region": "shape:bt-dual-drag",
-          "shape": "shape:FHGM1K_NUpNG-joNQTYnV"
+          "shape": "shape:tbVZR6f56C9Tiv_gfFjzH"
         }
       ],
       "ok": true
@@ -121,10 +121,10 @@
       "id": "click.selects",
       "label": "the click selected the node",
       "observed": [
-        "shape:5TyjhWEQmslBQAuXuYeUA"
+        "shape:pz0lje2rdN9WaVA9x0sCI"
       ],
       "desired": [
-        "shape:5TyjhWEQmslBQAuXuYeUA"
+        "shape:pz0lje2rdN9WaVA9x0sCI"
       ],
       "ok": true
     },

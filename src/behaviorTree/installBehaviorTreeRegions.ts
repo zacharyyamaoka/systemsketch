@@ -153,8 +153,11 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId, optio
 					idByPath.set(child.path, current.id)
 					const wanted = desiredRecordProps(child, current)
 					const skip = options.skipShapeIds?.includes(current.id) ?? false
-					if (!skip && (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || !sameProps(current.props as Record<string, unknown>, wanted))) {
-						editor.updateShape({ id: current.id, type: current.type, x: child.x, y: child.y, props: wanted } as never)
+					// The region owns its children's opacity: the disabled dim is a
+					// projection fact, so a hand-set opacity is repaired like a drag.
+					const wantedOpacity = child.opacity ?? 1
+					if (!skip && (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || current.opacity !== wantedOpacity || !sameProps(current.props as Record<string, unknown>, wanted))) {
+						editor.updateShape({ id: current.id, type: current.type, x: child.x, y: child.y, opacity: wantedOpacity, props: wanted } as never)
 						report.updated += 1
 					}
 					// A copied child arrives naming the region it was copied from.
@@ -176,6 +179,7 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId, optio
 					parentId: region.id,
 					x: child.x,
 					y: child.y,
+					opacity: child.opacity ?? 1,
 					props: child.props,
 					meta: btChildMeta(region.id, child.path, child.role),
 				} as never)
@@ -338,6 +342,17 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 	// arrivals are remembered until the repair that follows it.
 	const arrived = new Set<TLShapeId>()
 
+	// WHY: undo/redo replays a whole operation's diff atomically — store.put
+	// (every added/updated record, region included) runs before store.remove
+	// (every deleted record) — so a region's own xml/offsets are already back
+	// to their pre-edit value by the time a *child's* revert fires its own
+	// side effect. `stopDelete` below relies on this ordering: once a region
+	// has already been rewritten earlier in the same operation, a child
+	// vanishing afterward is that rewrite's own bookkeeping catching up, not a
+	// fresh gesture, so it must not be compiled into a second, independent
+	// edit. Reset once per completed operation — see `stopComplete`.
+	const regionRewrittenThisOperation = new Set<TLShapeId>()
+
 	const stopCreate = editor.sideEffects.registerAfterCreateHandler('shape', (shape, source) => {
 		if (isProjecting(editor)) return
 		arrived.add(shape.id)
@@ -351,7 +366,10 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		if (isBehaviorTreeShape(after)) {
 			if (before.props !== after.props && (before as BehaviorTreeShape).props.xml === after.props.xml
 				&& JSON.stringify({ ...(before as BehaviorTreeShape).props, w: 0, h: 0 }) === JSON.stringify({ ...after.props, w: 0, h: 0 })) return
-			if (before.props !== after.props) queue(after.id, repairSource)
+			if (before.props !== after.props) {
+				queue(after.id, repairSource)
+				regionRewrittenThisOperation.add(after.id)
+			}
 			return
 		}
 		const meta = readBtChildMeta(after)
@@ -413,6 +431,22 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		const region = behaviorTreeRegionFor(editor, shape)
 		if (!isBehaviorTreeShape(region)) return
 		const regionId = region.id
+		// WHY: an undo that unwinds an earlier insert removes the shape that
+		// insert created — the same store event a real Delete key produces.
+		// But by now the region's xml has already been reverted (put runs
+		// before remove; see `regionRewrittenThisOperation` above), so this
+		// shape's `btPath` is stale: that slot in the *current* xml may
+		// already, legitimately, belong to a different, already-restored
+		// occurrence. Compiling "delete `path`" here would delete THAT node
+		// instead — confirmed live: inserting a sibling mid-tree then undoing
+		// once silently dropped an unrelated, already-existing node. Once the
+		// region has already been rewritten this operation, trust that
+		// rewrite; a reconcile pass (queued below) is enough to catch up any
+		// shape bookkeeping that still needs it.
+		if (regionRewrittenThisOperation.has(regionId)) {
+			queue(regionId, source === 'remote' ? 'remote' : 'user')
+			return
+		}
 		// Delete on a projected node is a semantic delete of that occurrence.
 		const result = deleteBehaviorTreeNode(region.props.xml, region.props.treeId, meta[BT_META_PATH])
 		if (result.ok) {
@@ -489,6 +523,7 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		queueMicrotask(repairPending)
 	}
 	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(() => {
+		regionRewrittenThisOperation.clear()
 		if (pending.size > 0) scheduleRepair()
 		else arrived.clear()
 	})

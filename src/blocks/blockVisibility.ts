@@ -1,6 +1,6 @@
 import { isShapeId, type Editor, type TLShape } from 'tldraw'
 
-import { isBlockShape } from './blockModel'
+import { blockIsFolded, isBlockShape } from './blockModel'
 import { isBranchShape } from '../branch/branchModel'
 import {
 	foldedUnderCaseView,
@@ -10,6 +10,11 @@ import {
 import { getConnectionBindings } from './connections/ConnectionBindingUtil'
 import { CONNECTION_SHAPE_TYPE } from './connections/connectionModel'
 import { getActiveDepthScopeId } from '../depth/depthNavigation'
+import {
+	communicationProjection,
+	isCommunicationPrototypeEnabled,
+	isShapeInCommunicationScope,
+} from '../prototypes/communication/communicationProjection'
 
 /**
  * A Block is an opaque leaf unless its active view is Expanded, and a Branch
@@ -31,6 +36,17 @@ export function getBlockShapeVisibility(
 	shape: TLShape,
 	editor: Editor,
 ): 'visible' | 'hidden' | 'inherit' {
+	// WHY: the component map is a transient projection of this exact document.
+	// Literal value nodes remain stored and return untouched in Dataflow; hiding
+	// them here proves the simplified view did not create or delete a second
+	// graph merely to make component communication legible.
+	if (
+		isCommunicationPrototypeEnabled(editor)
+		&& communicationProjection.get(editor).mode === 'components'
+		&& isBlockShape(shape)
+		&& shape.props.view === 'value'
+		&& isShapeInCommunicationScope(editor, shape.id)
+	) return 'hidden'
 	const depthScopeId = getActiveDepthScopeId(editor)
 	if (depthScopeId && editor.getShape(depthScopeId)) {
 		// The entered Block must explicitly override a hidden ancestor. Its
@@ -42,7 +58,9 @@ export function getBlockShapeVisibility(
 	}
 	if (isShapeId(shape.parentId)) {
 		const parent = editor.getShape(shape.parentId)
-		if (isBlockShape(parent) && parent.props.view !== 'expanded') return 'hidden'
+		if (isBlockShape(parent) && (parent.props.view !== 'expanded' || blockIsFolded(parent.props))) {
+			return 'hidden'
+		}
 	}
 	if (shape.type === CONNECTION_SHAPE_TYPE) {
 		return connectionHiddenByBranch(editor, shape) ? 'hidden' : 'inherit'

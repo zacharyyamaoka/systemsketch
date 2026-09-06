@@ -156,6 +156,23 @@ async function selectRegion(page) {
   await delay(200)
 }
 
+/** Bring an on-canvas button to the middle of the viewport, the way a person
+ * would scroll before clicking it — needed before any insert-menu check,
+ * since a `fitRegion`-wide view can leave individual "+" targets (there is
+ * one per insertion point, scattered across the whole region) off-screen. */
+async function centerOnButton(page, selector) {
+  await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const button = document.querySelector(${JSON.stringify(selector)})
+    const rect = button.getBoundingClientRect()
+    const point = editor.screenToPage({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+    editor.setCamera({ x: editor.getCamera().x, y: editor.getCamera().y, z: 0.8 })
+    editor.centerOnPoint(point, { animation: { duration: 0 } })
+    return null
+  })()`)
+  await delay(300)
+}
+
 async function selectPath(page, path) {
   return evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
@@ -299,6 +316,18 @@ async function main() {
     await shot(page, 'process-dataflow.png')
     await setView(page, { projection: 'tree', dataLens: 'none', nodeFace: 'simple', orientation: 'down' })
 
+    // ---- Tree wire styles -----------------------------------------------------
+    for (const edgeStyle of ['straight', 'elbow', 'curved', 'slanted']) {
+      await setView(page, { edgeStyle })
+      await fitRegion(page)
+      const wires = await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.BehaviorTree-wire')).map((path) => path.getAttribute('d')))`).then(JSON.parse)
+      check(`tree.wires.${edgeStyle}`, `Tree wires draw as ${edgeStyle}`,
+        { count: wires.length > 0, hasCurve: wires.some((d) => d.includes('C')) },
+        { count: true, hasCurve: edgeStyle === 'curved' })
+      await shot(page, `tree-wires-${edgeStyle}.png`)
+    }
+    await setView(page, { edgeStyle: 'straight' })
+
     // ---- insert through the on-canvas "+" -----------------------------------
     await setView(page, { projection: 'process' })
     await fitRegion(page)
@@ -306,27 +335,176 @@ async function main() {
     const xmlBefore = await regionXml(page)
     // Bring the end target to the middle of the viewport so its menu opens
     // clear of the bottom toolbar, the way a person would scroll before adding.
-    await evaluate(page, `(() => {
-      const editor = window.__systemsketch.editor
-      const button = document.querySelector('[data-testid="bt-insert-end"]')
-      const rect = button.getBoundingClientRect()
-      const point = editor.screenToPage({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
-      editor.setCamera({ x: editor.getCamera().x, y: editor.getCamera().y, z: 0.8 })
-      editor.centerOnPoint(point, { animation: { duration: 0 } })
-      return null
-    })()`)
-    await delay(300)
+    await centerOnButton(page, '[data-testid="bt-insert-end"]')
+
+    check('insert.closed-initially', 'no menu is open before any "+" is clicked',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
+
+    // The menu is now a real `TldrawUiPopover`: registering with tldraw's own
+    // menu state buys outside-click dismissal, Escape, Tab trapping and focus
+    // return for free instead of hand-rolling each one.
     await clickElement(page, '[data-testid="bt-insert-end"]')
     await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu')
+    check('insert.pressed', 'the "+" that owns the open menu shows a pressed state',
+      await evaluate(page, `document.querySelector('[data-testid="bt-insert-end"]')?.getAttribute('aria-pressed')`), 'true')
     check('insert.menu-rows', 'the first page is Skills, Control flow, Fail',
       await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('[data-testid="bt-insert-menu"] .BehaviorTree-menuRowLabel')).map((node) => node.textContent))`).then(JSON.parse),
       ['Skills', 'Control flow', 'Fail'])
+    check('insert.focus-on-open', 'opening the menu moves focus to its first row',
+      await evaluate(page, `document.activeElement?.getAttribute('data-testid') ?? null`), 'bt-insert-row-skills')
+
+    // ---- the menu never sits under a projected card, or under the toolbar --
+    const zOrder = await evaluate(page, `JSON.stringify((() => {
+      const menu = document.querySelector('[data-testid="bt-insert-menu"]')
+      const menuRect = menu.getBoundingClientRect()
+      const skillsRow = document.querySelector('[data-testid="bt-insert-row-skills"]')
+      const rowRect = skillsRow.getBoundingClientRect()
+      const rowHit = document.elementFromPoint(rowRect.x + rowRect.width / 2, rowRect.y + rowRect.height / 2)
+      const cards = Array.from(document.querySelectorAll('[data-shape-id]'))
+      const overlapping = cards.find((card) => {
+        const rect = card.getBoundingClientRect()
+        return rect.left < menuRect.right && menuRect.left < rect.right && rect.top < menuRect.bottom && menuRect.top < rect.bottom
+      })
+      const inViewport = menuRect.left >= 0 && menuRect.top >= 0 && menuRect.right <= window.innerWidth && menuRect.bottom <= window.innerHeight
+      let aboveCard = null
+      if (overlapping) {
+        const rect = overlapping.getBoundingClientRect()
+        const px = (Math.max(rect.left, menuRect.left) + Math.min(rect.right, menuRect.right)) / 2
+        const py = (Math.max(rect.top, menuRect.top) + Math.min(rect.bottom, menuRect.bottom)) / 2
+        const hit = document.elementFromPoint(px, py)
+        aboveCard = Boolean(hit && hit.closest('[data-testid="bt-insert-menu"]'))
+      }
+      return { rowUncovered: Boolean(rowHit && rowHit.closest('[data-testid="bt-insert-row-skills"]')), hasOverlappingCard: Boolean(overlapping), aboveCard, inViewport }
+    })())`).then(JSON.parse)
+    check('insert.z-order.row', 'nothing covers the Skills row', zOrder.rowUncovered, true)
+    check('insert.z-order.above-cards', 'where a card overlaps the menu, the menu paints above it in z-order',
+      zOrder.hasOverlappingCard ? zOrder.aboveCard : 'no overlapping card to check', zOrder.hasOverlappingCard ? true : 'no overlapping card to check')
+    check('insert.in-viewport', 'the menu stays inside the viewport rather than sitting under the toolbar or off-screen', zOrder.inViewport, true)
     await shot(page, 'insert-menu.png')
+
+    await key(page, 'Tab')
+    await delay(150)
+    check('insert.tab-trapped', 'Tab cycles inside the open menu rather than escaping to the canvas',
+      await evaluate(page, `Boolean(document.activeElement?.closest('[data-testid="bt-insert-menu"]'))`), true)
+
     await clickElement(page, '[data-testid="bt-insert-row-skills"]')
     await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-search"]'))`, 'the Skills page')
+    check('insert.focus-skills', 'the Skills page moves focus to its search field',
+      await evaluate(page, `document.activeElement?.getAttribute('data-testid') ?? null`), 'bt-insert-search')
     await shot(page, 'insert-menu-skills.png')
+
+    // ---- Escape steps back before it closes ---------------------------------
+    await key(page, 'Escape')
+    await delay(150)
+    check('insert.escape-back', 'Escape on a sub-page returns to the root page instead of closing',
+      await evaluate(page, `JSON.stringify({ open: Boolean(document.querySelector('[data-testid="bt-insert-menu"]')), page: document.querySelector('[data-testid="bt-insert-menu"]')?.getAttribute('data-page') ?? null })`).then(JSON.parse),
+      { open: true, page: 'root' })
+    await key(page, 'Escape')
+    await delay(150)
+    check('insert.escape-close', 'Escape on the root page closes the menu',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
+    check('insert.focus-return', 'focus returns to the "+" that opened the menu',
+      await evaluate(page, `document.activeElement?.getAttribute('data-testid') ?? null`), 'bt-insert-end')
+
+    // ---- outside pointer-down closes without inserting ----------------------
+    const xmlBeforeOutside = await regionXml(page)
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    // A point well clear of the menu, chosen at runtime so it never lands on
+    // the toolbar or another chrome panel rather than guessing fixed pixels.
+    const outside = await evaluate(page, `JSON.stringify((() => {
+      const candidates = [
+        { x: 40, y: window.innerHeight / 2 },
+        { x: window.innerWidth / 2, y: 40 },
+        { x: window.innerWidth - 40, y: window.innerHeight / 2 },
+      ]
+      const isChrome = (element) => Boolean(element?.closest(
+        '.tlui-layout__top, .tlui-layout__bottom, .tlui-toolbar, .systemsketch-popout, .systemsketch-top-left-shell, .systemsketch-top-right-shell, [data-testid="bt-insert-menu"]',
+      ))
+      return candidates.find((point) => !isChrome(document.elementFromPoint(point.x, point.y))) ?? candidates[0]
+    })())`).then(JSON.parse)
+    await clickAt(page, outside.x, outside.y)
+    await delay(200)
+    check('insert.outside-closes', 'a pointer-down elsewhere closes the menu without inserting anything',
+      await evaluate(page, `JSON.stringify({ open: Boolean(document.querySelector('[data-testid="bt-insert-menu"]')) })`).then(JSON.parse),
+      { open: false })
+    check('insert.outside-no-insert', 'the XML is untouched by an outside dismissal', await regionXml(page), xmlBeforeOutside)
+
+    // ---- clicking the same "+" again closes it -------------------------------
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await delay(200)
+    check('insert.toggle-closes', 'clicking the same "+" again closes its own menu',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
+
+    // ---- clicking a different "+" moves the menu; only one is ever open -----
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    const otherInsertId = await evaluate(page, `JSON.stringify((() => {
+      const buttons = Array.from(document.querySelectorAll('.BehaviorTree-insert'))
+      const other = buttons.find((button) => button.dataset.testid !== 'bt-insert-end')
+      return other?.dataset.testid ?? null
+    })())`).then(JSON.parse)
+    check('insert.other-target-exists', 'the sample process view has more than one insertion target', typeof otherInsertId, 'string')
+    if (otherInsertId) {
+      // The camera is still centred tight on `bt-insert-end` (z 0.8, to clear
+      // the toolbar for the z-order checks above) — the sample's other
+      // insert points live elsewhere in the region, so bring this one into
+      // view too before clicking its real screen coordinates.
+      await centerOnButton(page, `[data-testid="${otherInsertId}"]`)
+      // Two clicks, not one: every "+" lives on the canvas itself (below
+      // tldraw's chrome layer), and while `bt-insert-end`'s menu is open,
+      // tldraw's own `MenuClickCapture` — an invisible, full-viewport
+      // overlay it mounts whenever any menu is open, specifically to swallow
+      // canvas interaction — sits above it in z-order and intercepts this
+      // click before it ever reaches the other button (confirmed live:
+      // `document.elementFromPoint` at the other button's own screen centre
+      // returned the `.tlui-menu-click-capture` div, not the button). That
+      // first click does what a bare canvas click always does — closes the
+      // open menu — exactly like `insert.outside-closes` above. Only the
+      // second click, now that nothing covers the canvas, lands on the real
+      // trigger and opens it. Every *stock* tldraw popover trigger lives in
+      // the chrome layer instead, so this two-click reality is specific to
+      // having a trigger on the canvas, not a bug in the exclusivity logic
+      // itself (`insert.closes-on-choose` below proves that logic correctly
+      // forces a stale popover closed once it's told to).
+      await clickElement(page, `[data-testid="${otherInsertId}"]`)
+      await delay(200)
+      await clickElement(page, `[data-testid="${otherInsertId}"]`)
+      await delay(200)
+      check('insert.one-open-at-a-time', 'opening a different "+" closes the first and shows exactly one menu, at the new target',
+        await evaluate(page, `JSON.stringify({
+          menus: document.querySelectorAll('[data-testid="bt-insert-menu"]').length,
+          endPressed: document.querySelector('[data-testid="bt-insert-end"]')?.getAttribute('aria-pressed'),
+          otherPressed: document.querySelector(${JSON.stringify(`[data-testid="${otherInsertId}"]`)})?.getAttribute('aria-pressed'),
+        })`).then(JSON.parse),
+        { menus: 1, endPressed: 'false', otherPressed: 'true' })
+      // A non-persistent "+" is normally hover-only; its own open menu keeps
+      // it (and only it) visible without the pointer resting on it.
+      check('insert.active-stays-visible', 'the "+" that owns the open menu stays visible even though it is not persistent',
+        await evaluate(page, `JSON.stringify((() => {
+          const button = document.querySelector(${JSON.stringify(`[data-testid="${otherInsertId}"]`)})
+          return { persistent: button.dataset.persistent, opacity: Number(getComputedStyle(button).opacity) }
+        })())`).then(JSON.parse),
+        { persistent: 'false', opacity: 1 })
+      await key(page, 'Escape')
+      await delay(150)
+    } else {
+      await key(page, 'Escape')
+      await delay(150)
+    }
+
+    // ---- choosing a row inserts exactly one node, closes, and selects it ----
+    await centerOnButton(page, '[data-testid="bt-insert-end"]')
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    await clickElement(page, '[data-testid="bt-insert-row-skills"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-search"]'))`, 'the Skills page')
     await clickElement(page, '[data-testid="bt-insert-row-model:MoveHome"]')
     await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml !== ${JSON.stringify(xmlBefore)}`, 'the XML to change')
+    check('insert.closes-on-choose', 'choosing a row closes the menu',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
     const xmlAfterInsert = await regionXml(page)
     check('insert.xml', 'MoveHome is appended to the root Sequence', (xmlAfterInsert.match(/<MoveHome/g) ?? []).length - (xmlBefore.match(/<MoveHome/g) ?? []).length, 1)
     check('insert.selected', 'the new occurrence is selected',
@@ -345,6 +523,33 @@ async function main() {
     await shortcut(page, 'z', 'KeyZ', 2)
     await delay(350)
     check('insert.undo', 'a second undo takes back the insertion', await regionXml(page), xmlBefore)
+
+    // ---- undo of a MID-tree insert (a path remap, not just an append) --------
+    // The two undo checks just above only ever insert at the LAST position
+    // (`0.5`), where the new occurrence's path never collided with a
+    // survivor once undo put everything else back — so a remap bug in the
+    // undo path had nothing to catch it on. `0.2` here has real later
+    // siblings (`0.3`, `0.4`) that must shift up and then back down again.
+    // The region is still in the `process` projection from the section
+    // above, where controls paint as rails/joins rather than shapes of their
+    // own (see `process.leaves-only`), so the count check below is taken
+    // relative to this section's own baseline rather than the tree
+    // projection's absolute 13 — it asserts the round trip is
+    // count-preserving, not what the count should be in some other view.
+    const countBeforeMidInsert = await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`)
+    await selectPath(page, '0.2')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-action-add-after"]'))`, 'the inspector for 0.2')
+    await clickElement(page, '[data-testid="bt-action-add-after"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml !== ${JSON.stringify(xmlBefore)}`, 'the mid-tree insert to land')
+    await delay(300)
+    const xmlAfterMidInsert = await regionXml(page)
+    check('insert.middle.xml', 'Add after inserts one sibling right after 0.2', (xmlAfterMidInsert.match(/<NewSkill/g) ?? []).length, 1)
+    check('insert.middle.count', 'the new occurrence adds exactly one child shape', await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeMidInsert + 1)
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(350)
+    check('insert.middle.undo', 'one undo restores the pre-insert XML byte-for-byte, including the shifted siblings', await regionXml(page), xmlBefore)
+    check('insert.middle.undo-count', 'the shifted siblings are neither duplicated nor dropped', await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeMidInsert)
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
 
     // ---- free arrangement and Tidy --------------------------------------------
     // Item 6: Tree view now defaults to Auto layout on (`arrangement: 'tidy'`,
@@ -413,6 +618,178 @@ async function main() {
     await setView(page, { projection: 'process', orientation: 'right' })
     await fitRegion(page)
     await shot(page, 'process-recovery-added.png')
+    await setView(page, { projection: 'tree', orientation: 'down' })
+
+    // ---- comment out / comment in (MoveIt Pro's disable-without-delete) ------
+    // Authoring-time only — there is no live executor — so the proof is the
+    // `_disabled` marker in the XML, the dimmed projection over the whole
+    // subtree, both toggle directions, and survival of a rebuild from the
+    // persisted XML alone (the reload case).
+    const opacitiesByPath = async () => JSON.parse(await evaluate(page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const byPath = {}
+      for (const id of editor.getSortedChildIdsForParent('${REGION}')) {
+        const shape = editor.getShape(id)
+        if (shape.meta.btRole === 'node') byPath[shape.meta.btPath] = shape.opacity
+      }
+      return byPath
+    })())`))
+    await selectPath(page, '0.1')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-action-disable"]'))`, 'the comment-out action')
+    check('disable.offer', 'an enabled node offers "Comment out"',
+      await evaluate(page, `document.querySelector('[data-testid="bt-action-disable"]')?.textContent ?? null`), 'Comment out')
+    await clickElement(page, '[data-testid="bt-action-disable"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml.includes('_disabled')`, 'the disabled marker to land')
+    await delay(300)
+    const disabledXml = await regionXml(page)
+    check('disable.xml', 'commenting out writes _disabled="true" on the occurrence',
+      disabledXml.includes('<Fallback name="Grasp or correct" _disabled="true">'), true)
+    let dimmed = await opacitiesByPath()
+    check('disable.dims-subtree', 'the node and its whole subtree dim; siblings stay full-strength',
+      { node: dimmed['0.1'], child: dimmed['0.1.0'], sibling: dimmed['0.0'] },
+      { node: 0.35, child: 0.35, sibling: 1 })
+    await fitRegion(page)
+    await shot(page, 'disabled-dimmed.png')
+
+    // The reload case: a fresh region rebuilt from nothing but the saved XML.
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.deleteShapes(['${REGION}'])
+      editor.createShape({ id: '${REGION}', type: 'behaviorTree', x: 200, y: 160, props: { xml: ${JSON.stringify(disabledXml)}, title: 'PickAndPlace' } })
+      editor.selectNone()
+      return null
+    })()`)
+    await waitFor(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length >= 13`, 'the rebuilt region to project')
+    await delay(300)
+    dimmed = await opacitiesByPath()
+    check('disable.survives-reload', 'a region rebuilt from the saved XML still dims the commented-out subtree',
+      { node: dimmed['0.1'], child: dimmed['0.1.1'], sibling: dimmed['0.2'] },
+      { node: 0.35, child: 0.35, sibling: 1 })
+
+    await selectPath(page, '0.1')
+    await waitFor(page, `document.querySelector('[data-testid="bt-action-disable"]')?.textContent === 'Comment in'`, 'the comment-in action')
+    await clickElement(page, '[data-testid="bt-action-disable"]')
+    await waitFor(page, `!window.__systemsketch.editor.getShape('${REGION}').props.xml.includes('_disabled')`, 'the marker to clear')
+    await delay(300)
+    dimmed = await opacitiesByPath()
+    check('disable.clears', 'commenting back in removes the attribute and restores full opacity',
+      { node: dimmed['0.1'], marker: (await regionXml(page)).includes('_disabled') }, { node: 1, marker: false })
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
+    // ---- Group: Ctrl+G wraps sibling occurrences in one named Sequence -------
+    // MoveIt Pro 10.0's "Group Under Sequence" on tldraw's own group keystroke;
+    // the whole thing — XML edit, re-stamps, projection repair — is one undo step.
+    const xmlBeforeGroup = await regionXml(page)
+    const countBeforeGroup = await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`)
+    const selectedForGroup = await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const ids = editor.getSortedChildIdsForParent('${REGION}').filter((id) => {
+        const shape = editor.getShape(id)
+        return shape.meta.btRole === 'node' && ['0.2', '0.3'].includes(shape.meta.btPath)
+      })
+      editor.select(...ids)
+      return ids.length
+    })()`)
+    check('group.selection', 'two sibling occurrences are selected', selectedForGroup, 2)
+    await shortcut(page, 'g', 'KeyG', 2)
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml !== ${JSON.stringify(xmlBeforeGroup)}`, 'the group to land')
+    await delay(300)
+    check('group.xml', 'Ctrl+G wraps the selection in a Sequence named Group',
+      (await regionXml(page)).includes('<Sequence name="Group">'), true)
+    check('group.selected', 'the new wrapper is selected',
+      await evaluate(page, `window.__systemsketch.editor.getSelectedShapes()[0]?.meta?.btPath ?? null`), '0.2')
+    kids = await children(page)
+    const groupWrapper = kids.find((child) => child.path === '0.2')
+    check('group.wrapper', 'the wrapper projects as a control card labelled Group',
+      [groupWrapper?.type, groupWrapper?.title], ['behaviorTreeControl', 'Group'])
+    check('group.members', 'the members sit under the wrapper in their sibling order',
+      kids.filter((child) => child.path === '0.2.0' || child.path === '0.2.1').map((child) => child.title),
+      ['Fallback', 'MoveHome'])
+    check('group.one-new-shape', 'grouping adds exactly the wrapper',
+      await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeGroup + 1)
+    await fitRegion(page)
+    await shot(page, 'group-under-sequence.png')
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(350)
+    check('group.undo', 'one undo restores the pre-group XML byte-for-byte', await regionXml(page), xmlBeforeGroup)
+    check('group.undo-count', 'and the shape count', await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeGroup)
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
+    // ---- the survey's new primitives are really insertable -------------------
+    await selectPath(page, '0')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-library-Breakpoint"]'))`, 'the Breakpoint library row')
+    check('library.async-rows', 'AsyncSequence and AsyncFallback are insertable library rows',
+      await evaluate(page, `JSON.stringify({
+        sequence: Boolean(document.querySelector('[data-testid="bt-library-AsyncSequence"]')),
+        fallback: Boolean(document.querySelector('[data-testid="bt-library-AsyncFallback"]')),
+      })`).then(JSON.parse), { sequence: true, fallback: true })
+    const xmlBeforeBreakpoint = await regionXml(page)
+    await evaluate(page, `document.querySelector('[data-testid="bt-library-Breakpoint"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
+    await clickElement(page, '[data-testid="bt-library-Breakpoint"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml.includes('<Breakpoint')`, 'the Breakpoint to land')
+    await delay(300)
+    kids = await children(page)
+    const breakpointCard = kids.find((child) => child.path === '0.5')
+    check('breakpoint.card', 'the inserted Breakpoint projects as a control card',
+      [breakpointCard?.type, breakpointCard?.title], ['behaviorTreeControl', 'Breakpoint'])
+    check('breakpoint.glyph', 'and wears its own filled-dot glyph, unlike every other decorator',
+      await evaluate(page, `document.querySelectorAll('.systemsketch-bt-control[data-glyph="breakpoint"]').length`), 1)
+    await fitRegion(page)
+    await shot(page, 'breakpoint-inserted.png')
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(350)
+    check('breakpoint.undo', 'one undo takes it back', await regionXml(page), xmlBeforeBreakpoint)
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
+    // ---- inspector Library section: caption and click never drift -----------------
+    // Regression for the bug an audit found live: with a region selected and no
+    // node, the Library section used to say "Adds the root node." even when a
+    // root already existed, and clicking any row was silently refused
+    // ("The tree already has a root; insert under it") — the panel promised one
+    // thing and did another. `planBehaviorInsert` now drives both the caption
+    // and the click, so this proves the fix through the actual reachable UI
+    // (not just the pure function's own unit tests).
+    await selectRegion(page)
+    await delay(200)
+    const hintWithRoot = await evaluate(page, `document.querySelector('[data-inspector-section="Library"] .block-inspector__hint')?.textContent ?? null`)
+    check('library.hint-not-root-when-root-exists', 'the Library caption never claims to add a root once one exists',
+      hintWithRoot === 'Adds the root node.', false)
+    const xmlBeforeLibraryClick = await regionXml(page)
+    // The inspector body scrolls as one column; by the time the Library
+    // section is reached (after the Node and View sections above it) its
+    // rows can sit below the fold, so bring the row into view the way a
+    // person would scroll before clicking it.
+    await evaluate(page, `document.querySelector('[data-testid="bt-library-Sequence"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
+    await clickElement(page, '[data-testid="bt-library-Sequence"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}')?.props.xml !== ${JSON.stringify(xmlBeforeLibraryClick)}`, 'the click to land in the XML')
+    const xmlAfterLibraryClick = await regionXml(page)
+    check('library.click-matches-caption', 'clicking a row while nothing is selected actually edits the XML, matching the caption',
+      xmlAfterLibraryClick !== xmlBeforeLibraryClick, true)
+    const noticeAfterLibraryClick = await evaluate(page, `document.querySelector('[data-inspector-section="Library"] .bt-inspector__notice')?.textContent ?? null`)
+    check('library.no-refusal-notice', 'no "tree already has a root" refusal fires for the case the caption promised',
+      noticeAfterLibraryClick, null)
+
+    // Now the true empty-tree case: delete the whole tree and confirm the
+    // Library section both says AND does "adds the root node."
+    await selectPath(page, '0')
+    await delay(200)
+    await clickElement(page, '[data-testid="bt-action-delete"]')
+    await delay(300)
+    check('library.tree-now-empty', 'deleting the root leaves the tree with no occurrences', (await children(page)).length, 0)
+    await selectRegion(page)
+    await delay(200)
+    const hintWithoutRoot = await evaluate(page, `document.querySelector('[data-inspector-section="Library"] .block-inspector__hint')?.textContent ?? null`)
+    check('library.empty-caption', 'with no root, the caption says it will add one', hintWithoutRoot, 'Adds the root node.')
+    await evaluate(page, `document.querySelector('[data-testid="bt-library-Sequence"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
+    await clickElement(page, '[data-testid="bt-library-Sequence"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}')?.props.xml.includes('<Sequence')`, 'the new root to land in the XML')
+    await delay(200)
+    check('library.empty-insert-creates-root', 'clicking actually creates the root the caption promised', (await children(page)).length > 0, true)
+    check('library.empty-insert-xml', 'the new root lands in the XML', (await regionXml(page)).includes('<Sequence'), true)
+    await shot(page, 'library-empty-root-created.png')
 
     // ---- reference-parity captures ----------------------------------------------
     // The same tree Flowstate shows at 15:04 (Initialize Workcell / Pull Part Kit),

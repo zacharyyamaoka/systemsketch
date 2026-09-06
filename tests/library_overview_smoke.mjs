@@ -13,6 +13,7 @@ import {
   delay,
   ensureDir,
   evaluate,
+  key,
   localConsoleErrors,
   makeChecklist,
   openApp,
@@ -75,8 +76,10 @@ async function proveResponsiveChrome(page) {
       assert.ok(box.x >= 0 && box.right <= width, `chrome escaped ${width}px viewport`)
     }
     assert.equal(await evaluate(page,
-      `document.querySelector('[title="Shapes library"]').getBoundingClientRect().width > 0
+      `!document.querySelector('[title="Shapes library"]')
+       && !document.querySelector('[title="Search and commands (Ctrl+P)"]')
        && document.querySelector('[title="Comments and inspector"]').getBoundingClientRect().width > 0
+       && document.querySelector('[data-testid="systemsketch-tool-library"]').getBoundingClientRect().width > 0
        && document.querySelectorAll('[data-testid="systemsketch-preview-mode"] button').length === 2`), true)
     if (width === 1990) assert.equal(boxes.placement, 'inline', 'wide Preview should use the top-row gap')
     if (width === 560) assert.equal(boxes.placement, 'below', 'narrow Preview should drop below the corner chrome')
@@ -87,19 +90,29 @@ async function proveResponsiveChrome(page) {
         `dropped Preview is too close to corner chrome at ${width}px`)
     }
     await screenshot(page, `library-overview-chrome-${width}-2026-09-02.png`)
-    pass(`${width}px keeps both corner capsules and every Preview action usable without overlap`)
+    pass(`${width}px keeps the simplified right shell, library entry point, and Preview actions usable without overlap`)
   }
   await setViewport(page, 1440, 900)
 }
 
 async function proveLibrary(page) {
-  await clickElement(page, '[title="Shapes library"]')
-  await waitFor(page, `document.querySelector('[data-testid="systemsketch-left-popout"]')`, 'top-left Shapes library')
+  const openShapesFromCommands = async () => {
+    await shortcut(page, 'p', 'KeyP', 2)
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-command-palette"]')`, 'command palette')
+    await typeSlowly(page, 'open shapes library')
+    await waitFor(page,
+      `document.querySelector('[role="option"][data-command-id="shape-library"]')`,
+      'Open Shapes library command')
+    await key(page, 'Enter', 'Enter')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-left-popout"]')`, 'Shapes library from commands')
+  }
+
+  await openShapesFromCommands()
   assert.equal(await evaluate(page,
     `document.querySelectorAll('[data-testid="systemsketch-left-popout"] [data-library-section="Connections"] [data-library-item]').length`), 3)
   assert.equal(await evaluate(page,
     `document.querySelector('[data-testid="systemsketch-left-popout"]').textContent.includes('placeholder')`), false)
-  pass('top-left Connections contains three real stock-arrow choices and no placeholder rows')
+  pass('the command-palette Shapes library contains three real stock-arrow choices and no placeholder rows')
 
   const search = '[data-testid="systemsketch-left-popout"] input[aria-label="Search shapes"]'
   await clickElement(page, search)
@@ -113,7 +126,7 @@ async function proveLibrary(page) {
   pass('search filters the shared catalog and explains a zero-result query')
 
   await clickElement(page, '[aria-label="Close shapes library"]')
-  await clickElement(page, '[title="Shapes library"]')
+  await openShapesFromCommands()
   await waitFor(page,
     `document.querySelector('[data-testid="systemsketch-left-popout"] button[data-library-item="arrow-elbow"]')`,
     'fresh library query')
@@ -140,7 +153,7 @@ async function proveLibrary(page) {
     'single-step library undo')
   pass('an Elbow choice inserts a stock arrow and one Undo removes the complete insertion')
 
-  await clickElement(page, '[title="Shapes library"]')
+  await openShapesFromCommands()
   const centerBefore = JSON.parse(await evaluate(page,
     `JSON.stringify(window.__systemsketch.editor.getViewportPageBounds().center)`))
   await clickElement(page,
@@ -161,7 +174,7 @@ async function proveLibrary(page) {
   assert.ok(Math.abs(inserted.center.x - centerBefore.x) < 1 && Math.abs(inserted.center.y - centerBefore.y) < 1)
   pass('a catalog shape is selected at the visible viewport centre')
 
-  await clickElement(page, '[title="Shapes library"]')
+  await openShapesFromCommands()
   await waitFor(page,
     `document.querySelector('[data-testid="systemsketch-left-popout"] button[data-library-section="Recents"][data-library-item="rectangle"]')`,
     'persisted Rectangle recent')
@@ -213,10 +226,10 @@ async function proveOverview(page) {
   assert.match(text, /Expanded Runtime/)
   assert.match(text, /Board/)
   assert.match(text, /Frames/)
-  assert.match(text, /Expanded Blocks/)
-  pass('overview lists one board with Frames and Expanded Blocks by their real names')
+  assert.match(text, /EXPANDED-BLOCK/)
+  pass('overview lists one board with its Frame and expanded Block by their real names')
 
-  await clickElement(page, '[data-overview-target="shape:overview-frame"]')
+  await clickElement(page, '[data-testid="systemsketch-frames-panel-focus-shape:shape:overview-frame"]')
   await delay(420)
   const focused = JSON.parse(await evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
@@ -234,7 +247,7 @@ async function proveOverview(page) {
   assert.ok(focused.dx < 1 && focused.dy < 1)
   pass('clicking a Frame selects it and camera-fits it at viewport centre')
 
-  await clickElement(page, '[data-overview-target="shape:overview-block"]')
+  await clickElement(page, '[data-testid="systemsketch-frames-panel-focus-shape:shape:overview-block"]')
   await delay(420)
   assert.equal(await evaluate(page,
     `window.__systemsketch.editor.getOnlySelectedShape()?.id === 'shape:overview-block'
@@ -252,12 +265,12 @@ async function proveOverview(page) {
     return true
   })()`)
   await waitFor(page,
-    `document.querySelector('[data-testid="systemsketch-board-overview"]').textContent.includes('No board landmarks yet')`,
+    `document.querySelector('[data-testid="systemsketch-board-overview"]').textContent.includes('No frames or saved views yet')`,
     'overview empty state')
   assert.match(await evaluate(page,
     `document.querySelector('.systemsketch-board-overview__empty').textContent`),
-  /Add a Frame or Branch, or expand a Block/)
-  pass('the live empty state explains the two actions that make landmarks appear')
+  /Add a Frame or save the current camera view/)
+  pass('the live empty state explains how to add a Frame or saved view')
 }
 
 async function main() {

@@ -1,0 +1,55 @@
+/* Stock tldraw owns the rich-text toolbar's commands, selection tracking,
+ * focus, and link editor. SystemSketch only supplies the visual skin here.
+ *
+ * WHY: whole-shape formatting and selected-text formatting are different
+ * scopes, but they should still read as one contextual-menu family. Keeping
+ * this as a class-scoped CSS adapter preserves tldraw's reliable editor
+ * behavior instead of cloning six commands into app-owned React state.
+ */
+.systemsketch-app .tlui-rich-text__toolbar > .tlui-menu {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-radius: 13px;
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse);
+  box-shadow: var(--ss-shadow-2);
+}
+
+.systemsketch-app .tlui-rich-text__toolbar .tlui-button {
+  color: var(--ss-text-inverse);
+}
+
+.systemsketch-app .tlui-rich-text__toolbar .tlui-button::after {
+  border-radius: 7px;
+  background: var(--ss-surface-inverse-hover);
+}
+
+.systemsketch-app .tlui-rich-text__toolbar .tlui-button[data-isactive='true']::after {
+  background: var(--ss-accent);
+}
+
+.systemsketch-app .tlui-rich-text__toolbar .tlui-input__wrapper {
+  height: 32px;
+  margin: 4px 0 4px 8px;
+  border-radius: 7px;
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse-hover);
+}
+
+.systemsketch-app .tlui-rich-text__toolbar .tlui-input {
+  height: 32px;
+  color: var(--ss-text-inverse);
+}
+
+.systemsketch-app .tlui-rich-text__toolbar .tlui-input::placeholder {
+  color: var(--ss-text-inverse);
+  opacity: 0.62;
+}
+
+.systemsketch-app .tl-container__focused:not(.tl-container__no-focus-ring)
+  .tlui-rich-text__toolbar .tlui-button:focus-visible,
+.systemsketch-app .tl-container__focused:not(.tl-container__no-focus-ring)
+  .tlui-rich-text__toolbar .tlui-input:focus-visible {
+  outline-color: var(--ss-text-inverse);
+}

@@ -6,12 +6,12 @@
 import { describe, expect, it } from 'vitest'
 
 import { insertBehaviorTreeNode, SAMPLE_BEHAVIOR_TREE_XML, parseBehaviorTreeXml, selectTree } from './btcppXml'
-import { type BtPoint, type BtRect, type BtScene } from './behaviorTreeModel'
+import { BT_EDGE_STYLES, type BtPoint, type BtRect, type BtScene } from './behaviorTreeModel'
 import { analyzeDataflow } from './dataflow'
 import { layoutBlackboard } from './blackboardLayout'
 import { layoutProcess, PROCESS_GAP, PROCESS_INSERT_SIZE } from './processLayout'
 import { sceneToSvg } from './sceneSvg'
-import { layoutTree, TREE_SIBLING_GAP } from './treeLayout'
+import { layoutTree, treeEdgeEndpoints, TREE_SIBLING_GAP } from './treeLayout'
 
 const FLOWSTATE_XML = `<root BTCPP_format="4" main_tree_to_execute="RigidBodyAssembly">
   <BehaviorTree ID="RigidBodyAssembly">
@@ -213,6 +213,68 @@ describe('Tree layout', () => {
 		const b = scene.nodes.find((entry) => entry.path === '0.1')!.rect
 		expect(b.x - (a.x + a.w)).toBeLessThanOrEqual(TREE_SIBLING_GAP + 1)
 		preview('tree-down-unbalanced', scene)
+	})
+})
+
+describe('Tree edge styles', () => {
+	// '0.1' (Fallback) has two children, so its wires to '0.1.0' and '0.1.1'
+	// are never cross-axis-aligned — the shape assertions below would be
+	// trivially satisfied (a straight line) by a centred, aligned pair.
+	for (const orientation of ['down', 'right'] as const) {
+		const down = orientation === 'down'
+		const cross = (point: BtPoint) => (down ? point.x : point.y)
+		const flow = (point: BtPoint) => (down ? point.y : point.x)
+
+		for (const edgeStyle of BT_EDGE_STYLES) {
+			it(`draws a ${edgeStyle} wire from the parent's exit to the child's entry (${orientation})`, () => {
+				const scene = layoutTree(sample, { orientation, nodeFace: 'simple', controlFace: 'expanded', edgeStyle })
+				const parent = scene.nodes.find((entry) => entry.path === '0.1')!.rect
+				const child = scene.nodes.find((entry) => entry.path === '0.1.0')!.rect
+				const { from, to } = treeEdgeEndpoints(parent, child, orientation)
+				const edge = scene.edges.find((candidate) => candidate.from === '0.1' && candidate.to === '0.1.0')!
+
+				expect(edge.points[0]).toEqual(from)
+				expect(edge.points[edge.points.length - 1]).toEqual(to)
+
+				if (edgeStyle === 'straight') {
+					expect(edge.points).toHaveLength(2)
+					expect(edge.curve).toBeFalsy()
+				} else if (edgeStyle === 'elbow') {
+					expect(edge.points).toHaveLength(4)
+					expect(edge.curve).toBeFalsy()
+				} else if (edgeStyle === 'curved') {
+					expect(edge.points).toHaveLength(4)
+					expect(edge.curve).toBe(true)
+					const [, c1, c2] = edge.points
+					// Control points sit on the reading axis: each keeps its
+					// nearest endpoint's cross-axis position and only moves
+					// halfway along the flow axis, so the axis is never guessed.
+					expect(cross(c1)).toBeCloseTo(cross(from))
+					expect(cross(c2)).toBeCloseTo(cross(to))
+					expect(flow(c1)).toBeCloseTo((flow(from) + flow(to)) / 2)
+					expect(flow(c2)).toBeCloseTo((flow(from) + flow(to)) / 2)
+				} else {
+					expect(edgeStyle).toBe('slanted')
+					expect(edge.points).toHaveLength(3)
+					expect(edge.curve).toBeFalsy()
+					const [, stubPoint] = edge.points
+					// The stub departs straight along the reading direction from
+					// the parent's exit face — same rule as the Slanted arrow.
+					expect(cross(stubPoint)).toBeCloseTo(cross(from))
+					expect(flow(stubPoint)).toBeGreaterThan(flow(from))
+					expect(flow(stubPoint)).toBeLessThan(flow(to))
+				}
+			})
+		}
+	}
+
+	it('clamps the slanted stub so a short span (the Start pill) never overshoots the child', () => {
+		const empty = selectTree(parseBehaviorTreeXml('<root BTCPP_format="4"><BehaviorTree ID="T"><LeafOnly/></BehaviorTree><TreeNodesModel><Action ID="LeafOnly"/></TreeNodesModel></root>'), 'T')!
+		const scene = layoutTree(empty, { orientation: 'down', nodeFace: 'simple', controlFace: 'expanded', edgeStyle: 'slanted' })
+		const startEdge = scene.edges.find((edge) => edge.to === '0')!
+		// The Start→root connector is always a plain straight stub, whatever
+		// the control-wire style — only parent→child wires take the style.
+		expect(startEdge.points).toHaveLength(2)
 	})
 })
 
@@ -1062,6 +1124,74 @@ describe('Process insert-placement invariants', () => {
 				expect(orientation === 'down' ? between.at.y : between.at.x).toBeCloseTo(mid, 5)
 				expect(orientation === 'down' ? between.at.x : between.at.y).toBeCloseTo(centerA, 5)
 			}
+		}
+	})
+
+	/**
+	 * A childless control (or a childless decorator, which falls back to the
+	 * same code) paints its name as a chip past the "+" insert, not inside the
+	 * insert's own small box — `emptyControlItem`'s declared `flow` has to
+	 * reach the chip's real far edge, or a sibling's between-insert midpoint
+	 * lands on the chip's own text (the RetryUntilSuccessful/"blue icon cut
+	 * off" bug), and the chip's own box has to grow with the label, or a long
+	 * name like `RetryUntilSuccessful` overflows it.
+	 */
+	describe('empty-control label chip', () => {
+		// Deliberately spans short → long, and includes the exact name Zach
+		// reported (RetryUntilSuccessful, rendered when that decorator has no
+		// child yet).
+		const LABELS = ['Go', 'RetryUntilSuccessful', 'A Very Much Longer Synthetic Control Name For Testing Overflow']
+
+		function emptyControlTree(labels: string[]) {
+			const xml = `<root BTCPP_format="4" main_tree_to_execute="Repro">
+  <BehaviorTree ID="Repro">
+    <Sequence name="Repro">
+      <GraspValid pose="{object_pose}" quality="{quality}"/>
+      ${labels.map((label) => `<Sequence name="${label}"/>`).join('\n      ')}
+      <AlwaysFailure/>
+    </Sequence>
+  </BehaviorTree>
+  <TreeNodesModel>
+    <Condition ID="GraspValid">
+      <input_port name="pose" type="Pose"/>
+      <output_port name="quality" type="double"/>
+    </Condition>
+  </TreeNodesModel>
+</root>`
+			return selectTree(parseBehaviorTreeXml(xml), 'Repro')!
+		}
+
+		/** Matches `.BehaviorTree-insert`'s real 28×28 CSS box, centered on `at`. */
+		function insertRect(insert: { at: BtPoint }): BtRect {
+			return { x: insert.at.x - 14, y: insert.at.y - 14, w: 28, h: 28 }
+		}
+
+		for (const orientation of ['down', 'right'] as const) {
+			it(`sizes the chip to its label and keeps it clear of every insert (${orientation})`, () => {
+				const tree = emptyControlTree(LABELS)
+				const scene = layoutProcess(tree, { orientation, nodeFace: 'simple', controlFace: 'expanded' })
+				expectNoNodeOverlap(scene)
+
+				const labelChips = scene.chips.filter((chip) => chip.kind === 'label')
+				expect(labelChips).toHaveLength(LABELS.length)
+
+				// A longer label gets a wider chip — no longer a fixed constant
+				// that ignores the text and lets RetryUntilSuccessful overflow it.
+				const widths = LABELS.map((label) => labelChips.find((chip) => chip.text === label)!.rect.w)
+				for (let i = 1; i < widths.length; i += 1) {
+					expect(widths[i]).toBeGreaterThan(widths[i - 1])
+				}
+
+				// No label chip overlaps any insert point — this is the "+"
+				// icon vs. chip-text overlap: a between-insert's midpoint used
+				// to be computed from a declared extent that ignored the chip.
+				for (const chip of labelChips) {
+					for (const insert of scene.inserts) {
+						expect(overlaps(chip.rect, insertRect(insert)), `chip "${chip.text}" overlaps insert ${insert.id}`).toBe(false)
+					}
+				}
+				preview(`process-empty-control-${orientation}`, scene)
+			})
 		}
 	})
 })

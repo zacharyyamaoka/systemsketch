@@ -1,0 +1,110 @@
+{
+  "feature": "Branch interior cable selection",
+  "viewport": { "width": 1600, "height": 960 },
+  "pages": [{ "id": "review", "name": "Branch cable selection" }],
+  "shapes": [
+    {
+      "id": "branch",
+      "type": "branch",
+      "x": 250,
+      "y": 290,
+      "props": {
+        "w": 780,
+        "h": 494,
+        "title": "route_by_kind()",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          { "id": "arm_1", "title": "if payload is known", "open": true, "h": 200 },
+          { "id": "arm_2", "title": "else", "open": true, "h": 200 }
+        ]
+      }
+    },
+    {
+      "id": "source",
+      "type": "block",
+      "parentId": "branch",
+      "x": 48,
+      "y": 82,
+      "meta": { "branchArm": "arm_1" },
+      "props": {
+        "w": 250,
+        "h": 148,
+        "title": "decode()",
+        "view": "port",
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "payload", "type": "Data", "visible": true }]
+      }
+    },
+    {
+      "id": "target",
+      "type": "block",
+      "parentId": "branch",
+      "x": 476,
+      "y": 82,
+      "meta": { "branchArm": "arm_1" },
+      "props": {
+        "w": 250,
+        "h": 148,
+        "title": "process()",
+        "view": "port",
+        "inputs": [{ "id": "in_1", "name": "payload", "type": "Data", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "cable",
+      "type": "connection",
+      "parentId": "branch",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "cable-start",
+      "type": "connection",
+      "fromId": "cable",
+      "toId": "source",
+      "props": { "portId": "out_1", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "cable-end",
+      "type": "connection",
+      "fromId": "cable",
+      "toId": "target",
+      "props": { "portId": "in_1", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-click-wire",
+      "kind": "step",
+      "text": "1 · Click the blue wire inside the open if arm.",
+      "x": 95,
+      "y": 90,
+      "w": 450,
+      "h": 108,
+      "target": { "shapeId": "target", "anchor": "left" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The Connection inspector opens and the blue wire gains selection handles; neither Block nor the empty canvas is selected.",
+      "x": 1085,
+      "y": 486,
+      "w": 440,
+      "h": 132
+    }
+  ]
+}

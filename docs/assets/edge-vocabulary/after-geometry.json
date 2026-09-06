@@ -1,0 +1,979 @@
+{
+ "color": {
+  "file": "docs/appearance-menu-1-color-2026-09-01.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 386,
+   "y": 182,
+   "w": 368,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "fillSolid": {
+  "file": "docs/appearance-menu-11-fill-solid-2026-09-05.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 386,
+   "y": 182,
+   "w": 368,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "fillTransparent": {
+  "file": "docs/appearance-menu-12-fill-transparent-2026-09-05.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 386,
+   "y": 182,
+   "w": 368,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "fillNone": {
+  "file": "docs/appearance-menu-13-fill-none-2026-09-05.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 386,
+   "y": 182,
+   "w": 368,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "picker": {
+  "file": "docs/appearance-menu-4-custom-picker-2026-09-01.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 386,
+   "y": 182,
+   "w": 368,
+   "h": 129
+  },
+  "picker": {
+   "x": 638,
+   "y": 311,
+   "w": 184,
+   "h": 310
+  },
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "custom": {
+  "file": "docs/appearance-menu-5-custom-applied-2026-09-01.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 386,
+   "y": 182,
+   "w": 368,
+   "h": 129
+  },
+  "picker": {
+   "x": 638,
+   "y": 311,
+   "w": 184,
+   "h": 310
+  },
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "chips": {
+  "file": "docs/appearance-menu-8-shape-line-style-2026-09-05.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 438,
+   "y": 182,
+   "w": 374,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "asyncEdge": {
+  "file": "docs/appearance-menu-10-async-edge-2026-09-05.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 438,
+   "y": 182,
+   "w": 374,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "fontSize": {
+  "file": "docs/appearance-menu-7-font-size-2026-09-01.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 726,
+   "y": 175,
+   "w": 129,
+   "h": 136
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "shape": {
+  "file": "docs/appearance-menu-2-shape-2026-09-01.png",
+  "pill": {
+   "x": 476,
+   "y": 319,
+   "w": 509,
+   "h": 40
+  },
+  "panel": {
+   "x": 220,
+   "y": 161,
+   "w": 571.4,
+   "h": 150
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 478,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 543,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 597,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 662,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 718,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 871,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 927,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "lineStyle": {
+  "file": "docs/appearance-menu-6-line-style-2026-09-01.png",
+  "pill": {
+   "x": 565,
+   "y": 359,
+   "w": 331,
+   "h": 40
+  },
+  "panel": {
+   "x": 529,
+   "y": 307,
+   "w": 241,
+   "h": 44
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 567,
+    "y": 359,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 621,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "addText",
+    "x": 677,
+    "y": 359,
+    "w": 40,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 726,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowKind",
+    "kind": "value",
+    "x": 782,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 838,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "arrowRouting": {
+  "file": "docs/assets/arrow-routing-three-options.png",
+  "pill": {
+   "x": 565,
+   "y": 359,
+   "w": 331,
+   "h": 40
+  },
+  "panel": {
+   "x": 758,
+   "y": 311,
+   "w": 104,
+   "h": 40
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 567,
+    "y": 359,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 621,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "addText",
+    "x": 677,
+    "y": 359,
+    "w": 40,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 726,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowKind",
+    "kind": "value",
+    "x": 782,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 838,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "connector": {
+  "file": "docs/appearance-menu-3-connector-2026-09-01.png",
+  "pill": {
+   "x": 565,
+   "y": 359,
+   "w": 331,
+   "h": 40
+  },
+  "panel": null,
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 567,
+    "y": 359,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 621,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "addText",
+    "x": 677,
+    "y": 359,
+    "w": 40,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 726,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowKind",
+    "kind": "value",
+    "x": 782,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 838,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "mixed": {
+  "file": "docs/appearance-menu-9-mixed-selection-2026-09-01.png",
+  "pill": {
+   "x": 567,
+   "y": 299,
+   "w": 365.9,
+   "h": 40
+  },
+  "panel": null,
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 670,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 735,
+    "y": 299,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 789,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ }
+}

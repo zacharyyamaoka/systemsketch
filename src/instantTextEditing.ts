@@ -7,7 +7,7 @@ import {
   type TLShapeId,
 } from 'tldraw'
 
-import { BLOCK_SHAPE_TYPE, PILL_TOOL_ID, isBlockShape } from './blocks/blockModel'
+import { BLOCK_SHAPE_TYPE, PILL_TOOL_ID, TYPE_TOOL_ID, isBlockShape } from './blocks/blockModel'
 import { rememberBlockInlineField } from './blocks/inlineBlockEditing'
 
 export type PrimaryTextEditorKind = 'rich-text' | 'plain-text' | 'block-title'
@@ -47,10 +47,11 @@ export const TEXT_ON_DEMAND_SHAPE_TYPES: readonly string[] = ['arrow', 'line']
  */
 export function isPrimaryTextDrawing(toolId: string | null, shape: TLShape): boolean {
   if (TEXT_ON_DEMAND_SHAPE_TYPES.includes(shape.type)) return false
-  // The Pill tool is the one tool whose id is not its shape type: it draws a
-  // Block already in its `value` view, and the literal is that Block's title.
+  // Pill and Type are the two tools whose id is not their shape type: both
+  // draw a Block already shaped into a specific view, so their titles open
+  // for typing exactly as a freshly drawn Block's does.
   const drawsShape = toolId === shape.type
-    || (toolId === PILL_TOOL_ID && shape.type === BLOCK_SHAPE_TYPE)
+    || ((toolId === PILL_TOOL_ID || toolId === TYPE_TOOL_ID) && shape.type === BLOCK_SHAPE_TYPE)
   return drawsShape && primaryTextEditorKind(shape) !== null
 }
 

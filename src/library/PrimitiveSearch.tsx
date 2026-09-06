@@ -1,39 +1,28 @@
-import {
-  TldrawUiButtonIcon,
-  TldrawUiInput,
-  useEditor,
-  useTools,
-} from 'tldraw'
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-} from 'react'
+import { TldrawUiButtonIcon, useEditor, useTools } from 'tldraw'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useChrome } from '../chrome/ChromeProvider'
-import {
-  SHAPE_LIBRARY_ITEMS,
-  filterShapeLibraryItems,
-  type ShapeLibraryItem,
-} from './shapeLibraryModel'
+import { useInterfaceScale } from '../settings/interfaceScale'
+import { LibrarySearchModal, type LibrarySearchItem } from './LibrarySearchModal'
 import { activateShapeLibraryTool } from './shapeLibraryTool'
+import {
+  TOOL_SEARCH_ALIAS_ITEMS,
+  filterToolSearchItems,
+  toolSearchItemId,
+  toolSearchItemLabel,
+  type ToolSearchItem,
+} from './toolSearchCatalog'
 import {
   PRIMITIVE_SEARCH_MAX_RESULTS,
   PRIMITIVE_SEARCH_WIDTH,
   isChromeShortcutTarget,
   isEditableShortcutTarget,
   isPrimitiveSearchKey,
-  nextPrimitiveSearchIndex,
   placePrimitiveSearch,
   primitiveSearchPanelHeight,
   type PrimitiveSearchPoint,
 } from './primitiveSearchModel'
 import { useToolAliases } from './toolAliases'
-import './primitive-search.css'
 
 interface PrimitiveSearchInvocation {
   screenPoint: PrimitiveSearchPoint
@@ -49,89 +38,55 @@ function toolbarObstacleTop(editorContainer: HTMLElement, viewportHeight: number
   return top > 0 && top < viewportHeight ? top : viewportHeight
 }
 
-function ResultRow({
-  active,
-  item,
-  aliases,
-  onActivate,
-  onChoose,
-}: {
-  active: boolean
-  item: ShapeLibraryItem
-  aliases: readonly string[]
-  onActivate(): void
-  onChoose(): void
-}) {
-  return (
-    <li role="presentation">
-      <button
-        id={`systemsketch-primitive-search-option-${item.id}`}
-        type="button"
-        role="option"
-        aria-selected={active}
-        aria-label={`Use ${item.label} tool`}
-        className="systemsketch-primitive-search__result"
-        data-active={active || undefined}
-        data-library-item={item.id}
-        data-testid={`systemsketch-primitive-search-${item.id}`}
-        onPointerMove={onActivate}
-        onFocus={onActivate}
-        onClick={onChoose}
-      >
-        <span className="systemsketch-primitive-search__icon" aria-hidden="true">
-          <TldrawUiButtonIcon icon={item.icon} />
-        </span>
-        <span className="systemsketch-primitive-search__copy">
-          <strong>{item.label}</strong>
-          <small>
-            {item.section}
-            {aliases.length > 0 ? <span className="systemsketch-primitive-search__aliases"><span aria-hidden="true">↪</span>{aliases.join(' · ')}</span> : null}
-          </small>
-        </span>
-        {active ? <kbd>Enter</kbd> : null}
-      </button>
-    </li>
-  )
-}
-
 /**
- * A primitive-only sibling to the command palette, anchored to the pointer.
+ * A tool-only sibling to the command palette, anchored to the pointer.
  *
  * WHY: S is about choosing what to draw where the user is already looking.
  * Reusing the centred command modal would destroy that Fusion-style spatial
  * promise; inserting immediately would steal the final placement gesture.
+ *
+ * The chrome itself now lives in `LibrarySearchModal`, which the Behaviors
+ * panel shares; this file keeps what is specific to tools — the `S` shortcut,
+ * its guards, the product-toolbar catalog, and arming the chosen tool.
  */
 export function PrimitiveSearch() {
   const editor = useEditor()
   const tools = useTools()
   const { toolbarSurface } = useChrome()
+  const interfaceScale = useInterfaceScale()
   const aliases = useToolAliases()
   const [invocation, setInvocation] = useState<PrimitiveSearchInvocation | null>(null)
   const [query, setQuery] = useState('')
-  const [activeIndex, setActiveIndex] = useState(0)
   const [layoutRevision, setLayoutRevision] = useState(0)
-  const rootRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const listboxId = useId()
 
   const matches = useMemo(
-    () => query.trim() ? filterShapeLibraryItems(query, aliases) : [],
-    [aliases, query],
+    () => filterToolSearchItems(query, aliases, new Set(Object.keys(tools))),
+    [aliases, query, tools],
   )
-  const visibleMatches = matches.slice(0, PRIMITIVE_SEARCH_MAX_RESULTS)
-  const activeItem = visibleMatches[activeIndex]
+  // Identity is the catalog id, so the row test ids stay
+  // `systemsketch-primitive-search-<item.id>` exactly as before.
+  const rows = useMemo<LibrarySearchItem[]>(() => matches.map((match) => ({
+    id: toolSearchItemId(match),
+    label: toolSearchItemLabel(match),
+    detail: match.source === 'library' ? match.item.section : 'Tools',
+    icon: <TldrawUiButtonIcon icon={match.source === 'library'
+      ? match.item.icon
+      : tools[match.item.toolId]?.icon ?? 'tool-pointer'} />,
+    aliases: aliases[toolSearchItemId(match)] ?? [],
+  })), [aliases, matches])
 
   const close = useCallback(() => {
     setInvocation(null)
     setQuery('')
-    setActiveIndex(0)
     editor.focus()
   }, [editor])
 
-  const choose = useCallback((item: ShapeLibraryItem) => {
-    activateShapeLibraryTool(tools, item)
+  const choose = useCallback((row: LibrarySearchItem) => {
+    const match: ToolSearchItem | undefined = matches.find((item) => toolSearchItemId(item) === row.id)
+    if (match?.source === 'library') activateShapeLibraryTool(tools, match.item)
+    else if (match?.source === 'toolbar') tools[match.item.toolId]?.onSelect('toolbar')
     close()
-  }, [close, tools])
+  }, [close, matches, tools])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -146,7 +101,6 @@ export function PrimitiveSearch() {
       event.stopImmediatePropagation()
       const screenPoint = editor.inputs.getCurrentScreenPoint()
       setQuery('')
-      setActiveIndex(0)
       setInvocation({
         screenPoint: { x: screenPoint.x, y: screenPoint.y },
       })
@@ -157,141 +111,50 @@ export function PrimitiveSearch() {
 
   useEffect(() => {
     if (!invocation) return
-    const focus = () => inputRef.current?.focus({ preventScroll: true })
-    const dismissOutside = (event: PointerEvent) => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close()
-    }
     const relayout = () => setLayoutRevision((current) => current + 1)
-    editor.timers.requestAnimationFrame(focus)
-    window.addEventListener('pointerdown', dismissOutside, true)
     window.addEventListener('resize', relayout)
-    return () => {
-      window.removeEventListener('pointerdown', dismissOutside, true)
-      window.removeEventListener('resize', relayout)
-    }
-  }, [close, editor, invocation])
-
-  useEffect(() => {
-    setActiveIndex(matches.length > 0 ? 0 : -1)
-  }, [matches.length, query])
-
-  useEffect(() => {
-    const input = inputRef.current
-    if (!input) return
-    input.setAttribute('role', 'combobox')
-    input.setAttribute('aria-autocomplete', 'list')
-    input.setAttribute('aria-expanded', 'true')
-    input.setAttribute('aria-controls', listboxId)
-    if (activeItem) input.setAttribute('aria-activedescendant', `systemsketch-primitive-search-option-${activeItem.id}`)
-    else input.removeAttribute('aria-activedescendant')
-  }, [activeItem, listboxId])
-
-  const onKeyDownCapture = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      event.preventDefault()
-      event.stopPropagation()
-      close()
-      return
-    }
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      event.preventDefault()
-      event.stopPropagation()
-      setActiveIndex((current) => nextPrimitiveSearchIndex(
-        current,
-        event.key === 'ArrowDown' ? 1 : -1,
-        visibleMatches.length,
-      ))
-      return
-    }
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      event.stopPropagation()
-      if (activeItem) choose(activeItem)
-    }
-  }
+    return () => window.removeEventListener('resize', relayout)
+  }, [invocation])
 
   if (!invocation) return null
 
   const viewport = editor.getViewportScreenBounds()
+  const chromeScale = interfaceScale / 100
   const desiredHeight = primitiveSearchPanelHeight(matches.length)
   const placement = placePrimitiveSearch(
     invocation.screenPoint,
-    { w: PRIMITIVE_SEARCH_WIDTH, h: desiredHeight },
+    // `screenPoint` and the viewport are canvas pixels while the panel is
+    // chrome. Place its scaled painted bounds, then let the modal cancel the
+    // host zoom before re-applying it around this fixed point.
+    { w: PRIMITIVE_SEARCH_WIDTH * chromeScale, h: desiredHeight * chromeScale },
     { w: viewport.w, h: viewport.h },
     toolbarObstacleTop(editor.getContainer(), viewport.h),
   )
   void layoutRevision
 
   return (
-    <>
-      <span
-        className="systemsketch-primitive-search__target"
-        style={{ left: invocation.screenPoint.x, top: invocation.screenPoint.y }}
-        aria-hidden="true"
-      />
-      <div
-        ref={rootRef}
-        className="systemsketch-primitive-search"
-        data-testid="systemsketch-primitive-search"
-        data-horizontal={placement.horizontal}
-        data-vertical={placement.vertical}
-        data-systemsketch-chrome
-        role="search"
-        aria-label="Search primitive library"
-        style={{ left: placement.x, top: placement.y, width: placement.w, maxHeight: placement.h }}
-        onKeyDownCapture={onKeyDownCapture}
-        onPointerDown={(event) => event.stopPropagation()}
-        onWheel={(event) => event.stopPropagation()}
-      >
-        <div className="systemsketch-primitive-search__field">
-          <span className="systemsketch-primitive-search__key" aria-hidden="true">S</span>
-          <TldrawUiInput
-            ref={inputRef}
-            className="systemsketch-primitive-search__input"
-            aria-label="Search primitives"
-            autoFocus
-            placeholder={`Search ${SHAPE_LIBRARY_ITEMS.length} primitives`}
-            value={query}
-            onValueChange={setQuery}
-            onCancel={close}
-          />
-          <kbd>Esc</kbd>
-        </div>
-
-        {visibleMatches.length > 0 ? (
-          <>
-            <ul
-              id={listboxId}
-              className="systemsketch-primitive-search__results"
-              role="listbox"
-              aria-label="Matching primitives"
-            >
-              {visibleMatches.map((item, index) => (
-                <ResultRow
-                  key={item.id}
-                  item={item}
-                  aliases={aliases[item.id] ?? []}
-                  active={index === activeIndex}
-                  onActivate={() => setActiveIndex(index)}
-                  onChoose={() => choose(item)}
-                />
-              ))}
-            </ul>
-            <footer className="systemsketch-primitive-search__footer">
-              <span>{matches.length} {matches.length === 1 ? 'primitive' : 'primitives'}</span>
-              <span><kbd>↑</kbd><kbd>↓</kbd> choose <i>·</i> <kbd>Enter</kbd> arm</span>
-            </footer>
-          </>
-        ) : (
-          <div className="systemsketch-primitive-search__empty" role="status">
-            {query.trim() ? (
-              <><strong>No matching primitives</strong><span>Try arrow, rectangle, decision, or cloud.</span></>
-            ) : (
-              <><strong>Primitive library</strong><span>Type a shape or connection name.</span></>
-            )}
-          </div>
-        )}
-      </div>
-    </>
+    <LibrarySearchModal
+      items={rows}
+      query={query}
+      onQueryChange={setQuery}
+      maxResults={PRIMITIVE_SEARCH_MAX_RESULTS}
+      target={invocation.screenPoint}
+      placement={placement}
+      viewportScale={chromeScale}
+      keyChip="S"
+      ariaLabel="Search tools"
+      listAriaLabel="Matching tools"
+      inputAriaLabel="Search tools"
+      placeholder={`Search ${TOOL_SEARCH_ALIAS_ITEMS.length} tools`}
+      noun={{ one: 'tool', many: 'tools' }}
+      verb="arm"
+      idleTitle="Tool search"
+      idleHint="Type a toolbar tool, shape, or connection name."
+      emptyTitle="No matching tools"
+      emptyHint="Try block, type, arrow, rectangle, decision, or cloud."
+      itemAriaLabel={(row) => `Use ${row.label} tool`}
+      onChoose={choose}
+      onClose={close}
+    />
   )
 }

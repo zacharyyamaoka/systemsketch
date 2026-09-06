@@ -1,0 +1,199 @@
+{
+  "feature": "Integrated generic Block controls",
+  "viewport": { "width": 2100, "height": 1320 },
+  "pages": [{ "id": "review", "name": "Integrated generic Block" }],
+  "shapes": [
+    {
+      "id": "generic-block",
+      "type": "block",
+      "x": 690,
+      "y": 230,
+      "props": {
+        "title": "CardGame",
+        "description": "",
+        "blockType": "Type",
+        "icon": "SquareFunction",
+        "draftOrdinal": 2,
+        "view": "expanded",
+        "w": 700,
+        "h": 700,
+        "headerAlign": "center",
+        "foldable": true,
+        "folded": false,
+        "foldControlSide": "right",
+        "autoResize": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
+        "showDescription": false,
+        "memberLayout": "inset",
+        "insetBackground": "soft-gray",
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "parse-member",
+      "type": "block",
+      "parentId": "generic-block",
+      "x": 18,
+      "y": 76,
+      "props": {
+        "title": "parse_frame",
+        "description": "Drag this direct member to exercise continuous auto-fit.",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 664,
+        "h": 230,
+        "showFooter": false,
+        "inputs": [{ "id": "packet", "name": "packet", "type": "Bytes", "visible": true }],
+        "outputs": [{ "id": "frame", "name": "frame", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "render-member",
+      "type": "block",
+      "parentId": "generic-block",
+      "x": 18,
+      "y": 328,
+      "props": {
+        "title": "render_turn",
+        "description": "Double-click the title for the composed title-formatting surface.",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 664,
+        "h": 230,
+        "titleFont": "serif",
+        "titleSize": "m",
+        "titleBold": true,
+        "titleColor": "blue",
+        "titleAlign": "middle",
+        "showHeaderDivider": false,
+        "inputs": [{ "id": "state", "name": "state", "type": "GameState", "visible": true }],
+        "outputs": [{ "id": "view", "name": "view", "type": "Scene", "visible": true }]
+      }
+    },
+    {
+      "id": "velocity",
+      "type": "floating-port",
+      "x": 1450,
+      "y": 560,
+      "props": {
+        "w": 1,
+        "h": 1,
+        "name": "velocity",
+        "type": "Number",
+        "value": "3.5",
+        "direction": "output",
+        "textLayout": "offset",
+        "fill": "auto"
+      }
+    },
+    {
+      "id": "integrate",
+      "type": "block",
+      "x": 1750,
+      "y": 480,
+      "props": {
+        "title": "integrate",
+        "description": "The same generic Block used as a callable leaf.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 180,
+        "inputs": [{ "id": "in_velocity", "name": "velocity", "type": "Number", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "velocity-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "velocity-cable-start",
+      "type": "connection",
+      "fromId": "velocity-cable",
+      "toId": "velocity",
+      "props": { "portId": "port", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "velocity-cable-end",
+      "type": "connection",
+      "fromId": "velocity-cable",
+      "toId": "integrate",
+      "props": { "portId": "in_velocity", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "inspect",
+      "kind": "step",
+      "text": "1 · Select CardGame. The inspector composes Header, Chrome, Behaviour, member layout, and inset-background controls.",
+      "x": 745,
+      "y": 20,
+      "w": 590,
+      "h": 130,
+      "target": { "shapeId": "generic-block", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "drag-child",
+      "kind": "step",
+      "text": "2 · Immediately drag parse_frame rapidly. Only the child moves; CardGame follows continuously and keeps membership.",
+      "x": 70,
+      "y": 330,
+      "w": 500,
+      "h": 140,
+      "target": { "shapeId": "parse-member", "anchor": "left", "dy": -70 }
+    },
+    {
+      "id": "title-edit",
+      "kind": "step",
+      "text": "3 · Double-click render_turn. Its title editor opens with the same composed black contextual controls used elsewhere.",
+      "x": 130,
+      "y": 690,
+      "w": 500,
+      "h": 140,
+      "target": { "shapeId": "render-member", "anchor": "left", "dy": -70 }
+    },
+    {
+      "id": "fold",
+      "kind": "step",
+      "text": "4 · Use the right chevron to fold and reopen. The chevron stays in the corner; icon, title, and Draft stay composed, with Type beside the title.",
+      "x": 1450,
+      "y": 70,
+      "w": 560,
+      "h": 150,
+      "target": { "shapeId": "generic-block", "anchor": "right", "dy": -280 }
+    },
+    {
+      "id": "port-drag",
+      "kind": "step",
+      "text": "5 · Press-drag velocity's text once. The floating Port and its live cable move immediately; its dot remains the wire handle.",
+      "x": 1490,
+      "y": 790,
+      "w": 520,
+      "h": 140,
+      "target": { "shapeId": "velocity", "anchor": "bottom" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Every control works on these ordinary Blocks and Port together: no crash, no parent+child double move, stable continuous fit, preserved membership, and no duplicated menu chrome.",
+      "x": 650,
+      "y": 1080,
+      "w": 800,
+      "h": 150
+    }
+  ]
+}

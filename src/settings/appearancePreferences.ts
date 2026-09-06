@@ -8,10 +8,19 @@ export const WHEEL_ZOOM_SENSITIVITY_STEP = 5
 
 export interface AppearancePreferences {
   showZoomButtons: boolean
-  /** Plain wheel zoom follows Zach's spatial convention: moving the wheel
-   * down moves closer to the board. Keep the opposite convention reachable
-   * without changing the board or replacing tldraw's camera behavior. */
+  /** Start from tldraw's ordinary whiteboard contract: wheel pans, while
+   * Ctrl/Cmd + wheel zooms. Direct wheel zoom is an explicit opt-in for the
+   * spatial convention SystemSketch briefly made universal. */
+  directWheelZoom: boolean
+  /** When direct wheel zoom is enabled, moving the wheel down moves closer to
+   * the board. Keep the opposite convention reachable without changing the
+   * board or replacing tldraw's camera behavior. */
   scrollDownZoomsIn: boolean
+  /** In direct mode, keep Ctrl/Cmd + wheel available as an intentionally
+   * opposite zoom gesture instead of tldraw's usual temporary pan. This lets
+   * CAD and stock-whiteboard muscle memory coexist without changing the
+   * unmodified wheel's chosen direction. */
+  modifierWheelZoomsOppositely: boolean
   /** A percentage of tldraw's stock `zoomSpeed: 1`. Keeping the persisted
    * value in product language makes 100 the obvious, durable reset point. */
   wheelZoomSensitivityPercent: number
@@ -24,7 +33,9 @@ export interface AppearancePreferences {
 
 export const DEFAULT_APPEARANCE_PREFERENCES: AppearancePreferences = Object.freeze({
   showZoomButtons: false,
+  directWheelZoom: false,
   scrollDownZoomsIn: true,
+  modifierWheelZoomsOppositely: false,
   wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
   punctuatedPortRow: true,
 })
@@ -51,7 +62,9 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
   }
   const {
     showZoomButtons,
+    directWheelZoom,
     scrollDownZoomsIn,
+    modifierWheelZoomsOppositely,
     wheelZoomSensitivityPercent,
     punctuatedPortRow,
   } = value
@@ -61,7 +74,9 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
   // wrong type means the record is corrupt, and the whole thing resets.
   if (
     (showZoomButtons !== undefined && typeof showZoomButtons !== 'boolean')
+    || (directWheelZoom !== undefined && typeof directWheelZoom !== 'boolean')
     || (scrollDownZoomsIn !== undefined && typeof scrollDownZoomsIn !== 'boolean')
+    || (modifierWheelZoomsOppositely !== undefined && typeof modifierWheelZoomsOppositely !== 'boolean')
     || (wheelZoomSensitivityPercent !== undefined && !isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent))
     || (punctuatedPortRow !== undefined && typeof punctuatedPortRow !== 'boolean')
   ) {
@@ -71,9 +86,15 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     showZoomButtons: typeof showZoomButtons === 'boolean'
       ? showZoomButtons
       : DEFAULT_APPEARANCE_PREFERENCES.showZoomButtons,
+    directWheelZoom: typeof directWheelZoom === 'boolean'
+      ? directWheelZoom
+      : DEFAULT_APPEARANCE_PREFERENCES.directWheelZoom,
     scrollDownZoomsIn: typeof scrollDownZoomsIn === 'boolean'
       ? scrollDownZoomsIn
       : DEFAULT_APPEARANCE_PREFERENCES.scrollDownZoomsIn,
+    modifierWheelZoomsOppositely: typeof modifierWheelZoomsOppositely === 'boolean'
+      ? modifierWheelZoomsOppositely
+      : DEFAULT_APPEARANCE_PREFERENCES.modifierWheelZoomsOppositely,
     wheelZoomSensitivityPercent: isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent)
       ? wheelZoomSensitivityPercent
       : DEFAULT_APPEARANCE_PREFERENCES.wheelZoomSensitivityPercent,
@@ -131,7 +152,9 @@ export function updateAppearancePreferences(
   const next = { ...snapshot, ...patch }
   if (
     next.showZoomButtons === snapshot.showZoomButtons
+    && next.directWheelZoom === snapshot.directWheelZoom
     && next.scrollDownZoomsIn === snapshot.scrollDownZoomsIn
+    && next.modifierWheelZoomsOppositely === snapshot.modifierWheelZoomsOppositely
     && next.wheelZoomSensitivityPercent === snapshot.wheelZoomSensitivityPercent
     && next.punctuatedPortRow === snapshot.punctuatedPortRow
   ) {

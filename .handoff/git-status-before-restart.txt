@@ -1,0 +1,48 @@
+ M docs/assets/behavior-tree/acceptance.json
+ M docs/assets/behavior-tree/blackboard-pytrees.png
+ M docs/assets/behavior-tree/blackboard-rail.png
+ M docs/assets/behavior-tree/blackboard-table.png
+ M docs/assets/behavior-tree/inspector-node.png
+ M docs/assets/behavior-tree/inspector-renamed.png
+ M docs/assets/behavior-tree/process-blackboard-pytrees.png
+ M docs/assets/behavior-tree/pytrees-placement.json
+ M docs/assets/behavior-tree/tree-after-drag.png
+ M docs/assets/behavior-tree/tree-down-ports.png
+ M docs/assets/behavior-tree/tree-down-selected.png
+ M docs/assets/behavior-tree/tree-down.png
+ M docs/assets/behavior-tree/tree-free-offset.png
+ M docs/assets/behavior-tree/tree-right-compact-elbow.png
+ M docs/assets/behavior-tree/tree-right.png
+ M src/behaviorTree/BehaviorTreeCanvas.tsx
+ M src/behaviorTree/behavior-tree.css
+ M src/behaviorTree/behaviorTreeModel.ts
+ M src/behaviorTree/index.ts
+ M src/behaviorTree/installBehaviorTreeRegions.ts
+ M src/behaviorTree/layouts.test.ts
+ M src/behaviorTree/sceneSvg.ts
+ M src/behaviorTree/treeLayout.ts
+ M src/behaviorTree/ui/BehaviorTreeInspector.tsx
+ M src/behaviorTree/ui/BtInsertMenu.tsx
+ M src/blocks/definitions/definitionLinking.ts
+ M src/blocks/detach/detachBlock.ts
+ M src/blocks/detach/detachModel.test.ts
+ M src/blocks/detach/detachModel.ts
+ M src/branch/detachBranch.ts
+ M src/export/portableTldraw.ts
+ M src/loop/detachLoop.ts
+ M tests/behavior_tree_smoke.mjs
+ M tests/test_stock_boundary.py
+?? .handoff/
+?? docs/assets/behavior-tree-detach/
+?? docs/assets/behavior-tree-identity/
+?? docs/assets/behavior-tree/acceptance.failed.json
+?? sketches/review/behavior-tree-detach.png
+?? sketches/review/behavior-tree-detach.systemsketch
+?? sketches/review/behavior-tree-region-identity.png
+?? sketches/review/behavior-tree-region-identity.systemsketch
+?? src/behaviorTree/btPrimitives.test.ts
+?? src/behaviorTree/btPrimitives.ts
+?? src/behaviorTree/detachBehaviorTree.ts
+?? src/scroll/
+?? tests/behavior_tree_detach_smoke.mjs
+?? tests/behavior_tree_identity_smoke.mjs

@@ -1,6 +1,16 @@
+@import './scroll/scroll-area.css';
+
 /* The page's colours come from the token layer: the app root carries
  * `data-ss-theme`, and `src/theme/tokens.css` paints it. Nothing here names
- * a colour, so nothing here can disagree with the theme. */
+ * a colour, so nothing here can disagree with the theme.
+ *
+ * WHY the scrollbar rules moved out of this file: they were a panel-scoped
+ * list, so a new scrolling surface drew the OS trough until someone
+ * remembered to add its panel to seven selector lists. `src/scroll/` owns
+ * them now, with `.ss-scroll` as a class a scroller can claim for itself.
+ * The import stays here so the rules exist even when no module imports
+ * `ScrollArea.tsx`. */
+
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
@@ -28,11 +38,42 @@ button {
   display: contents;
 }
 
+/* Flex column so a mounted DraftModeBar pushes the canvas down instead of
+ * overlaying it — the draft-mode bar is a real chrome row (see
+ * src/drafts/DraftModeBar.tsx), not a floating notice. */
 .systemsketch-app {
   position: fixed;
   inset: 0;
+  display: flex;
+  flex-direction: column;
   color: var(--ss-text);
   background: var(--ss-surface);
+}
+
+/* `.tl-container` fills 100% of its parent, so this wrapper needs a real,
+ * shrinkable height of its own — `flex: 1 1 auto` plus `min-height: 0` gives
+ * it exactly the space left over once the bar above it (when mounted) has
+ * taken its `--systemsketch-top-height`.
+ *
+ * WHY the `transition`: DraftModeBar mounting/unmounting as a sibling above
+ * this one is what actually resizes it — there is no class or prop toggling
+ * on this element itself. `height` is still the property whose COMPUTED
+ * value changes (it is the main-size property for a column-flex child), so
+ * listing it here is enough for the browser to animate the resulting jump
+ * instead of snapping it — this is the intended "mode banner" reveal
+ * (confirmed with Zach, see DraftModeBar.tsx's header comment), it just used
+ * to cut instead of sliding. */
+.systemsketch-app__canvas {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 auto;
+  transition: height 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-app__canvas {
+    transition: none;
+  }
 }
 
 /* -------------------------------------------------------------------------
@@ -117,7 +158,8 @@ button {
 .systemsketch-library-browser,
 .systemsketch-settings,
 .systemsketch-workspace-dialog,
-.block-inspector {
+.block-inspector,
+.systemsketch-block-canvas {
   scrollbar-width: thin;
   scrollbar-color: var(--ss-border-strong) transparent;
 }
@@ -128,7 +170,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar,
 .systemsketch-settings ::-webkit-scrollbar,
 .systemsketch-workspace-dialog ::-webkit-scrollbar,
-.block-inspector ::-webkit-scrollbar {
+.block-inspector ::-webkit-scrollbar,
+.systemsketch-block-canvas ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
@@ -139,7 +182,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-track,
 .systemsketch-settings ::-webkit-scrollbar-track,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-track,
-.block-inspector ::-webkit-scrollbar-track {
+.block-inspector ::-webkit-scrollbar-track,
+.systemsketch-block-canvas ::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -149,7 +193,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-thumb,
 .systemsketch-settings ::-webkit-scrollbar-thumb,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-thumb,
-.block-inspector ::-webkit-scrollbar-thumb {
+.block-inspector ::-webkit-scrollbar-thumb,
+.systemsketch-block-canvas ::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   border-radius: 999px;
   /* `background-clip: content-box` is what turns the 10px track into a 4px
@@ -164,7 +209,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-thumb:hover,
 .systemsketch-settings ::-webkit-scrollbar-thumb:hover,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-thumb:hover,
-.block-inspector ::-webkit-scrollbar-thumb:hover {
+.block-inspector ::-webkit-scrollbar-thumb:hover,
+.systemsketch-block-canvas ::-webkit-scrollbar-thumb:hover {
   background: var(--ss-text-muted);
   background-clip: content-box;
 }
@@ -175,7 +221,8 @@ button {
 .systemsketch-library-browser ::-webkit-scrollbar-corner,
 .systemsketch-settings ::-webkit-scrollbar-corner,
 .systemsketch-workspace-dialog ::-webkit-scrollbar-corner,
-.block-inspector ::-webkit-scrollbar-corner {
+.block-inspector ::-webkit-scrollbar-corner,
+.systemsketch-block-canvas ::-webkit-scrollbar-corner {
   background: transparent;
 }
 
@@ -190,6 +237,36 @@ button {
 .systemsketch-detached-text-visual .tl-text-shape-label {
   font-weight: var(--systemsketch-detached-font-weight);
   letter-spacing: var(--systemsketch-detached-letter-spacing);
+}
+
+/* The async edge: a shape wearing the packet cadence a cable is drawn with.
+ *
+ * The outline is the one path in a geo shape's SVG that carries a `stroke`
+ * attribute — its fill path has none — so this reaches the edge without
+ * touching the fill or the label. The cadence itself arrives as a custom
+ * property from the shape util, so the canvas and the SVG export are painted
+ * from the same constant rather than from a number copied into CSS. */
+.systemsketch-async-edge path[stroke] {
+  stroke-dasharray: var(--systemsketch-async-dasharray);
+  stroke-linecap: butt;
+}
+
+/* The plain data cable's marching-ants line — React Flow's homepage effect,
+ * v1 always-on per Zach's literal ask. `ConnectionShapeUtil.tsx` sets the
+ * static `stroke-dasharray`; this owns only the motion, so `toSvg` exports
+ * the same dash pattern frozen at offset 0 with no extra branching. The
+ * cadence is one full dash-plus-gap per loop, so it seams cleanly. */
+.ConnectionShape-marchingData {
+  animation: systemsketch-data-cable-march 0.5s linear infinite;
+}
+
+@keyframes systemsketch-data-cable-march {
+  from { stroke-dashoffset: 10; }
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ConnectionShape-marchingData { animation: none; }
 }
 
 .systemsketch-authored-arrow__stock {

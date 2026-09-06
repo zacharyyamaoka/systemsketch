@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useState } from 'react'
 import type { Editor } from 'tldraw'
 
 import {
@@ -93,28 +93,6 @@ export function BoardDiagnosticsView({
 }: BoardDiagnosticsViewProps) {
 	const visible = visibleDiagnostics(model, filter)
 	const visibleIds = new Set(visible.map((diagnostic) => diagnostic.id))
-	const filterRefs = useRef<Array<HTMLButtonElement | null>>([])
-	const activeFilterIndex = FILTERS.findIndex((candidate) => candidate.id === filter)
-
-	/**
-	 * Arrow keys walk the filter list and choose as they go, matching the
-	 * radiogroup pattern already used for the theme list
-	 * (`src/settings/InterfaceSettings.tsx`) — mutually-exclusive filters are a
-	 * single tab stop with the arrows doing the choosing, not a Tab stop each.
-	 */
-	const onFilterKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-		const from = activeFilterIndex === -1 ? 0 : activeFilterIndex
-		let next = from
-		if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (from + 1) % FILTERS.length
-		else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (from - 1 + FILTERS.length) % FILTERS.length
-		else if (event.key === 'Home') next = 0
-		else if (event.key === 'End') next = FILTERS.length - 1
-		else return
-		event.preventDefault()
-		event.stopPropagation()
-		onFilterChange?.(FILTERS[next].id)
-		queueMicrotask(() => filterRefs.current[next]?.focus())
-	}
 
 	return (
 		<section
@@ -139,25 +117,16 @@ export function BoardDiagnosticsView({
 			</header>
 
 			{model.counts.total > 0 ? (
-				<div
-					className="systemsketch-diagnostics__filters"
-					role="radiogroup"
-					aria-label="Filter diagnostics"
-					onKeyDown={onFilterKeyDown}
-				>
-					{FILTERS.map((candidate, index) => {
+				<div className="systemsketch-diagnostics__filters" role="group" aria-label="Filter diagnostics">
+					{FILTERS.map((candidate) => {
 						const count = candidate.id === 'all'
 							? model.counts.total
 							: model.counts[candidate.id]
-						const active = filter === candidate.id
 						return (
 							<button
 								key={candidate.id}
 								type="button"
-								role="radio"
-								aria-checked={active}
-								tabIndex={active || (activeFilterIndex === -1 && index === 0) ? 0 : -1}
-								ref={(element) => { filterRefs.current[index] = element }}
+								aria-pressed={filter === candidate.id}
 								onClick={() => onFilterChange?.(candidate.id)}
 							>
 								{candidate.label}<span>{count}</span>

@@ -1,0 +1,10 @@
+{"wall": 1788658318516.7, "method": "POST", "path": "/api/recordings/arm", "status": 200, "durationMs": 0.0, "level": "info", "summary": "POST /api/recordings/arm → 200", "t": 1.7}
+{"wall": 1788658319995.1, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 1480.1}
+{"wall": 1788658321495.1, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 2980.1}
+{"wall": 1788658322995.0, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 4480.0}
+{"wall": 1788658324495.0, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 5980.0}
+{"wall": 1788658325995.4, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 7480.4}
+{"wall": 1788658327495.3, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 8980.3}
+{"wall": 1788658328995.1, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 10480.1}
+{"wall": 1788658329229.7, "method": "GET", "path": "/api/release", "status": 200, "durationMs": 0.3, "level": "info", "summary": "GET /api/release → 200", "t": 10714.7}
+{"wall": 1788658330495.4, "method": "GET", "path": "/api/workspace/stat", "status": 200, "durationMs": 0.4, "level": "info", "summary": "GET /api/workspace/stat → 200", "t": 11980.4}
