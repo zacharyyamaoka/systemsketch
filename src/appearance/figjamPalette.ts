@@ -100,7 +100,7 @@ function darken(hex: string, amount: number): string {
 }
 
 /** Black text on a pale colour, white on a deep one. */
-function readableInk(hex: string): string {
+export function readableInk(hex: string): string {
   const [r, g, b] = channels(hex)
   return (r * 299 + g * 587 + b * 114) / 1000 > 140 ? '#000000' : '#ffffff'
 }

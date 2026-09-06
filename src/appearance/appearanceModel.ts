@@ -28,6 +28,7 @@ import {
 
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import { isCustomColor } from './customColors'
+import { ASYNC_LINE_VALUE, type StrokeMetaField } from './strokeMeta'
 import {
   FIGJAM_COLOR_NAMES,
   FIGJAM_PALETTE_COLUMNS,
@@ -37,8 +38,8 @@ export type AppearanceControlId =
   | 'geo'
   | 'color'
   | 'fill'
-  | 'dash'
   | 'lineStyle'
+  | 'strokeColor'
   | 'size'
   | 'font'
   | 'align'
@@ -91,6 +92,14 @@ export interface AppearanceControl {
    */
   modeControl?: AppearanceControl
   modePlacement?: 'above' | 'beside'
+  /**
+   * An edge control writes shape metadata rather than a style, because neither
+   * a per-shape stroke colour nor the async cadence fits a stock style prop
+   * (`strokeMeta.ts` says why). `value` is filled in by `AppearanceControls`,
+   * which is the only place that can see the selected shapes; the fallback the
+   * model puts there is the stock style the edge follows by default.
+   */
+  meta?: StrokeMetaField
 }
 
 const option = (value: string, label: string): AppearanceOption => ({ value, label })
@@ -105,21 +114,46 @@ export const APPEARANCE_COLORS = FIGJAM_COLOR_NAMES
 
 export const APPEARANCE_COLOR_COLUMNS = FIGJAM_PALETTE_COLUMNS
 
-/** tldraw's fill values, named the way FigJam names the three it has. */
+/**
+ * FigJam's three fills, in FigJam's order, and only those three.
+ *
+ * WHY: tldraw also has `fill`, `pattern` and `lined-fill`, and offering all six
+ * was the menu trying to be tldraw and Excalidraw and FigJam at once. The
+ * vocabulary is FigJam's, so it stops at Solid / Transparent / No fill — and
+ * runs in that direction, most paint first, exactly as FigJam's own row does.
+ * A shape that already stores one of the other three still renders it and
+ * still names it on the trigger — see `selectedOption` — it just cannot be
+ * chosen here.
+ */
 const FILL_OPTIONS = [
-  option('none', 'No fill'),
-  option('semi', 'Transparent'),
   option('solid', 'Solid'),
-  option('fill', 'Fill'),
-  option('pattern', 'Pattern'),
-  option('lined-fill', 'Lined'),
+  option('semi', 'Transparent'),
+  option('none', 'No fill'),
 ] as const
 
-const DASH_OPTIONS = [
-  option('draw', 'Draw'),
+/**
+ * The line-style vocabulary. One list, everywhere a line has a style.
+ *
+ * FigJam has Solid / Dashed / None; tldraw's `dotted` joins them because a
+ * dotted line is a distinction SystemSketch draws, and `async` — the packet
+ * cadence a cable already paints — is the one entry that is ours rather than
+ * tldraw's (`strokeMeta.ts` says why it cannot be a dash value).
+ *
+ * WHY there is exactly one list: a rectangle's edge and a connector are the
+ * same question asked of two shapes, and the moment they were two lists they
+ * drifted — the connector's own Dotted icon was being drawn by the arrowhead
+ * renderer, because only the shape's control id reached the dash glyph. The
+ * two menus now differ in one property, `layout`, which is the label toggle:
+ * `chips` names each option, `row` shows the same glyphs bare.
+ *
+ * `draw` — the sketchy Excalidraw-ish outline — is deliberately absent: it was
+ * the single option that made the pill read as three products at once.
+ */
+const LINE_STYLE_OPTIONS = [
   option('solid', 'Solid'),
   option('dashed', 'Dashed'),
   option('dotted', 'Dotted'),
+  option(ASYNC_LINE_VALUE, 'Async'),
   option('none', 'None'),
 ] as const
 
@@ -132,13 +166,15 @@ const SIZE_OPTIONS = [
 ] as const
 
 /**
- * The same four rungs as a connector's stroke weight, where FigJam has two:
- * its icons sit on the ends and tldraw's middle two keep their own names.
+ * A connector's stroke weight: FigJam's two rungs, and only two.
+ *
+ * WHY `m` is Thin rather than tldraw's `s`: `m` is the size every shape and
+ * cable is created at, so binding Thin to it means a cable drawn today reads
+ * as Thin instead of showing an empty row. The pair still spans a visible
+ * difference — 3.5px against 6px — which is the whole point of having two.
  */
 const WEIGHT_OPTIONS = [
-  option('s', 'Thin'),
-  option('m', 'Medium'),
-  option('l', 'Large'),
+  option('m', 'Thin'),
   option('xl', 'Thick'),
 ] as const
 
@@ -234,9 +270,15 @@ interface Definition {
   layout: AppearanceLayout
   trigger: AppearanceTrigger
   columns?: number
+  meta?: StrokeMetaField
 }
 
-const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineStyle'>, Definition>> = {
+// `fill` and `strokeColor` are built from the selection rather than declared:
+// one is a mode row inside another control's popover, the other needs the
+// shape's own colour as its fallback.
+const DEFINITIONS: Readonly<
+  Record<Exclude<AppearanceControlId, 'fill' | 'strokeColor'>, Definition>
+> = {
   // FigJam's trigger is a fixed circle-and-square glyph, the same whichever
   // geo is actually selected — not a preview of the current shape.
   geo: {
@@ -248,11 +290,14 @@ const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineSt
     options: APPEARANCE_COLORS.map((value) => option(value, colorLabel(value))),
     layout: 'swatches', trigger: 'value', columns: APPEARANCE_COLOR_COLUMNS,
   },
-  // A shape's Line style: FigJam's Solid / Dashed / None as labelled chips
-  // behind the same fixed three-bar icon a connector's uses.
-  dash: {
-    id: 'dash', label: 'Line style', style: DefaultDashStyle as StyleProp<string>,
-    options: DASH_OPTIONS, layout: 'chips', trigger: 'icon',
+  // The one Line style control. A shape stacks it as labelled chips above its
+  // edge palette; a connector shows the same options bare beside its weight.
+  // Nothing but `layout` differs, so neither menu can drift from the other.
+  // The value is meta-backed because `async` is not a tldraw dash; the style
+  // below is what it falls back to and what every other option writes.
+  lineStyle: {
+    id: 'lineStyle', label: 'Line style', style: DefaultDashStyle as StyleProp<string>,
+    options: LINE_STYLE_OPTIONS, layout: 'chips', trigger: 'icon', meta: 'pattern',
   },
   // A shape's size is FigJam's Font size: a combobox that names the rung,
   // after Typeface, listing each rung at its own size. tldraw's one `size`
@@ -307,7 +352,7 @@ const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineSt
  * once the shape actually has text; see `TYPOGRAPHY_IDS` below.
  */
 const SHAPE_ORDER: readonly AppearanceControlId[] = [
-  'geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign',
+  'geo', 'color', 'strokeColor', 'font', 'size', 'align', 'verticalAlign',
 ]
 
 /**
@@ -370,6 +415,39 @@ function fillControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefi
 }
 
 /**
+ * A shape's Line style: FigJam's Stroke popover, which is a palette with the
+ * line-style chips stacked above it.
+ *
+ * WHY the palette is here at all: tldraw paints a shape's outline and its fill
+ * from one `color`, so before this there was no way to say "white box, black
+ * edge" — the exact thing FigJam's two popovers exist to allow. The edge
+ * colour is an override stored beside the shape; with none, the palette shows
+ * the shape's own colour, which is what tldraw is painting the outline with.
+ *
+ * The trigger stays FigJam's three-bar Line style icon, and the chips stay the
+ * first thing in the popover, so the control still reads as "line style" with
+ * a colour under it rather than as a second colour button.
+ */
+function strokeColorControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefined {
+  const dash = styles.get(DefaultDashStyle as StyleProp<string>)
+  if (!dash) return undefined
+  // Only a geo shape. WHY: the edge colour and the async cadence are painted
+  // by the geo util's display values and its component; offering either on a
+  // freehand stroke would be a control that writes state nothing reads.
+  if (!styles.get(GeoShapeGeoStyle as StyleProp<string>)) return undefined
+  const color = styles.get(DefaultColorStyle as StyleProp<string>)
+  return {
+    id: 'strokeColor', label: 'Line style', style: DefaultColorStyle as StyleProp<string>,
+    value: color ?? { type: 'mixed' },
+    options: APPEARANCE_COLORS.map((value) => option(value, colorLabel(value))),
+    layout: 'swatches', trigger: 'icon', columns: APPEARANCE_COLOR_COLUMNS,
+    meta: 'color',
+    modeControl: { ...DEFINITIONS.lineStyle, value: dash },
+    modePlacement: 'above',
+  }
+}
+
+/**
  * A connector's Line style: FigJam's one popover holding `Thin Thick | Solid
  * Dashed`, so this is the dash control with the weight control beside it.
  * Both still write their own tldraw style; only the popover is shared.
@@ -377,10 +455,9 @@ function fillControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefi
 function lineStyleControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefined {
   const dash = styles.get(DefaultDashStyle as StyleProp<string>)
   if (!dash) return undefined
-  const control: AppearanceControl = {
-    id: 'lineStyle', label: 'Line style', style: DefaultDashStyle as StyleProp<string>,
-    value: dash, options: DASH_OPTIONS, layout: 'row', trigger: 'icon',
-  }
+  // The shape's own control with the labels turned off — same options, same
+  // glyphs, same writes. `layout` is the only thing a connector changes.
+  const control: AppearanceControl = { ...DEFINITIONS.lineStyle, layout: 'row', value: dash }
   const size = styles.get(DefaultSizeStyle as StyleProp<string>)
   if (size) {
     control.modeControl = {
@@ -430,6 +507,18 @@ export function buildAppearanceControls(
       if (size) controls.push({ ...DEFINITIONS.size, value: size })
       continue
     }
+    if (id === 'strokeColor') {
+      const stroke = strokeColorControl(styles)
+      if (stroke) {
+        controls.push(stroke)
+        continue
+      }
+      // A dash-bearing shape with no geo — a freehand stroke — keeps the chips
+      // without the palette above them: its edge colour is its only colour.
+      const dash = styles.get(DEFINITIONS.lineStyle.style)
+      if (dash) controls.push({ ...DEFINITIONS.lineStyle, value: dash })
+      continue
+    }
     const definition = DEFINITIONS[id as keyof typeof DEFINITIONS]
     const value = styles.get(definition.style)
     if (!value) continue
@@ -447,6 +536,48 @@ export function buildAppearanceControls(
   return controls
 }
 
+/**
+ * The edge values `AppearanceControls` reads off the selected shapes, in the
+ * two states a control can show: one definite value, or `mixed`. `null` means
+ * the selection has no edge at all, so the control keeps the stock style it
+ * falls back to.
+ */
+export interface EdgeValues {
+  color: string | null
+  pattern: string | null
+}
+
+/** The sentinel `useEdgeValue` returns for a selection that disagrees. */
+export const EDGE_MIXED = '\u0000mixed'
+
+function edgeShared(value: string | null): SharedStyle<string> | undefined {
+  if (value === null) return undefined
+  return value === EDGE_MIXED ? { type: 'mixed' } : { type: 'shared', value }
+}
+
+/**
+ * Fill in the two meta-backed controls from the selection.
+ *
+ * The model cannot read shape metadata — it only ever sees tldraw's shared
+ * style map — so this is where the value the canvas actually holds replaces
+ * the stock style the control falls back to. Same shape as the arrow-routing
+ * substitution beside it in `AppearanceControls`.
+ */
+export function withEdgeValues(
+  control: AppearanceControl,
+  values: EdgeValues,
+): AppearanceControl {
+  const mode = control.modeControl
+  const modeValue = mode?.meta ? edgeShared(values[mode.meta]) : undefined
+  const own = control.meta ? edgeShared(values[control.meta]) : undefined
+  if (!modeValue && !own) return control
+  return {
+    ...control,
+    ...(own ? { value: own } : {}),
+    ...(mode && modeValue ? { modeControl: { ...mode, value: modeValue } } : {}),
+  }
+}
+
 /** FigJam's word for the 22nd cell, and for the trigger while a custom colour is applied. */
 export const CUSTOM_LABEL = 'Custom'
 
@@ -460,16 +591,49 @@ export function selectedOption(control: AppearanceControl): AppearanceOption | u
   if (shared.type !== 'shared') return undefined
   const found = control.options.find((candidate) => candidate.value === shared.value)
   if (found) return found
-  if (control.id === 'color' && isCustomColor(shared.value)) {
+  if ((control.id === 'color' || control.id === 'strokeColor') && isCustomColor(shared.value)) {
     return option(shared.value, CUSTOM_LABEL)
   }
   return undefined
 }
 
+/**
+ * A value the selection definitely holds but the menu no longer offers —
+ * a `pattern` fill or a `draw` dash drawn before the vocabulary closed.
+ *
+ * WHY this exists: the alternative is `Mixed`, and a single shape with one
+ * definite stored value is not mixed. Naming the stored token keeps the pill
+ * honest about what the shape is, while the panel stays honest about what can
+ * be chosen — nothing in it is checked.
+ */
+export function unofferedValue(control: AppearanceControl): string | undefined {
+  const shared = control.value
+  if (shared.type !== 'shared') return undefined
+  return selectedOption(control) ? undefined : shared.value
+}
+
 /** What the trigger says when the selection disagrees, as tldraw's own panel does. */
 export const MIXED_LABEL = 'Mixed'
 
-export function triggerLabel(control: AppearanceControl): string {
+function valueName(control: AppearanceControl): string {
   const option = selectedOption(control)
-  return `${control.label}, ${option ? option.label.toLowerCase() : MIXED_LABEL.toLowerCase()}`
+  if (option) return option.label.toLowerCase()
+  return unofferedValue(control) ?? MIXED_LABEL.toLowerCase()
+}
+
+/**
+ * What the trigger announces.
+ *
+ * A trigger showing a fixed icon says nothing about its value, and a stacked
+ * popover holds two of them — a shape's Line style is a dash *and* an edge
+ * colour behind one three-bar glyph. Both are named, mode first, so the pill
+ * is readable without opening it. Every other trigger draws its own value and
+ * names just that one.
+ */
+export function triggerLabel(control: AppearanceControl): string {
+  const stacked = control.trigger === 'icon' && control.modePlacement === 'above'
+    ? control.modeControl
+    : undefined
+  const value = stacked ? `${valueName(stacked)} ${valueName(control)}` : valueName(control)
+  return `${control.label}, ${value}`
 }

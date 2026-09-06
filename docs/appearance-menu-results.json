@@ -20,6 +20,10 @@
   "ok": true
  },
  {
+  "label": "the three fills are three visibly different things, in both directions",
+  "ok": true
+ },
+ {
   "label": "Custom opens FigJam's 184x310 picker flush under the palette, on the current colour",
   "ok": true
  },
@@ -40,7 +44,7 @@
   "ok": true
  },
  {
-  "label": "a shape's Line style is a row of labelled chips offering every dash the document can hold",
+  "label": "a shape's Line style holds the chips over a palette of its own, and async paints the cable cadence",
   "ok": true
  },
  {

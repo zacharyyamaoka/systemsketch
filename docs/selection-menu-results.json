@@ -16,7 +16,7 @@
   "ok": true
  },
  {
-  "label": "a selection larger than the viewport parks the menu above the tool belt, not at the window edge",
+  "label": "a selection larger than the viewport pins the menu to the top margin, not the bottom toolbar",
   "ok": true
  },
  {
@@ -29,6 +29,18 @@
  },
  {
   "label": "panning the selection off screen hides the menu and stops it answering hit tests",
+  "ok": true
+ },
+ {
+  "label": "a viewport entirely inside an oversized frame pins the menu to the top margin",
+  "ok": true
+ },
+ {
+  "label": "a frame with its top edge visible near mid-screen gets the ordinary 'above' placement",
+  "ok": true
+ },
+ {
+  "label": "panning the camera 600px sideways moves the visible-portion centre with it",
   "ok": true
  },
  {

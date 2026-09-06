@@ -93,19 +93,6 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
       // Escape closes the surfaces a person opened; the dock closes with its
       // own × or by clearing the selection.
       if (latest === 'right:inspector') return
-      // The library's own search input clears an active query on its first
-      // Escape (see ShapeLibraryBrowser.tsx) — this capture-phase listener
-      // fires before that local handler ever gets the event, so without this
-      // check "clear the filter" was unreachable: this closed the whole
-      // panel first. A second Escape, with nothing left to clear, still
-      // closes here as it always did.
-      if (latest === 'left:shapes') {
-        const active = document.activeElement
-        const searchHasQuery = active instanceof HTMLInputElement
-          && active.classList.contains('systemsketch-library-search')
-          && active.value !== ''
-        if (searchHasQuery) return
-      }
       event.preventDefault()
       event.stopPropagation()
       closeLatest()

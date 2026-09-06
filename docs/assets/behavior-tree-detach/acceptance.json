@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-05T18:22:29.832Z",
-  "passed": 26,
-  "total": 26,
+  "generatedAt": "2026-09-06T03:27:14.381Z",
+  "passed": 28,
+  "total": 28,
   "results": [
     {
       "id": "refuse.leaf.selected",
       "description": "right-clicking a projected leaf selects it",
       "ok": true,
       "observed": [
-        "shape:rUXZmotF3HYFnDw5aZoa6"
+        "shape:HHG3AeUsGgTjgbgQ9aR8E"
       ],
       "desired": [
-        "shape:rUXZmotF3HYFnDw5aZoa6"
+        "shape:HHG3AeUsGgTjgbgQ9aR8E"
       ]
     },
     {
@@ -26,10 +26,10 @@
       "description": "right-clicking a projected control selects it",
       "ok": true,
       "observed": [
-        "shape:UNkVbNd_3T3IZ5IRdvznK"
+        "shape:Dutt2JPYx2PoIQQ-tYpjH"
       ],
       "desired": [
-        "shape:UNkVbNd_3T3IZ5IRdvznK"
+        "shape:Dutt2JPYx2PoIQQ-tYpjH"
       ]
     },
     {
@@ -267,6 +267,28 @@
       "ok": true,
       "observed": [],
       "desired": []
+    },
+    {
+      "id": "annotate.parented",
+      "description": "a rectangle drawn inside the region becomes its child",
+      "ok": true,
+      "observed": [
+        "shape:bt-detach-region"
+      ],
+      "desired": [
+        "shape:bt-detach-region"
+      ]
+    },
+    {
+      "id": "annotate.survives",
+      "description": "the person's own drawing survives the detach, inside the frame",
+      "ok": true,
+      "observed": [
+        "in-frame"
+      ],
+      "desired": [
+        "in-frame"
+      ]
     },
     {
       "id": "console.end",

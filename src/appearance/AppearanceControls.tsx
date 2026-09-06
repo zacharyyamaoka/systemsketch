@@ -18,11 +18,21 @@ import {
   buildAppearanceControls,
   selectedOption,
   triggerLabel,
+  withEdgeValues,
   CUSTOM_LABEL,
+  EDGE_MIXED,
   MIXED_LABEL,
   type AppearanceControl,
   type AppearanceOption,
+  type EdgeValues,
 } from './appearanceModel'
+import {
+  applyLinePattern,
+  applyStrokeMeta,
+  linePatternOf,
+  sharedEdgeValue,
+  strokeColorOf,
+} from './strokeMeta'
 import { AppearanceGlyph, FigjamGlyph, TriggerGlyph } from './AppearanceGlyph'
 import { CustomColorPicker } from './CustomColorPicker'
 import { isCustomColor, registeredHex } from './customColors'
@@ -79,7 +89,10 @@ export function AppearanceControls() {
     },
     [editor],
   )
+  const edges = useEdgeValues(editor)
   const controls = buildAppearanceControls(styles, hasText).map((control) => {
+    const withEdges = withEdgeValues(control, edges)
+    if (withEdges !== control) return withEdges
     if (control.id !== 'arrowKind' || selectedArrowRouting === null) return control
     return {
       ...control,
@@ -136,6 +149,32 @@ function AddTextButton({ editor, shape }: { editor: Editor; shape: TLShape }) {
       <FigjamGlyph name="trigger/Add text" />
     </button>
   )
+}
+
+/**
+ * The edge state of the selection, as two plain strings.
+ *
+ * `useValue` compares by reference, so a hook returning a fresh object would
+ * re-render the whole pill on every canvas tick. Two scalars cost one
+ * comparison each and change only when the edge actually does.
+ */
+function useEdgeValues(editor: Editor): EdgeValues {
+  const color = useValue(
+    'systemsketch edge colour',
+    () => encodeEdge(sharedEdgeValue(editor.getSelectedShapes(), strokeColorOf)),
+    [editor],
+  )
+  const pattern = useValue(
+    'systemsketch edge line style',
+    () => encodeEdge(sharedEdgeValue(editor.getSelectedShapes(), linePatternOf)),
+    [editor],
+  )
+  return { color, pattern }
+}
+
+function encodeEdge(shared: ReturnType<typeof sharedEdgeValue>): string | null {
+  if (!shared) return null
+  return shared.type === 'shared' ? shared.value : EDGE_MIXED
 }
 
 /** Apply a style the way tldraw's own panel does: one history step, both scopes. */
@@ -294,6 +333,12 @@ function OptionButton({
       onClick={() => {
         if (control.id === 'arrowKind' && isArrowPreset(option.value)) {
           applyArrowRouting(editor, option.value)
+        } else if (control.meta === 'pattern') {
+          // One chip, two homes: the stock dash on the shape and the async
+          // override beside it. `applyLinePattern` keeps them in step.
+          applyLinePattern(editor, option.value)
+        } else if (control.meta === 'color') {
+          applyStrokeMeta(editor, 'color', option.value)
         } else {
           applyStyle(editor, control.style, option.value)
         }
