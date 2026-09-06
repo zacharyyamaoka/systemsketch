@@ -12,9 +12,9 @@
  * if you're doing something that is not part of the diagram, you use the
  * whiteboard one." Auto-layout changes a region's identity from whiteboard
  * to reactive diagram, so the diagram's own gesture engine takes the drag.
- * A PEP is owed at merge recording this fork (single-drag-owner vs
- * conditional-dual-drag-owner) — see docs/peps/README.md; do not silently
- * re-litigate this by "simplifying" back to one owner.
+ * This fork (single-drag-owner vs conditional-dual-drag-owner) is recorded
+ * in docs/peps/0007-conditional-dual-drag-owner.md; do not silently
+ * re-litigate it by "simplifying" back to one owner.
  *
  * THE BOUNDARY, precisely — dnd-kit may own a gesture only when ALL hold:
  *   - the pressed shape is a projected diagram node (`btRole === 'node'`)

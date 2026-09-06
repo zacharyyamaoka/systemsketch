@@ -24,7 +24,11 @@
  * same exported, pure collision functions `DndContext` runs internally —
  * composed per its multi-container example (containment first, nearest
  * fallback), fed the virtual per-container slot geometry that
- * `sortableGeometry.ts` derives from the real layout.
+ * `sortableGeometry.ts` derives from the real layout. This fork is recorded
+ * in docs/peps/0006-tree-drag-dndkit-pure-collision.md; the later, precisely
+ * scoped exception that mounts ONE DndContext as the claimed-gesture sensor
+ * (never a sortable DOM mirror of the projection) is
+ * docs/peps/0007-conditional-dual-drag-owner.md.
  *
  * THE ONE IDEA kept from the predecessor (and its `labs/railDrag` ancestor):
  * a drop target is resolved against a GHOST layout — the real tree with the

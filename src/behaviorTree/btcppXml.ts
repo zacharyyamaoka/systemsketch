@@ -321,7 +321,8 @@ export const BT_BUILTIN_MODELS: readonly BtNodeModel[] = [
 	// FollowPath) — real trees use it at multiple granularities, which is why
 	// this app needs to render it recognizably rather than fall back to a
 	// generic "control with children" box the way it did before this model
-	// existed. See `docs/peps/` if this ever grows a decision record.
+	// existed. The decision record is
+	// docs/peps/0008-recoverynode-first-class-control.md.
 	model('RecoveryNode', 'control', [port('number_of_retries', 'input', 'int', '1', 'Successful recoveries allowed before giving up')], {
 		controlKind: 'recoveryLoop',
 		description: 'Primary step; on failure, a one-step recovery, then retry the primary.',

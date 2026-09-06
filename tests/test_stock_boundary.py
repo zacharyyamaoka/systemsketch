@@ -144,7 +144,8 @@ class StockBoundaryTests(unittest.TestCase):
 
         A future rewrite must not silently re-litigate this fork
         (single-drag-owner vs conditional-dual-drag-owner): the WHY block in
-        treeDndDrag.tsx records the decision and a PEP is owed at merge.
+        treeDndDrag.tsx records the decision, and its durable record is
+        docs/peps/0007-conditional-dual-drag-owner.md.
         """
 
         drag_lane = (PROJECT_ROOT / "src" / "behaviorTree" / "treeDndDrag.tsx").read_text(
@@ -169,8 +170,8 @@ class StockBoundaryTests(unittest.TestCase):
         # The second system is real and mounted — sensors, not just math.
         self.assertIn("<DndContext", drag_lane)
         self.assertIn("PointerSensor", drag_lane)
-        # The decision is recorded where it lives, and owed a PEP at merge.
-        self.assertIn("A PEP is owed at merge", drag_lane)
+        # The decision is recorded where it lives, and in its merge-time PEP.
+        self.assertIn("docs/peps/0007-conditional-dual-drag-owner.md", drag_lane)
 
         # dnd-kit stays inside the one module that owns the exception; nothing
         # else in the app may import it, mount a second DndContext, or build a
