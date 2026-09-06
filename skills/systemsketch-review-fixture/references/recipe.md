@@ -155,6 +155,12 @@ and the helper leaves those derived records out of the authored inventory.
 Target callouts at the region itself, never at a projected child, because a
 child's id is minted at load.
 
+Run mode is ephemeral: a fixture cannot seed a run, so cue the trigger instead
+(select the region → ▶ run on its selection pill). Authored mock parameters DO
+belong in the fixture — `_mock_success` / `_mock_duration_ms` attributes on the
+XML's `TreeNodesModel` entries — so bake the story (e.g. a 30% flaky skill
+under a Retry) into `props.xml`.
+
 ```json
 {
   "id": "subject",
