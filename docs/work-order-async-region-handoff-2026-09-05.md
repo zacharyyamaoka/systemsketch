@@ -1,10 +1,12 @@
 # Work order: take over contextual Async regions
 
-**Status:** implemented, verified, committed through `2a6f4bfd`, reconciled through
-`main` commit `3a648701`, and intentionally not integrated. The adversarial
-review has five components, 18 protocol legs, nine semantic relationships,
-selectable fixed/shortest carrier edges, and a live nineteenth-wire defaulting
-gesture. Do not rebuild the feature from scratch.
+**Status:** implemented, verified, and merged into local `main` by
+`f32d1ab1` on 2026-09-06. The merge reconciles the communication work with
+the Draft, Type, primitive-search, and canvas-navigation changes already on
+`main`; it has not been pushed or promoted. The adversarial review has five
+components, 18 protocol legs, nine semantic relationships, selectable
+fixed/shortest carrier edges, exact focused-phase labels, and a live
+nineteenth-wire defaulting gesture. Do not rebuild the feature from scratch.
 
 ## Objective
 
@@ -34,28 +36,33 @@ components move, boards load, or users edit temporal behavior.
 
 | Item | Value |
 |---|---|
-| Repository | `/home/bam/systemsketch` |
-| Feature worktree | `/home/bam/.codex/worktrees/7110/systemsketch-track-communication-representative-edge` |
-| Branch | `codex/communication-representative-edge` |
+| Repository and integrated checkout | `/home/bam/systemsketch` |
+| Historical feature worktree | `/home/bam/.codex/worktrees/7110/systemsketch-track-communication-representative-edge` |
+| Historical feature branch | `codex/communication-representative-edge` at `008bd59c8ec072253d2e60eb5b7f5d74c840eb40` |
 | Original implementation and focused browser proof | `7a959d11d2ed7adce989a2a26e99944b9de6cc80` |
 | Reconciled communication/Async-region predecessor | `9a36d399893a2087f6c678afd819f7bf258e1f8a` |
 | Representative-edge implementation and proof | `ff3d4cbde0aa6000d8bbcc130d341185682b36d8` |
 | Exact focused-phase labels and proof | `2a6f4bfdc9f4abc3140583429120d9055cbc58dd` |
-| Latest reconciled `main` baseline | `3a648701a31c13705d01fb457fc4b2f61286e295` |
-| Integration state | Not merged into `main`; no integration was authorized |
-| Retained review | Run `python3 scripts/review_runtime.py list` for the current commit-pinned stress URL |
+| Pre-merge `main` | `bad92c887eb03fbf3b649c96e8d0f5ee5700ff05` |
+| Merge commit | `f32d1ab1` — `Merge communication relationship carrier and focus UX` |
+| Integration state | Merged into local `main`; not pushed and not promoted to Stable/Preview |
+| Retained review | Run `python3 scripts/review_runtime.py list` and use `communication-async-regions-main-20260906` |
 
 Before writing, run `git status --short`, `git worktree list`, and
-`git rev-parse main`. The named worktree was clean when this handoff was
-written. Claim it only if no other lane is using it. If another writer owns it,
-create a fresh worktree at the branch HEAD instead of sharing one filesystem
-lane.
+`git rev-parse main`. The authoritative main checkout had an unrelated
+Control-lanes Babble in progress when this merge was performed: a README link,
+`sketches/review/edge-styling.systemsketch`, and three
+`docs/control-lanes-babble*` files. Those changes were deliberately restored
+uncommitted, with a safety copy in the stash named
+`preserve control-lane work before communication merge 2026-09-06`. Do not
+stage, rewrite, drop, or claim them. The historical feature worktree also has
+an unrelated `AGENTS.md` edit; preserve it.
 
 ## Review surfaces
 
-- The active retained review's exact board and report URLs are printed by
-  `python3 scripts/review_runtime.py list`; use the entry whose name starts
-  `communication-representative-edge`.
+- The integrated retained review's exact board and report URLs are printed by
+  `python3 scripts/review_runtime.py list`; use
+  `communication-async-regions-main-20260906`.
 - Committed board:
   `sketches/review/async-region.systemsketch`
 - Committed stress board:
@@ -63,12 +70,11 @@ lane.
 - Report source and output:
   `docs/build_async_region.py` and `docs/async-region-2026-09-05.html`
 
-If the retained review is down, relaunch it from the feature worktree using
-the exact name reported by `list`, for example:
+If the retained review is down, relaunch it from the integrated main checkout:
 
 ```bash
-python3 scripts/review_runtime.py up communication-representative-edge-20260906 \
-  --ref 2a6f4bfdc9f4abc3140583429120d9055cbc58dd \
+python3 scripts/review_runtime.py up communication-async-regions-main-20260906 \
+  --ref main \
   --board sketches/review/async-region-stress.systemsketch \
   --report docs/async-region-2026-09-05.html
 ```
@@ -166,7 +172,7 @@ The next change is acceptable only if all of these remain true:
 
 ## Verification commands
 
-From the feature worktree:
+From the integrated main checkout:
 
 ```bash
 npm install
@@ -192,13 +198,42 @@ through the repo's `systemsketch-review-fixture` skill, drive that exact saved
 board in the real app, regenerate `docs/async-region-2026-09-05.html`, and
 visually inspect the result. Never hand-edit tldraw schema JSON.
 
+## Most likely continuation: semantic association V2
+
+The open product question is how to replace naming inference with authored or
+source-derived communication meaning without creating a second graph. A safe
+next increment is:
+
+1. Define one analyzer result shaped like `CommunicationDescriptor`, including
+   family, interaction name, phase, direction, and provenance.
+2. Prefer an explicit authored/source-derived result when it is complete and
+   internally consistent; otherwise fall back visibly to the existing strict
+   port-name parser.
+3. Keep grouping and validation downstream of that seam unchanged: component
+   pair + family + interaction name, followed by missing/duplicate/reversed-leg
+   diagnostics.
+4. Surface unresolved or conflicting provenance instead of silently guessing.
+5. Add an adversarial fixture containing two Actions and two Services with the
+   same component pair and deliberately misleading port names, proving source
+   semantics win without changing the canonical data edges.
+
+This matches Dora's model: Topic, Service, Action, and Streaming remain
+well-known interpretations over ordinary inputs and outputs rather than new
+YAML edge primitives. Reference:
+<https://github.com/dora-rs/dora/blob/main/guide/src/concepts/patterns.md>.
+
 ## Known boundaries; ask before expanding them
 
 - The existing legacy Communication prototype remains available behind its
   query flag for old review links. Real Async regions do not require that flag.
-- This implementation does not infer communication families by parsing
-  arbitrary source code. It scopes and presents the existing connection
-  metadata and applies only the temporal Async default.
+- V1 communication inference is deliberately strict and name-based. It reads
+  the two endpoint port names; recognizes Action phases `goal`, `cancel`,
+  `feedback`, and `result`, and Service phases `req`/`request`/`query` and
+  `reply`/`response`; requires an interaction prefix such as `move.goal`; and
+  rejects conflicting endpoint claims. It groups legs by unordered component
+  pair + family + lowercase interaction name. It does not yet parse a Block's
+  source/function body. The `provenance: 'strict-port-name'` descriptor field
+  is the explicit V2 replacement seam.
 - The region is not a runtime scheduler, deployment boundary, queue, or Dora
   topology object. Those could become projections or exports later, but they
   are not implied by this canvas tag.
@@ -218,15 +253,20 @@ visually inspect the result. Never hand-edit tldraw schema JSON.
 
 > Take over the SystemSketch Async-region work using
 > `docs/work-order-async-region-handoff-2026-09-05.md` as the authoritative
-> handoff. Start by inspecting the exact branch/worktree and opening the retained
-> board and report. Do not recreate the feature: the Async-region base started
-> at `7a959d11`, and representative-edge selection plus its current proof is at
-> `ff3d4cbd`; exact focused-phase labels are verified at `2a6f4bfd`. Preserve
-> both central contracts: a region supplies a one-time
+> handoff. The feature is already merged into local `main` by `f32d1ab1`; do
+> not recreate or re-merge it. Start by checking the GUI-selected environment,
+> `git status`, and `git rev-parse main`, then open the retained board/report
+> named `communication-async-regions-main-20260906`. Preserve the unrelated
+> uncommitted Control-lanes Babble in `/home/bam/systemsketch`. The Async-region
+> base started at `7a959d11`, representative-edge selection is at `ff3d4cbd`,
+> and exact focused-phase labels are at `2a6f4bfd`. Preserve both central
+> contracts: a region supplies a one-time
 > creation default rather than continuous semantic enforcement, and carrier
 > selection is a transient projection over authored data edges rather than a
-> second graph. Check current `main` and concurrent work before editing. Run the
-> full verification listed in the work order after any change, and do not merge
-> or promote anything unless I explicitly authorize integration. Report the
-> exact branch, commit, worktree, test results, and retained-review URL when you
-> hand back.
+> second graph. V1 protocol association is strict port-name inference; if you
+> implement V2 source/function analysis, feed it through the existing descriptor
+> provenance seam and retain V1 as an explicit fallback until the authored
+> semantic source is trustworthy. Run the full verification listed above after
+> any change, and do not push, promote, or integrate subsequent work unless I
+> explicitly authorize it. Report the exact branch, commit, checkout/worktree,
+> test results, and retained-review URL when you hand back.
