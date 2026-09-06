@@ -62,7 +62,7 @@
   "records": [
     {
       "x": 520,
-      "y": 525,
+      "y": 590,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -83,8 +83,8 @@
           "y": 0
         },
         "end": {
-          "x": 100,
-          "y": 105
+          "x": 190,
+          "y": -80
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -101,7 +101,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3m9rV",
+      "index": "a3liaV",
       "typeName": "shape"
     },
     {
@@ -114,7 +114,7 @@
     },
     {
       "x": 520,
-      "y": 705,
+      "y": 810,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -135,8 +135,8 @@
           "y": 0
         },
         "end": {
-          "x": 190,
-          "y": -195
+          "x": 100,
+          "y": 40
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -153,12 +153,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4hqo",
+      "index": "a4q6P",
       "typeName": "shape"
     },
     {
       "x": 1800,
-      "y": 405,
+      "y": 420,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -180,7 +180,7 @@
         },
         "end": {
           "x": -190,
-          "y": 45
+          "y": 30
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -197,12 +197,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5xAoV",
+      "index": "a5tf8V",
       "typeName": "shape"
     },
     {
       "x": 1800,
-      "y": 595,
+      "y": 650,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -224,7 +224,7 @@
         },
         "end": {
           "x": -190,
-          "y": -25
+          "y": -80
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -241,7 +241,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6kncV",
+      "index": "a6wUfC",
       "typeName": "shape"
     },
     {
@@ -252,328 +252,6 @@
       "opacity": 1,
       "meta": {},
       "id": "shape:cue-step-1",
-      "type": "geo",
-      "props": {
-        "w": 420,
-        "h": 120,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 2,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "1 · Click the violet Async region frame. Its communication bar opens above the board."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a2P66",
-      "typeName": "shape"
-    },
-    {
-      "x": 1800,
-      "y": 970,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-6-arrow",
-      "type": "arrow",
-      "props": {
-        "kind": "elbow",
-        "elbowMidPoint": 0.5,
-        "dash": "draw",
-        "size": "m",
-        "fill": "none",
-        "color": "orange",
-        "labelColor": "black",
-        "bend": 0,
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": -470,
-          "y": -10
-        },
-        "arrowheadStart": "none",
-        "arrowheadEnd": "arrow",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph"
-            }
-          ]
-        },
-        "labelPosition": 0.5,
-        "font": "draw",
-        "scale": 1
-      },
-      "parentId": "page:page",
-      "index": "a7nzqV",
-      "typeName": "shape"
-    },
-    {
-      "x": 620,
-      "y": 1290,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-pass",
-      "type": "geo",
-      "props": {
-        "w": 1080,
-        "h": 220,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 0,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "green",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "PASS WHEN Components shows exactly three arrows — S1 · service · robot, A1 · action · robot, ST1 · stream · camera — and Dataflow shows the ports that spell them: robot.request/response, robot.goal/feedback/result, camera.stream. Camera's stream socket sits on its TOP edge with the label below it, because Mission is above it."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a85wQ",
-      "typeName": "shape"
-    },
-    {
-      "x": 100,
-      "y": 470,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-2",
-      "type": "geo",
-      "props": {
-        "w": 420,
-        "h": 110,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 0,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "2 · In that bar press Components, then press Service in the DRAW group."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a3TDX",
-      "typeName": "shape"
-    },
-    {
-      "x": -18.851674641148335,
-      "y": -175.93301435406704,
-      "z": 0.7886792452830188,
-      "meta": {},
-      "id": "camera:page:page",
-      "typeName": "camera"
-    },
-    {
-      "x": 100,
-      "y": 630,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-3",
-      "type": "geo",
-      "props": {
-        "w": 420,
-        "h": 150,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 2,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "3 · Drag from anywhere on Mission's card onto Robot's card. No ports, no port dots — surface to surface. The arrowhead names the client."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a4Hqz",
-      "typeName": "shape"
-    },
-    {
-      "x": 1800,
-      "y": 340,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-4",
-      "type": "geo",
-      "props": {
-        "w": 420,
-        "h": 130,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 0,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "4 · Press Action, drag Mission → Robot again. Then press Stream and drag Camera → Mission."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a5Y56",
-      "typeName": "shape"
-    },
-    {
-      "x": 1800,
-      "y": 530,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-5",
-      "type": "geo",
-      "props": {
-        "w": 420,
-        "h": 130,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 0,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "5 · Press Dataflow. The ports and cables the three arrows generated are now on the cards."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a6Mer",
-      "typeName": "shape"
-    },
-    {
-      "x": 1800,
-      "y": 900,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-6",
       "type": "geo",
       "props": {
         "w": 420,
@@ -600,7 +278,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "6 · Back in Components, click the A1 arrow, type a new name in the bar's Name field and press Rename."
+                  "text": "1 · Click the violet Async region. Press Components — the cards go Simple and the DRAW group appears."
                 }
               ]
             }
@@ -608,16 +286,330 @@
         }
       },
       "parentId": "page:page",
-      "index": "a754v",
+      "index": "a276M",
       "typeName": "shape"
     },
     {
-      "name": "",
-      "color": "#FF802B",
-      "imageUrl": "",
+      "x": 1800,
+      "y": 975,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
       "meta": {},
-      "id": "user:ZPTBxSwsgz-gPAEAFcuav",
-      "typeName": "user"
+      "id": "shape:cue-step-6-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -470,
+          "y": -15
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a7zmbV",
+      "typeName": "shape"
+    },
+    {
+      "x": 620,
+      "y": 1290,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 1080,
+        "h": 260,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN the two lenses disagree about where a port is, and neither disturbs the other. Components shows S1 · service · robot, A1 · action · robot and ST1 · stream · camera, with sockets on whichever edge faces the component they talk to. Dataflow shows the same six cables with every socket back on a left or right lane. A port you drag in Components stays put when you flip to Dataflow and back."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a84za",
+      "typeName": "shape"
+    },
+    {
+      "x": 100,
+      "y": 500,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 180,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Press Service, then drag from anywhere on Mission's card onto Robot's. No ports, no port dots. Repeat with Action. Then Stream, Camera → Mission."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3UZu",
+      "typeName": "shape"
+    },
+    {
+      "x": -18.851674641148335,
+      "y": -195.93301435406704,
+      "z": 0.7886792452830188,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 100,
+      "y": 740,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 140,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Press ALSO › Tag edges. Every protocol leg appears beside the arrow it belongs to, auto-spaced."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4HlE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1800,
+      "y": 330,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 180,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Press Dataflow. The generated ports are all on the left and right lanes — a socket that sat on a top or bottom edge is repositioned back."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5ANE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1800,
+      "y": 570,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-5",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 160,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 · Still in Dataflow, press ALSO › Communication. The relationship arrows come back over the real routes and no port moves."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a6nlv",
+      "typeName": "shape"
+    },
+    {
+      "x": 1800,
+      "y": 880,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-6",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "6 · Back in Components with CARD › Port, press and HOLD a port dot on Camera, then drag it to another edge. Hold still first — moving straight away draws a cable instead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a7B8j",
+      "typeName": "shape"
     },
     {
       "meta": {},
@@ -630,7 +622,7 @@
         "isExact": false,
         "normalizedAnchor": {
           "x": 0,
-          "y": 0.19767441860465115
+          "y": 0.1744186046511628
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -642,13 +634,13 @@
       "id": "binding:cue-step-2-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-2-arrow",
-      "toId": "shape:region",
+      "toId": "shape:mission",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 0,
-          "y": 0.38372093023255816
+          "y": 0.5
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -660,13 +652,13 @@
       "id": "binding:cue-step-3-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-3-arrow",
-      "toId": "shape:mission",
+      "toId": "shape:region",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 0,
-          "y": 0.5
+          "y": 0.6395348837209303
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -724,7 +716,7 @@
         "color": "violet"
       },
       "parentId": "page:page",
-      "index": "a1TNE",
+      "index": "a1GII",
       "typeName": "shape"
     },
     {
@@ -828,12 +820,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "C1g6t3qAODUvXyVZIzB9L",
+        "definitionId": "8hosqPL7WINkD_wj3VTgq",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Robot"
       },
-      "index": "a2AU9",
+      "index": "a2uYb",
       "typeName": "shape"
     },
     {
@@ -937,12 +929,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "uUQ5fx1SrYxA24myPAuR6",
+        "definitionId": "9U9fd30rtcdgXFvkgFbT_",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Mission"
       },
-      "index": "a13cU",
+      "index": "a1Cyb",
       "typeName": "shape"
     },
     {
@@ -980,6 +972,14 @@
         "terminal": "start"
       },
       "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:1JSdqAvR9qf-GGUs7h1Je",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -1092,17 +1092,17 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "l60fKztaE3ysYTrj5TNX3",
+        "definitionId": "NG2fJH-DJfkOIJc_ScZLn",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Camera"
       },
-      "index": "a3X46",
+      "index": "a3q3I",
       "typeName": "shape"
     },
     {
       "x": 520,
-      "y": 360,
+      "y": 370,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1124,7 +1124,7 @@
         },
         "end": {
           "x": 100,
-          "y": 110
+          "y": 80
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -1141,7 +1141,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2sQN",
+      "index": "a2ZTk",
       "typeName": "shape"
     }
   ]

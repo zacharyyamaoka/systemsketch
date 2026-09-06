@@ -1,15 +1,32 @@
 {
   "feature": "Draw communication relationships, get dataflow",
-  "viewport": { "width": 1800, "height": 1150 },
-  "pages": [{ "id": "review", "name": "Review" }],
+  "viewport": {
+    "width": 1800,
+    "height": 1150
+  },
+  "pages": [
+    {
+      "id": "review",
+      "name": "Review"
+    }
+  ],
   "shapes": [
     {
       "id": "region",
       "type": "frame",
       "x": 620,
       "y": 300,
-      "props": { "name": "Async region", "color": "violet", "w": 1080, "h": 860 },
-      "meta": { "systemSketchAsyncRegion": { "version": 1 } }
+      "props": {
+        "name": "Async region",
+        "color": "violet",
+        "w": 1080,
+        "h": 860
+      },
+      "meta": {
+        "systemSketchAsyncRegion": {
+          "version": 1
+        }
+      }
     },
     {
       "id": "mission",
@@ -68,71 +85,93 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Click the violet Async region frame. Its communication bar opens above the board.",
+      "text": "1 · Click the violet Async region. Press Components — the cards go Simple and the DRAW group appears.",
       "x": 100,
       "y": 300,
       "w": 420,
-      "h": 120,
-      "target": { "shapeId": "region", "anchor": "left", "dy": -260 }
+      "h": 140,
+      "target": {
+        "shapeId": "region",
+        "anchor": "left",
+        "dy": -280
+      }
     },
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · In that bar press Components, then press Service in the DRAW group.",
+      "text": "2 · Press Service, then drag from anywhere on Mission's card onto Robot's. No ports, no port dots. Repeat with Action. Then Stream, Camera → Mission.",
       "x": 100,
-      "y": 470,
+      "y": 500,
       "w": 420,
-      "h": 110,
-      "target": { "shapeId": "region", "anchor": "left", "dy": -100 }
+      "h": 180,
+      "target": {
+        "shapeId": "mission",
+        "anchor": "left"
+      }
     },
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Drag from anywhere on Mission's card onto Robot's card. No ports, no port dots — surface to surface. The arrowhead names the client.",
+      "text": "3 · Press ALSO › Tag edges. Every protocol leg appears beside the arrow it belongs to, auto-spaced.",
       "x": 100,
-      "y": 630,
+      "y": 740,
       "w": 420,
-      "h": 150,
-      "target": { "shapeId": "mission", "anchor": "left" }
+      "h": 140,
+      "target": {
+        "shapeId": "region",
+        "anchor": "left",
+        "dy": 120
+      }
     },
     {
       "id": "step-4",
       "kind": "step",
-      "text": "4 · Press Action, drag Mission → Robot again. Then press Stream and drag Camera → Mission.",
+      "text": "4 · Press Dataflow. The generated ports are all on the left and right lanes — a socket that sat on a top or bottom edge is repositioned back.",
       "x": 1800,
-      "y": 340,
+      "y": 330,
       "w": 420,
-      "h": 130,
-      "target": { "shapeId": "robot", "anchor": "right", "dy": -60 }
+      "h": 180,
+      "target": {
+        "shapeId": "robot",
+        "anchor": "right",
+        "dy": -60
+      }
     },
     {
       "id": "step-5",
       "kind": "step",
-      "text": "5 · Press Dataflow. The ports and cables the three arrows generated are now on the cards.",
+      "text": "5 · Still in Dataflow, press ALSO › Communication. The relationship arrows come back over the real routes and no port moves.",
       "x": 1800,
-      "y": 530,
+      "y": 570,
       "w": 420,
-      "h": 130,
-      "target": { "shapeId": "robot", "anchor": "right", "dy": 60 }
+      "h": 160,
+      "target": {
+        "shapeId": "robot",
+        "anchor": "right",
+        "dy": 60
+      }
     },
     {
       "id": "step-6",
       "kind": "step",
-      "text": "6 · Back in Components, click the A1 arrow, type a new name in the bar's Name field and press Rename.",
+      "text": "6 · Back in Components with CARD › Port, press and HOLD a port dot on Camera, then drag it to another edge. Hold still first — moving straight away draws a cable instead.",
       "x": 1800,
-      "y": 900,
+      "y": 880,
       "w": 420,
-      "h": 140,
-      "target": { "shapeId": "camera", "anchor": "right" }
+      "h": 190,
+      "target": {
+        "shapeId": "camera",
+        "anchor": "right"
+      }
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN Components shows exactly three arrows — S1 · service · robot, A1 · action · robot, ST1 · stream · camera — and Dataflow shows the ports that spell them: robot.request/response, robot.goal/feedback/result, camera.stream. Camera's stream socket sits on its TOP edge with the label below it, because Mission is above it.",
+      "text": "PASS WHEN the two lenses disagree about where a port is, and neither disturbs the other. Components shows S1 · service · robot, A1 · action · robot and ST1 · stream · camera, with sockets on whichever edge faces the component they talk to. Dataflow shows the same six cables with every socket back on a left or right lane. A port you drag in Components stays put when you flip to Dataflow and back.",
       "x": 620,
       "y": 1290,
       "w": 1080,
-      "h": 220
+      "h": 260
     }
   ]
 }

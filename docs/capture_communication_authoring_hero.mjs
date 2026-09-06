@@ -126,7 +126,7 @@ async function encode(frames) {
     const next = kept[index + 1]
     const duration = next
       ? Math.min(1.8, Math.max(0.08, next.timestamp - kept[index].timestamp))
-      : 1.4
+      : 1.6
     manifest.push(`duration ${duration.toFixed(3)}`)
   }
   manifest.push(`file '${join(directory, `${String(kept.length - 1).padStart(4, '0')}.jpg`)}'`)
@@ -198,8 +198,19 @@ async function main() {
     await dragSurfaces(app.page, camera, mission)
     await delay(820)
 
+    // The legs, beside the arrows that own them.
+    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await delay(1700)
+    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await delay(500)
+
+    // Dataflow: every socket back on a lane.
     await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
-    await delay(1500)
+    await delay(1600)
+
+    // ...and the communication reading of that same wired board.
+    await clickElement(app.page, '[data-testid="communication-overlay-relationships"]')
+    await delay(1800)
 
     const frames = await stop()
     const kept = await encode(frames)
