@@ -1,0 +1,65 @@
+[
+  {
+    "id": "BTE-1",
+    "label": "exporting only the region still produces an SVG mime type",
+    "observed": "image/svg+xml",
+    "desired": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "id": "BTE-2",
+    "label": "the region's wires (paths) are in the export, not just its children",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BTE-3",
+    "label": "the header divider (line) is in the export",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BTE-4",
+    "label": "the region title text is in the export",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BTE-5",
+    "label": "the Start marker text is in the export",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BTE-6",
+    "label": "region-only export draws exactly as many wires as an explicit region+descendants export",
+    "observed": 26,
+    "desired": 26,
+    "ok": true
+  },
+  {
+    "id": "BTE-7",
+    "label": "exporting only the region still produces a PNG mime type",
+    "observed": "image/png",
+    "desired": "image/png",
+    "ok": true
+  },
+  {
+    "id": "BTE-8",
+    "label": "the PNG is content-rich, not a near-blank children-only render",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BTE-9",
+    "label": "no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

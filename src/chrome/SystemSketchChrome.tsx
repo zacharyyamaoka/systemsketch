@@ -11,7 +11,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
@@ -19,6 +19,7 @@ import { canWrapSelection } from '../frames/wrapSelection'
 import {
   BLOCK_TOOL_ID,
   PILL_TOOL_ID,
+  TYPE_TOOL_ID,
   adoptConnectedPillType,
   canAdoptConnectedPillType,
   getBlockInspectorContext,
@@ -31,9 +32,9 @@ import {
   getOnlySelectedFloatingPort,
 } from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
-import { describeTidyEdgesOutcome, tidyEdges, tidyEdgesOutcomeSeverity } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
-import { describeOrganizeNodesOutcome, organizeNodes, organizeNodesOutcomeSeverity } from '../blocks/layout'
+import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
@@ -68,6 +69,9 @@ import {
 } from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
+// Imported by path rather than through `../behaviorTree`: the barrel is being
+// edited by a concurrent session, and the panel has no other consumer.
+import { BehaviorTreeLibraryPanel } from '../behaviorTree/ui/BehaviorTreeLibraryPanel'
 import { PrimitiveSearch } from '../library/PrimitiveSearch'
 import { BoardOverview } from './BoardOverview'
 import { LocalCommentsPanel } from '../comments'
@@ -389,22 +393,13 @@ function SelectionMiniMenu() {
     [editor],
   )
   const propagationFocus = usePropagationFocus(editor)
-  const [organizingNodes, setOrganizingNodes] = useState(false)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
-    addToast({ title: describeTidyEdgesOutcome(outcome), severity: tidyEdgesOutcomeSeverity(outcome) })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
   }
   const runOrganizeNodes = async () => {
-    // The elk layout pass is async and can take a visible moment on a large
-    // graph; without this the trigger stayed clickable and unlabeled mid-run,
-    // inviting a second, redundant pass.
-    setOrganizingNodes(true)
-    try {
-      const outcome = await organizeNodes(editor)
-      addToast({ title: describeOrganizeNodesOutcome(outcome), severity: organizeNodesOutcomeSeverity(outcome) })
-    } finally {
-      setOrganizingNodes(false)
-    }
+    const outcome = await organizeNodes(editor)
+    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
   }
   const hasVisibleActions = hasCode
     || hasBranch
@@ -452,7 +447,6 @@ function SelectionMiniMenu() {
     layout: (
       <SelectionLayoutActions
         {...layoutActions}
-        organizeNodesBusy={organizingNodes}
         onTidyEdges={runTidyEdges}
         onOrganizeNodes={() => void runOrganizeNodes()}
       />
@@ -626,6 +620,14 @@ export function SystemSketchSurfaceHost() {
         run: () => editor.setCurrentTool(FLOATING_PORT_TOOL_ID),
       },
       {
+        id: 'insert-type',
+        label: 'Insert Type',
+        description: 'Switch to the compact Type definition tool',
+        keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
+        icon: '⌘',
+        run: () => editor.setCurrentTool(TYPE_TOOL_ID),
+      },
+      {
         // Taking the lens off is a safety property, not a convenience. A diff
         // or lint `state` is something a projector said ABOUT a board, and a
         // person can always open that board, like it, and start editing — at
@@ -645,6 +647,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['insert'],
         icon: '◇',
         run: () => setLeft('shapes'),
+      },
+      {
+        id: 'behavior-library',
+        label: 'Open Behaviors library',
+        description: 'Browse skills, conditions, controls and decorators',
+        keywords: ['insert', 'behavior', 'behaviour', 'tree', 'skill'],
+        icon: '⌥',
+        run: () => setLeft('behaviors'),
       },
       {
         id: 'show-problems',
@@ -747,7 +757,6 @@ export function SystemSketchSurfaceHost() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
-      if (event.repeat) return
       const key = event.key.toLowerCase()
       if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()
@@ -789,22 +798,53 @@ export function SystemSketchSurfaceHost() {
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       <PrimitiveSearch />
-      {leftSurface ? (
-        <aside
-          id="systemsketch-left-popout"
-          className="systemsketch-popout systemsketch-popout--left"
-          aria-label="Shapes library"
-          data-testid="systemsketch-left-popout"
-          data-systemsketch-chrome
-          onWheel={(event) => event.stopPropagation()}
-        >
-          <header className="systemsketch-popout__header">
-            <div><span>Library</span><h2>Shapes</h2></div>
-            <button type="button" aria-label="Close shapes library" onClick={() => setLeft(null)}>×</button>
-          </header>
-          <ShapesLibrary />
-        </aside>
-      ) : null}
+      {leftSurface ? (() => {
+        // `files` is declared on LeftSurface but never set; treat anything that
+        // is not the Behaviors surface as Shapes rather than rendering nothing.
+        const surface = leftSurface === 'behaviors' ? 'behaviors' : 'shapes'
+        const title = surface === 'behaviors' ? 'Behaviors' : 'Shapes'
+        return (
+          <aside
+            id="systemsketch-left-popout"
+            className="systemsketch-popout systemsketch-popout--left"
+            aria-label={`${title} library`}
+            data-testid="systemsketch-left-popout"
+            data-left-surface={surface}
+            data-systemsketch-chrome
+            onWheel={(event) => event.stopPropagation()}
+          >
+            <header className="systemsketch-popout__header">
+              <div><span>Library</span><h2>{title}</h2></div>
+              <button type="button" aria-label={`Close ${title.toLowerCase()} library`} onClick={() => setLeft(null)}>×</button>
+            </header>
+            {/* WHY the switcher sits below the header rather than inside it:
+                `systemsketch-chrome.css` styles EVERY `button` in
+                `.systemsketch-popout__header` as a 30×30 icon square, which
+                would squash a labelled tab into an unreadable chip. */}
+            <div className="systemsketch-popout__surfaces" role="tablist" aria-label="Library surface">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={surface === 'shapes'}
+                data-testid="systemsketch-left-surface-shapes"
+                onClick={() => setLeft('shapes')}
+              >
+                Shapes
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={surface === 'behaviors'}
+                data-testid="systemsketch-left-surface-behaviors"
+                onClick={() => setLeft('behaviors')}
+              >
+                Behaviors
+              </button>
+            </div>
+            {surface === 'behaviors' ? <BehaviorTreeLibraryPanel /> : <ShapesLibrary />}
+          </aside>
+        )
+      })() : null}
 
       {rightSurface ? (
         <aside

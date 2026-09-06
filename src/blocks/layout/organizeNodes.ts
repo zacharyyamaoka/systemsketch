@@ -64,11 +64,6 @@ export function describeOrganizeNodesOutcome(outcome: OrganizeNodesOutcome): str
 	return `Organized ${outcome.moved} node${outcome.moved === 1 ? '' : 's'}${where}`
 }
 
-/** `insufficient-space` means the layout was asked for and not delivered. */
-export function organizeNodesOutcomeSeverity(outcome: OrganizeNodesOutcome): 'info' | 'warning' {
-	return outcome.reason === 'insufficient-space' ? 'warning' : 'info'
-}
-
 interface OrganizeNodesTarget {
 	scope: OrganizeNodesScope
 	nodes: BlockShape[]

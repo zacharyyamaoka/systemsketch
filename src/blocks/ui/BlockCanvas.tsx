@@ -84,6 +84,7 @@ import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
 import { blockAutoResizePresentation } from '../blockAutoResize'
 import { isClockTriggerBlock, stockBlockVisibleDescription } from '../stockBlocks'
+import { TypeAttributeRegion } from './TypeAttributeRegion'
 import {
   describeDiffCounts,
   diffGutterGlyph,
@@ -1532,6 +1533,12 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 />
               </div>
             ) : null}
+            <TypeAttributeRegion
+              shape={shape}
+              top={layout.headerHeight + 1}
+              bottom={layout.footerTop - 1}
+              selected={isSelected}
+            />
           </>
         ) : null}
 

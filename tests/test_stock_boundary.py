@@ -46,12 +46,13 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("PillTool", source)
         self.assertIn("CodeShapeUtil", source)
         self.assertIn("CodeBlockTool", source)
+        self.assertIn("TypeTool", source)
         self.assertIn("CalloutTool", source)
         self.assertIn("CalloutAddLeaderTool", source)
         self.assertIn("FloatingPortShapeUtil", source)
         self.assertIn("FloatingPortTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -115,8 +116,9 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BtControlShapeUtil,", source)
         self.assertIn("const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)", product_source)
         self.assertIn("CodeShapeUtil,", source)
+        self.assertIn("TypeTool,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -164,9 +166,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("CodeBlockTool,", embedded)
         self.assertIn("FloatingPortShapeUtil,", embedded)
         self.assertIn("FloatingPortTool", embedded)
+        self.assertIn("TypeTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)

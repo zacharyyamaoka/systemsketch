@@ -23,7 +23,9 @@ export function AppearanceGlyph({
   value: string | undefined
   editor: Editor
 }) {
-  if (control.kind === 'color') {
+  // The edge palette draws the same swatch the fill palette does; only the
+  // style it writes differs.
+  if (control.kind === 'color' || control.kind === 'strokeColor') {
     return <ColorSwatch editor={editor} name={value} />
   }
   // FigJam's Font size list draws no glyph: each row is its own name, at its
@@ -53,7 +55,10 @@ export function AppearanceGlyph({
   if (control.kind === 'geo') {
     return <GeoGlyph value={value} />
   }
-  if (control.kind === 'dash') {
+  // One glyph for the one line-style vocabulary, whichever menu asks. Before
+  // this the connector's control id missed this branch entirely and its Dotted
+  // option was drawn by the arrowhead renderer below — a plain line.
+  if (control.kind === 'dash' || control.kind === 'lineStyle') {
     return <DashGlyph value={value} />
   }
   if (control.kind === 'size' || control.kind === 'weight') {
@@ -168,7 +173,10 @@ function FillGlyph({ value }: { value: string | undefined }) {
       : ['M4 8h12', 'M4 11.5h12', 'M4 15h12']
     return <Svg>{box}{lines.map((d) => <path key={d} d={d} strokeWidth={1} />)}</Svg>
   }
-  const opacity = value === 'semi' ? 0.35 : value === 'solid' ? 0.7 : 1
+  // The glyph says what the fill does: Solid is fully painted, Transparent is
+  // a wash you can read through. Both match `fillPaint.TRANSPARENT_FILL_ALPHA`
+  // closely enough to be recognised in a 16px cell.
+  const opacity = value === 'semi' ? 0.35 : 1
   return (
     <Svg>
       <rect x="3.5" y="3.5" width="13" height="13" rx="2" data-role="solid" opacity={opacity} />
@@ -205,11 +213,18 @@ function GeoGlyph({ value }: { value: string | undefined }) {
   return <Svg><path d={GEO_PATHS[value ?? 'rectangle'] ?? GEO_PATHS.rectangle} /></Svg>
 }
 
+/**
+ * The glyph's cadence per line style. `async` is the cable's own packet
+ * rhythm — a long carrier, a hair of a gap, a short packet — scaled from the
+ * 56/4/10/4 the canvas paints (`connectionPresentation.ASYNC_PACKET_DASHARRAY`)
+ * down to the 14 units this glyph has to say it in.
+ */
 const DASH_ARRAYS: Record<string, string | undefined> = {
   draw: undefined,
   solid: undefined,
   dashed: '4 3',
   dotted: '0.1 3.2',
+  async: '9 1 2 1',
   none: undefined,
 }
 
@@ -223,6 +238,7 @@ function DashGlyph({ value }: { value: string | undefined }) {
         d={value === 'draw' ? 'M3 12.5c4-6 6 2 14-4.5' : 'M3 10h14'}
         strokeDasharray={DASH_ARRAYS[value ?? 'solid']}
         strokeLinecap={value === 'dotted' ? 'round' : 'butt'}
+        data-dash={value}
       />
     </Svg>
   )

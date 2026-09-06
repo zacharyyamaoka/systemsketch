@@ -91,11 +91,6 @@ export function describeTidyEdgesOutcome(outcome: TidyEdgesOutcome): string {
 	return parts.join(', ')
 }
 
-/** A route the router could not fully clear is a limitation, not routine confirmation. */
-export function tidyEdgesOutcomeSeverity(outcome: TidyEdgesOutcome): 'info' | 'warning' {
-	return outcome.unresolved > 0 || outcome.forcedCrossings > 0 ? 'warning' : 'info'
-}
-
 function plural(count: number): string {
 	return count === 1 ? '' : 's'
 }

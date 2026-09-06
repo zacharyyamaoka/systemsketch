@@ -23,6 +23,9 @@ import {
   colorLabel,
   selectedOption,
   triggerLabel,
+  unofferedValue,
+  withEdgeValues,
+  EDGE_MIXED,
   type AppearanceControl,
 } from './appearanceModel'
 
@@ -48,7 +51,7 @@ const SHAPE_WITH_TEXT = styleMap([
   [GeoShapeGeoStyle, shared('rectangle')],
   [DefaultColorStyle, shared('blue')],
   [DefaultFillStyle, shared('solid')],
-  [DefaultDashStyle, shared('draw')],
+  [DefaultDashStyle, shared('solid')],
   [DefaultSizeStyle, shared('m')],
   [DefaultFontStyle, shared('sans')],
   [DefaultHorizontalAlignStyle, shared('middle')],
@@ -102,7 +105,7 @@ describe('appearance controls', () => {
     // style | Typeface, Font size | ... | Text alignment`. Font size follows
     // Typeface.
     expect(ids(buildAppearanceControls(SHAPE_WITH_TEXT, true))).toEqual([
-      'geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign',
+      'geo', 'color', 'strokeColor', 'font', 'size', 'align', 'verticalAlign',
     ])
   })
 
@@ -111,7 +114,7 @@ describe('appearance controls', () => {
     // style`, full stop — three controls, never Typeface/Font size/alignment,
     // even though tldraw reports all three as relevant regardless of content.
     expect(ids(buildAppearanceControls(SHAPE_WITH_TEXT, false))).toEqual([
-      'geo', 'color', 'dash',
+      'geo', 'color', 'strokeColor',
     ])
   })
 
@@ -142,18 +145,73 @@ describe('appearance controls', () => {
     expect(lineStyle.trigger).toBe('icon')
     expect(lineStyle.modePlacement).toBe('beside')
     expect(lineStyle.modeControl?.style).toBe(DefaultSizeStyle)
-    // FigJam's two weights sit on the ends; tldraw's middle two keep their names.
+    // FigJam has two weights and so does this: `m`, the size everything is
+    // created at, and `xl`. Four rungs was tldraw's vocabulary, not FigJam's.
     expect(lineStyle.modeControl?.options.map((option) => option.label))
-      .toEqual(['Thin', 'Medium', 'Large', 'Thick'])
+      .toEqual(['Thin', 'Thick'])
+    expect(lineStyle.modeControl?.options.map((option) => option.value))
+      .toEqual(['m', 'xl'])
+    // `draw` is no longer offered, and a shape that still stores it is named
+    // by its stored token rather than called mixed.
     expect(triggerLabel(lineStyle)).toBe('Line style, draw')
   })
 
-  it('shows a shape\'s Line style as labelled chips behind the same fixed icon', () => {
-    const dash = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'dash')!
-    expect(dash.label).toBe('Line style')
-    expect(dash.layout).toBe('chips')
-    expect(dash.trigger).toBe('icon')
-    expect(dash.modeControl).toBeUndefined()
+  it('names both halves of the stacked Line style trigger, since its icon shows neither', () => {
+    const stroke = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'strokeColor')!
+    expect(triggerLabel(stroke)).toBe('Line style, solid blue')
+    expect(triggerLabel(withEdgeValues(stroke, { color: 'black', pattern: 'async' })))
+      .toBe('Line style, async black')
+    // A trigger that draws its own value still names only that value.
+    const color = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'color')!
+    expect(triggerLabel(color)).toBe('Color, blue')
+  })
+
+  it('gives a shape\'s Line style its own palette, with the chips stacked above it', () => {
+    // FigJam's Stroke popover: the line-style chips, a hairline, then a
+    // palette — so an edge can be a different colour from the fill, which one
+    // tldraw `color` cannot express on its own.
+    const stroke = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'strokeColor')!
+    expect(stroke.label).toBe('Line style')
+    expect(stroke.layout).toBe('swatches')
+    expect(stroke.trigger).toBe('icon')
+    expect(stroke.meta).toBe('color')
+    expect(stroke.options.map((option) => option.value)).toEqual([...APPEARANCE_COLORS])
+    expect(stroke.modePlacement).toBe('above')
+    expect(stroke.modeControl?.id).toBe('lineStyle')
+    expect(stroke.modeControl?.layout).toBe('chips')
+    expect(stroke.modeControl?.meta).toBe('pattern')
+    expect(stroke.modeControl?.options.map((option) => option.label))
+      .toEqual(['Solid', 'Dashed', 'Dotted', 'Async', 'None'])
+  })
+
+  it('gives a shape with no edge palette the same chips, without the palette', () => {
+    // A freehand stroke has a dash but no geo, so there is no edge colour to
+    // choose — its outline is its only colour. It still gets the one
+    // line-style vocabulary, not a second, shorter one.
+    const draw = styleMap([
+      [DefaultColorStyle, shared('black')],
+      [DefaultDashStyle, shared('solid')],
+      [DefaultSizeStyle, shared('m')],
+    ])
+    const control = buildAppearanceControls(draw, false).find((c) => c.id === 'lineStyle')!
+    expect(control.layout).toBe('chips')
+    expect(control.modeControl).toBeUndefined()
+    expect(control.options.map((option) => option.value))
+      .toEqual(['solid', 'dashed', 'dotted', 'async', 'none'])
+  })
+
+  it('gives a connector the shape\'s own line styles with the labels turned off', () => {
+    // Zach's rule for these menus: the connector's little row IS the shape's
+    // control with the text toggled off. Same options, same order, same
+    // meta-backed writes — only `layout` differs, which is the label toggle.
+    const shape = buildAppearanceControls(SHAPE_WITH_TEXT, false)
+      .find((c) => c.id === 'strokeColor')!.modeControl!
+    const connector = buildAppearanceControls(CONNECTOR, true).find((c) => c.id === 'lineStyle')!
+    expect(connector.options).toEqual(shape.options)
+    expect(connector.meta).toBe(shape.meta)
+    expect(connector.label).toBe(shape.label)
+    expect(shape.layout).toBe('chips')
+    expect(connector.layout).toBe('row')
   })
 
   it('shows a shape\'s fixed Shape-trigger icon, not a preview of the current geo', () => {
@@ -229,8 +287,10 @@ describe('appearance controls', () => {
     const color = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'color')!
     expect(color.modeControl?.style).toBe(DefaultFillStyle)
     expect(color.modePlacement).toBe('above')
+    // Three fills, not tldraw's six, and in FigJam's own order: most paint
+    // first. The vocabulary and its direction are both FigJam's.
     expect(color.modeControl?.options.map((option) => option.label)).toEqual([
-      'No fill', 'Transparent', 'Solid', 'Fill', 'Pattern', 'Lined',
+      'Solid', 'Transparent', 'No fill',
     ])
   })
 
@@ -250,13 +310,57 @@ describe('appearance controls', () => {
   it('offers every value the style accepts, so the menu can show any document state', () => {
     const controls = buildAppearanceControls(SHAPE_WITH_TEXT, true)
     const byId = Object.fromEntries(controls.map((control) => [control.id, control]))
-    // `draw` is tldraw's default dash: omitting it for FigJam's three would
-    // leave a freshly drawn shape with nothing selected in its own menu.
-    expect(byId.dash.options.map((option) => option.value))
-      .toEqual(['draw', 'solid', 'dashed', 'dotted', 'none'])
+    // `draw` is gone — it was the sketchy option that made the pill read as
+    // three products at once — and `seedDefaultLineStyle` is what keeps a
+    // freshly drawn shape out of it. `async` is ours rather than tldraw's.
+    expect(byId.strokeColor.modeControl?.options.map((option) => option.value))
+      .toEqual(['solid', 'dashed', 'dotted', 'async', 'none'])
+    expect(byId.color.modeControl?.options.map((option) => option.value))
+      .toEqual(['solid', 'semi', 'none'])
     expect(byId.size.options.map((option) => option.value)).toEqual(['s', 'm', 'l', 'xl'])
     expect(byId.font.options.map((option) => option.value)).toEqual(['sans', 'serif', 'mono', 'draw'])
     expect(byId.color.options.map((option) => option.value)).toEqual([...APPEARANCE_COLORS])
+  })
+
+  it('fills the edge controls in from the selection, style fallbacks and all', () => {
+    // The model only ever sees tldraw's shared style map, so the edge values
+    // arrive from `AppearanceControls`, which is the only place that can read
+    // shape metadata. Until they do, the control shows the stock style the
+    // edge follows — never a blank palette.
+    const stroke = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'strokeColor')!
+    expect(stroke.value).toEqual({ type: 'shared', value: 'blue' })
+    expect(stroke.modeControl?.value).toEqual({ type: 'shared', value: 'solid' })
+
+    const filled = withEdgeValues(stroke, { color: 'black', pattern: 'async' })
+    expect(filled.value).toEqual({ type: 'shared', value: 'black' })
+    expect(filled.modeControl?.value).toEqual({ type: 'shared', value: 'async' })
+    expect(selectedOption(filled)).toEqual({ value: 'black', label: 'black' })
+    expect(selectedOption(filled.modeControl!)).toEqual({ value: 'async', label: 'Async' })
+
+    const disagreeing = withEdgeValues(stroke, { color: EDGE_MIXED, pattern: null })
+    expect(disagreeing.value).toEqual({ type: 'mixed' })
+    // A control the selection has nothing to say about keeps its fallback.
+    expect(disagreeing.modeControl?.value).toEqual({ type: 'shared', value: 'solid' })
+  })
+
+  it('names a stored value the menu no longer offers, rather than calling it mixed', () => {
+    // A rectangle drawn before the vocabulary closed still holds `draw`, and a
+    // single shape with one definite value is not mixed. The pill says what
+    // the shape is; the panel stays honest that nothing in it is chosen.
+    const legacy = styleMap([
+      [GeoShapeGeoStyle, shared('rectangle')],
+      [DefaultColorStyle, shared('blue')],
+      [DefaultFillStyle, shared('pattern')],
+      [DefaultDashStyle, shared('draw')],
+    ])
+    const controls = buildAppearanceControls(legacy, false)
+    const fill = controls.find((c) => c.id === 'color')!.modeControl!
+    expect(selectedOption(fill)).toBeUndefined()
+    expect(unofferedValue(fill)).toBe('pattern')
+    expect(triggerLabel(fill)).toBe('Fill, pattern')
+
+    const chips = controls.find((c) => c.id === 'strokeColor')!.modeControl!
+    expect(unofferedValue(chips)).toBe('draw')
   })
 
   it('names typefaces the way FigJam does, so the reference app transfers', () => {

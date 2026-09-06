@@ -13,8 +13,18 @@ import {
 import {
   buildAppearanceControls,
   isConnectorSelection,
+  withEdgeValues,
+  EDGE_MIXED,
   type AppearanceControl,
+  type EdgeValues,
 } from './appearanceModel'
+import {
+  applyLinePattern,
+  applyStrokeMeta,
+  linePatternOf,
+  sharedEdgeValue,
+  strokeColorOf,
+} from './strokeMeta'
 import { addTextTarget, selectionHasVisibleText } from './textPresence'
 import {
   applyArrowPresetToSelection,
@@ -31,7 +41,7 @@ import {
 import { ContextualControls } from '../contextualMenus/ContextualControls'
 
 /**
- * The stock-style adapter. It binds tldraw values and commands into the same
+ * The stock-style/meta adapter. It binds tldraw and edge values into the same
  * registered controls that Block-title formatting uses.
  */
 export function AppearanceControls() {
@@ -60,8 +70,11 @@ export function AppearanceControls() {
     },
     [editor],
   )
+  const edges = useEdgeValues(editor)
 
   const appearance = buildAppearanceControls(styles, hasText).map((control) => {
+    const withEdges = withEdgeValues(control, edges)
+    if (withEdges !== control) return withEdges
     if (control.kind !== 'arrowKind' || selectedArrowRouting === null) return control
     return {
       ...control,
@@ -97,6 +110,25 @@ export function hasAppearanceControls(
   return buildAppearanceControls(styles, hasText).length > 0 || addTextShape !== null
 }
 
+function useEdgeValues(editor: Editor): EdgeValues {
+  const color = useValue(
+    'systemsketch edge colour',
+    () => encodeEdge(sharedEdgeValue(editor.getSelectedShapes(), strokeColorOf)),
+    [editor],
+  )
+  const pattern = useValue(
+    'systemsketch edge line style',
+    () => encodeEdge(sharedEdgeValue(editor.getSelectedShapes(), linePatternOf)),
+    [editor],
+  )
+  return { color, pattern }
+}
+
+function encodeEdge(shared: ReturnType<typeof sharedEdgeValue>): string | null {
+  if (!shared) return null
+  return shared.type === 'shared' ? shared.value : EDGE_MIXED
+}
+
 function bindAddTextControl(editor: Editor, shape: TLShape): ContextualControl {
   return bindContextualControl('addText', {
     id: 'addText',
@@ -117,11 +149,18 @@ function bindAppearanceControl(editor: Editor, control: AppearanceControl): Cont
       if (!value) return
       if (control.kind === 'arrowKind' && isArrowPreset(value)) {
         applyArrowRouting(editor, value, { markHistory: !options?.continuous })
+      } else if (control.meta === 'pattern') {
+        applyLinePattern(editor, value)
+      } else if (control.meta === 'color') {
+        applyStrokeMeta(editor, 'color', value)
       } else {
         applyStyle(editor, control.style, value, { markHistory: !options?.continuous })
       }
     },
   })
+  // `bindContextualControl` supplies the canonical definition; the appearance
+  // model may only tailor layout (labels shown/hidden) for this composition.
+  bound.layout = control.layout
   if (control.modeControl) {
     bound.modeControl = bindAppearanceControl(editor, control.modeControl)
     bound.modePlacement = control.modePlacement

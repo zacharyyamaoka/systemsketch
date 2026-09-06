@@ -613,6 +613,128 @@ async function main() {
     await shot(page, 'process-recovery-added.png')
     await setView(page, { projection: 'tree', orientation: 'down' })
 
+    // ---- comment out / comment in (MoveIt Pro's disable-without-delete) ------
+    // Authoring-time only — there is no live executor — so the proof is the
+    // `_disabled` marker in the XML, the dimmed projection over the whole
+    // subtree, both toggle directions, and survival of a rebuild from the
+    // persisted XML alone (the reload case).
+    const opacitiesByPath = async () => JSON.parse(await evaluate(page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const byPath = {}
+      for (const id of editor.getSortedChildIdsForParent('${REGION}')) {
+        const shape = editor.getShape(id)
+        if (shape.meta.btRole === 'node') byPath[shape.meta.btPath] = shape.opacity
+      }
+      return byPath
+    })())`))
+    await selectPath(page, '0.1')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-action-disable"]'))`, 'the comment-out action')
+    check('disable.offer', 'an enabled node offers "Comment out"',
+      await evaluate(page, `document.querySelector('[data-testid="bt-action-disable"]')?.textContent ?? null`), 'Comment out')
+    await clickElement(page, '[data-testid="bt-action-disable"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml.includes('_disabled')`, 'the disabled marker to land')
+    await delay(300)
+    const disabledXml = await regionXml(page)
+    check('disable.xml', 'commenting out writes _disabled="true" on the occurrence',
+      disabledXml.includes('<Fallback name="Grasp or correct" _disabled="true">'), true)
+    let dimmed = await opacitiesByPath()
+    check('disable.dims-subtree', 'the node and its whole subtree dim; siblings stay full-strength',
+      { node: dimmed['0.1'], child: dimmed['0.1.0'], sibling: dimmed['0.0'] },
+      { node: 0.35, child: 0.35, sibling: 1 })
+    await fitRegion(page)
+    await shot(page, 'disabled-dimmed.png')
+
+    // The reload case: a fresh region rebuilt from nothing but the saved XML.
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.deleteShapes(['${REGION}'])
+      editor.createShape({ id: '${REGION}', type: 'behaviorTree', x: 200, y: 160, props: { xml: ${JSON.stringify(disabledXml)}, title: 'PickAndPlace' } })
+      editor.selectNone()
+      return null
+    })()`)
+    await waitFor(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length >= 13`, 'the rebuilt region to project')
+    await delay(300)
+    dimmed = await opacitiesByPath()
+    check('disable.survives-reload', 'a region rebuilt from the saved XML still dims the commented-out subtree',
+      { node: dimmed['0.1'], child: dimmed['0.1.1'], sibling: dimmed['0.2'] },
+      { node: 0.35, child: 0.35, sibling: 1 })
+
+    await selectPath(page, '0.1')
+    await waitFor(page, `document.querySelector('[data-testid="bt-action-disable"]')?.textContent === 'Comment in'`, 'the comment-in action')
+    await clickElement(page, '[data-testid="bt-action-disable"]')
+    await waitFor(page, `!window.__systemsketch.editor.getShape('${REGION}').props.xml.includes('_disabled')`, 'the marker to clear')
+    await delay(300)
+    dimmed = await opacitiesByPath()
+    check('disable.clears', 'commenting back in removes the attribute and restores full opacity',
+      { node: dimmed['0.1'], marker: (await regionXml(page)).includes('_disabled') }, { node: 1, marker: false })
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
+    // ---- Group: Ctrl+G wraps sibling occurrences in one named Sequence -------
+    // MoveIt Pro 10.0's "Group Under Sequence" on tldraw's own group keystroke;
+    // the whole thing — XML edit, re-stamps, projection repair — is one undo step.
+    const xmlBeforeGroup = await regionXml(page)
+    const countBeforeGroup = await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`)
+    const selectedForGroup = await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const ids = editor.getSortedChildIdsForParent('${REGION}').filter((id) => {
+        const shape = editor.getShape(id)
+        return shape.meta.btRole === 'node' && ['0.2', '0.3'].includes(shape.meta.btPath)
+      })
+      editor.select(...ids)
+      return ids.length
+    })()`)
+    check('group.selection', 'two sibling occurrences are selected', selectedForGroup, 2)
+    await shortcut(page, 'g', 'KeyG', 2)
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml !== ${JSON.stringify(xmlBeforeGroup)}`, 'the group to land')
+    await delay(300)
+    check('group.xml', 'Ctrl+G wraps the selection in a Sequence named Group',
+      (await regionXml(page)).includes('<Sequence name="Group">'), true)
+    check('group.selected', 'the new wrapper is selected',
+      await evaluate(page, `window.__systemsketch.editor.getSelectedShapes()[0]?.meta?.btPath ?? null`), '0.2')
+    kids = await children(page)
+    const groupWrapper = kids.find((child) => child.path === '0.2')
+    check('group.wrapper', 'the wrapper projects as a control card labelled Group',
+      [groupWrapper?.type, groupWrapper?.title], ['behaviorTreeControl', 'Group'])
+    check('group.members', 'the members sit under the wrapper in their sibling order',
+      kids.filter((child) => child.path === '0.2.0' || child.path === '0.2.1').map((child) => child.title),
+      ['Fallback', 'MoveHome'])
+    check('group.one-new-shape', 'grouping adds exactly the wrapper',
+      await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeGroup + 1)
+    await fitRegion(page)
+    await shot(page, 'group-under-sequence.png')
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(350)
+    check('group.undo', 'one undo restores the pre-group XML byte-for-byte', await regionXml(page), xmlBeforeGroup)
+    check('group.undo-count', 'and the shape count', await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeGroup)
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
+    // ---- the survey's new primitives are really insertable -------------------
+    await selectPath(page, '0')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-library-Breakpoint"]'))`, 'the Breakpoint library row')
+    check('library.async-rows', 'AsyncSequence and AsyncFallback are insertable library rows',
+      await evaluate(page, `JSON.stringify({
+        sequence: Boolean(document.querySelector('[data-testid="bt-library-AsyncSequence"]')),
+        fallback: Boolean(document.querySelector('[data-testid="bt-library-AsyncFallback"]')),
+      })`).then(JSON.parse), { sequence: true, fallback: true })
+    const xmlBeforeBreakpoint = await regionXml(page)
+    await evaluate(page, `document.querySelector('[data-testid="bt-library-Breakpoint"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
+    await clickElement(page, '[data-testid="bt-library-Breakpoint"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml.includes('<Breakpoint')`, 'the Breakpoint to land')
+    await delay(300)
+    kids = await children(page)
+    const breakpointCard = kids.find((child) => child.path === '0.5')
+    check('breakpoint.card', 'the inserted Breakpoint projects as a control card',
+      [breakpointCard?.type, breakpointCard?.title], ['behaviorTreeControl', 'Breakpoint'])
+    check('breakpoint.glyph', 'and wears its own filled-dot glyph, unlike every other decorator',
+      await evaluate(page, `document.querySelectorAll('.systemsketch-bt-control[data-glyph="breakpoint"]').length`), 1)
+    await fitRegion(page)
+    await shot(page, 'breakpoint-inserted.png')
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(350)
+    check('breakpoint.undo', 'one undo takes it back', await regionXml(page), xmlBeforeBreakpoint)
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
     // ---- inspector Library section: caption and click never drift -----------------
     // Regression for the bug an audit found live: with a region selected and no
     // node, the Library section used to say "Adds the root node." even when a

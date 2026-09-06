@@ -8,10 +8,12 @@
  * rules, typography, and cable path without forking any engine primitive.
  */
 import {
+	DrawShapeUtil,
 	LineShapeUtil,
 	PathBuilder,
 	TextShapeUtil,
 	type TLGeoShape,
+	type TLTheme,
 	type JsonObject,
 	type TLLineShape,
 	type TLShape,
@@ -20,6 +22,10 @@ import {
 } from 'tldraw'
 import { createElement } from 'react'
 import type { CSSProperties } from 'react'
+
+import { withAsyncEdge } from './appearance/asyncEdge'
+import { fillPaintFor } from './appearance/fillPaint'
+import { readStrokeMeta, resolveStrokeHex } from './appearance/strokeMeta'
 
 export const SYSTEMSKETCH_PRIMITIVE_STYLE_META_KEY = 'systemSketchPrimitiveStyle'
 export const SYSTEMSKETCH_ROUNDED_RECT_GEO = 'systemsketch-rounded-rect'
@@ -155,15 +161,40 @@ export function getSystemSketchRoundedRectPath(
 		.close()
 }
 
-/** Display values consumed by the configured stock GeoShapeUtil. */
-export function systemSketchGeoDisplayValues(shape: TLGeoShape) {
+/**
+ * Display values consumed by the configured stock GeoShapeUtil.
+ *
+ * Three sources, in this order: what the three fills mean here, then paint
+ * frozen onto a detached composite, then the shape's own edge colour. WHY that
+ * order: the fill mapping is the vocabulary's own default, a detached
+ * composite recorded exactly what a Block looked like when it was taken apart,
+ * and an edge colour is something the person holding the shape chose
+ * afterwards — each is more specific than the one before it. All of it is
+ * display only, so plain tldraw still opens the shape and paints it from
+ * `color` and `fill` alone.
+ */
+export function systemSketchGeoDisplayValues(
+	shape: TLGeoShape,
+	theme?: TLTheme,
+	colorMode?: 'dark' | 'light',
+) {
+	const colors = theme && colorMode ? theme.colors[colorMode] : undefined
+	const fill = colors
+		? fillPaintFor(colors as never, shape.props.fill, shape.props.color)
+		: {}
 	const style = readSystemSketchPrimitiveStyle(shape)
-	if (style?.kind !== 'geo') return {}
-	return {
-		fillColor: style.fillColor,
-		strokeColor: style.strokeColor,
-		strokeWidth: style.strokeWidth,
-	}
+	const detached = style?.kind === 'geo'
+		? {
+			fillColor: style.fillColor,
+			strokeColor: style.strokeColor,
+			strokeWidth: style.strokeWidth,
+		}
+		: {}
+	const edge = theme && colorMode
+		? resolveStrokeHex(theme, colorMode, readStrokeMeta(shape).color)
+		: undefined
+	const values = { ...fill, ...detached }
+	return edge ? { ...values, strokeColor: edge } : values
 }
 
 /** Exact Block typography on otherwise normal, editable stock text shapes. */
@@ -209,8 +240,22 @@ const SystemSketchLineShapeUtil = LineShapeUtil.configure({
 	},
 })
 
-/** Add beside tldraw's defaults; both utilities retain their stock type ids. */
+/** A closed freehand stroke fills with the same three fills a rectangle has. */
+const SystemSketchDrawShapeUtil = DrawShapeUtil.configure({
+	getCustomDisplayValues: (_editor, shape, theme, colorMode) =>
+		fillPaintFor(theme.colors[colorMode] as never, shape.props.fill, shape.props.color),
+})
+
+/**
+ * Add beside tldraw's defaults; every utility retains its stock type id.
+ *
+ * A line and a freehand stroke are wrapped for one reason only: they carry a
+ * dash, so the Line style menu offers them Async, so they have to be able to
+ * paint it. The menu and the paint are kept in step by construction rather
+ * than by a second, shorter option list.
+ */
 export const SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS = [
 	SystemSketchTextShapeUtil,
-	SystemSketchLineShapeUtil,
+	withAsyncEdge(SystemSketchLineShapeUtil),
+	withAsyncEdge(SystemSketchDrawShapeUtil),
 ]

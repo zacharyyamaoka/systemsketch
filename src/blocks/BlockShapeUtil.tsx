@@ -14,6 +14,7 @@ import {
 	BLOCK_SHAPE_TYPE,
 	BLOCK_FOLDED_HEIGHT_PX,
 	PILL_TOOL_ID,
+	TYPE_TOOL_ID,
 	blockFoldControlSide,
 	blockIsFolded,
 	canBlockFold,
@@ -40,6 +41,7 @@ import {
 	valueBlockText,
 } from './valueBlock'
 import { applyCanvasPillSignature, canvasPortSignaturePatch } from './canvasPython'
+import { createTypeProps } from './typeAttributes'
 import { patchBlockPortProps } from './commands/blockCommands'
 import {
 	blockInlineFieldAtPoint,
@@ -265,6 +267,8 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		// reads its size to centre it on the click.
 		const drawnAsPill = this.editor.getCurrentToolId() === PILL_TOOL_ID
 			&& isBlankBlockProps(next.props)
+		const drawnAsType = this.editor.getCurrentToolId() === TYPE_TOOL_ID
+			&& isBlankBlockProps(next.props)
 		if (drawnAsPill) {
 			// A fresh capsule begins on its variable name, just like a new code
 			// line. `name: Type = value` is then expanded on edit completion.
@@ -274,7 +278,9 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		}
 		const valueProps = drawnAsPill
 			? createValueBlockProps(next.props)
-			: normalizeValueBlockProps(next.props)
+			: drawnAsType
+				? createTypeProps(next.props)
+				: normalizeValueBlockProps(next.props)
 		const props = normalizeStockBlockProps(valueProps)
 		return props === next.props ? undefined : { ...next, props }
 	}

@@ -2,6 +2,7 @@ import type { SharedStyle } from 'tldraw'
 
 import { FIGJAM_COLOR_NAMES, FIGJAM_PALETTE_COLUMNS } from '../appearance/figjamPalette'
 import { isCustomColor } from '../appearance/customColors'
+import { ASYNC_LINE_VALUE, type StrokeMetaField } from '../appearance/strokeMeta'
 
 export type ContextualControlKind =
   | 'geo'
@@ -9,6 +10,7 @@ export type ContextualControlKind =
   | 'fill'
   | 'dash'
   | 'lineStyle'
+  | 'strokeColor'
   | 'size'
   | 'weight'
   | 'font'
@@ -39,6 +41,8 @@ export interface ContextualControlDefinition {
   trigger: ContextualControlTrigger
   columns?: number
   custom?: boolean
+  /** Edge paint stored in shape metadata rather than a stock StyleProp. */
+  meta?: StrokeMetaField
 }
 
 export interface ContextualControl extends ContextualControlDefinition {
@@ -74,19 +78,16 @@ export interface ContextualControlRecipe {
 const option = (value: string, label: string): ContextualControlOption => ({ value, label })
 
 const FILL_OPTIONS = [
-  option('none', 'No fill'),
-  option('semi', 'Transparent'),
   option('solid', 'Solid'),
-  option('fill', 'Fill'),
-  option('pattern', 'Pattern'),
-  option('lined-fill', 'Lined'),
+  option('semi', 'Transparent'),
+  option('none', 'No fill'),
 ] as const
 
 const DASH_OPTIONS = [
-  option('draw', 'Draw'),
   option('solid', 'Solid'),
   option('dashed', 'Dashed'),
   option('dotted', 'Dotted'),
+  option(ASYNC_LINE_VALUE, 'Async'),
   option('none', 'None'),
 ] as const
 
@@ -98,9 +99,7 @@ const SIZE_OPTIONS = [
 ] as const
 
 const WEIGHT_OPTIONS = [
-  option('s', 'Thin'),
-  option('m', 'Medium'),
-  option('l', 'Large'),
+  option('m', 'Thin'),
   option('xl', 'Thick'),
 ] as const
 
@@ -188,7 +187,16 @@ export const CONTEXTUAL_CONTROL_REGISTRY: Readonly<Record<ContextualControlKind,
   },
   fill: { kind: 'fill', label: 'Fill', options: FILL_OPTIONS, layout: 'chips', trigger: 'value' },
   dash: { kind: 'dash', label: 'Line style', options: DASH_OPTIONS, layout: 'chips', trigger: 'icon' },
-  lineStyle: { kind: 'lineStyle', label: 'Line style', options: DASH_OPTIONS, layout: 'row', trigger: 'icon' },
+  lineStyle: {
+    kind: 'lineStyle', label: 'Line style', options: DASH_OPTIONS,
+    layout: 'chips', trigger: 'icon', meta: 'pattern',
+  },
+  strokeColor: {
+    kind: 'strokeColor', label: 'Line style',
+    options: FIGJAM_COLOR_NAMES.map((value) => option(value, value)),
+    layout: 'swatches', trigger: 'icon', columns: FIGJAM_PALETTE_COLUMNS,
+    meta: 'color',
+  },
   size: { kind: 'size', label: 'Font size', options: SIZE_OPTIONS, layout: 'list', trigger: 'text' },
   weight: { kind: 'weight', label: 'Weight', options: WEIGHT_OPTIONS, layout: 'row', trigger: 'value' },
   font: { kind: 'font', label: 'Typeface', options: FONT_OPTIONS, layout: 'list', trigger: 'icon' },
@@ -219,7 +227,7 @@ export const SHAPE_CONTEXTUAL_RECIPE: ContextualControlRecipe = {
   id: 'shape',
   groups: [
     { id: 'identity', items: ['geo'] },
-    { id: 'paint', items: ['color', 'dash'] },
+    { id: 'paint', items: ['color', 'strokeColor'] },
     { id: 'type', items: ['font', 'size'] },
     { id: 'alignment', items: ['align', 'verticalAlign'] },
   ],
@@ -297,13 +305,22 @@ export function selectedContextualOption(
   const found = control.options.find((candidate) => candidate.value === value)
   if (found) return found
   if (control.automaticOption?.value === value) return control.automaticOption
-  if (control.kind === 'color' && isCustomColor(value)) {
+  if ((control.kind === 'color' || control.kind === 'strokeColor') && isCustomColor(value)) {
     return option(value, CUSTOM_LABEL)
   }
   return undefined
 }
 
 export function contextualTriggerLabel(control: ContextualControl): string {
-  const selected = selectedContextualOption(control)
-  return `${control.label}, ${selected ? selected.label.toLowerCase() : MIXED_LABEL.toLowerCase()}`
+  const valueName = (candidate: ContextualControl): string => {
+    const selected = selectedContextualOption(candidate)
+    if (selected) return selected.label.toLowerCase()
+    if (candidate.value?.type === 'shared') return candidate.value.value
+    return MIXED_LABEL.toLowerCase()
+  }
+  const stacked = control.trigger === 'icon' && control.modePlacement === 'above'
+    ? control.modeControl
+    : undefined
+  const value = stacked ? `${valueName(stacked)} ${valueName(control)}` : valueName(control)
+  return `${control.label}, ${value}`
 }

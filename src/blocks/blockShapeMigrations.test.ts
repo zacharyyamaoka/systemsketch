@@ -20,6 +20,7 @@ import {
 	downgradeBlockPropsV9ToV8,
 	downgradeBlockPropsV10ToV9,
 	downgradeBlockPropsV11ToV10,
+	downgradeBlockPropsV12ToV11,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -31,6 +32,7 @@ import {
 	upgradeBlockPropsV8ToV9,
 	upgradeBlockPropsV9ToV10,
 	upgradeBlockPropsV10ToV11,
+	upgradeBlockPropsV11ToV12,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -96,21 +98,36 @@ describe('Block shape migrations', () => {
 	})
 
 	it('adds the separated member-layout default and removes it for older readers', () => {
-		const v9 = { title: 'Class', inputs: [], outputs: [] }
-		const v10 = throughPureStep(v9, upgradeBlockPropsV9ToV10)
-		expect(v10).toEqual({ ...v9, memberLayout: 'inset' })
-		expect(throughPureStep(v10, downgradeBlockPropsV10ToV9)).toEqual(v9)
-		expect(upgradeBlockPropsV9ToV10({ ...v9, memberLayout: 'edge-to-edge' }))
-			.toEqual({ ...v9, memberLayout: 'edge-to-edge' })
+		const v10 = { title: 'Class', inputs: [], outputs: [] }
+		const v11 = throughPureStep(v10, upgradeBlockPropsV10ToV11)
+		expect(v11).toEqual({ ...v10, memberLayout: 'inset' })
+		expect(throughPureStep(v11, downgradeBlockPropsV11ToV10)).toEqual(v10)
+		expect(upgradeBlockPropsV10ToV11({ ...v10, memberLayout: 'edge-to-edge' }))
+			.toEqual({ ...v10, memberLayout: 'edge-to-edge' })
 	})
 
 	it('adds the white inset-background default and preserves an authored gray well', () => {
-		const v10 = { title: 'Class', memberLayout: 'inset', inputs: [], outputs: [] }
-		const v11 = throughPureStep(v10, upgradeBlockPropsV10ToV11)
-		expect(v11).toEqual({ ...v10, insetBackground: 'white' })
-		expect(throughPureStep(v11, downgradeBlockPropsV11ToV10)).toEqual(v10)
-		expect(upgradeBlockPropsV10ToV11({ ...v10, insetBackground: 'soft-gray' }))
-			.toEqual({ ...v10, insetBackground: 'soft-gray' })
+		const v11 = { title: 'Class', memberLayout: 'inset', inputs: [], outputs: [] }
+		const v12 = throughPureStep(v11, upgradeBlockPropsV11ToV12)
+		expect(v12).toEqual({ ...v11, insetBackground: 'white' })
+		expect(throughPureStep(v12, downgradeBlockPropsV12ToV11)).toEqual(v11)
+		expect(upgradeBlockPropsV11ToV12({ ...v11, insetBackground: 'soft-gray' }))
+			.toEqual({ ...v11, insetBackground: 'soft-gray' })
+	})
+
+	it('keeps a Type attribute source opaque across the V8 boundary', () => {
+		const v7: BlockMigrationProps = {
+			...getDefaultBlockProps(),
+			blockType: 'type',
+		}
+		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
+		expect(v8).toBe(v7)
+
+		const withSource: BlockMigrationProps = {
+			...v8,
+			attributeSource: 'pose: Pose\\nquality: float',
+		}
+		expect(throughPureStep(withSource, downgradeBlockPropsV8ToV7)).not.toHaveProperty('attributeSource')
 	})
 
 	it('loads a V6 Projection record as Unbundle without losing authored fields', () => {
@@ -195,16 +212,19 @@ describe('Block shape migrations', () => {
 		expect(v7).toEqual(v6)
 
 		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
-		expect(v8).toMatchObject({ showFooter: true, showHeaderDivider: true })
+		expect(v8).toBe(v7)
 
 		const v9 = throughPureStep(v8, upgradeBlockPropsV8ToV9)
-		expect(v9).toMatchObject({ foldable: false, folded: false, autoResize: false })
+		expect(v9).toMatchObject({ showFooter: true, showHeaderDivider: true })
 
 		const v10 = throughPureStep(v9, upgradeBlockPropsV9ToV10)
-		expect(v10.memberLayout).toBe('inset')
+		expect(v10).toMatchObject({ foldable: false, folded: false, autoResize: false })
 
 		const v11 = throughPureStep(v10, upgradeBlockPropsV10ToV11)
-		expect(v11.insetBackground).toBe('white')
+		expect(v11.memberLayout).toBe('inset')
+
+		const v12 = throughPureStep(v11, upgradeBlockPropsV11ToV12)
+		expect(v12.insetBackground).toBe('white')
 
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
@@ -250,7 +270,7 @@ describe('Block shape migrations', () => {
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
 		expect(migrated.props.insetBackground).toBe('white')
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(11)
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(12)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))
@@ -261,11 +281,11 @@ describe('Block shape migrations', () => {
 		expect((record.props as Record<string, unknown>)).not.toHaveProperty('stockConfig')
 	})
 
-	it('adds visible chrome to old records and removes it cleanly for a v7 reader', () => {
-		const v7: BlockMigrationProps = { title: 'draw', showFooter: undefined }
-		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
-		expect(v8).toEqual({ title: 'draw', showFooter: true, showHeaderDivider: true })
-		expect(throughPureStep(v8, downgradeBlockPropsV8ToV7)).toEqual({ title: 'draw' })
+	it('adds visible chrome to old records and removes it cleanly for a v8 reader', () => {
+		const v8: BlockMigrationProps = { title: 'draw', showFooter: undefined }
+		const v9 = throughPureStep(v8, upgradeBlockPropsV8ToV9)
+		expect(v9).toEqual({ title: 'draw', showFooter: true, showHeaderDivider: true })
+		expect(throughPureStep(v9, downgradeBlockPropsV9ToV8)).toEqual({ title: 'draw' })
 	})
 
 	it('downgrades disposable diff data without mutating the current record', () => {
@@ -467,14 +487,14 @@ describe('Block shape migrations', () => {
 	})
 
 	it('adds opt-in folding and auto-fit flags, and removes them for an older reader', () => {
-		const v8: BlockMigrationProps = { ...getDefaultBlockProps() }
-		delete v8.foldable
-		delete v8.folded
-		delete v8.autoResize
-		const v9 = throughPureStep(v8, upgradeBlockPropsV8ToV9)
-		expect(v9).toMatchObject({ foldable: false, folded: false, autoResize: false })
+		const v9: BlockMigrationProps = { ...getDefaultBlockProps() }
+		delete v9.foldable
+		delete v9.folded
+		delete v9.autoResize
+		const v10 = throughPureStep(v9, upgradeBlockPropsV9ToV10)
+		expect(v10).toMatchObject({ foldable: false, folded: false, autoResize: false })
 
-		const older = throughPureStep({ ...v9, foldable: true, folded: true, autoResize: true }, downgradeBlockPropsV9ToV8)
+		const older = throughPureStep({ ...v10, foldable: true, folded: true, autoResize: true }, downgradeBlockPropsV10ToV9)
 		expect(older).not.toHaveProperty('foldable')
 		expect(older).not.toHaveProperty('folded')
 		expect(older).not.toHaveProperty('autoResize')

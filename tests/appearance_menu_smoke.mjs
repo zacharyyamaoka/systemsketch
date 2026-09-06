@@ -46,7 +46,16 @@ const FRAMES = {
   lineStyle: join(ROOT, 'docs', 'appearance-menu-6-line-style-2026-09-01.png'),
   fontSize: join(ROOT, 'docs', 'appearance-menu-7-font-size-2026-09-01.png'),
   font: join(ROOT, 'docs', 'assets', 'contextual-menu-text-font-2026-09-04.png'),
-  chips: join(ROOT, 'docs', 'appearance-menu-8-shape-line-style-2026-09-01.png'),
+  // A shape's Line style is now FigJam's Stroke popover — chips over a
+  // palette — so this captures the new panel under its own date. The
+  // 2026-09-01 frame beside it stays as the record of what it replaced.
+  chips: join(ROOT, 'docs', 'appearance-menu-8-shape-line-style-2026-09-05.png'),
+  asyncEdge: join(ROOT, 'docs', 'appearance-menu-10-async-edge-2026-09-05.png'),
+  // The three fills, each photographed on the same shape: the pair that used
+  // to be one white box is the whole reason these exist.
+  fillSolid: join(ROOT, 'docs', 'appearance-menu-11-fill-solid-2026-09-05.png'),
+  fillTransparent: join(ROOT, 'docs', 'appearance-menu-12-fill-transparent-2026-09-05.png'),
+  fillNone: join(ROOT, 'docs', 'appearance-menu-13-fill-none-2026-09-05.png'),
   mixed: join(ROOT, 'docs', 'appearance-menu-9-mixed-selection-2026-09-01.png'),
   arrowRouting: join(ROOT, 'docs', 'assets', 'arrow-routing-three-options.png'),
   arrowRoutingSwitched: join(ROOT, 'docs', 'assets', 'arrow-routing-switched-control.png'),
@@ -56,7 +65,7 @@ const FRAMES = {
  * FigJam's shape pill, captured as `Shape | Change color, Line style |
  * Typeface, Font size | ... | Text alignment`: Font size follows Typeface.
  */
-const SHAPE_CONTROLS = ['geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign']
+const SHAPE_CONTROLS = ['geo', 'color', 'strokeColor', 'font', 'size', 'align', 'verticalAlign']
 /**
  * FigJam's connector pill, `Change color | Line style | Add text | Start point
  * | Line shape | End point`: one Line style holding weight and dash, then the
@@ -93,6 +102,9 @@ async function readMenu(page) {
       value: b.dataset.value, checked: b.getAttribute('aria-checked') === 'true',
       preview: b.querySelector('.systemsketch-appearance__font')?.textContent ?? null,
       label: b.querySelector('.systemsketch-appearance__label')?.textContent ?? null,
+      // Which glyph this option drew: a traced FigJam icon, or one of ours.
+      glyph: b.querySelector('[data-icon]')?.dataset.icon
+        ?? (b.querySelector('[data-dash]') ? 'dash/' + b.querySelector('[data-dash]').dataset.dash : null),
       ...box(b), radius: getComputedStyle(b).borderRadius, background: getComputedStyle(b).backgroundColor,
       fontSize: b.querySelector('.systemsketch-appearance__label')
         ? parseFloat(getComputedStyle(b.querySelector('.systemsketch-appearance__label')).fontSize) : null,
@@ -118,6 +130,11 @@ async function readMenu(page) {
       separators: [...document.querySelectorAll('.systemsketch-appearance__separator')].map(box),
       stroke: painted ? painted.getAttribute('stroke') : null,
       strokeWidth: painted ? painted.getAttribute('stroke-width') : null,
+      // The edge as the browser resolves it: the async cadence arrives from a
+      // stylesheet, so the attribute alone cannot prove it.
+      strokeDash: painted ? getComputedStyle(painted).strokeDasharray : null,
+      shapeFill: shape && shape.querySelector('path[fill]:not([stroke])')
+        ? shape.querySelector('path[fill]:not([stroke])').getAttribute('fill') : null,
       opacity: shape ? getComputedStyle(shape).opacity : null,
       shapeType: shape ? shape.getAttribute('data-shape-type') : null,
       pill: box(pill),
@@ -195,6 +212,21 @@ async function pickOption(page, control, value) {
   await delay(280)
 }
 
+/**
+ * Poll the autosaved board until it matches `marker`. The document is written
+ * pretty-printed, so every marker here is a pattern rather than a substring.
+ */
+async function waitForSave(board, marker) {
+  const deadline = Date.now() + 8000
+  let saved = ''
+  while (Date.now() < deadline) {
+    saved = await readFile(board, 'utf8').catch(() => '')
+    if (marker.test(saved)) return saved
+    await delay(200)
+  }
+  assert.fail(`the saved board never carried ${marker}`)
+}
+
 async function drawAndSelect(page, from, to, toolKey) {
   await key(page, toolKey, `Key${toolKey.toUpperCase()}`)
   await drag(page, from, to)
@@ -216,6 +248,9 @@ async function clearBoard(page) {
 }
 
 const geometry = {}
+
+/** A shape's Line style row, kept so the connector's can be compared to it. */
+let shapeLineStyle = null
 
 async function saveScreenshot(page, path) {
   const capture = await page.send('Page.captureScreenshot', { format: 'png' })
@@ -255,7 +290,7 @@ async function main() {
     // color/Line style, full stop, and so is this one now.
     await drawAndSelect(page, { x: 560, y: 380 }, { x: 900, y: 540 }, 'r')
     const freshShape = await readMenu(page)
-    assert.deepEqual(freshShape.controls, ['geo', 'color', 'dash'])
+    assert.deepEqual(freshShape.controls, ['geo', 'color', 'strokeColor'])
     assert.equal(freshShape.triggers.find((t) => t.control === 'geo').icon, 'trigger/Shape',
       'the Shape trigger shows FigJam\'s fixed glyph, not a preview of the current geo')
     pass('a fresh shape with no text hides Typeface/Font size/alignment, and its Shape trigger is fixed')
@@ -276,7 +311,10 @@ async function main() {
     const shape = await readMenu(page)
     assert.deepEqual(shape.controls, SHAPE_CONTROLS)
     assert.equal(shape.labels.geo, 'Shape, rectangle')
-    assert.equal(shape.labels.dash, 'Line style, draw')
+    // Both halves of the stacked Line style trigger, since its icon shows
+    // neither: the dash a fresh shape is seeded with, then the edge colour it
+    // follows until one is chosen.
+    assert.equal(shape.labels.strokeColor, 'Line style, solid black')
     assert.equal(shape.labels.size, 'Font size, medium')
     for (const trigger of shape.triggers) {
       const expected = trigger.control === 'color' ? FIGJAM.colorTrigger
@@ -286,7 +324,7 @@ async function main() {
     }
     assert.equal(shape.triggers.find((t) => t.control === 'size').text, 'Medium')
     assert.equal(shape.triggers.find((t) => t.control === 'font').icon, 'trigger/Typeface')
-    assert.equal(shape.triggers.find((t) => t.control === 'dash').icon, 'trigger/Line style')
+    assert.equal(shape.triggers.find((t) => t.control === 'strokeColor').icon, 'trigger/Line style')
     // FigJam's hairlines: Shape | Color, Line style | Typeface, Font size | Alignment.
     assert.equal(shape.separators.length, 3)
     for (const separator of shape.separators) {
@@ -302,8 +340,9 @@ async function main() {
     assert.equal(colorOpen.panel.mode, 'above')
     assert.equal(colorOpen.panel.background, 'rgb(30, 30, 30)')
     assert.equal(colorOpen.panel.radius, '13px')
-    assert.deepEqual(colorOpen.panel.modeRow.map((c) => c.value),
-      ['none', 'semi', 'solid', 'fill', 'pattern', 'lined-fill'])
+    // FigJam's three fills, in FigJam's order, and only those three: tldraw's
+    // `fill`, `pattern` and `lined-fill` are a different product's vocabulary.
+    assert.deepEqual(colorOpen.panel.modeRow.map((c) => c.value), ['solid', 'semi', 'none'])
     const gap = colorOpen.pill.y - (colorOpen.panel.y + colorOpen.panel.h)
     assert.ok(near(gap, 8), `popover should sit 8px above the pill, was ${gap}`)
     // 24px discs on a 32px pitch, inset 4px: the grid FigJam's 368px panel holds.
@@ -336,11 +375,39 @@ async function main() {
     await pickOption(page, 'color', 'solid')
     const filled = await readMenu(page)
     assert.ok(filled.panel, 'the popover stays open after a pick')
-    assert.equal(filled.panel.modeRow.length, 6)
+    assert.equal(filled.panel.modeRow.length, 3)
+    // FigJam's own order: most paint first.
+    assert.deepEqual(filled.panel.modeRow.map((c) => c.value), ['solid', 'semi', 'none'])
     assert.equal(filled.panel.modeRow.find((c) => c.value === 'solid').background, FIGJAM.chipChosen)
     assert.equal(filled.labels.color, 'Color, blue', 'filling must not disturb the colour')
     assert.equal(filled.stroke, paintedBefore, 'filling must not change the stroke either')
     pass('the fill row and the palette write different styles from one popover')
+
+    // 4b. Every transition between the three, both directions, because two of
+    //     them used to be the same white box: tldraw paints `semi` with the
+    //     theme's flat canvas colour and `solid` with an 18% wash, so on a
+    //     white canvas Transparent was No fill with extra steps.
+    const painted = {}
+    for (const from of ['solid', 'semi', 'none']) {
+      for (const to of ['solid', 'semi', 'none']) {
+        await pickOption(page, 'color', from)
+        await pickOption(page, 'color', to)
+        const reading = await readMenu(page)
+        assert.ok(reading.panel.modeRow.find((c) => c.value === to).checked,
+          `${from} → ${to} must leave ${to} chosen`)
+        assert.equal(reading.stroke, paintedBefore, `${from} → ${to} must not touch the edge`)
+        painted[to] = reading.shapeFill
+      }
+    }
+    for (const [fill, name] of [['solid', 'fillSolid'], ['semi', 'fillTransparent'], ['none', 'fillNone']]) {
+      await pickOption(page, 'color', fill)
+      await frame(page, name)
+    }
+    assert.equal(painted.none, null, 'No fill paints no fill path at all')
+    assert.equal(painted.solid, '#3dadff', 'Solid is the swatch itself, not a wash of it')
+    assert.equal(painted.semi, '#3dadff40', 'Transparent is the same colour you can see through')
+    await pickOption(page, 'color', 'solid')
+    pass('the three fills are three visibly different things, in both directions')
 
     // 5. Custom: the picker opens flush under the palette, centred on the cell,
     //    with the current colour's hex selected and ready to overtype.
@@ -429,20 +496,52 @@ async function main() {
     assert.equal(reloaded.stroke, '#a3f2c1', 'a fresh load registers the colour before parsing the file')
     pass('a board naming a custom colour saves the hex in the file and reopens painted with it')
 
-    // 10. A shape's Line style is FigJam's labelled chips, and every dash the
-    //     document can hold is offered — including tldraw's `draw` default.
-    const dash = await openControl(page, 'dash')
-    assert.equal(dash.panel.layout, 'chips')
-    assert.deepEqual(dash.panel.options.map((o) => o.value), ['draw', 'solid', 'dashed', 'dotted', 'none'])
-    assert.ok(dash.panel.options.find((o) => o.value === 'draw').checked,
-      'a freshly drawn shape is `draw`, so the menu must be able to show it')
-    assert.ok(dash.panel.options.every((o) => o.h === FIGJAM.cell && o.radius === FIGJAM.cellRadius))
-    assert.equal(dash.panel.options.find((o) => o.value === 'draw').background, FIGJAM.cellChosen)
+    // 10. A shape's Line style is FigJam's Stroke popover: the line-style
+    //     chips, a hairline, then a palette of its own — so the edge can be a
+    //     colour the fill is not, which one tldraw `color` cannot express.
+    await openControl(page, 'color')
+    await pickOption(page, 'color', 'solid')
+    await closeControl(page, 'color')
+    const solidFill = await readMenu(page)
+    assert.ok(solidFill.shapeFill, 'the shape now has a painted fill to differ from')
+
+    const stroke = await openControl(page, 'strokeColor')
+    assert.equal(stroke.panel.layout, 'swatches')
+    assert.equal(stroke.panel.mode, 'above')
+    assert.deepEqual(stroke.panel.modeRow.map((c) => c.value),
+      ['solid', 'dashed', 'dotted', 'async', 'none'])
+    assert.ok(stroke.panel.modeRow.find((c) => c.value === 'solid').checked,
+      'a freshly drawn shape is seeded solid, so the menu must show it as chosen')
+    assert.equal(stroke.panel.options.length, 21, 'the edge gets the same palette the fill has')
+    // Held for the connector, which must show this exact row with the text off.
+    shapeLineStyle = stroke.panel.modeRow.map((c) => ({ value: c.value, glyph: c.glyph }))
+    // No 22nd cell: a custom hex writes tldraw's own colour style, which is
+    // the fill's. The edge takes palette names only, for now.
+    assert.equal(stroke.panel.custom, null)
     await frame(page, 'chips')
-    await pickOption(page, 'dash', 'dashed')
-    assert.equal((await readMenu(page)).labels.dash, 'Line style, dashed')
-    await closeControl(page, 'dash')
-    pass('a shape\'s Line style is a row of labelled chips offering every dash the document can hold')
+
+    await pickOption(page, 'strokeColor', 'black')
+    const edged = await readMenu(page)
+    assert.notEqual(edged.stroke, edged.shapeFill,
+      'the edge is painted its own colour while the fill keeps the shape\'s')
+    assert.equal(edged.shapeFill, solidFill.shapeFill, 'choosing an edge colour must not repaint the fill')
+
+    // The async cadence: the packet rhythm a cable is drawn with, on a shape.
+    await pickOption(page, 'strokeColor', 'async')
+    const asyncEdge = await readMenu(page)
+    assert.equal(asyncEdge.labels.strokeColor, 'Line style, async black')
+    const cadence = asyncEdge.strokeDash.replace(/px/g, '').split(/[,\s]+/).filter(Boolean).map(Number)
+    assert.deepEqual(cadence, [56, 4, 10, 4],
+      `the async edge wears the cable's packet cadence, was ${asyncEdge.strokeDash}`)
+    await frame(page, 'asyncEdge')
+    await closeControl(page, 'strokeColor')
+
+    // One undo retracts the whole choice, and the file keeps both halves.
+    const asyncSaved = await waitForSave(board, /"pattern":\s*"async"/)
+    assert.match(asyncSaved, /"color":\s*"black"/, 'the edge colour is saved beside the pattern')
+    assert.match(asyncSaved, /"dash":\s*"solid"/,
+      'an async shape still stores a dash plain tldraw can draw')
+    pass('a shape\'s Line style holds the chips over a palette of its own, and async paints the cable cadence')
 
     // 11. Font size is FigJam's combobox: each rung listed at its own size,
     //     the chosen one checked; Typeface keeps its `Aa` trigger.
@@ -501,8 +600,19 @@ async function main() {
     assert.equal(connector.triggers.find((t) => t.control === 'lineStyle').icon, 'trigger/Line style')
     const lineStyle = await openControl(page, 'lineStyle')
     assert.equal(lineStyle.panel.mode, 'beside')
-    assert.deepEqual(lineStyle.panel.group.map((c) => c.value), ['s', 'm', 'l', 'xl'])
-    assert.deepEqual(lineStyle.panel.options.map((o) => o.value), ['draw', 'solid', 'dashed', 'dotted', 'none'])
+    // Two weights, as FigJam has: `m` is what everything is drawn at, `xl` is
+    // the thick rung beside it.
+    assert.deepEqual(lineStyle.panel.group.map((c) => c.value), ['m', 'xl'])
+    // The shape's own row with the text turned off — same options, same
+    // glyphs, in the same order. Before they were two lists and two glyph
+    // paths, and the connector's Dotted option was being drawn by the
+    // arrowhead renderer, which is a plain line.
+    assert.deepEqual(
+      lineStyle.panel.options.map((o) => ({ value: o.value, glyph: o.glyph })),
+      shapeLineStyle,
+      'a connector shows the shape\'s line styles, labels off')
+    assert.ok(lineStyle.panel.options.every((o) => !o.fontSize),
+      'and shows them bare: no labels in the row')
     assert.ok(near(lineStyle.panel.h, FIGJAM.lineStylePanelHeight), `line style panel ${lineStyle.panel.h}`)
     assert.equal(lineStyle.panel.divider.w, 1)
     assert.ok(near(lineStyle.panel.divider.h, lineStyle.panel.h), 'the hairline cuts the full panel height')

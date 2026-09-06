@@ -30,11 +30,13 @@ describe('FigJam icon map', () => {
   })
 
   it('gives a shape and a connector the same Line style icons', () => {
-    // One trigger icon and one set of dash icons, whichever pill they are on:
-    // that is what FigJam does, and what the muscle memory is for.
-    expect(FIGJAM_TRIGGER_ICON.dash).toBe('trigger/Line style')
+    // There is now literally one entry to share: a shape's chips and a
+    // connector's bare row are the same control at two layouts, so the icons
+    // cannot drift the way they had (the connector's Dotted option was being
+    // drawn by the arrowhead renderer).
     expect(FIGJAM_TRIGGER_ICON.lineStyle).toBe('trigger/Line style')
-    expect(FIGJAM_ICON_FOR.lineStyle).toEqual(FIGJAM_ICON_FOR.dash)
+    expect(FIGJAM_TRIGGER_ICON.strokeColor).toBe('trigger/Line style')
+    expect(Object.keys(FIGJAM_ICON_FOR)).not.toContain('dash')
     expect(figjamIconName('lineStyle', 'dashed')).toBe('line-style/Dashed')
   })
 
@@ -56,9 +58,18 @@ describe('FigJam icon map', () => {
   })
 
   it('says nothing for a value FigJam has no icon for', () => {
-    // tldraw has nine arrowheads to FigJam's six, and four sizes to its two.
+    // tldraw has nine arrowheads to FigJam's six, and a `dotted` dash and an
+    // `async` cadence FigJam draws neither of.
     expect(figjamIconName('arrowheadEnd', 'pipe')).toBeUndefined()
-    expect(figjamIconName('size', 'm')).toBeUndefined()
-    expect(figjamIconName('dash', 'draw')).toBeUndefined()
+    expect(figjamIconName('size', 'l')).toBeUndefined()
+    expect(figjamIconName('lineStyle', 'dotted')).toBeUndefined()
+    expect(figjamIconName('lineStyle', 'async')).toBeUndefined()
+  })
+
+  it('gives the two weights SystemSketch offers FigJam\'s two weight icons', () => {
+    // The weight row is the one place these are read: `m` is what everything
+    // is created at, `xl` is the thick rung beside it.
+    expect(figjamIconName('size', 'm')).toBe('line-style/Thin')
+    expect(figjamIconName('size', 'xl')).toBe('line-style/Thick')
   })
 })

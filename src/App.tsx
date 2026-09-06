@@ -8,6 +8,7 @@ import {
   BlockShapeUtil,
   BlockTool,
   PillTool,
+  TypeTool,
   getBlockShapeVisibility,
   installBlockAutoResize,
   installBlockChildSelection,
@@ -75,6 +76,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
+import { seedDefaultLineStyle } from './appearance/strokeMeta'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
@@ -111,7 +113,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -134,7 +136,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -153,6 +155,7 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     setMountedEditor(editor)
+    seedDefaultLineStyle(editor)
     const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
