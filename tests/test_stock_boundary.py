@@ -52,7 +52,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("FloatingPortShapeUtil", source)
         self.assertIn("FloatingPortTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -95,6 +95,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("label: 'Behavior Tree', icon: <BehaviorTreeIcon />", toolbar_source)
         self.assertNotIn('title="Behavior Tree"', toolbar_source)
         self.assertNotIn('title="Loop"', toolbar_source)
+        # Async region is still a stock Frame gesture; its thin tool subclass
+        # contributes only the semantic stamp and visible default name.
+        self.assertIn("label: 'Async region', icon: <AsyncRegionIcon />", toolbar_source)
+        self.assertNotIn('title="Async region"', toolbar_source)
         # Listing a tool in that submenu is not enough to make it selectable:
         # `selectSystemFamilyTool` calls `tools[id]?.onSelect(...)`, so an id
         # with no entry in tldraw's UI-tool registry is a silent no-op. Shipped
@@ -102,7 +106,7 @@ class StockBoundaryTests(unittest.TestCase):
         integration = (
             PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
         ).read_text(encoding="utf-8")
-        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withBehaviorTreeTool", "withCodeTool", "withFloatingPortTool", "withCalloutTool"):
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withAsyncRegionTool", "withBehaviorTreeTool", "withCodeTool", "withFloatingPortTool", "withCalloutTool"):
             self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
@@ -118,7 +122,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("CodeShapeUtil,", source)
         self.assertIn("TypeTool,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -169,7 +173,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("TypeTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)

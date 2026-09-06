@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-09-06T10:19:28.489Z",
+  "checks": [
+    "the communication controls are absent on an ordinary board",
+    "drawing Async region uses the stock Frame gesture, adopts enclosed components, and opens contextual controls",
+    "a real port drag completed inside the region becomes an Async wire and stays painted above its Frame",
+    "the Async default remains explicitly overridable through the ordinary wire inspector",
+    "pressing outside the Frame dismisses the region controls",
+    "reselecting the Frame reopens its scoped communication lens without reapplying the Async default",
+    "the real browser journey emitted no local console errors"
+  ]
+}

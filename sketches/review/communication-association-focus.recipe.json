@@ -1,0 +1,152 @@
+{
+  "feature": "Communication association IDs and focus",
+  "viewport": { "width": 1920, "height": 1200 },
+  "shapes": [
+    {
+      "id": "mission", "type": "block", "x": 0, "y": 120,
+      "props": {
+        "title": "Mission Orchestrator", "description": "Three Actions and three Services share this component pair", "blockType": "action + service client", "view": "port", "w": 470, "h": 660,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 470, "h": 660 }, "expanded": { "w": 620, "h": 440 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [
+          { "id": "move_feedback", "name": "move.feedback", "type": "Progress", "visible": true },
+          { "id": "move_result", "name": "move.result", "type": "MoveResult", "visible": true },
+          { "id": "dock_feedback", "name": "dock.feedback", "type": "Progress", "visible": true },
+          { "id": "dock_result", "name": "dock.result", "type": "DockResult", "visible": true },
+          { "id": "status_action_result", "name": "status.result", "type": "StatusResult", "visible": true },
+          { "id": "pose_response", "name": "pose.response", "type": "Pose", "visible": true },
+          { "id": "health_response", "name": "health.response", "type": "Health", "visible": true },
+          { "id": "status_service_response", "name": "status.response", "type": "Status", "visible": true }
+        ],
+        "outputs": [
+          { "id": "move_goal", "name": "move.goal", "type": "MoveGoal", "visible": true },
+          { "id": "move_cancel", "name": "move.cancel", "type": "GoalId", "visible": true },
+          { "id": "dock_goal", "name": "dock.goal", "type": "DockGoal", "visible": true },
+          { "id": "status_action_goal", "name": "status.goal", "type": "StatusGoal", "visible": true },
+          { "id": "pose_request", "name": "pose.request", "type": "PoseQuery", "visible": true },
+          { "id": "health_request", "name": "health.request", "type": "HealthQuery", "visible": true },
+          { "id": "status_service_request", "name": "status.request", "type": "StatusQuery", "visible": true },
+          { "id": "bare_goal", "name": "goal", "type": "Unknown", "visible": true },
+          { "id": "conflict_move", "name": "move.goal", "type": "Unknown", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "runtime", "type": "block", "x": 760, "y": 120,
+      "props": {
+        "title": "Robot Runtime", "description": "The same pair serves every protocol below", "blockType": "action + service server", "view": "port", "w": 500, "h": 660,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 500, "h": 660 }, "expanded": { "w": 620, "h": 440 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [
+          { "id": "move_goal", "name": "move.goal", "type": "MoveGoal", "visible": true },
+          { "id": "move_cancel", "name": "move.cancel", "type": "GoalId", "visible": true },
+          { "id": "dock_goal", "name": "dock.goal", "type": "DockGoal", "visible": true },
+          { "id": "status_action_goal", "name": "status.goal", "type": "StatusGoal", "visible": true },
+          { "id": "pose_request", "name": "pose.request", "type": "PoseQuery", "visible": true },
+          { "id": "health_request", "name": "health.request", "type": "HealthQuery", "visible": true },
+          { "id": "status_service_request", "name": "status.request", "type": "StatusQuery", "visible": true },
+          { "id": "bare_goal", "name": "goal", "type": "Unknown", "visible": true },
+          { "id": "conflict_dock", "name": "dock.goal", "type": "Unknown", "visible": true }
+        ],
+        "outputs": [
+          { "id": "move_feedback", "name": "move.feedback", "type": "Progress", "visible": true },
+          { "id": "move_result", "name": "move.result", "type": "MoveResult", "visible": true },
+          { "id": "dock_feedback", "name": "dock.feedback", "type": "Progress", "visible": true },
+          { "id": "dock_result", "name": "dock.result", "type": "DockResult", "visible": true },
+          { "id": "status_action_result", "name": "status.result", "type": "StatusResult", "visible": true },
+          { "id": "pose_response", "name": "pose.response", "type": "Pose", "visible": true },
+          { "id": "health_response", "name": "health.response", "type": "Health", "visible": true },
+          { "id": "status_service_response", "name": "status.response", "type": "Status", "visible": true }
+        ]
+      }
+    },
+    { "id": "edge_move_goal", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_move_cancel", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_move_feedback", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_move_result", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_dock_goal", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_dock_feedback", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_dock_result", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_status_action_goal", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_status_action_result", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_pose_request", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_pose_response", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_health_request", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_health_response", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_status_service_request", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_status_service_response", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_bare_goal", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "edge_conflicting_claims", "type": "connection", "props": { "routing": "elbow", "temporal": "data" } }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "edge_move_goal", "toId": "mission", "props": { "portId": "move_goal", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_goal", "toId": "runtime", "props": { "portId": "move_goal", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_cancel", "toId": "mission", "props": { "portId": "move_cancel", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_cancel", "toId": "runtime", "props": { "portId": "move_cancel", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_feedback", "toId": "runtime", "props": { "portId": "move_feedback", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_feedback", "toId": "mission", "props": { "portId": "move_feedback", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_result", "toId": "runtime", "props": { "portId": "move_result", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_result", "toId": "mission", "props": { "portId": "move_result", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge_dock_goal", "toId": "mission", "props": { "portId": "dock_goal", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_dock_goal", "toId": "runtime", "props": { "portId": "dock_goal", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_dock_feedback", "toId": "runtime", "props": { "portId": "dock_feedback", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_dock_feedback", "toId": "mission", "props": { "portId": "dock_feedback", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_dock_result", "toId": "runtime", "props": { "portId": "dock_result", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_dock_result", "toId": "mission", "props": { "portId": "dock_result", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge_status_action_goal", "toId": "mission", "props": { "portId": "status_action_goal", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_action_goal", "toId": "runtime", "props": { "portId": "status_action_goal", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_action_result", "toId": "runtime", "props": { "portId": "status_action_result", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_action_result", "toId": "mission", "props": { "portId": "status_action_result", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge_pose_request", "toId": "mission", "props": { "portId": "pose_request", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_request", "toId": "runtime", "props": { "portId": "pose_request", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_response", "toId": "runtime", "props": { "portId": "pose_response", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_response", "toId": "mission", "props": { "portId": "pose_response", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_health_request", "toId": "mission", "props": { "portId": "health_request", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_health_request", "toId": "runtime", "props": { "portId": "health_request", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_health_response", "toId": "runtime", "props": { "portId": "health_response", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_health_response", "toId": "mission", "props": { "portId": "health_response", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_service_request", "toId": "mission", "props": { "portId": "status_service_request", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_service_request", "toId": "runtime", "props": { "portId": "status_service_request", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_service_response", "toId": "runtime", "props": { "portId": "status_service_response", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status_service_response", "toId": "mission", "props": { "portId": "status_service_response", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge_bare_goal", "toId": "mission", "props": { "portId": "bare_goal", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_bare_goal", "toId": "runtime", "props": { "portId": "bare_goal", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_conflicting_claims", "toId": "mission", "props": { "portId": "conflict_move", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_conflicting_claims", "toId": "runtime", "props": { "portId": "conflict_dock", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-tag", "kind": "step", "text": "1 · Click Tag edges. Every leg of one protocol repeats the same A# or S# identifier.",
+      "x": -80, "y": -190, "w": 500, "h": 120,
+      "target": { "shapeId": "mission", "anchor": "top", "dx": -105 }
+    },
+    {
+      "id": "step-associations", "kind": "step", "text": "2 · Confirm A1 dock, A2 move, A3 status; S1 health, S2 pose, S3 status. The two gray bottom wires stay unresolved.",
+      "x": 690, "y": -220, "w": 560, "h": 150,
+      "target": { "shapeId": "runtime", "anchor": "top", "dx": 105 }
+    },
+    {
+      "id": "step-components", "kind": "step", "text": "3 · Click Components, then click A2. Other relationships dim and move's cancel, feedback, and result tracks reappear over Simple.",
+      "x": 700, "y": 900, "w": 560, "h": 150,
+      "target": { "shapeId": "runtime", "anchor": "bottom", "dx": 105 }
+    },
+    {
+      "id": "step-straight", "kind": "step", "text": "4 · Switch Arrow to Straight. Click any staggered ID label to focus an overlapping centreline relationship.",
+      "x": -80, "y": 900, "w": 520, "h": 130,
+      "target": { "shapeId": "mission", "anchor": "bottom", "dx": -105 }
+    },
+    {
+      "id": "step-dismiss", "kind": "step", "text": "5 · With A2 focused, click this blank canvas or select either component. Focus clears; a selected component stays selected.",
+      "x": 1420, "y": 900, "w": 560, "h": 140,
+      "target": { "x": 1370, "y": 830 }
+    },
+    {
+      "id": "pass", "kind": "pass", "text": "PASS WHEN · Each ID isolates exactly its protocol; a canvas or component selection restores every relationship immediately.",
+      "x": 1420, "y": -220, "w": 560, "h": 140
+    }
+  ]
+}

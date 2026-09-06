@@ -113,6 +113,19 @@ describe('Stable Block toolbar seam', () => {
     overridden?.block.onSelect('toolbar')
     expect(setCurrentTool).toHaveBeenCalledWith('block')
   })
+
+	it('registers Async region as a real system-family tool', () => {
+		const setCurrentTool = vi.fn()
+		const editor = { setCurrentTool } as unknown as Editor
+		const overridden = SYSTEMSKETCH_TOOLBAR_OVERRIDES.tools?.(
+			editor,
+			{ arrow: { id: 'arrow', label: 'Arrow', icon: 'tool-arrow', onSelect: vi.fn() } } as TLUiToolsContextType,
+			{} as never,
+		)
+		expect(overridden?.['async-region'].label).toBe('Async region')
+		overridden?.['async-region'].onSelect('toolbar')
+		expect(setCurrentTool).toHaveBeenCalledWith('async-region')
+	})
 })
 
 /**

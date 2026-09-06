@@ -1,0 +1,1235 @@
+{
+  "feature": "Async region stress test · mixed communication protocols",
+  "viewport": {
+    "width": 2800,
+    "height": 1650
+  },
+  "pages": [
+    {
+      "id": "review",
+      "name": "Async region stress test"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "async-region-stress",
+      "type": "frame",
+      "x": 500,
+      "y": 260,
+      "props": {
+        "w": 1700,
+        "h": 1020,
+        "name": "Async region · Warehouse autonomy",
+        "color": "violet"
+      },
+      "meta": {
+        "systemSketchAsyncRegion": {
+          "version": 1
+        }
+      }
+    },
+    {
+      "id": "camera",
+      "type": "block",
+      "parentId": "async-region-stress",
+      "x": 50,
+      "y": 100,
+      "props": {
+        "title": "Camera gateway",
+        "description": "Topic + Stream producer; alerts is intentionally unwired",
+        "blockType": "component",
+        "view": "port",
+        "w": 500,
+        "h": 220,
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 500,
+            "h": 220
+          },
+          "expanded": {
+            "w": 620,
+            "h": 440
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "frame",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          },
+          {
+            "id": "preview",
+            "name": "preview",
+            "type": "Chunk[Image]",
+            "visible": true
+          },
+          {
+            "id": "alerts",
+            "name": "alerts",
+            "type": "Alert",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "perception",
+      "type": "block",
+      "parentId": "async-region-stress",
+      "x": 670,
+      "y": 100,
+      "props": {
+        "title": "Perception",
+        "description": "Consumes frames and publishes detections",
+        "blockType": "component",
+        "view": "port",
+        "w": 360,
+        "h": 220,
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 360,
+            "h": 220
+          },
+          "expanded": {
+            "w": 620,
+            "h": 440
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "frame",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "detections",
+            "name": "detections",
+            "type": "Detections",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry",
+      "type": "block",
+      "parentId": "async-region-stress",
+      "x": 1200,
+      "y": 100,
+      "props": {
+        "title": "Telemetry UI",
+        "description": "Stream consumer; alerts is the live defaulting target",
+        "blockType": "component",
+        "view": "port",
+        "w": 450,
+        "h": 220,
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 450,
+            "h": 220
+          },
+          "expanded": {
+            "w": 620,
+            "h": 440
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "preview",
+            "name": "preview",
+            "type": "Chunk[Image]",
+            "visible": true
+          },
+          {
+            "id": "alerts",
+            "name": "alerts",
+            "type": "Alert",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "mission",
+      "type": "block",
+      "parentId": "async-region-stress",
+      "x": 70,
+      "y": 390,
+      "props": {
+        "title": "Mission orchestrator",
+        "description": "Three Actions + three Services share one component pair",
+        "blockType": "component",
+        "view": "port",
+        "w": 600,
+        "h": 540,
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 600,
+            "h": 540
+          },
+          "expanded": {
+            "w": 620,
+            "h": 540
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "detections",
+            "name": "detections",
+            "type": "Detections",
+            "visible": true
+          },
+          {
+            "id": "dock_feedback",
+            "name": "dock.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "dock_result",
+            "name": "dock.result",
+            "type": "DockResult",
+            "visible": true
+          },
+          {
+            "id": "move_feedback",
+            "name": "move.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "move_result",
+            "name": "move.result",
+            "type": "MoveResult",
+            "visible": true
+          },
+          {
+            "id": "status_action_result",
+            "name": "status.result",
+            "type": "StatusResult",
+            "visible": true
+          },
+          {
+            "id": "health_response",
+            "name": "health.response",
+            "type": "Health",
+            "visible": true
+          },
+          {
+            "id": "pose_response",
+            "name": "pose.response",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "status_service_response",
+            "name": "status.response",
+            "type": "Status",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "dock_goal",
+            "name": "dock.goal",
+            "type": "DockGoal",
+            "visible": true
+          },
+          {
+            "id": "move_goal",
+            "name": "move.goal",
+            "type": "MoveGoal",
+            "visible": true
+          },
+          {
+            "id": "move_cancel",
+            "name": "move.cancel",
+            "type": "GoalId",
+            "visible": true
+          },
+          {
+            "id": "status_action_goal",
+            "name": "status.goal",
+            "type": "StatusGoal",
+            "visible": true
+          },
+          {
+            "id": "health_request",
+            "name": "health.request",
+            "type": "HealthQuery",
+            "visible": true
+          },
+          {
+            "id": "pose_request",
+            "name": "pose.request",
+            "type": "PoseQuery",
+            "visible": true
+          },
+          {
+            "id": "status_service_request",
+            "name": "status.request",
+            "type": "StatusQuery",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "runtime",
+      "type": "block",
+      "parentId": "async-region-stress",
+      "x": 1030,
+      "y": 390,
+      "props": {
+        "title": "Robot runtime",
+        "description": "Server for every Action and Service on the left",
+        "blockType": "component",
+        "view": "port",
+        "w": 600,
+        "h": 540,
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 600,
+            "h": 540
+          },
+          "expanded": {
+            "w": 620,
+            "h": 540
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "portLayout": "inline",
+        "state": "normal",
+        "inputs": [
+          {
+            "id": "dock_goal",
+            "name": "dock.goal",
+            "type": "DockGoal",
+            "visible": true
+          },
+          {
+            "id": "move_goal",
+            "name": "move.goal",
+            "type": "MoveGoal",
+            "visible": true
+          },
+          {
+            "id": "move_cancel",
+            "name": "move.cancel",
+            "type": "GoalId",
+            "visible": true
+          },
+          {
+            "id": "status_action_goal",
+            "name": "status.goal",
+            "type": "StatusGoal",
+            "visible": true
+          },
+          {
+            "id": "health_request",
+            "name": "health.request",
+            "type": "HealthQuery",
+            "visible": true
+          },
+          {
+            "id": "pose_request",
+            "name": "pose.request",
+            "type": "PoseQuery",
+            "visible": true
+          },
+          {
+            "id": "status_service_request",
+            "name": "status.request",
+            "type": "StatusQuery",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "dock_feedback",
+            "name": "dock.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "dock_result",
+            "name": "dock.result",
+            "type": "DockResult",
+            "visible": true
+          },
+          {
+            "id": "move_feedback",
+            "name": "move.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "move_result",
+            "name": "move.result",
+            "type": "MoveResult",
+            "visible": true
+          },
+          {
+            "id": "status_action_result",
+            "name": "status.result",
+            "type": "StatusResult",
+            "visible": true
+          },
+          {
+            "id": "health_response",
+            "name": "health.response",
+            "type": "Health",
+            "visible": true
+          },
+          {
+            "id": "pose_response",
+            "name": "pose.response",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "status_service_response",
+            "name": "status.response",
+            "type": "Status",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "edge-frame",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-preview",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-detections",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-dock-goal",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-dock-feedback",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-dock-result",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-move-goal",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-move-cancel",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-move-feedback",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-move-result",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-status-action-goal",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-status-action-result",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-health-request",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-health-response",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-pose-request",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-pose-response",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-status-service-request",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    },
+    {
+      "id": "edge-status-service-response",
+      "type": "connection",
+      "parentId": "async-region-stress",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "temporal": "async"
+      },
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "type": "connection",
+      "fromId": "edge-frame",
+      "toId": "camera",
+      "props": {
+        "portId": "frame",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-frame",
+      "toId": "perception",
+      "props": {
+        "portId": "frame",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-preview",
+      "toId": "camera",
+      "props": {
+        "portId": "preview",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-preview",
+      "toId": "telemetry",
+      "props": {
+        "portId": "preview",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-detections",
+      "toId": "perception",
+      "props": {
+        "portId": "detections",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-detections",
+      "toId": "mission",
+      "props": {
+        "portId": "detections",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-dock-goal",
+      "toId": "mission",
+      "props": {
+        "portId": "dock_goal",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-dock-goal",
+      "toId": "runtime",
+      "props": {
+        "portId": "dock_goal",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-dock-feedback",
+      "toId": "runtime",
+      "props": {
+        "portId": "dock_feedback",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-dock-feedback",
+      "toId": "mission",
+      "props": {
+        "portId": "dock_feedback",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-dock-result",
+      "toId": "runtime",
+      "props": {
+        "portId": "dock_result",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-dock-result",
+      "toId": "mission",
+      "props": {
+        "portId": "dock_result",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-goal",
+      "toId": "mission",
+      "props": {
+        "portId": "move_goal",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-goal",
+      "toId": "runtime",
+      "props": {
+        "portId": "move_goal",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-cancel",
+      "toId": "mission",
+      "props": {
+        "portId": "move_cancel",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-cancel",
+      "toId": "runtime",
+      "props": {
+        "portId": "move_cancel",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-feedback",
+      "toId": "runtime",
+      "props": {
+        "portId": "move_feedback",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-feedback",
+      "toId": "mission",
+      "props": {
+        "portId": "move_feedback",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-result",
+      "toId": "runtime",
+      "props": {
+        "portId": "move_result",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-move-result",
+      "toId": "mission",
+      "props": {
+        "portId": "move_result",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-action-goal",
+      "toId": "mission",
+      "props": {
+        "portId": "status_action_goal",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-action-goal",
+      "toId": "runtime",
+      "props": {
+        "portId": "status_action_goal",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-action-result",
+      "toId": "runtime",
+      "props": {
+        "portId": "status_action_result",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-action-result",
+      "toId": "mission",
+      "props": {
+        "portId": "status_action_result",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-health-request",
+      "toId": "mission",
+      "props": {
+        "portId": "health_request",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-health-request",
+      "toId": "runtime",
+      "props": {
+        "portId": "health_request",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-health-response",
+      "toId": "runtime",
+      "props": {
+        "portId": "health_response",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-health-response",
+      "toId": "mission",
+      "props": {
+        "portId": "health_response",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-pose-request",
+      "toId": "mission",
+      "props": {
+        "portId": "pose_request",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-pose-request",
+      "toId": "runtime",
+      "props": {
+        "portId": "pose_request",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-pose-response",
+      "toId": "runtime",
+      "props": {
+        "portId": "pose_response",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-pose-response",
+      "toId": "mission",
+      "props": {
+        "portId": "pose_response",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-service-request",
+      "toId": "mission",
+      "props": {
+        "portId": "status_service_request",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-service-request",
+      "toId": "runtime",
+      "props": {
+        "portId": "status_service_request",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-service-response",
+      "toId": "runtime",
+      "props": {
+        "portId": "status_service_response",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "edge-status-service-response",
+      "toId": "mission",
+      "props": {
+        "portId": "status_service_response",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-open",
+      "kind": "step",
+      "text": "1 · Click this Async region, then Tag edges. All 18 seeded wires should receive a semantic label.",
+      "x": 520,
+      "y": 30,
+      "w": 600,
+      "h": 140,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "top",
+        "dx": -500
+      }
+    },
+    {
+      "id": "step-count",
+      "kind": "step",
+      "text": "2 · Confirm A1 dock · A2 move · A3 status, S1 health · S2 pose · S3 status, T1 detections · T2 frame, and ST1 preview.",
+      "x": 1500,
+      "y": 30,
+      "w": 620,
+      "h": 140,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "top",
+        "dx": 500
+      }
+    },
+    {
+      "id": "step-carrier",
+      "kind": "step",
+      "text": "3 · Switch to Components. Use Service edge and Action edge to choose the request/response or goal/feedback/result carrier.",
+      "x": 20,
+      "y": 500,
+      "w": 380,
+      "h": 190,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "left",
+        "dy": -250
+      }
+    },
+    {
+      "id": "step-shortest",
+      "kind": "step",
+      "text": "4 · Choose Shortest for both families. Every A#/S# should independently reuse its shortest routed leg; Topic and Stream stay on data.",
+      "x": 20,
+      "y": 780,
+      "w": 380,
+      "h": 190,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "left",
+        "dy": 250
+      }
+    },
+    {
+      "id": "step-focus",
+      "kind": "step",
+      "text": "5 · Click S1. Its two focused tags should say S1 request and S1 response—not the aggregate Service health label.",
+      "x": 2300,
+      "y": 500,
+      "w": 440,
+      "h": 190,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "right",
+        "dy": -250
+      }
+    },
+    {
+      "id": "step-wire",
+      "kind": "step",
+      "text": "6 · Return to Dataflow. Drag Camera gateway.alerts onto Telemetry UI.alerts. The nineteenth wire should default to Async.",
+      "x": 2300,
+      "y": 780,
+      "w": 440,
+      "h": 190,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "right",
+        "dy": 250
+      }
+    },
+    {
+      "id": "step-dismiss",
+      "kind": "step",
+      "text": "7 · Click outside the frame. The contextual controls should close while every wire and component remains.",
+      "x": 520,
+      "y": 1400,
+      "w": 650,
+      "h": 170,
+      "target": {
+        "shapeId": "async-region-stress",
+        "anchor": "bottom",
+        "dx": -450
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Carrier choices do not move the graph; S1 focus names request/response exactly; A2 still isolates four legs; the new alerts wire defaults Async.",
+      "x": 1500,
+      "y": 1400,
+      "w": 650,
+      "h": 170
+    }
+  ]
+}

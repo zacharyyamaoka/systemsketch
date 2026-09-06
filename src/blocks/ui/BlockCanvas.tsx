@@ -1338,13 +1338,14 @@ function PortDragOverlay({
 
 export interface BlockCanvasProps {
   shape: BlockShape
+  communicationProjected?: boolean
 }
 
 /**
  * Canvas-only Block renderer. `BlockShapeUtil` remains the authority for frame
  * geometry, containment, clipping, resize, export and connection routing.
  */
-export function BlockCanvas({ shape }: BlockCanvasProps) {
+export function BlockCanvas({ shape, communicationProjected = false }: BlockCanvasProps) {
   const editor = useEditor()
   const autoFitPresentation = useValue(
     'Block continuous auto-fit presentation',
@@ -1437,6 +1438,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
+      data-communication-projected={communicationProjected || undefined}
 		data-member-layout={layout.view === 'expanded' ? blockMemberLayout(shape.props) : undefined}
 		data-inset-background={layout.view === 'expanded' && blockMemberLayout(shape.props) === 'inset'
 			? insetBackground

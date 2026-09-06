@@ -8,6 +8,8 @@ import {
 	type TLDragShapesOutInfo,
 	type TLResizeInfo,
 	type TLShape,
+	useEditor,
+	useValue,
 } from 'tldraw'
 import {
 	BLOCK_SHAPE_PROPS,
@@ -71,6 +73,38 @@ import {
 	isBranchArmShape,
 	type BranchArmShape,
 } from '../branch/BranchArmShapeUtil'
+import {
+	communicationProjection,
+	isCommunicationPrototypeEnabled,
+	isShapeInCommunicationScope,
+} from '../prototypes/communication/communicationProjection'
+
+function CommunicationProjectedBlockCanvas({ shape }: { shape: BlockShape }) {
+	const editor = useEditor()
+	const enabled = isCommunicationPrototypeEnabled(editor)
+	const projection = useValue(
+		'communication component presentation',
+		() => communicationProjection.get(editor),
+		[editor],
+	)
+	if (
+		!enabled
+		|| projection.mode !== 'components'
+		|| shape.props.view === 'value'
+		|| !isShapeInCommunicationScope(editor, shape.id)
+	) {
+		return <BlockCanvas shape={shape} />
+	}
+	// WHY: Components is a lens over the dataflow, not a view mutation. Swapping
+	// only the props seen by the canvas renderer keeps the stored Port geometry,
+	// selection box, port anchors, x/y, and w/h byte-for-byte unchanged while a
+	// same-size Simple face hides the port details.
+	const rendered = {
+		...shape,
+		props: { ...shape.props, view: projection.componentView },
+	} as BlockShape
+	return <BlockCanvas shape={rendered} communicationProjected />
+}
 
 function exportPortColor(type: string): string {
 	const normalized = type.trim().toLowerCase()
@@ -484,7 +518,7 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override component(shape: BlockShape) {
-		return <BlockCanvas shape={shape} />
+		return <CommunicationProjectedBlockCanvas shape={shape} />
 	}
 
 	override toSvg(shape: BlockShape) {

@@ -28,6 +28,7 @@ import { LOOP_TOOL_ID, LoopIcon } from '../loop'
 import { BEHAVIOR_TREE_TOOL_ID, BehaviorTreeIcon } from '../behaviorTree'
 import { CODE_TOOL_ID, CodeIcon } from '../code'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
+import { ASYNC_REGION_TOOL_ID, AsyncRegionIcon } from '../asyncRegion'
 import { FLOATING_PORT_TOOL_ID, FloatingPortIcon } from '../floatingPort'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
@@ -117,6 +118,7 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // same reason: it is used less often than a Block and the toolbar, not the
   // right-click menu, is where the muscle memory forms.
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
+  { id: ASYNC_REGION_TOOL_ID, label: 'Async region', icon: <AsyncRegionIcon /> },
   // A Behavior Tree is a region like Branch and Loop: its nodes are real
   // Blocks, so it lives in the same family slot rather than on its own.
   { id: BEHAVIOR_TREE_TOOL_ID, label: 'Behavior Tree', icon: <BehaviorTreeIcon /> },
@@ -315,6 +317,8 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     ? BRANCH_TOOL_ID
       : activeToolId === LOOP_TOOL_ID
       ? LOOP_TOOL_ID
+      : activeToolId === ASYNC_REGION_TOOL_ID
+        ? ASYNC_REGION_TOOL_ID
       : activeToolId === BEHAVIOR_TREE_TOOL_ID
       ? BEHAVIOR_TREE_TOOL_ID
       : activeToolId === CODE_TOOL_ID
@@ -334,6 +338,7 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
+    || activeToolId === ASYNC_REGION_TOOL_ID
     || activeToolId === BEHAVIOR_TREE_TOOL_ID
     || activeToolId === CODE_TOOL_ID
     || activeToolId === PILL_TOOL_ID

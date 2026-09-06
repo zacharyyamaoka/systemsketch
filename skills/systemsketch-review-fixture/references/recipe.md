@@ -147,6 +147,14 @@ For a free `floating-port`, keep `w: 1` and `h: 1`; its meaningful geometry is t
 
 For an edge-tunnel review, set `tunnel: true` and give `tunnelLayer` a readable name such as `Diagnostics` on the real `connection` shape. The live app derives its reusable Layers chip from those persisted connection props; do not seed a fake layer card or a second metadata record. Also seed at least one other long semantic connection outside that layer. Leave the named cable idle so its endpoint stubs and outlined mouths are visible before the first gesture. Hover must restore its complete run while keeping both mouths visible; focusing the layer must remove the mouths from its member edge and tunnel every other long connection.
 
+For an Async region, use the stock `frame` shape and stamp
+`meta.systemSketchAsyncRegion: { "version": 1 }`; give it the visible name
+`Async region`. Parent contained Blocks and existing connections to that Frame.
+An existing async cable uses the ordinary connection prop `temporal: "async"`.
+The region is a creation default, so a fixture that asks the reviewer to draw a
+new wire should leave that second pair of ports unwired and let the real port
+gesture apply the default—do not pre-author the result being reviewed.
+
 SystemSketch documents have one canvas. When a fixture needs to demonstrate a legacy multi-page import, seed named stock Frames such as `Architecture` and `Runtime` side by side and parent each former page's objects to its Frame. The product migration itself must be proven by an automated test that opens a real multi-page `.tldr`; do not make the review helper create forbidden product pages.
 
 For a Branch, seed only the semantic `branch` and its ordinary direct children, stamping each child with `meta.branchArm`. The live editor projects those children into internal `branch-arm` frames when the board loads. Never put `branch-arm` records in a recipe: they are derived implementation details that the current document format persists automatically, while older boards are upgraded on load.

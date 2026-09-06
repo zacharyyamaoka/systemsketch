@@ -98,6 +98,7 @@ import {
 } from './SelectionLayoutActions'
 import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
+import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
 import './systemsketch-chrome.css'
 import './rich-text-toolbar.css'
 
@@ -742,6 +743,7 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      <CommunicationPrototypeControls />
       <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />
