@@ -43,7 +43,12 @@ from urllib.parse import quote
 REPO = Path(__file__).resolve().parents[1]
 NAME = re.compile(r"^[a-z][a-z0-9-]{0,47}$")
 PORT_MIN = 4600
-PORT_MAX = 4698
+# Retained reviews are the point: they stay registered after they are stopped so
+# a published URL keeps meaning the same commit. That makes the pool fill with
+# down-but-reserved pairs, and a full pool blocks publishing a NEW review rather
+# than reclaiming an old one — which would silently repoint someone's link. Widen
+# the range instead of evicting; ports are free and a broken review URL is not.
+PORT_MAX = 4898
 START_TIMEOUT_SECONDS = 35.0
 STOP_TIMEOUT_SECONDS = 5.0
 
