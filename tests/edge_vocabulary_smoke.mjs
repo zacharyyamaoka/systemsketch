@@ -192,7 +192,12 @@ async function main() {
       { temporal: cable.temporal, delayValue: cable.delayValue, pillPosition: cable.pillPosition },
       { temporal: 'data', delayValue: '', pillPosition: 0.5 })
     let paint = await painted(page, cable.id)
-    check('EV-2', 'a data cable paints one solid path and no pill', { segments: paint.segments, dash: paint.dash, pill: paint.pill }, { segments: [null], dash: [null], pill: null })
+    // WHY: `dash: ['5']` replaces the old `[null]` (solid) expectation — Zach's
+    // 2026-09-05 ask for the React Flow homepage's marching-ants line on every
+    // plain `data` cable by default (see `DataCablePath` in
+    // ConnectionShapeUtil.tsx). Still one path, still no pill: only the
+    // cadence changed.
+    check('EV-2', 'a data cable paints one path, now with the marching-ants dash, and no pill', { segments: paint.segments, dash: paint.dash, pill: paint.pill }, { segments: [null], dash: ['5'], pill: null })
     await shot(page, 'edge-vocabulary-1-data.png')
 
     // 2 · Delayed from the inspector: dotted, pill centred on the cable.

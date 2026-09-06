@@ -125,6 +125,36 @@ button {
   letter-spacing: var(--systemsketch-detached-letter-spacing);
 }
 
+/* The async edge: a shape wearing the packet cadence a cable is drawn with.
+ *
+ * The outline is the one path in a geo shape's SVG that carries a `stroke`
+ * attribute — its fill path has none — so this reaches the edge without
+ * touching the fill or the label. The cadence itself arrives as a custom
+ * property from the shape util, so the canvas and the SVG export are painted
+ * from the same constant rather than from a number copied into CSS. */
+.systemsketch-async-edge path[stroke] {
+  stroke-dasharray: var(--systemsketch-async-dasharray);
+  stroke-linecap: butt;
+}
+
+/* The plain data cable's marching-ants line — React Flow's homepage effect,
+ * v1 always-on per Zach's literal ask. `ConnectionShapeUtil.tsx` sets the
+ * static `stroke-dasharray`; this owns only the motion, so `toSvg` exports
+ * the same dash pattern frozen at offset 0 with no extra branching. The
+ * cadence is one full dash-plus-gap per loop, so it seams cleanly. */
+.ConnectionShape-marchingData {
+  animation: systemsketch-data-cable-march 0.5s linear infinite;
+}
+
+@keyframes systemsketch-data-cable-march {
+  from { stroke-dashoffset: 10; }
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ConnectionShape-marchingData { animation: none; }
+}
+
 .systemsketch-authored-arrow__stock {
 	display: contents;
 }

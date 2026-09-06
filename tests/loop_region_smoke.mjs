@@ -4,12 +4,15 @@
  *
  * The claim under test is not decorative. B says: the header is an operator,
  * the collection lands ON it, the element leaves it through a REAL port, and
- * the cable that element travels on is an ordinary SOLID connection — because
+ * the cable that element travels on is an ordinary DATA connection — because
  * dotted already means `temporal: delayed`, one turn late, and the element is
  * this turn's value. So the journey drives the toolbar, draws the region,
  * welds both header ports with real mouse events, and then reads the painted
- * path to confirm the item cable carries no dash pattern while a delayed cable
- * on the same board does.
+ * path to confirm the item cable's cadence is never confusable with a delayed
+ * cable's on the same board (2026-09-05: a plain `data` cable is no longer
+ * undashed either — it wears React Flow's homepage marching-ants line — so
+ * the two are told apart by their distinct dash cadences, not by one of them
+ * being solid).
  */
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -220,9 +223,10 @@ async function run() {
     check('L6', 'the collection lands on the header, welded to the Iterable inlet',
       [state.cables, state.orphans, state.intoLoopIterable], [2, 0, ['end']])
 
-    // 7 — solid means solid. The painted item cable carries no dash pattern,
-    // and a delayed cable on the same board does, so the two cannot be read
-    // as the same thing.
+    // 7 — the two are never confusable. A `data` cable's marching-ants dash
+    // (2026-09-05, always on: see `DataCablePath`) and a delayed cable's
+    // dotted `temporal: delayed` cadence are both dashed now, but they must
+    // still be two visibly distinct patterns, not the same dash read twice.
     await editorEval(page, `
       const cable = editor.getCurrentPageShapes().filter((s) => s.type === 'connection')[0]
       editor.updateShape({ id: cable.id, type: 'connection', props: { temporal: 'delayed' } })
@@ -230,11 +234,9 @@ async function run() {
     await delay(420)
     const dashes = JSON.parse(await evaluate(page, `(() => JSON.stringify(
       Array.from(document.querySelectorAll('[data-shape-type="connection"] path'))
-        .map((node) => (getComputedStyle(node).strokeDasharray || 'none'))))()`))
-    const anyDashed = dashes.some((value) => value !== 'none' && value !== '')
-    const anySolid = dashes.some((value) => value === 'none' || value === '')
-    check('L7', 'a delayed cable paints dashes; a data cable paints none',
-      [anyDashed, anySolid], [true, true])
+        .map((node) => (node.getAttribute('stroke-dasharray') || 'none'))))()`))
+    check('L7', 'a delayed cable and a data cable paint two distinct dash cadences',
+      new Set(dashes).size, 2)
     await editorEval(page, `
       const cable = editor.getCurrentPageShapes().filter((s) => s.type === 'connection')[0]
       editor.updateShape({ id: cable.id, type: 'connection', props: { temporal: 'data' } })
