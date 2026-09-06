@@ -8,6 +8,7 @@ import {
   BlockShapeUtil,
   BlockTool,
   PillTool,
+  TypeTool,
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
@@ -108,7 +109,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -130,7 +131,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
