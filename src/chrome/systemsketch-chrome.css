@@ -200,13 +200,13 @@
   padding-top: 12px;
 }
 
-.systemsketch-popout--left .systemsketch-library-browser .systemsketch-library-search {
-  margin-inline: 12px;
-}
-
-.systemsketch-popout--left .systemsketch-library-browser .systemsketch-library-panel__body {
-  padding-inline: 12px;
-}
+/* WHY no left/right override here: these two used to pull the search's
+ * margin and the body's padding in to 12px, one narrower than the 14px this
+ * popout uses everywhere else (header, the Shapes/Behaviors tab strip, the
+ * base `.systemsketch-library-search`/`.systemsketch-library-panel__body`
+ * rules in shape-library.css). Left at 14px like the rest of the panel; see
+ * shape-library.css for why the search's inset has to be padding rather
+ * than margin regardless. */
 
 .systemsketch-library-body section {
   margin-top: 16px;
