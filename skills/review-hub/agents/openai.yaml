@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Hub"
+  short_description: "Publish durable, versioned agent reviews"
+  default_prompt: "Use $review-hub to publish this task’s report, status, and optional preview manifest."
