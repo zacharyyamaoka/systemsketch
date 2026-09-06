@@ -7,7 +7,10 @@
  * to the drawn glyph, which is the honest outcome: inventing a FigJam-looking
  * icon for a state FigJam does not have would be worse than not matching.
  */
-import type { AppearanceControlId } from '../contextualMenus/contextualControlRegistry'
+import type {
+  AppearanceControlId,
+  ContextualControlKind,
+} from '../contextualMenus/contextualControlRegistry'
 
 type ValueToIcon = Readonly<Record<string, string>>
 
@@ -36,13 +39,17 @@ const LINE_STYLE: ValueToIcon = {
  * overlapping a square, the same icon whichever geo is actually selected. All
  * three are read off the pill itself.
  */
-export const FIGJAM_TRIGGER_ICON: Partial<Record<AppearanceControlId, string>> = {
+export const FIGJAM_TRIGGER_ICON: Partial<Record<ContextualControlKind, string>> = {
   lineStyle: 'trigger/Line style',
   // A shape's Line style is the edge palette with those same chips above it,
   // and it keeps FigJam's three-bar trigger: it is still the same control.
   strokeColor: 'trigger/Line style',
   font: 'trigger/Typeface',
   geo: 'trigger/Shape',
+  // An action control's face is the same kind of data as an icon trigger's:
+  // one fixed traced icon, read from here rather than hardcoded per kind in
+  // the renderer.
+  addText: 'trigger/Add text',
 }
 
 /** FigJam's menu check, beside the chosen row of Typeface and Font size. */
@@ -51,23 +58,17 @@ export const FIGJAM_CHECK_ICON = 'menu/Check'
 /** FigJam's eyedropper, in the picker behind Custom. */
 export const FIGJAM_EYEDROPPER_ICON = 'picker/Eyedropper'
 
-/** All three line-shape styles share FigJam's three icons. */
+/** The ONE Line shape control's canonical vocabulary, on FigJam's three icons. */
 const LINE_SHAPE: ValueToIcon = {
   elbow: 'line-shape/Elbowed',
-  curved: 'line-shape/Curved',
   curve: 'line-shape/Curved',
-  arc: 'line-shape/Curved',
-  cubic: 'line-shape/Curved',
   straight: 'line-shape/Straight',
-  line: 'line-shape/Straight',
 }
 
 export const FIGJAM_ICON_FOR: Partial<Record<AppearanceControlId, ValueToIcon>> = {
   arrowheadStart: ARROWHEADS,
   arrowheadEnd: ARROWHEADS,
-  connectionRouting: LINE_SHAPE,
-  arrowKind: LINE_SHAPE,
-  spline: LINE_SHAPE,
+  lineShape: LINE_SHAPE,
   // The one line-style control, whether it is drawn as chips on a shape or as
   // a bare icon row beside a connector's weight.
   lineStyle: LINE_STYLE,

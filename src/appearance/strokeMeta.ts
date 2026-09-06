@@ -34,6 +34,8 @@ import {
 	type TLTheme,
 } from 'tldraw'
 
+import { sharedValueAcross } from '../contextualMenus/sharedValues'
+
 export const SYSTEMSKETCH_STROKE_META_KEY = 'systemSketchStroke'
 
 /** The one line style that is ours rather than tldraw's. */
@@ -137,15 +139,9 @@ export function sharedEdgeValue(
 	shapes: readonly ShapeLike[],
 	read: (shape: ShapeLike) => string | undefined,
 ): SharedStyle<string> | undefined {
-	let found: string | undefined
-	for (const shape of shapes) {
-		if (!hasPaintedEdge(shape)) continue
-		const value = read(shape)
-		if (value === undefined) continue
-		if (found === undefined) found = value
-		else if (found !== value) return { type: 'mixed' }
-	}
-	return found === undefined ? undefined : { type: 'shared', value: found }
+	return sharedValueAcross(
+		shapes.map((shape) => (hasPaintedEdge(shape) ? read(shape) : undefined)),
+	)
 }
 
 /** The edge colour a shape is painted with, resolved through the live theme. */

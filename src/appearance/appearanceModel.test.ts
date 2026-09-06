@@ -10,6 +10,7 @@ import {
   DefaultSizeStyle,
   DefaultVerticalAlignStyle,
   GeoShapeGeoStyle,
+  LineShapeSplineStyle,
   type ReadonlySharedStyleMap,
   type SharedStyle,
   type StyleProp,
@@ -122,7 +123,7 @@ describe('appearance controls', () => {
     // FigJam's connector pill has one Line style holding both weight and
     // dash, so neither `dash` nor `size` appears on its own.
     expect(ids(buildAppearanceControls(CONNECTOR, true))).toEqual([
-      'color', 'lineStyle', 'arrowheadStart', 'arrowKind', 'arrowheadEnd',
+      'color', 'lineStyle', 'arrowheadStart', 'lineShape', 'arrowheadEnd',
     ])
   })
 
@@ -241,7 +242,7 @@ describe('appearance controls', () => {
     // Not gated by `hasText`: this is a Text object's own size, not a
     // shape's typography-before-text or a connector's fixed label style.
     expect(ids(buildAppearanceControls(textAndCable, false)))
-      .toEqual(['color', 'size', 'font', 'connectionRouting'])
+      .toEqual(['color', 'size', 'font', 'lineShape'])
   })
 
   it('orders the connector controls the way the arrow itself reads', () => {
@@ -258,22 +259,66 @@ describe('appearance controls', () => {
     expect(shape).toBeLessThan(order.indexOf('arrowheadEnd'))
   })
 
-  it('offers a cable all three of FigJam line shapes', () => {
+  it('offers a cable all three of FigJam line shapes, in the canonical vocabulary', () => {
     // FigJam shows `Elbowed Curved Straight`; a SystemSketch cable is the one
     // connector that can hold all three, so it must show all three.
     const controls = buildAppearanceControls(CABLE, true)
-    const shape = controls.find((control) => control.id === 'connectionRouting')!
+    const shape = controls.find((control) => control.id === 'lineShape')!
     expect(shape.options.map((option) => option.label)).toEqual([
       'Elbowed', 'Curved', 'Straight',
     ])
+    // The cable's own `elbow` routing reads straight into the shared value.
+    expect(shape.value).toEqual({ type: 'shared', value: 'elbow' })
   })
 
   it('offers an arrow the same elbowed, curved, and straight vocabulary', () => {
-    const shape = buildAppearanceControls(CONNECTOR, true)
-      .find((control) => control.id === 'arrowKind')!
+    const shape = buildAppearanceControls(CONNECTOR, true, 'curve')
+      .find((control) => control.id === 'lineShape')!
     expect(shape.options.map((option) => option.label)).toEqual([
       'Elbowed', 'Curved', 'Straight',
     ])
+    expect(shape.value).toEqual({ type: 'shared', value: 'curve' })
+  })
+
+  it('collapses every selected connector kind into ONE Line shape control', () => {
+    // An arrow, a stock line and a cable are three StyleProps for one user
+    // concept. Selected together they must produce one control — three
+    // near-identical "Line shape" dropdowns in one pill was the reported bug.
+    const everyKind = styleMap([
+      [DefaultColorStyle, shared('black')],
+      [ArrowShapeKindStyle, shared('arc')],
+      [LineShapeSplineStyle, shared('cubic')],
+      [ConnectionRoutingStyle, shared('curved')],
+    ])
+    const controls = buildAppearanceControls(everyKind, true, 'curve')
+    expect(controls.filter((control) => control.label === 'Line shape')).toHaveLength(1)
+    // All three read `curve` through their own vocabularies, so the one
+    // control reports the agreement rather than three private spellings.
+    expect(controls.find((control) => control.id === 'lineShape')!.value)
+      .toEqual({ type: 'shared', value: 'curve' })
+  })
+
+  it('reads a disagreeing Line shape as mixed, never as one kind\'s value', () => {
+    const disagreeing = styleMap([
+      [DefaultColorStyle, shared('black')],
+      [ArrowShapeKindStyle, shared('arc')],
+      [ConnectionRoutingStyle, shared('elbow')],
+    ])
+    const control = buildAppearanceControls(disagreeing, true, 'straight')
+      .find((candidate) => candidate.id === 'lineShape')!
+    expect(control.value).toEqual({ type: 'mixed' })
+  })
+
+  it('takes the arrow routing from the caller, since the kind style cannot say', () => {
+    // Stock tldraw stores Straight and Curved both as `kind: 'arc'` — only
+    // per-shape `bend` separates them — so without the caller's per-shape
+    // reading the model must claim nothing rather than guess.
+    const uninformed = buildAppearanceControls(CONNECTOR, true)
+      .find((control) => control.id === 'lineShape')!
+    expect(uninformed.value).toEqual({ type: 'mixed' })
+    const informed = buildAppearanceControls(CONNECTOR, true, 'straight')
+      .find((control) => control.id === 'lineShape')!
+    expect(informed.value).toEqual({ type: 'shared', value: 'straight' })
   })
 
   it('never offers a control the selection cannot accept', () => {

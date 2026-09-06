@@ -131,6 +131,15 @@ async function main() {
 
     await clickSelector(page, '[data-control="titleSize"]')
     await waitFor(page, `document.querySelector('[data-control="titleSize"][data-value="m"]')`, 'title size options')
+    // REGRESSION (2026-09-06): this popover must NOT carry the custom-px cell.
+    // The cell renders only where a surface binds a `customSize` channel for
+    // its own target; the Block-title menu binds none, and the dead cell it
+    // used to show was wired to the canvas SELECTION — a different subject
+    // than the title being formatted.
+    const customCell = await evaluate(page, `Boolean(document.querySelector(
+      '[data-testid="systemsketch-appearance-panel-titleSize"] [data-testid="font-size-custom"]'))`)
+    assert.equal(customCell, false,
+      'the Block-title size list is presets-only: no selection-wired Custom cell')
     await clickSelector(page, '[data-control="titleSize"][data-value="m"]')
     await delay(160)
     formatted = await shapeAndPaint(page)

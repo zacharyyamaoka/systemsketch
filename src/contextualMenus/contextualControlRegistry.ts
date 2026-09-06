@@ -9,7 +9,6 @@ export type ContextualControlKind =
   | 'geo'
   | 'color'
   | 'fill'
-  | 'dash'
   | 'lineStyle'
   | 'strokeColor'
   | 'codeLanguage'
@@ -18,9 +17,7 @@ export type ContextualControlKind =
   | 'font'
   | 'align'
   | 'verticalAlign'
-  | 'arrowKind'
-  | 'spline'
-  | 'connectionRouting'
+  | 'lineShape'
   | 'arrowheadStart'
   | 'arrowheadEnd'
   | 'bold'
@@ -29,6 +26,30 @@ export type ContextualControlKind =
 export type AppearanceControlId = Exclude<ContextualControlKind, 'bold' | 'addText'>
 export type ContextualControlLayout = 'swatches' | 'row' | 'chips' | 'list' | 'library'
 export type ContextualControlTrigger = 'value' | 'icon' | 'text' | 'toggle' | 'action'
+
+/**
+ * Which visual family draws a control's value previews.
+ *
+ * WHY: the glyph renderer (`AppearanceGlyph.tsx`) dispatches on THIS field
+ * through a lookup table, never on `kind` through an if-chain. A new registry
+ * entry that previews like an existing one (the common case) names the family
+ * here and needs zero renderer changes; only a genuinely new way of drawing a
+ * value earns a new family and a new component. Absent means the value has no
+ * drawn preview — its label or row carries it (Font size rows, the language
+ * list).
+ */
+export type ContextualGlyphFamily =
+  | 'swatch'
+  | 'font'
+  | 'fill'
+  | 'geo'
+  | 'dash'
+  | 'size'
+  | 'align'
+  | 'verticalAlign'
+  | 'lineShape'
+  | 'arrowheadStart'
+  | 'arrowheadEnd'
 
 export interface ContextualControlOption {
   value: string
@@ -41,10 +62,34 @@ export interface ContextualControlDefinition {
   options: readonly ContextualControlOption[]
   layout: ContextualControlLayout
   trigger: ContextualControlTrigger
+  glyph?: ContextualGlyphFamily
   columns?: number
   custom?: boolean
   /** Edge paint stored in shape metadata rather than a stock StyleProp. */
   meta?: StrokeMetaField
+}
+
+/**
+ * A size list's continuous channel, bound by the surface that owns the target.
+ *
+ * WHY: the renderer must never reach for `editor.getSelectedShapes()` itself —
+ * every control's value flows in through its binding, and the custom-px cell
+ * is no exception. Before this contract, `ContextualControls` read the live
+ * canvas selection directly; that happened to be right for the appearance pill
+ * and quietly wrong for any surface bound to an explicit target (the
+ * Block-title menu showed a dead Custom cell wired to the selection). A size
+ * control without this binding is presets-only: no Custom row, no px trigger.
+ */
+export interface ContextualCustomSize {
+  /** One shared effective px across the target, 'mixed', or null (none apply). */
+  sharedPx(): number | 'mixed' | null
+  /** True when every participant sits exactly on its preset rung. */
+  onPresetRungs(): boolean
+  /** Apply an exact pixel size to the whole target. */
+  applyPx(px: number): void
+  /** Entry bounds for the px field, owned by the target's own size model. */
+  minPx: number
+  maxPx: number
 }
 
 export interface ContextualControl extends ContextualControlDefinition {
@@ -55,6 +100,7 @@ export interface ContextualControl extends ContextualControlDefinition {
   automaticOption?: ContextualControlOption
   /** Whether this target maps custom-colour alpha onto its own document model. */
   customColorOpacity?: boolean
+  customSize?: ContextualCustomSize
   modeControl?: ContextualControl
   modePlacement?: 'above' | 'beside'
 }
@@ -124,21 +170,16 @@ const VERTICAL_ALIGN_OPTIONS = [
   option('end', 'Bottom'),
 ] as const
 
-const CONNECTION_ROUTING_OPTIONS = [
-  option('elbow', 'Elbowed'),
-  option('curved', 'Curved'),
-  option('straight', 'Straight'),
-] as const
-
-const ARROW_KIND_OPTIONS = [
+// WHY: "Line shape" is ONE user concept over three stock StyleProps — an
+// arrow's kind+bend, a line's spline, a cable's routing. It gets one registry
+// entry in the toolbar's ArrowPreset vocabulary; the appearance model reads
+// and writes each underlying style through this shared vocabulary. Registering
+// the three styles as three sibling controls is what once put two or three
+// pixel-identical "Line shape" dropdowns in a mixed arrow/line/cable pill.
+const LINE_SHAPE_OPTIONS = [
   option('elbow', 'Elbowed'),
   option('curve', 'Curved'),
   option('straight', 'Straight'),
-] as const
-
-const SPLINE_OPTIONS = [
-  option('cubic', 'Curved'),
-  option('line', 'Straight'),
 ] as const
 
 const ARROWHEAD_OPTIONS = [
@@ -183,48 +224,48 @@ const GEO_OPTIONS = [
  * commands; they do not re-declare labels, options, previews, or layouts.
  */
 export const CONTEXTUAL_CONTROL_REGISTRY: Readonly<Record<ContextualControlKind, ContextualControlDefinition>> = {
-  geo: { kind: 'geo', label: 'Shape', options: GEO_OPTIONS, layout: 'library', trigger: 'icon' },
+  geo: { kind: 'geo', label: 'Shape', options: GEO_OPTIONS, layout: 'library', trigger: 'icon', glyph: 'geo' },
   color: {
     kind: 'color', label: 'Color',
     options: FIGJAM_COLOR_NAMES.map((value) => option(value, value)),
-    layout: 'swatches', trigger: 'value', columns: FIGJAM_PALETTE_COLUMNS, custom: true,
+    layout: 'swatches', trigger: 'value', glyph: 'swatch',
+    columns: FIGJAM_PALETTE_COLUMNS, custom: true,
   },
-  fill: { kind: 'fill', label: 'Fill', options: FILL_OPTIONS, layout: 'chips', trigger: 'value' },
-  dash: { kind: 'dash', label: 'Line style', options: DASH_OPTIONS, layout: 'chips', trigger: 'icon' },
+  fill: { kind: 'fill', label: 'Fill', options: FILL_OPTIONS, layout: 'chips', trigger: 'value', glyph: 'fill' },
+  // WHY: `lineStyle` is the ONE dash/line-style vocabulary for every surface.
+  // A second registered kind with the same label and options (the old `dash`)
+  // is how duplicate controls get composed into one pill — see `lineShape`.
   lineStyle: {
     kind: 'lineStyle', label: 'Line style', options: DASH_OPTIONS,
-    layout: 'chips', trigger: 'icon', meta: 'pattern',
+    layout: 'chips', trigger: 'icon', glyph: 'dash', meta: 'pattern',
   },
   strokeColor: {
     kind: 'strokeColor', label: 'Line style',
     options: FIGJAM_COLOR_NAMES.map((value) => option(value, value)),
-    layout: 'swatches', trigger: 'icon', columns: FIGJAM_PALETTE_COLUMNS,
+    layout: 'swatches', trigger: 'icon', glyph: 'swatch', columns: FIGJAM_PALETTE_COLUMNS,
     meta: 'color',
   },
   codeLanguage: {
     kind: 'codeLanguage', label: 'Language', options: CODE_LANGUAGE_OPTIONS, layout: 'list', trigger: 'text',
   },
-  size: { kind: 'size', label: 'Font size', options: SIZE_OPTIONS, layout: 'list', trigger: 'text' },
-  weight: { kind: 'weight', label: 'Weight', options: WEIGHT_OPTIONS, layout: 'row', trigger: 'value' },
-  font: { kind: 'font', label: 'Typeface', options: FONT_OPTIONS, layout: 'list', trigger: 'icon' },
-  align: { kind: 'align', label: 'Text alignment', options: ALIGN_OPTIONS, layout: 'row', trigger: 'value' },
+  size: { kind: 'size', label: 'Font size', options: SIZE_OPTIONS, layout: 'list', trigger: 'text', glyph: 'size' },
+  weight: { kind: 'weight', label: 'Weight', options: WEIGHT_OPTIONS, layout: 'row', trigger: 'value', glyph: 'size' },
+  font: { kind: 'font', label: 'Typeface', options: FONT_OPTIONS, layout: 'list', trigger: 'icon', glyph: 'font' },
+  align: { kind: 'align', label: 'Text alignment', options: ALIGN_OPTIONS, layout: 'row', trigger: 'value', glyph: 'align' },
   verticalAlign: {
     kind: 'verticalAlign', label: 'Vertical alignment',
-    options: VERTICAL_ALIGN_OPTIONS, layout: 'row', trigger: 'value',
+    options: VERTICAL_ALIGN_OPTIONS, layout: 'row', trigger: 'value', glyph: 'verticalAlign',
   },
-  arrowKind: { kind: 'arrowKind', label: 'Line shape', options: ARROW_KIND_OPTIONS, layout: 'row', trigger: 'value' },
-  spline: { kind: 'spline', label: 'Line shape', options: SPLINE_OPTIONS, layout: 'row', trigger: 'value' },
-  connectionRouting: {
-    kind: 'connectionRouting', label: 'Line shape',
-    options: CONNECTION_ROUTING_OPTIONS, layout: 'row', trigger: 'value',
+  lineShape: {
+    kind: 'lineShape', label: 'Line shape', options: LINE_SHAPE_OPTIONS, layout: 'row', trigger: 'value', glyph: 'lineShape',
   },
   arrowheadStart: {
     kind: 'arrowheadStart', label: 'Start point',
-    options: ARROWHEAD_OPTIONS, layout: 'row', trigger: 'value',
+    options: ARROWHEAD_OPTIONS, layout: 'row', trigger: 'value', glyph: 'arrowheadStart',
   },
   arrowheadEnd: {
     kind: 'arrowheadEnd', label: 'End point',
-    options: ARROWHEAD_OPTIONS, layout: 'row', trigger: 'value',
+    options: ARROWHEAD_OPTIONS, layout: 'row', trigger: 'value', glyph: 'arrowheadEnd',
   },
   bold: { kind: 'bold', label: 'Bold', options: [], layout: 'row', trigger: 'toggle' },
   addText: { kind: 'addText', label: 'Add text', options: [], layout: 'row', trigger: 'action' },
@@ -234,7 +275,11 @@ export const SHAPE_CONTEXTUAL_RECIPE: ContextualControlRecipe = {
   id: 'shape',
   groups: [
     { id: 'identity', items: ['geo'] },
-    { id: 'paint', items: ['color', 'strokeColor'] },
+    // `lineStyle` is the freehand stroke's slot: a draw shape has a dash but
+    // no separately paintable edge, so the model emits the bare chips instead
+    // of `strokeColor`. Listing both here is what lets that control actually
+    // render — a candidate absent from its recipe is silently dropped.
+    { id: 'paint', items: ['color', 'strokeColor', 'lineStyle'] },
     // `codeLanguage` is absent from every candidate list except a selected
     // Code block's own — see `buildAppearanceControls` — so it costs nothing
     // for any other shape's recipe to carry the slot.
@@ -256,7 +301,7 @@ export const CONNECTOR_CONTEXTUAL_RECIPE: ContextualControlRecipe = {
     { id: 'alignment', items: ['align', 'verticalAlign'] },
     {
       id: 'flow',
-      items: ['arrowheadStart', 'connectionRouting', 'arrowKind', 'spline', 'arrowheadEnd'],
+      items: ['arrowheadStart', 'lineShape', 'arrowheadEnd'],
     },
   ],
 }
@@ -276,7 +321,7 @@ export function bindContextualControl(
   binding: Pick<ContextualControl, 'id' | 'value' | 'onSelect'>
     & Partial<Pick<
       ContextualControl,
-      'automaticOption' | 'customColorOpacity' | 'modeControl' | 'modePlacement'
+      'automaticOption' | 'customColorOpacity' | 'customSize' | 'modeControl' | 'modePlacement'
     >>,
 ): ContextualControl {
   return { ...CONTEXTUAL_CONTROL_REGISTRY[kind], ...binding, kind }
@@ -319,6 +364,23 @@ export function selectedContextualOption(
     return option(value, CUSTOM_LABEL)
   }
   return undefined
+}
+
+/**
+ * True only when this control DECLARES an Automatic option and the shared
+ * value is exactly it.
+ *
+ * WHY: this predicate exists because the intuitive inline comparison
+ * `control.automaticOption?.value === current?.value` is `undefined ===
+ * undefined` — true — for every control with no Automatic concept the moment
+ * its value is mixed or unoffered. That one expression put an "A" badge on
+ * the Color and Line style triggers of any disagreeing selection. Renderers
+ * must ask this predicate, never compare the two optionals themselves.
+ */
+export function isAutomaticContextualSelection(control: ContextualControl): boolean {
+  return control.automaticOption !== undefined
+    && control.value?.type === 'shared'
+    && control.value.value === control.automaticOption.value
 }
 
 export function contextualTriggerLabel(control: ContextualControl): string {

@@ -610,10 +610,10 @@
    "h": 40
   },
   "panel": {
-   "x": 726,
-   "y": 175,
-   "w": 129,
-   "h": 136
+   "x": 720,
+   "y": 135,
+   "w": 140.3,
+   "h": 176
   },
   "picker": null,
   "triggers": [
@@ -871,7 +871,7 @@
     "h": 40
    },
    {
-    "control": "arrowKind",
+    "control": "lineShape",
     "kind": "value",
     "x": 782,
     "y": 359,
@@ -936,7 +936,7 @@
     "h": 40
    },
    {
-    "control": "arrowKind",
+    "control": "lineShape",
     "kind": "value",
     "x": 782,
     "y": 359,
@@ -996,7 +996,7 @@
     "h": 40
    },
    {
-    "control": "arrowKind",
+    "control": "lineShape",
     "kind": "value",
     "x": 782,
     "y": 359,
@@ -1045,6 +1045,96 @@
     "kind": "icon",
     "x": 789,
     "y": 299,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "mixedNoBadge": {
+  "file": "docs/assets/appearance-mixed-no-automatic-2026-09-06.png",
+  "pill": {
+   "x": 528,
+   "y": 319,
+   "w": 264.9,
+   "h": 40
+  },
+  "panel": null,
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "icon",
+    "x": 530,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 595,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "strokeColor",
+    "kind": "icon",
+    "x": 649,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "oneLineShape": {
+  "file": "docs/assets/appearance-one-line-shape-2026-09-06.png",
+  "pill": {
+   "x": 434,
+   "y": 319,
+   "w": 412.9,
+   "h": 40
+  },
+  "panel": null,
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 436,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 490,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 555,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "lineShape",
+    "kind": "value",
+    "x": 611,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 667,
+    "y": 319,
     "w": 56,
     "h": 40
    }

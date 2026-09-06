@@ -4,6 +4,7 @@ import {
   useRelevantStyles,
   useValue,
   DefaultSizeStyle,
+  LineShapeSplineStyle,
   type Editor,
   type ReadonlySharedStyleMap,
   type StyleProp,
@@ -11,12 +12,16 @@ import {
   type TLShape,
 } from 'tldraw'
 
+import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { connectionRoutingForArrowPreset } from '../toolbar/toolbarModel'
+
 import {
   buildAppearanceControls,
   isConnectorSelection,
   withEdgeValues,
   EDGE_MIXED,
   type AppearanceControl,
+  type ArrowRoutingReading,
   type EdgeValues,
 } from './appearanceModel'
 import {
@@ -26,7 +31,15 @@ import {
   sharedEdgeValue,
   strokeColorOf,
 } from './strokeMeta'
-import { resetCustomFontScale } from './customFontSize'
+import {
+  applyCustomFontPx,
+  resetCustomFontScale,
+  selectionOnPresetRungs,
+  sharedFontPx,
+  CUSTOM_FONT_PX_MAX,
+  CUSTOM_FONT_PX_MIN,
+} from './customFontSize'
+import { sharedValueAcross } from '../contextualMenus/sharedValues'
 import { addTextTarget, selectionHasVisibleText } from './textPresence'
 import {
   applyArrowPresetToSelection,
@@ -61,30 +74,19 @@ export function AppearanceControls() {
   )
   const selectedArrowRouting = useValue(
     'selected arrow routing',
-    () => {
+    (): ArrowRoutingReading => {
       const arrows = editor.getSelectedShapes()
         .filter((shape): shape is TLArrowShape => shape.type === 'arrow')
-      if (arrows.length === 0) return null
-      const first = arrowPresetForShape(arrows[0])
-      return arrows.every((shape) => arrowPresetForShape(shape) === first)
-        ? first
-        : 'mixed'
+      const shared = sharedValueAcross(arrows.map(arrowPresetForShape))
+      if (!shared) return null
+      return shared.type === 'shared' ? shared.value : 'mixed'
     },
     [editor],
   )
   const edges = useEdgeValues(editor)
 
-  const appearance = buildAppearanceControls(styles, hasText).map((control) => {
-    const withEdges = withEdgeValues(control, edges)
-    if (withEdges !== control) return withEdges
-    if (control.kind !== 'arrowKind' || selectedArrowRouting === null) return control
-    return {
-      ...control,
-      value: selectedArrowRouting === 'mixed'
-        ? { type: 'mixed' as const }
-        : { type: 'shared' as const, value: selectedArrowRouting },
-    }
-  })
+  const appearance = buildAppearanceControls(styles, hasText, selectedArrowRouting)
+    .map((control) => withEdgeValues(control, edges))
   const candidates = appearance.map((control) => bindAppearanceControl(editor, control))
   if (addTextShape) candidates.push(bindAddTextControl(editor, addTextShape))
   const recipe = styles && isConnectorSelection(styles)
@@ -147,15 +149,28 @@ function bindAppearanceControl(editor: Editor, control: AppearanceControl): Cont
     id: control.id,
     value: control.value,
     customColorOpacity: control.kind === 'color',
+    // The continuous-size channel, bound HERE because this surface's target IS
+    // the selection. The renderer itself never asks who is selected, so a
+    // surface bound to an explicit shape (the Block title) simply gets a
+    // presets-only size list instead of a dead selection-wired Custom cell.
+    customSize: control.kind === 'size'
+      ? {
+          sharedPx: () => sharedFontPx(editor),
+          onPresetRungs: () => selectionOnPresetRungs(editor),
+          applyPx: (px) => applyCustomFontPx(editor, px),
+          minPx: CUSTOM_FONT_PX_MIN,
+          maxPx: CUSTOM_FONT_PX_MAX,
+        }
+      : undefined,
     onSelect: (value, options) => {
       if (!value) return
-      if (control.kind === 'arrowKind' && isArrowPreset(value)) {
-        applyArrowRouting(editor, value, { markHistory: !options?.continuous })
+      if (control.kind === 'lineShape' && isArrowPreset(value)) {
+        applyLineShape(editor, value, { markHistory: !options?.continuous })
       } else if (control.meta === 'pattern') {
         applyLinePattern(editor, value)
       } else if (control.meta === 'color') {
         applyStrokeMeta(editor, 'color', value)
-      } else {
+      } else if (control.style) {
         applyStyle(editor, control.style, value, { markHistory: !options?.continuous })
       }
     },
@@ -192,12 +207,34 @@ function isArrowPreset(value: string): value is ArrowPreset {
   return value === 'straight' || value === 'curve' || value === 'elbow'
 }
 
-/** One history step around the stock arrow prop translation. */
-export function applyArrowRouting(
+/**
+ * One Line shape choice, written to every connector kind in the selection.
+ *
+ * WHY: "a preset IS a routing, and every surface that sets one sets both"
+ * (toolbarModel.ts). The menu's ONE Line shape control therefore writes the
+ * whole preset — selected arrows through the stock kind/bend translation,
+ * selected cables through their routing style, selected lines through their
+ * spline — in one history step, instead of exposing per-StyleProp controls
+ * that silently skip half of a mixed selection. `Elbowed` deliberately leaves
+ * a stock line untouched: a line has no elbow state, and writing a wrong value
+ * would be worse than the control honestly reading mixed afterwards.
+ */
+export function applyLineShape(
   editor: Editor,
   preset: ArrowPreset,
   { markHistory = true }: { markHistory?: boolean } = {},
 ) {
   if (markHistory) editor.markHistoryStoppingPoint('appearance')
-  editor.run(() => applyArrowPresetToSelection(editor, preset))
+  editor.run(() => {
+    applyArrowPresetToSelection(editor, preset)
+    editor.setStyleForSelectedShapes(
+      ConnectionRoutingStyle,
+      connectionRoutingForArrowPreset(preset),
+    )
+    if (preset !== 'elbow') {
+      const spline = preset === 'curve' ? 'cubic' : 'line'
+      editor.setStyleForSelectedShapes(LineShapeSplineStyle, spline)
+      editor.setStyleForNextShapes(LineShapeSplineStyle, spline)
+    }
+  })
 }
