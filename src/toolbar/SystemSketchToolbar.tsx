@@ -56,7 +56,7 @@ interface ShapeMenuItem {
 
 const GEO_MENU_ITEMS: readonly ShapeMenuItem[] = [
   { id: 'rectangle', label: 'Rectangle', icon: 'geo-rectangle', shortcut: 'R' },
-  { id: 'ellipse', label: 'Ellipse', icon: 'geo-ellipse', shortcut: 'O' },
+  { id: 'ellipse', label: 'Ellipse', icon: 'geo-ellipse', shortcut: 'C / O' },
   { id: 'triangle', label: 'Triangle', icon: 'geo-triangle' },
   { id: 'diamond', label: 'Diamond', icon: 'geo-diamond' },
   { id: 'line', label: 'Line', icon: 'tool-line', shortcut: 'L' },
@@ -122,9 +122,9 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // A Behavior Tree is a region like Branch and Loop: its nodes are real
   // Blocks, so it lives in the same family slot rather than on its own.
   { id: BEHAVIOR_TREE_TOOL_ID, label: 'Behavior Tree', icon: <BehaviorTreeIcon /> },
-  // Code is an authored literal on the board, so C inserts it directly while
-  // its language and presentational width remain on the selected object.
-  { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon />, shortcut: 'C' },
+  // Code is an authored literal reached from this family or S-search; C/O
+  // intentionally converge on Ellipse for drawing muscle memory.
+  { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
   { id: FLOATING_PORT_TOOL_ID, label: 'Port', icon: <FloatingPortIcon /> },
@@ -274,7 +274,7 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
     <FamilyToolSlot
       family="shape"
       icon={currentItem.icon}
-      label={`${currentItem.label} · R O L A`}
+      label={`${currentItem.label} · R C/O L A`}
       active={isActive}
       onSelect={() => selectShapeFamilyTool(tools, current)}
     >

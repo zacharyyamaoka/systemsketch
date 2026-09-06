@@ -19,6 +19,8 @@ import {
 } from './browser_harness.mjs'
 
 const SHOT = join(ROOT, 'docs', 'definition-linking-live-2026-09-02.png')
+const ICON_BEFORE_SHOT = join(ROOT, 'docs', 'definition-icon-scope-before-2026-09-06.png')
+const ICON_AFTER_SHOT = join(ROOT, 'docs', 'definition-icon-scope-after-2026-09-06.png')
 const { checks, pass } = makeChecklist()
 
 async function state(page) {
@@ -30,6 +32,7 @@ async function state(page) {
       parentId: shape.parentId,
       title: shape.props.title,
       description: shape.props.description,
+      icon: shape.props.icon,
       definitionId: shape.props.definitionId,
       definitionKey: shape.props.definitionKey,
       draftOrdinal: shape.props.draftOrdinal ?? null,
@@ -66,6 +69,7 @@ async function main() {
         ...base,
         title,
         description,
+        icon: 'Workflow',
         view: 'expanded',
         w: base.views.expanded.w,
         h: base.views.expanded.h,
@@ -114,6 +118,26 @@ async function main() {
     })()`)
 
     const linked = topRuns.filter((block) => block.definitionId === 'definition-run-main')
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(linked[0].id)}); return true })()`)
+    await waitFor(page, `document.querySelector('[aria-label="Icon: Workflow. Change icon"]')`, 'the selected occurrence icon control')
+    await page.send('Page.captureScreenshot', { format: 'png' }).then(async ({ data }) => {
+      const { writeFile } = await import('node:fs/promises')
+      await writeFile(ICON_BEFORE_SHOT, Buffer.from(data, 'base64'))
+    })
+    await clickElement(page, '[aria-label="Icon: Workflow. Change icon"]')
+    await waitFor(page, `document.querySelector('[role="option"][title="braces"]')`, 'the braces icon option')
+    await clickElement(page, '[role="option"][title="braces"]')
+    await waitFor(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const [source, peer] = ${JSON.stringify(linked.map((block) => block.id))}.map((id) => editor.getShape(id))
+      return source?.props.icon === 'Braces' && peer?.props.icon === 'Workflow'
+    })()`, 'the icon change to stay on its selected occurrence')
+    await page.send('Page.captureScreenshot', { format: 'png' }).then(async ({ data }) => {
+      const { writeFile } = await import('node:fs/promises')
+      await writeFile(ICON_AFTER_SHOT, Buffer.from(data, 'base64'))
+    })
+    pass('choosing an icon in the inspector changes only the selected occurrence')
+
     await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
       const source = editor.getShape(${JSON.stringify(linked[0].id)})

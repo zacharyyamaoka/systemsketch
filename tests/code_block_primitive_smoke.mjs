@@ -2,7 +2,7 @@
 /**
  * The Code block primitive, driven in a real browser.
  *
- *   Code lives in the System family slot (and on C); drawing one yields a
+ *   Code lives in the System family slot (and S-search); drawing one yields a
  *   real CodeMirror 6 document inside a stock tldraw shape. Its language and
  *   its text size are ordinary rows in the ONE shared selection menu — the
  *   language combobox is an appearance row, the size control is the standard

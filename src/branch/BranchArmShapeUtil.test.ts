@@ -56,13 +56,17 @@ function child(type: string): TLShape {
 }
 
 describe('Branch arm frame primitive', () => {
-	it('is the stock frame-like primitive with one full-row rectangle', () => {
+	it('is the stock frame-like primitive with one full-row open perimeter', () => {
 		const region = branch()
 		const frame = armFrame(region.id)
 		const util = new BranchArmShapeUtil({ getShape: () => region } as unknown as Editor)
 
 		expect(BranchArmShapeUtil.prototype).toBeInstanceOf(BaseFrameLikeShapeUtil)
 		expect(util.getGeometry(frame).bounds).toMatchObject({ x: 0, y: 0, w: 420, h: 212 })
+		expect(util.getGeometry(frame).hitTestPoint({ x: 210, y: 106 }, 0, true)).toBe(false)
+		expect(util.getClipPath(frame)).toMatchObject([
+			{ x: 0, y: 0 }, { x: 420, y: 0 }, { x: 420, y: 212 }, { x: 0, y: 212 },
+		])
 	})
 
 	it('clips ordinary children but leaves both semantic cables and stock arrows free', () => {
