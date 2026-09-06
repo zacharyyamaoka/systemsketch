@@ -46,6 +46,7 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	DiffState: 5,
 	FieldDiffs: 6,
 	SemanticRolesAndStockConfig: 7,
+	TypeAttributes: 8,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -283,6 +284,17 @@ export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigr
 	return next.blockType === 'unbundle' ? { ...next, blockType: 'projection' } : next
 }
 
+/** v7 → v8: the Type body is optional, so ordinary Blocks need no new stored value. */
+export function upgradeBlockPropsV7ToV8(props: BlockMigrationProps): BlockMigrationProps {
+	return props
+}
+
+/** v8 → v7: older validators do not know the Type attribute body. */
+export function downgradeBlockPropsV8ToV7(props: BlockMigrationProps): BlockMigrationProps {
+	const { attributeSource: _attributeSource, ...rest } = props
+	return _attributeSource === undefined ? props : rest
+}
+
 /**
  * tldraw's migration sequence invokes each step for its side effect; it does
  * not consume a replacement props object. Keep the exported steps pure for
@@ -333,5 +345,9 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.SemanticRolesAndStockConfig,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV6ToV7),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV7ToV6),
+	}, {
+		id: blockVersions.TypeAttributes,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV7ToV8),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV8ToV7),
 	}],
 })

@@ -19,6 +19,7 @@ import { canWrapSelection } from '../frames/wrapSelection'
 import {
   BLOCK_TOOL_ID,
   PILL_TOOL_ID,
+  TYPE_TOOL_ID,
   adoptConnectedPillType,
   canAdoptConnectedPillType,
   getBlockInspectorContext,
@@ -616,6 +617,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['value', 'literal', 'variable'],
         icon: '＝',
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
+      },
+      {
+        id: 'insert-type',
+        label: 'Insert Type',
+        description: 'Switch to the compact Type definition tool',
+        keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
+        icon: '⌘',
+        run: () => editor.setCurrentTool(TYPE_TOOL_ID),
       },
       {
         // Taking the lens off is a safety property, not a convenience. A diff

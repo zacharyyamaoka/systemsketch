@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 3,
+  "title": "Type attribute region",
+  "kicker": "Babble & Prune · Type primitive",
+  "brief": "Five concrete attribute regions for the same EstimatePairOut Type. Every direction starts compact, can reveal nested shape information, and keeps Python-like type annotations editable on the canvas.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "V1 makes ordinary text the one canonical authoring surface while the compact tree remains a projection. It is the only direction that makes cursor placement, Enter, multiline paste, and a nested ergonomic read all first-class without a second editable representation.",
+  "decisionHinge": "If per-field structured editing becomes more important than whole-snippet paste and Python-shaped source, V3 becomes the better fit; it does not lose on visual density alone.",
+  "invariants": [
+    "One canonical type body; Port and expanded views only project it.",
+    "No inference, validation, or hidden rewrite of author-written types.",
+    "Flat by default; nested detail is opt-in and reversible.",
+    "The representative content is EstimatePairOut with pose / quality and a nested Position."
+  ],
+  "boundary": "Runnable UI specimens only. Parsing, persistence, shape integration, and the chevron placement preference are implemented separately in the product track.",
+  "axes": [
+    { "name": "Canonical authoring object", "values": ["source text", "code document", "structured fields", "outline tree", "inspector form"] },
+    { "name": "Progressive disclosure", "values": ["tree projection", "folding gutter", "row expansion", "outline navigation", "off-canvas detail"] },
+    { "name": "Edit continuity", "values": ["one multiline field", "editor mode", "cell focus", "row commands", "panel handoff"] }
+  ],
+  "requirements": [
+    {
+      "id": "text", "name": "Text-native authoring", "weight": 38,
+      "why": "The Type should accept a cursor anywhere, Enter, selection, and pasted annotations without translating the author into a form.",
+      "passCondition": "A person can paste or edit a multi-line Python-shaped member declaration as one ordinary text operation.",
+      "anchors": { "1": "Only individual cells can be edited.", "3": "A text view exists but interrupts the primary interaction.", "5": "The canvas itself provides one normal multiline editing transaction." }
+    },
+    {
+      "id": "density", "name": "Compact typed reading", "weight": 32,
+      "why": "Early domain modeling needs a lot of type vocabulary visible without turning every type into a large class diagram.",
+      "passCondition": "Two top-level attributes remain scannable at normal canvas scale while a nested pose can be opened in place.",
+      "anchors": { "1": "Nested detail is always open or hard to find.", "3": "The tree is readable with repeated chrome.", "5": "The default is as compact as source text and expansion stays spatially stable." }
+    },
+    {
+      "id": "projection", "name": "One body, many views", "weight": 20,
+      "why": "A Type must not fork when shown as a compact signature, an expanded definition, or later as code.",
+      "passCondition": "The proposal has one authored body and describes Port / expanded representations as read projections.",
+      "anchors": { "1": "Each view has independent editable data.", "3": "A sync rule is needed to keep views aligned.", "5": "Only one body is editable; every other view is derived on demand." }
+    },
+    {
+      "id": "canvas", "name": "Whiteboard fit", "weight": 10,
+      "why": "SystemSketch remains a permissive whiteboard beside Python, so the type surface must not become a miniature IDE or enforce correctness.",
+      "passCondition": "Malformed or incomplete text stays visible and editable rather than being blocked or auto-corrected.",
+      "anchors": { "1": "The editor rejects incomplete type text.", "3": "The UI tolerates text but adds a prominent error workflow.", "5": "Any text remains a literal board fact; parsing only changes the read projection." }
+    }
+  ],
+  "hardGates": [
+    { "id": "g1", "name": "No competing editable bodies", "why": "A result cannot win if Port, tree, or code view can drift from one another." },
+    { "id": "g2", "name": "Nested disclosure is visible", "why": "A direction cannot win if opening a nested record requires leaving the Type context." }
+  ],
+  "variants": [
+    {
+      "id": "v1", "name": "Source-first tree", "accent": "#2f7f62",
+      "thesis": "Store one multiline attribute source; parse it only to paint the compact, foldable tree.",
+      "bestWhen": "You model in Python-shaped snippets and want the canvas to behave like a light text field.",
+      "losesWhen": "You need mouse-first per-field normalization, reordering, or generated forms.",
+      "decisions": [
+        { "label": "Canonical body", "value": "A single `attributeSource` string on the Type Block." },
+        { "label": "Read view", "value": "A parsed tree with hover-only inline chevrons and a local gutter alternative." },
+        { "label": "Write view", "value": "Click any row to enter one normal multiline textarea; blur commits, Escape cancels." }
+      ],
+      "keepParts": ["one source body", "hover-only tree toggles", "inline / gutter presentation switch"],
+      "proof": ["The specimen toggles from a compact tree to an editable multiline body.", "Nested fields remain in the same spatial region when opened."],
+      "previewLabel": "compact tree → one text transaction",
+      "story": { "title": "Open the canonical field", "steps": [
+        { "label": "Compact read", "caption": "The usual canvas state is only two readable attributes; pose advertises deeper structure without showing it.", "state": "base", "target": "[data-demo-toggle]" },
+        { "label": "Edit the source", "caption": "Clicking enters one multiline text field, so Paste and Enter use browser-native text behavior rather than cell navigation.", "state": "alt", "target": "[data-demo-toggle]" }
+      ] },
+      "scores": {
+        "text": { "score": 5, "evidence": "The alternate state is one native multiline field containing the whole declaration.", "confidence": "high" },
+        "density": { "score": 5, "evidence": "The base state carries only the attribute header and two rows; nested Position stays folded.", "confidence": "high" },
+        "projection": { "score": 5, "evidence": "The written body is explicitly the source; the tree is its parser projection.", "confidence": "high" },
+        "canvas": { "score": 5, "evidence": "The design preserves raw text even if a line cannot be parsed as an attribute.", "confidence": "high" }
+      },
+      "gateResults": { "g1": { "pass": true, "evidence": "Only attributeSource is written." }, "g2": { "pass": true, "evidence": "pose unfolds in place." } },
+      "preview": "<div style=\"padding:18px;border:1px solid #d8d0c4;background:#fffdf9;font-family:ui-sans-serif,system-ui;min-height:220px\"><div class=\"demo-base-only\"><b style=\"font:650 12px ui-monospace,monospace\">⌄ attributes</b><div style=\"border-top:1px solid #ded7cb;margin-top:10px;padding-top:10px;line-height:1.9\"><div>› <b>pose</b>: <span style=\"color:#3f6fa8\">Pose</span> = …</div><div style=\"padding-left:18px;color:#6e6a63\">› xyz: Position = …</div><div style=\"padding-left:36px\">x: float = 0.0</div><div><b>quality</b>: <span style=\"color:#3f6fa8\">float</span></div></div></div><div class=\"demo-alt-only\"><b style=\"font:650 12px ui-monospace,monospace\">⌄ attributes · source</b><textarea aria-label=\"V1 attribute source\" style=\"width:100%;height:146px;margin-top:10px;padding:10px;border:1px solid #7896bf;background:#fbfdff;font:14px/1.55 ui-monospace,monospace;resize:vertical\">pose: Pose = …\\n  xyz: Position = …\\n    x: float = 0.0\\nquality: float</textarea></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Edit attributes\" data-alt-label=\"Return to tree\" style=\"margin-top:12px\">Edit attributes</button></div>",
+      "media": [{ "label": "Implementation seam", "caption": "One parser accepts Python-style `name: Type = value` lines; the renderer only displays its tree, never rewrites the raw source.", "html": "<pre style=\"margin:0;padding:14px;background:#1f242b;color:#dce6f1;overflow:auto\">attributeSource  →  parseAttributeTree()  →  Port / expanded tree</pre>" }]
+    },
+    {
+      "id": "v2", "name": "Foldable code cell", "accent": "#3f6fa8",
+      "thesis": "Treat the region as a miniature code editor with always-left gutter controls and syntax ink.",
+      "bestWhen": "The Type body should look and behave like a narrow source file and future Code Blocks share its editor.",
+      "losesWhen": "The visual form needs to feel like part of a whiteboard card rather than a code surface.",
+      "decisions": [{ "label": "Primary model", "value": "A CodeMirror-style document with line numbers and fold gutter." }, { "label": "Disclosure", "value": "Every fold marker stays in an aligned gutter, like source code." }, { "label": "Tradeoff", "value": "Great text behavior, but an IDE grammar dominates a compact Type." }],
+      "keepParts": ["native text editing", "gutter fold geometry", "syntax token colors"],
+      "proof": ["The hero shows the same body as source with a gutter collapse state."],
+      "previewLabel": "code-shaped alternative",
+      "story": { "title": "Fold one nested record", "steps": [{ "label": "Read source", "caption": "The gutter makes every fold affordance permanently aligned.", "state": "base", "target": "[data-demo-toggle]" }, { "label": "Collapse the body", "caption": "A whole nested record collapses to one source line with a code-editor ellipsis.", "state": "alt", "target": "[data-demo-toggle]" }] },
+      "scores": { "text": { "score": 5, "evidence": "A code document naturally supports selection, paste, and multiline editing.", "confidence": "high" }, "density": { "score": 3, "evidence": "Line numbers, a dark/editor surface, and permanent gutter controls add visual weight.", "confidence": "high" }, "projection": { "score": 4, "evidence": "Source can remain canonical, though a Code Block identity tempts a second editing surface.", "confidence": "medium" }, "canvas": { "score": 3, "evidence": "It is friendly to raw text but reads more like an embedded IDE than a loose board declaration.", "confidence": "high" } },
+      "gateResults": { "g1": { "pass": true, "evidence": "The code document can be the one body." }, "g2": { "pass": true, "evidence": "The gutter folds the nested block in place." } },
+      "preview": "<div style=\"padding:14px;background:#181d24;color:#d9e5f0;min-height:220px;font:14px/1.75 ui-monospace,monospace\"><div class=\"demo-base-only\"><div><span style=\"color:#70839b\">1 ⌄</span> <span style=\"color:#d5a85b\">pose</span>: <span style=\"color:#71b7d9\">Pose</span> = …</div><div><span style=\"color:#70839b\">2 ⌄</span>   xyz: Position = …</div><div><span style=\"color:#70839b\">3</span>     x: float = 0.0</div><div><span style=\"color:#70839b\">4</span> quality: <span style=\"color:#71b7d9\">float</span></div></div><div class=\"demo-alt-only\"><div><span style=\"color:#70839b\">1 ›</span> <span style=\"color:#d5a85b\">pose</span>: <span style=\"color:#71b7d9\">Pose</span> = …</div><div><span style=\"color:#70839b\">2</span> quality: <span style=\"color:#71b7d9\">float</span></div></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Fold pose\" data-alt-label=\"Unfold pose\" style=\"margin-top:12px\">Fold pose</button></div>",
+      "media": [{ "label": "What carries forward", "caption": "The alternative is valuable evidence for the requested code-gutter placement switch, even if the Type itself should not start dark or numbered.", "html": "<div class=\"placeholder-preview compact\"><strong>Borrow the gutter mode, not the full IDE face.</strong></div>" }]
+    },
+    {
+      "id": "v3", "name": "Structured attribute table", "accent": "#7667c6",
+      "thesis": "Persist attributes as fields and edit Name, Type, and Default in separate cells.",
+      "bestWhen": "You want column-level editing, row commands, sorting, or future schema-driven forms.",
+      "losesWhen": "Typing a complete annotation or pasting a record definition should remain one ordinary gesture.",
+      "decisions": [{ "label": "Canonical body", "value": "An array of structured field records." }, { "label": "Interaction", "value": "Spreadsheet-style field focus and row controls." }, { "label": "Tradeoff", "value": "Strong field mechanics, weaker copy/paste and a second source projection." }],
+      "keepParts": ["visible type/default separation", "row ordering", "field-specific affordances"],
+      "proof": ["The hero turns the quality type cell into an input without leaving the row."],
+      "previewLabel": "form-first alternative",
+      "story": { "title": "Edit one type cell", "steps": [{ "label": "Scan fields", "caption": "Rows expose their parts as a compact table.", "state": "base", "target": "[data-demo-toggle]" }, { "label": "Focus a cell", "caption": "The focused field is precise, but it is not a normal multiline source transaction.", "state": "alt", "target": "[data-demo-toggle]" }] },
+      "scores": { "text": { "score": 2, "evidence": "Each cell is editable, but a multiline paste requires custom import behavior.", "confidence": "high" }, "density": { "score": 4, "evidence": "Three columns fit a flat two-row record, though headers consume space.", "confidence": "high" }, "projection": { "score": 2, "evidence": "Python source becomes a generated view or another hand-maintained editor.", "confidence": "high" }, "canvas": { "score": 4, "evidence": "Incomplete cells can stay literal, but the interaction is form-shaped.", "confidence": "medium" } },
+      "gateResults": { "g1": { "pass": false, "evidence": "A code representation would need a serializer rather than sharing the authored body." }, "g2": { "pass": true, "evidence": "Child fields can use expandable rows." } },
+      "preview": "<div style=\"padding:16px;border:1px solid #d8d0c4;background:#fffdf9;min-height:220px\"><b style=\"font:650 12px ui-monospace,monospace\">⌄ attributes</b><div style=\"display:grid;grid-template-columns:1fr 1fr .9fr;gap:6px;margin-top:12px;color:#777;font:11px ui-monospace,monospace\"><span>name</span><span>type</span><span>default</span></div><div style=\"display:grid;grid-template-columns:1fr 1fr .9fr;gap:6px;border-top:1px solid #ddd;padding:8px 0\"><b>pose</b><span>Pose</span><span>…</span></div><div class=\"demo-base-only\" style=\"display:grid;grid-template-columns:1fr 1fr .9fr;gap:6px;border-top:1px solid #ddd;padding:8px 0\"><b>quality</b><span>float</span><span></span></div><div class=\"demo-alt-only\" style=\"display:grid;grid-template-columns:1fr 1fr .9fr;gap:6px;border-top:1px solid #ddd;padding:8px 0\"><b>quality</b><input aria-label=\"V3 quality type\" value=\"float\" style=\"width:100%;font:inherit;border:1px solid #7667c6\"><span></span></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Edit quality\" data-alt-label=\"Finish cell\" style=\"margin-top:12px\">Edit quality</button></div>",
+      "media": [{ "label": "Risk", "caption": "A field array makes the canvas own more type structure than the Python-shaped authoring model calls for.", "html": "<div class=\"placeholder-preview compact\"><strong>Good spreadsheet; weak source mirror.</strong></div>" }]
+    },
+    {
+      "id": "v4", "name": "Direct outline editor", "accent": "#b7791f",
+      "thesis": "Make the tree itself the editor: click a row, type in place, add child rows with outline commands.",
+      "bestWhen": "Mouse-first gradual disclosure matters more than a whole-snippet authoring workflow.",
+      "losesWhen": "People regularly paste NamedTuple fields or refactor text with normal code-editor movements.",
+      "decisions": [{ "label": "Primary model", "value": "Tree nodes are authored records, not a parsed projection." }, { "label": "Interaction", "value": "Enter adds a sibling; Tab changes nesting; chevrons manage subtrees." }, { "label": "Tradeoff", "value": "Beautiful tree ergonomics, but it invents a second mini-language and keyboard contract." }],
+      "keepParts": ["hover-only row chevrons", "in-place nested expansion", "single-row visual density"],
+      "proof": ["The hero keeps a collapsed row compact and expands it without a panel change."],
+      "previewLabel": "tree-as-editor alternative",
+      "story": { "title": "Reveal nested Position", "steps": [{ "label": "Compact outline", "caption": "Only pose and quality consume the face initially.", "state": "base", "target": "[data-demo-toggle]" }, { "label": "Open one row", "caption": "The nested declaration appears in place, but the tree would also need to own editing semantics.", "state": "alt", "target": "[data-demo-toggle]" }] },
+      "scores": { "text": { "score": 3, "evidence": "Each row can accept text, but whole-snippet paste needs a parser/import layer.", "confidence": "high" }, "density": { "score": 5, "evidence": "The collapsed outline is exceptionally compact and nested expansion is local.", "confidence": "high" }, "projection": { "score": 2, "evidence": "The tree becomes canonical while a source block becomes another serialization format.", "confidence": "high" }, "canvas": { "score": 3, "evidence": "A custom outline keyboard grammar pushes the whiteboard toward a new language.", "confidence": "medium" } },
+      "gateResults": { "g1": { "pass": false, "evidence": "Source and outline would require bidirectional synchronization." }, "g2": { "pass": true, "evidence": "The region is an in-place outline." } },
+      "preview": "<div style=\"padding:16px;border:1px solid #d8d0c4;background:#fffdf9;min-height:220px\"><b style=\"font:650 12px ui-monospace,monospace\">⌄ attributes</b><div class=\"demo-base-only\" style=\"margin-top:12px;line-height:1.9\"><div>› <b>pose</b>: Pose = …</div><div><b>quality</b>: float</div></div><div class=\"demo-alt-only\" style=\"margin-top:12px;line-height:1.9\"><div>⌄ <b>pose</b>: Pose = …</div><div style=\"padding-left:22px\">⌄ xyz: Position = …</div><div style=\"padding-left:44px\">x: float = 0.0</div><div><b>quality</b>: float</div></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Open pose\" data-alt-label=\"Fold pose\" style=\"margin-top:12px\">Open pose</button></div>",
+      "media": [{ "label": "Splice candidate", "caption": "The hover/fold behavior is worth borrowing; the tree’s authorship model is not.", "html": "<div class=\"placeholder-preview compact\"><strong>Borrow presentation, avoid tree-as-source.</strong></div>" }]
+    },
+    {
+      "id": "v5", "name": "Compact card + inspector", "accent": "#b84939",
+      "thesis": "Keep only a one-line attributes signature on canvas and edit the full body in an inspector panel.",
+      "bestWhen": "The canvas must stay visually sparse and types are edited infrequently.",
+      "losesWhen": "Early modeling needs rapid type writing in the spatial context of transformations.",
+      "decisions": [{ "label": "On-canvas object", "value": "A short attributes summary and count." }, { "label": "Write surface", "value": "A side inspector textarea." }, { "label": "Tradeoff", "value": "Strong global density but breaks visual-to-text continuity." }],
+      "keepParts": ["very small collapsed signature", "full text editor", "explicit detail handoff"],
+      "proof": ["The hero shows the author leaving the card to reach the type text."],
+      "previewLabel": "off-canvas detail alternative",
+      "story": { "title": "Leave the card to edit", "steps": [{ "label": "Read the summary", "caption": "The card is calm, but only offers a count and short signature.", "state": "base", "target": "[data-demo-toggle]" }, { "label": "Open inspector", "caption": "Full source becomes available, but the type author has left the dataflow context.", "state": "alt", "target": "[data-demo-toggle]" }] },
+      "scores": { "text": { "score": 4, "evidence": "The inspector can provide native multiline text, but it is a separate interaction surface.", "confidence": "high" }, "density": { "score": 3, "evidence": "The card is sparse but no nested structure is readable in context.", "confidence": "high" }, "projection": { "score": 5, "evidence": "The inspector string can remain the only body and the card is derived.", "confidence": "high" }, "canvas": { "score": 4, "evidence": "Literal text can remain permissive, though the workflow is panel-first.", "confidence": "medium" } },
+      "gateResults": { "g1": { "pass": true, "evidence": "The inspector body is canonical." }, "g2": { "pass": false, "evidence": "Nested disclosure leaves the Type context." } },
+      "preview": "<div style=\"display:grid;grid-template-columns:1fr;gap:12px;min-height:220px\"><div class=\"demo-base-only\" style=\"padding:18px;border:1px solid #d8d0c4;background:#fffdf9\"><b>EstimatePairOut</b><div style=\"margin-top:12px;font:13px ui-monospace,monospace\">attributes · pose: Pose · quality: float</div></div><div class=\"demo-alt-only\" style=\"padding:16px;border:1px solid #d8d0c4;background:#fffdf9\"><b>Inspector · attributes</b><textarea aria-label=\"V5 inspector source\" style=\"width:100%;height:120px;margin-top:10px;font:13px/1.55 ui-monospace,monospace\">pose: Pose = …\\nquality: float</textarea></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Open inspector\" data-alt-label=\"Close inspector\">Open inspector</button></div>",
+      "media": [{ "label": "Risk", "caption": "The design preserves a single source but turns a frequent modeling operation into a panel hop.", "html": "<div class=\"placeholder-preview compact\"><strong>Calm canvas; too much distance for first-pass modeling.</strong></div>" }]
+    }
+  ],
+  "checks": ["Exact variant count", "One shared Type example", "Weights fixed before scoring", "Runnable state control in every hero", "Pick, shortlist, reject, and splice export"]
+}

@@ -1,7 +1,8 @@
 import type { Editor, TLUiToolsContextType } from 'tldraw'
 import { BlockIcon } from './BlockIcon'
 import { PillIcon } from './PillIcon'
-import { BLOCK_TOOL_ID, PILL_TOOL_ID } from './blockModel'
+import { TypeIcon } from './TypeIcon'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID, TYPE_TOOL_ID } from './blockModel'
 
 function withoutShortcut(kbd: string | undefined, shortcut: string): string | undefined {
   if (!kbd) return kbd
@@ -25,8 +26,8 @@ function releaseShortcut(tools: TLUiToolsContextType, shortcut: string): TLUiToo
 }
 
 /**
- * Add Block and Pill to tldraw's UI-tool registry with the donor's shortcuts:
- * B draws a Block; P creates the separate literal-pill representation.
+ * Add Block, Pill, and Type to tldraw's UI-tool registry. Type deliberately
+ * has no shortcut: T remains stock text, while its tool stays discoverable.
  *
  * The drawing state nodes are registered separately through Tldraw's `tools`
  * prop. This helper is the shared presentation seam used by Stable and the
@@ -54,6 +55,14 @@ export function withBlockTool(
       kbd: 'p',
       onSelect() {
         editor.setCurrentTool(PILL_TOOL_ID)
+      },
+    },
+    [TYPE_TOOL_ID]: {
+      id: TYPE_TOOL_ID,
+      label: 'Type',
+      icon: <TypeIcon />,
+      onSelect() {
+        editor.setCurrentTool(TYPE_TOOL_ID)
       },
     },
   }

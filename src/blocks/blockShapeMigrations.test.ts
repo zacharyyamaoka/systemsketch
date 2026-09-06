@@ -16,6 +16,7 @@ import {
 	downgradeBlockPropsV5ToV4,
 	downgradeBlockPropsV6ToV5,
 	downgradeBlockPropsV7ToV6,
+	downgradeBlockPropsV8ToV7,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -23,6 +24,7 @@ import {
 	upgradeBlockPropsV4ToV5,
 	upgradeBlockPropsV5ToV6,
 	upgradeBlockPropsV6ToV7,
+	upgradeBlockPropsV7ToV8,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -85,6 +87,21 @@ describe('Block shape migrations', () => {
 		}
 		expect(downgradeBlockPropsV7ToV6({ ...legacy, blockType: 'bundle' })).toEqual({ ...legacy, blockType: 'bundle' })
 		expect(downgradeBlockPropsV7ToV6({ ...legacy, blockType: 'copy' })).toEqual({ ...legacy, blockType: 'copy' })
+	})
+
+	it('keeps a Type attribute source opaque across the V8 boundary', () => {
+		const v7: BlockMigrationProps = {
+			...getDefaultBlockProps(),
+			blockType: 'type',
+		}
+		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
+		expect(v8).toBe(v7)
+
+		const withSource: BlockMigrationProps = {
+			...v8,
+			attributeSource: 'pose: Pose\\nquality: float',
+		}
+		expect(throughPureStep(withSource, downgradeBlockPropsV8ToV7)).not.toHaveProperty('attributeSource')
 	})
 
 	it('loads a V6 Projection record as Unbundle without losing authored fields', () => {
@@ -192,7 +209,7 @@ describe('Block shape migrations', () => {
 		expect(throughPureStep(configV7, downgradeBlockPropsV7ToV6)).not.toHaveProperty('stockConfig')
 	})
 
-	it('round-trips a V6 saved Block through the registered schema and validates the V7 record', () => {
+	it('round-trips a V6 saved Block through the registered schema and validates the current record', () => {
 		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
 		const currentSchema = store.schema.serialize()
 		const legacy = markerBlock()
@@ -211,7 +228,7 @@ describe('Block shape migrations', () => {
 		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(7)
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(8)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))
