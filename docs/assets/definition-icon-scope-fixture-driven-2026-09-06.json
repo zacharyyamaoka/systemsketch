@@ -1,0 +1,36 @@
+{
+  "before": {
+    "ingest": {
+      "x": 560,
+      "y": 340,
+      "icon": "Workflow"
+    },
+    "parse": {
+      "icon": "Braces"
+    },
+    "cueArrowsBoundToIngest": 1
+  },
+  "moved": {
+    "ingest": {
+      "x": 650,
+      "y": 370,
+      "icon": "Workflow"
+    },
+    "parse": {
+      "icon": "Braces"
+    },
+    "cueArrowsBoundToIngest": 1
+  },
+  "after": {
+    "ingest": {
+      "x": 650,
+      "y": 370,
+      "icon": "Terminal"
+    },
+    "parse": {
+      "icon": "Braces"
+    },
+    "cueArrowsBoundToIngest": 1
+  },
+  "consoleErrors": []
+}
