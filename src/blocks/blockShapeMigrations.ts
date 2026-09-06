@@ -46,6 +46,12 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	DiffState: 5,
 	FieldDiffs: 6,
 	SemanticRolesAndStockConfig: 7,
+	// `TypeAttributes` (main) and the Type-primitive branch's own
+	// `AttributeSource` migration were the same transform — both strip a
+	// stray `attributeSource` on the way down — added independently for the
+	// same feature. Keeping main's numbering/name here; the duplicate was
+	// dropped rather than renumbered, since it did nothing TypeAttributes
+	// doesn't already do.
 	TypeAttributes: 8,
 	BlockChrome: 9,
 	FoldAndAutoResize: 10,
@@ -358,6 +364,7 @@ export function downgradeBlockPropsV8ToV7(props: BlockMigrationProps): BlockMigr
 	const { attributeSource: _attributeSource, ...rest } = props
 	return _attributeSource === undefined ? props : rest
 }
+
 /**
  * tldraw's migration sequence invokes each step for its side effect; it does
  * not consume a replacement props object. Keep the exported steps pure for

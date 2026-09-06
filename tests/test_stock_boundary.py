@@ -223,7 +223,13 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("LoopShapeUtil", portable_export)
         self.assertIn("BehaviorTreeShapeUtil", portable_export)
         self.assertIn("BtControlShapeUtil", portable_export)
+        self.assertIn("detachLoopToPrimitives", portable_export)
+        self.assertIn("isLoopShape", portable_export)
+        # A Code block is a custom CodeMirror record; the portable export must
+        # lower it to stock primitives the way every other custom shape is.
         self.assertIn("CodeShapeUtil", portable_export)
+        self.assertIn("detachCodeToPrimitives", portable_export)
+        self.assertIn("isCodeShape", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)

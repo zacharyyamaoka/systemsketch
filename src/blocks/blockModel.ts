@@ -4,7 +4,7 @@ export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
 /** P creates the separate `value` literal-pill representation. */
 export const PILL_TOOL_ID = 'pill' as const
-/** Type uses the same Block geometry, with one compact annotation body. */
+/** Type shares the Block box gesture; its one addition is a Type-shaped starting body. */
 export const TYPE_TOOL_ID = 'type' as const
 
 /**
@@ -400,8 +400,10 @@ export const BLOCK_SHAPE_PROPS = {
 	/** Detailed Markdown from the donor Notes tab. */
 	notes: T.string.optional(),
 	/**
-	 * The canonical body of a Type definition. Its compact outline in Port and
-	 * Expanded views is parsed presentation, never a second editable schema.
+	 * The canonical body of a `type` Block: exact Python-annotation source, one
+	 * attribute per line. Its nested tree in Port and Expanded views is parsed
+	 * presentation only — never a second editable schema. Optional so every
+	 * earlier Block still loads.
 	 */
 	attributeSource: T.string.optional(),
 	/**

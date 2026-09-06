@@ -1,0 +1,216 @@
+/*
+ * Dev-only babble styles for the 4 Port text-authoring variants. Reached
+ * only through `shape.meta.portTextBabbleVariant` — no ordinary board paints
+ * any of this. Shares the Type attribute-body babble's `.TypeBabble-*`
+ * classes for the CodeMirror shell and its span vocabulary (see
+ * `type-babble.css`); everything below is what this babble adds on top.
+ */
+
+.systemsketch-block-canvas .PortTextBabble {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  z-index: 5;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  /* This surface REPLACES the ordinary port-pip row list underneath while
+     active — an opaque fill, not an overlay, is what keeps the two views
+     from visually double-printing the same ports on top of each other. */
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 20px;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .PortTextBabble[data-selected] { pointer-events: auto; }
+
+.systemsketch-block-canvas .PortTextBabble-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .PortTextBabbleV1-toggle {
+  display: inline-flex;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.systemsketch-block-canvas .PortTextBabbleV1-toggle button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ss-text-muted);
+  font: inherit;
+  cursor: pointer;
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.systemsketch-block-canvas .PortTextBabbleV1-toggle button[data-active] {
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+.systemsketch-block-canvas .PortTextBabble-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  pointer-events: auto;
+}
+
+.systemsketch-block-canvas .PortTextBabble-empty {
+  color: var(--ss-text-muted);
+  font-style: italic;
+  padding: 2px 0;
+}
+
+/* ------------------------------ one row ---------------------------------- */
+
+.systemsketch-block-canvas .PortTextBabble-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.systemsketch-block-canvas .PortTextBabble-bullet {
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ss-text-muted);
+  background: transparent;
+}
+.systemsketch-block-canvas .PortTextBabble-bullet[data-filled] {
+  background: var(--ss-accent);
+  border-color: var(--ss-accent);
+}
+
+.systemsketch-block-canvas .PortTextBabble-name { font-weight: 650; }
+.systemsketch-block-canvas .PortTextBabble-punct { color: var(--ss-text-muted); }
+.systemsketch-block-canvas .PortTextBabble-type { color: var(--ss-text-muted); }
+
+.systemsketch-block-canvas .PortTextBabble-pill {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+.systemsketch-block-canvas .PortTextBabble-pill--invalid {
+  background: var(--ss-warning-soft);
+  color: var(--ss-warning);
+}
+
+.systemsketch-block-canvas .PortTextBabble-rule {
+  height: 1px;
+  margin: 3px 0;
+  background: var(--ss-border);
+}
+
+.systemsketch-block-canvas .PortTextBabble-sectionHeading {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ss-text-muted);
+}
+.systemsketch-block-canvas .PortTextBabble-sectionHeading:first-child { margin-top: 0; }
+
+.systemsketch-block-canvas .PortTextBabble-armBadge {
+  margin: 2px 0 1px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ss-accent);
+}
+
+/* ------------------------------ diagnostics ------------------------------ */
+
+.systemsketch-block-canvas .PortTextBabble-diagnostics {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  border-radius: 4px;
+  background: var(--ss-warning-soft);
+  padding: 3px 6px;
+  max-height: 64px;
+  overflow: auto;
+}
+.systemsketch-block-canvas .PortTextBabble-diagnosticRow {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ss-warning);
+}
+.systemsketch-block-canvas .PortTextBabble-diagnosticLine { font-weight: 700; opacity: 0.8; }
+
+.systemsketch-block-canvas .PortTextBabble-invalidValue {
+  text-decoration: underline wavy var(--ss-warning);
+  text-decoration-thickness: 1px;
+}
+
+/* --------------------------------- V3 ------------------------------------- */
+/* Columnar read view keyed to the real `portLayout` style prop.            */
+
+.systemsketch-block-canvas .PortTextBabbleV3-body {
+  display: flex;
+  gap: 14px;
+}
+.systemsketch-block-canvas .PortTextBabbleV3-body--offset {
+  flex-direction: column;
+  gap: 4px;
+}
+.systemsketch-block-canvas .PortTextBabbleV3-column { flex: 1 1 0; min-width: 0; }
+.systemsketch-block-canvas .PortTextBabbleV3-body--offset .PortTextBabbleV3-column + .PortTextBabbleV3-column {
+  border-top: 1px solid var(--ss-border);
+  padding-top: 4px;
+}
+.systemsketch-block-canvas .PortTextBabbleV3-body--inline .PortTextBabbleV3-column + .PortTextBabbleV3-column {
+  border-left: 1px solid var(--ss-border);
+  padding-left: 14px;
+}
+
+/* --------------------------------- V4 ------------------------------------- */
+/* Always-live: preview and source both mounted, always, no toggle.         */
+
+.systemsketch-block-canvas .PortTextBabbleV4-hint {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+  opacity: 0.75;
+}
+.systemsketch-block-canvas .PortTextBabbleV4-preview {
+  flex: 0 1 auto;
+  overflow: auto;
+  max-height: 45%;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ss-border);
+  pointer-events: auto;
+}
+.systemsketch-block-canvas .PortTextBabbleV4 .TypeBabble-codeEditor {
+  flex: 1 1 auto;
+  min-height: 48px;
+}

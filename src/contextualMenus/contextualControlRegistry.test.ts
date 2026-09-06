@@ -15,7 +15,7 @@ const shared = (value: string) => ({ type: 'shared' as const, value })
 describe('contextual control composition', () => {
   it('keeps each control vocabulary entry in one registry', () => {
     expect(Object.keys(CONTEXTUAL_CONTROL_REGISTRY)).toEqual([
-      'geo', 'color', 'fill', 'dash', 'lineStyle', 'strokeColor', 'size', 'weight', 'font', 'align',
+      'geo', 'color', 'fill', 'dash', 'lineStyle', 'strokeColor', 'codeLanguage', 'size', 'weight', 'font', 'align',
       'verticalAlign', 'arrowKind', 'spline', 'connectionRouting',
       'arrowheadStart', 'arrowheadEnd', 'bold', 'addText',
     ])

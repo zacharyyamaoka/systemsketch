@@ -1,0 +1,383 @@
+/*
+ * Dev-only babble styles for the 5 Type MAPPING ("algebraic type system")
+ * variants. Reached only through `shape.meta.typeMappingBabbleVariant` — no
+ * ordinary board paints any of this. Deliberately its own namespace
+ * (`TypeMapping`, not `TypeBabble`) so this exploration never depends on the
+ * sibling attribute-body babble's stylesheet changing out from under it.
+ */
+
+.systemsketch-block-canvas .TypeMapping {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 21px;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .TypeMapping[data-selected] {
+  pointer-events: auto;
+}
+
+.systemsketch-block-canvas .TypeMapping button,
+.systemsketch-block-canvas .TypeMapping input {
+  font: inherit;
+}
+
+/* ---------------------------- shared spans ------------------------------ */
+
+.systemsketch-block-canvas .TypeMapping-name { font-weight: 650; }
+.systemsketch-block-canvas .TypeMapping-punct { color: var(--ss-text-muted); }
+.systemsketch-block-canvas .TypeMapping-raw { color: var(--ss-text-muted); }
+
+/* `typing.*` vocabulary — a library construct, never clickable. A lighter mix
+   than --primitive below keeps all three token kinds one hue apart only in
+   strength, so no new colour literal has to enter the theme for this. */
+.systemsketch-block-canvas .TypeMapping-token--construct {
+  color: color-mix(in srgb, var(--ss-accent) 45%, var(--ss-text));
+  font-weight: 600;
+}
+/* A Python builtin scalar — always known, no board lookup. */
+.systemsketch-block-canvas .TypeMapping-token--primitive {
+  color: color-mix(in srgb, var(--ss-accent) 68%, var(--ss-text));
+}
+/* A live Type or Type-Mapping alias found on this board — the sibling
+   attribute babble uses the same full-strength accent for the same fact, on
+   purpose: one colour for "this name resolves to a real thing on this
+   board," at its strongest mix since this is the most actionable case. */
+/* Matches the sibling attribute babble's link treatment exactly (see
+   type-babble.css) — solid, thin, ordinary hyperlink blue, so the two
+   babbles never teach two different "this is clickable" conventions. */
+.systemsketch-block-canvas .TypeMapping-token--known {
+  color: var(--ss-accent);
+  text-decoration: underline solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.systemsketch-block-canvas .TypeMapping-token--known:hover {
+  text-decoration-thickness: 2px;
+  filter: saturate(1.4);
+}
+/* Plain, matching the sibling attribute babble's own call: an underline on
+   every unresolved identifier in an expression got noisy fast, and the only
+   underline left in this vocabulary now means "this is a real link". */
+.systemsketch-block-canvas .TypeMapping-token--unknown {
+  color: var(--ss-text-muted);
+}
+
+/* ------------------------------- heading --------------------------------- */
+
+.systemsketch-block-canvas .TypeMapping-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .TypeMapping-heading button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.systemsketch-block-canvas .TypeMapping-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ss-accent) 16%, transparent);
+  color: var(--ss-accent);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.systemsketch-block-canvas .TypeMapping-empty {
+  appearance: none;
+  border: 1px dashed var(--ss-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--ss-text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* --------------------------- plain source editor ------------------------- */
+/* V1's whole-block edit and V2's raw fallback: an ordinary textarea, exactly
+   like the SHIPPED `TypeAttributeRegion-editor` — no highlight overlay, so
+   editing looks like editing and the pretty read view is a separate mode. */
+
+.systemsketch-block-canvas .TypeMapping-editor {
+  flex: 1 1 auto;
+  min-height: 64px;
+  resize: none;
+  outline: none;
+  border: 1px solid var(--ss-accent);
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  font: inherit;
+  line-height: 21px;
+  white-space: pre;
+}
+
+/* ------------------------- live-highlighted editor ------------------------ */
+/* V3, V4's source rung, and V5: the transparent-textarea-over-coloured-pre
+   technique, same shape as the sibling babble's `TypeBabble-codeEditor`. */
+
+.systemsketch-block-canvas .TypeMapping-codeEditor {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 64px;
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor-highlight,
+.systemsketch-block-canvas .TypeMapping-codeEditor-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--ss-accent);
+  border-radius: 4px;
+  overflow: auto;
+  font: inherit;
+  line-height: 21px;
+  white-space: pre;
+  tab-size: 2;
+  box-sizing: border-box;
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor-highlight {
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor-line { min-height: 21px; }
+
+.systemsketch-block-canvas .TypeMapping-codeEditor-input {
+  resize: none;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor-input::selection {
+  background: color-mix(in srgb, var(--ss-accent) 35%, transparent);
+  color: transparent;
+}
+
+/* --------------------------------- V1 ------------------------------------ */
+/* Code Cell: a [UI | Source] toggle (mirrors the sibling attribute babble's
+   V1 exactly, same component family) over the shared `SourceCodeEditor`.
+   Double-clicking a row drops into Source mode with the cursor at that row;
+   a recognised token still jumps the camera to its real definition. */
+
+.systemsketch-block-canvas .TypeMapping-toggle {
+  display: inline-flex;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.systemsketch-block-canvas .TypeMapping-toggle button {
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ss-text-muted);
+}
+.systemsketch-block-canvas .TypeMapping-toggle button[data-active] {
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+.systemsketch-block-canvas .TypeMappingV1-body { flex: 1 1 auto; }
+.systemsketch-block-canvas .TypeMappingV1-row { padding: 1px 0; cursor: text; }
+
+/* --------------------------------- V2 ------------------------------------ */
+/* Alias Chips: a wrapping rail of rounded pills, one per alias. */
+
+.systemsketch-block-canvas .TypeMappingV2-rail {
+  flex: 1 1 auto;
+  overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+}
+
+.systemsketch-block-canvas .TypeMappingV2-chip {
+  appearance: none;
+  border: 1px solid var(--ss-border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--ss-surface-raised);
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .TypeMappingV2-chip:hover {
+  border-color: var(--ss-accent);
+}
+
+.systemsketch-block-canvas .TypeMappingV2-chipInput {
+  min-width: 120px;
+  border: 1px solid var(--ss-accent);
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  outline: none;
+}
+
+.systemsketch-block-canvas .TypeMappingV2-addChip {
+  appearance: none;
+  border: 1px dashed var(--ss-border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: transparent;
+  color: var(--ss-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .TypeMappingV2-addChip:hover {
+  color: var(--ss-accent);
+  border-color: var(--ss-accent);
+}
+
+/* --------------------------------- V3 ------------------------------------ */
+/* Definition Table: always both, no toggle. A Name/Expression table, fixed
+   over a permanently visible, live-synced source pane below it. */
+
+.systemsketch-block-canvas .TypeMappingV3-table {
+  flex: 0 1 auto;
+  max-height: 50%;
+  overflow: auto;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ss-border);
+  margin-bottom: 4px;
+}
+
+.systemsketch-block-canvas .TypeMappingV3-row {
+  display: grid;
+  grid-template-columns: minmax(56px, max-content) 1fr;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.systemsketch-block-canvas .TypeMappingV3-cell--name {
+  font-weight: 650;
+  color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeMappingV3-cell--expr {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------- V4 ------------------------------------ */
+/* Collapsed Ladder: summary -> pretty list -> source, three rungs. */
+
+.systemsketch-block-canvas .TypeMappingV4-summary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ss-text);
+  font-weight: 700;
+}
+
+.systemsketch-block-canvas .TypeMappingV4-list { flex: 1 1 auto; overflow: auto; }
+.systemsketch-block-canvas .TypeMappingV4-row { padding: 1px 0; }
+
+/* --------------------------------- V5 ------------------------------------ */
+/* Inline REPL Feed: a fixed `>>>` prompt gutter beside a live editor. */
+
+.systemsketch-block-canvas .TypeMappingV5-editor {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 64px;
+}
+
+.systemsketch-block-canvas .TypeMappingV5-gutter {
+  flex: 0 0 auto;
+  width: 30px;
+  padding: 7px 0;
+  border: 1px solid var(--ss-accent);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.systemsketch-block-canvas .TypeMappingV5-gutter div { line-height: 21px; }
+
+.systemsketch-block-canvas .TypeMappingV5-editor .TypeMapping-codeEditor { flex: 1 1 auto; }
+
+.systemsketch-block-canvas .TypeMappingV5-editor .TypeMapping-codeEditor-highlight,
+.systemsketch-block-canvas .TypeMappingV5-editor .TypeMapping-codeEditor-input {
+  border-radius: 0 4px 4px 0;
+}
+
+/* ------------------- CodeMirror source editor (V1) ----------------------
+ * Same box as the sibling babble's CodeMirror rules; see type-babble.css. */
+
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-editor {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--ss-accent);
+  border-radius: 4px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  outline: none;
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-scroller {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 21px;
+  padding: 6px 8px;
+  tab-size: 2;
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-content {
+  padding: 0;
+  caret-color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-line { padding: 0; }
+
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-cursor,
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-dropCursor {
+  border-left-color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-selectionBackground,
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm .cm-focused .cm-selectionBackground,
+.systemsketch-block-canvas .TypeMapping-codeEditor--cm ::selection {
+  background: color-mix(in srgb, var(--ss-accent) 35%, transparent);
+}

@@ -58,7 +58,7 @@ import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSe
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
-  getOnlySelectedCode,
+  getSelectedCodeShapes,
 } from '../code'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import {
@@ -364,8 +364,8 @@ function SelectionMiniMenu() {
     [editor],
   )
   const hasCode = useValue(
-    'systemsketch selection is one Code block',
-    () => getOnlySelectedCode(editor) !== null,
+    'systemsketch selection has Code blocks',
+    () => getSelectedCodeShapes(editor).length > 0,
     [editor],
   )
   const layoutActions = useValue(
@@ -405,6 +405,7 @@ function SelectionMiniMenu() {
     || hasBranch
     || hasBehaviorTree
     || hasBlockMiniMenu
+    || hasCode
     || hasAppearance
     || canWrap
     || propagationSeed !== null
@@ -423,17 +424,6 @@ function SelectionMiniMenu() {
     )
   }
 
-  if (hasCode) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Code block actions"
-      >
-        <EditorCodeSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
   const surface = hasBehaviorTree
     ? 'behavior-tree-selection'
     : hasBranch ? 'branch-selection'
@@ -443,6 +433,10 @@ function SelectionMiniMenu() {
     'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
     'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
     appearance: <AppearanceControls />,
+    // Code contributes ONLY what is unique to it (line numbers, the character
+    // width) into this same pill — its language and text size are already
+    // ordinary appearance rows above. One menu, never a second floating surface.
+    'code-actions': hasCode ? <EditorCodeSelectionMiniMenu editor={editor} /> : null,
     wrap: <WrapSelectionControl />,
     layout: (
       <SelectionLayoutActions
@@ -624,7 +618,7 @@ export function SystemSketchSurfaceHost() {
         label: 'Insert Type',
         description: 'Switch to the compact Type definition tool',
         keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
-        icon: '⌘',
+        icon: '{}',
         run: () => editor.setCurrentTool(TYPE_TOOL_ID),
       },
       {

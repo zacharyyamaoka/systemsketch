@@ -1,3 +1,10 @@
+/*
+ * A Type's compact attribute tree, painted over the same body band a Port or
+ * Expanded Block would otherwise leave to its port rows. Geometry (the top
+ * and bottom of the band) is supplied by the caller from `layoutBlock`, so
+ * this file only paints inside that rect — never computes it.
+ */
+
 .systemsketch-block-canvas .TypeAttributeRegion {
   position: absolute;
   left: 12px;
@@ -93,9 +100,17 @@
   background: color-mix(in srgb, var(--ss-accent) 8%, transparent);
 }
 
-.systemsketch-block-canvas .TypeAttributeRegion-line b { font-weight: 650; }
-.systemsketch-block-canvas .TypeAttributeRegion-type { color: color-mix(in srgb, var(--ss-accent) 68%, var(--ss-text)); }
-.systemsketch-block-canvas .TypeAttributeRegion-punctuation { color: var(--ss-text-muted); }
+.systemsketch-block-canvas .TypeAttributeRegion-line b {
+  font-weight: 650;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-type {
+  color: color-mix(in srgb, var(--ss-accent) 68%, var(--ss-text));
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-punctuation {
+  color: var(--ss-text-muted);
+}
 
 .systemsketch-block-canvas .TypeAttributeRegion-chevron {
   position: absolute;
@@ -111,18 +126,45 @@
   line-height: 1;
 }
 
-/* WHY: open branches hide their chrome until asked for, preserving the
-   source-text density Zach chose; a folded branch keeps its chevron visible
-   so its hidden structure never becomes undiscoverable. */
-.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-chevron { left: 0; visibility: hidden; }
-.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-chevron[data-visible] { visibility: visible; }
-.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-row[data-has-children] > .TypeAttributeRegion-line { padding-left: 16px; }
-.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-children { margin-left: 18px; border-left: 2px solid color-mix(in srgb, var(--ss-text-muted) 55%, transparent); padding-left: 8px; }
+/*
+ * WHY: an open branch hides its fold chrome until asked for, keeping the
+ * source-text density Zach chose; a folded branch keeps its chevron visible
+ * so its hidden structure never becomes undiscoverable.
+ */
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-chevron {
+  left: 0;
+  visibility: hidden;
+}
 
-/* Code-style gutter deliberately aligns fold handles independently of nesting. */
-.systemsketch-block-canvas .TypeAttributeRegion--gutter { left: 28px; }
-.systemsketch-block-canvas .TypeAttributeRegion--gutter .TypeAttributeRegion-chevron { left: -20px; visibility: visible; }
-.systemsketch-block-canvas .TypeAttributeRegion--gutter .TypeAttributeRegion-children { margin-left: 12px; border-left: 1px solid color-mix(in srgb, var(--ss-text-muted) 45%, transparent); padding-left: 8px; }
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-chevron[data-visible] {
+  visibility: visible;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-row[data-has-children] > .TypeAttributeRegion-line {
+  padding-left: 16px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-children {
+  margin-left: 18px;
+  border-left: 2px solid color-mix(in srgb, var(--ss-text-muted) 55%, transparent);
+  padding-left: 8px;
+}
+
+/* The code-style gutter deliberately aligns every fold handle to one column, independent of nesting depth. */
+.systemsketch-block-canvas .TypeAttributeRegion--gutter {
+  left: 28px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--gutter .TypeAttributeRegion-chevron {
+  left: -20px;
+  visibility: visible;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--gutter .TypeAttributeRegion-children {
+  margin-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--ss-text-muted) 45%, transparent);
+  padding-left: 8px;
+}
 
 .systemsketch-block-canvas .TypeAttributeRegion-editor {
   width: 100%;

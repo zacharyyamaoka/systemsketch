@@ -90,9 +90,12 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 
 ### Code block
 
-Code is a normal resizable canvas shape with an authored literal. Seed the
-actual CodeMirror-facing props — do not substitute a stock Text shape — so the
-reviewer can exercise the selected-object ribbon and edit transaction:
+Code is a normal resizable canvas shape holding an authored literal in a real
+CodeMirror document. Seed the actual shape — do not substitute a stock Text
+shape — so the reviewer can exercise the shared selection pill (language and
+Font size are ordinary appearance rows; line numbers and the `ch` width
+combobox are the Code-specific contributions) and the click-to-edit
+transaction:
 
 ```json
 {
@@ -105,17 +108,20 @@ reviewer can exercise the selected-object ribbon and edit transaction:
     "h": 220,
     "code": "const ready = true",
     "language": "javascript",
-    "fontSize": 16,
+    "size": "m",
     "showLineNumbers": true,
     "characterWidth": 48
   }
 }
 ```
 
-`characterWidth` is the readable line measure: the selected Code ribbon
-offers common presets and a custom number, while a free tldraw resize updates
-the same value and shows its live `ch` readout. Code is presentation and an
-authored literal only; never seed execution, lint, or inferred-program records.
+`language` is a style (`systemsketch:codeLanguage`) and `size` is tldraw's own
+four-rung size style — the same values every text shape stores — mapped to a
+mono type scale inside the shape. `characterWidth` is the readable line
+measure: the width combobox offers preset rows and a custom number, while a
+free tldraw resize updates the same value and shows its live `ch` readout.
+Code is presentation and an authored literal only; never seed execution,
+lint, or inferred-program records.
 
 For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. Child `x` must clear the parent's left-edge port-label column (~160px), not just sit inside the frame: Expanded ports are vertically centred in the body, so extra top-inset alone leaves `poses` / `list[Pose]` buried under the child. Keep children below the 48px header as well.
 

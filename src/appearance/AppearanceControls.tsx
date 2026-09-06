@@ -3,6 +3,7 @@ import {
   useEditor,
   useRelevantStyles,
   useValue,
+  DefaultSizeStyle,
   type Editor,
   type ReadonlySharedStyleMap,
   type StyleProp,
@@ -25,6 +26,7 @@ import {
   sharedEdgeValue,
   strokeColorOf,
 } from './strokeMeta'
+import { resetCustomFontScale } from './customFontSize'
 import { addTextTarget, selectionHasVisibleText } from './textPresence'
 import {
   applyArrowPresetToSelection,
@@ -179,6 +181,10 @@ export function applyStyle(
   editor.run(() => {
     if (editor.isIn('select')) editor.setStyleForSelectedShapes(style, value)
     editor.setStyleForNextShapes(style, value)
+    // A preset must actually render at its named size: clear any custom scale
+    // in the same history step, or the checked row in the Font size list
+    // (`ContextualControls.tsx`'s `ControlPanel`) would lie.
+    if (style === DefaultSizeStyle) resetCustomFontScale(editor)
   })
 }
 

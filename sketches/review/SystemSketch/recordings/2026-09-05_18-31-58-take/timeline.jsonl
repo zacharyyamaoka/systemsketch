@@ -1,0 +1,493 @@
+{"t": 0.1, "lane": "mark", "text": "take started"}
+{"t": 4.4, "lane": "ui", "name": "focusout", "summary": "focusout button “Start recording · one minute maximum”", "detail": "focus-000001"}
+{"t": 7.4, "lane": "network", "name": "fetch", "summary": "POST /api/recordings/arm → 200 in 7.2 ms", "method": "POST", "url": "/api/recordings/arm", "status": 200, "ok": true, "durationMs": 7.2, "level": "info", "detail": "fetch-000002"}
+{"t": 14.2, "lane": "network", "name": "fetch", "summary": "GET /@fs/home/bam/systemsketch/node_modules/@tldraw/assets/fonts/IBMPlexSans-Medium.woff2 → 200 in 2.9 ms", "method": "GET", "url": "/@fs/home/bam/systemsketch/node_modules/@tldraw/assets/fonts/IBMPlexSans-Medium.woff2", "status": 200, "ok": true, "durationMs": 2.9, "level": "info", "detail": "fetch-000003"}
+{"t": 128.3, "lane": "perf", "name": "raf-stall", "summary": "animation frame gap 121.6 ms", "durationMs": 121.6, "level": "info"}
+{"t": 131.2, "lane": "perf", "name": "long-task", "summary": "main thread blocked for 110.0 ms", "durationMs": 110, "level": "warn", "detail": "long-task-000004"}
+{"t": 140.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1444, 1029], "page": [1239, 1370], "target": "canvas", "button": -1}
+{"t": 167.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1424, 1029], "page": [1219, 1370], "target": "canvas", "button": -1}
+{"t": 188.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1417, 1029], "page": [1212, 1370], "target": "canvas", "button": -1}
+{"t": 188.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1387, 1029], "page": [1182, 1370], "target": "canvas", "button": -1}
+{"t": 207.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1351, 1029], "page": [1146, 1370], "target": "canvas", "button": -1}
+{"t": 207.1, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": true}}], "detail": "store-000005"}
+{"t": 222.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1307, 1029], "page": [1102, 1370], "target": "canvas", "button": -1}
+{"t": 239, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1265, 1029], "page": [1060, 1370], "target": "canvas", "button": -1}
+{"t": 255.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1222, 1025], "page": [1017, 1366], "target": "canvas", "button": -1}
+{"t": 273, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1171, 1013], "page": [966, 1354], "target": "canvas", "button": -1}
+{"t": 288.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1118, 993], "page": [913, 1334], "target": "canvas", "button": -1}
+{"t": 305.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1057, 973], "page": [852, 1314], "target": "canvas", "button": -1}
+{"t": 323.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [993, 957], "page": [788, 1298], "target": "canvas", "button": -1}
+{"t": 339.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [933, 949], "page": [728, 1290], "target": "canvas", "button": -1}
+{"t": 356.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [867, 941], "page": [662, 1282], "target": "canvas", "button": -1}
+{"t": 373, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [806, 933], "page": [601, 1274], "target": "canvas", "button": -1}
+{"t": 389.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [745, 924], "page": [540, 1265], "target": "canvas", "button": -1}
+{"t": 407.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [687, 915], "page": [482, 1255], "target": "canvas", "button": -1}
+{"t": 422.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [635, 907], "page": [430, 1247], "target": "canvas", "button": -1}
+{"t": 439.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [588, 901], "page": [383, 1242], "target": "canvas", "button": -1}
+{"t": 455.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [561, 899], "page": [356, 1239], "target": "canvas", "button": -1}
+{"t": 472.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [550, 897], "page": [345, 1237], "target": "canvas", "button": -1}
+{"t": 489.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [541, 893], "page": [336, 1233], "target": "canvas", "button": -1}
+{"t": 505.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [536, 888], "page": [331, 1229], "target": "canvas", "button": -1}
+{"t": 522.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [529, 881], "page": [324, 1221], "target": "canvas", "button": -1}
+{"t": 538.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [524, 877], "page": [319, 1217], "target": "canvas", "button": -1}
+{"t": 538.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:mapping"}}], "detail": "store-000006"}
+{"t": 555.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [521, 873], "page": [316, 1214], "target": "canvas", "button": -1}
+{"t": 572, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [519, 872], "page": [314, 1213], "target": "canvas", "button": -1}
+{"t": 672.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [518, 871], "page": [313, 1212], "target": "canvas", "button": -1}
+{"t": 689, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [517, 869], "page": [312, 1209], "target": "canvas", "button": -1}
+{"t": 706, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [513, 865], "page": [308, 1205], "target": "canvas", "button": -1}
+{"t": 722.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [505, 859], "page": [300, 1199], "target": "canvas", "button": -1}
+{"t": 739, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [496, 847], "page": [291, 1188], "target": "canvas", "button": -1}
+{"t": 755.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [487, 837], "page": [282, 1178], "target": "canvas", "button": -1}
+{"t": 772, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [476, 825], "page": [271, 1166], "target": "canvas", "button": -1}
+{"t": 788.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [465, 815], "page": [260, 1155], "target": "canvas", "button": -1}
+{"t": 805.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [457, 807], "page": [252, 1148], "target": "canvas", "button": -1}
+{"t": 822.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [451, 803], "page": [246, 1143], "target": "canvas", "button": -1}
+{"t": 838.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [449, 801], "page": [244, 1142], "target": "canvas", "button": -1}
+{"t": 855.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [449, 800], "page": [244, 1141], "target": "canvas", "button": -1}
+{"t": 1056.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [448, 800], "page": [243, 1141], "target": "canvas", "button": -1}
+{"t": 1139.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [447, 800], "page": [242, 1141], "target": "canvas", "button": -1}
+{"t": 1233.9, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [447, 800], "on": "div “canvas”", "detail": "ui-hit-000007"}
+{"t": 1234.2, "lane": "input", "name": "pointer_down", "type": "pointer", "screen": [447, 800], "page": [242, 1141], "target": "canvas", "button": 0}
+{"t": 1234.3, "lane": "state", "from": "select.idle", "to": "select.pointing_shape", "trigger": "pointer_down"}
+{"t": 1239.2, "lane": "action", "name": "chrome-right", "summary": "opened inspector", "level": "info", "detail": "chrome-right-000008"}
+{"t": 1248.1, "lane": "ui", "name": "focusin", "summary": "focusin div[application] “tldraw”", "detail": "focus-000009"}
+{"t": 1248.7, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"selectedShapeIds": ["shape:mapping"]}}], "detail": "store-000010"}
+{"t": 1336.2, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [447, 800], "on": "div “canvas”"}
+{"t": 1336.5, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [447, 800], "page": [242, 1141], "target": "canvas", "button": 0}
+{"t": 1336.5, "lane": "state", "from": "select.pointing_shape", "to": "select.idle", "trigger": "pointer_up"}
+{"t": 1338.1, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [447, 800], "on": "div “canvas”", "detail": "ui-hit-000011"}
+{"t": 1406.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [447, 801], "page": [242, 1141], "target": "canvas", "button": -1}
+{"t": 1422.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [447, 801], "page": [242, 1141], "target": "canvas", "button": -1}
+{"t": 1439.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [446, 801], "page": [241, 1141], "target": "canvas", "button": -1}
+{"t": 1460.7, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [446, 801], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000012"}
+{"t": 1477.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000013"}
+{"t": 1481.4, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.3 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.3, "level": "info", "detail": "fetch-000014"}
+{"t": 1481.6, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000015"}
+{"t": 1553.3, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [446, 801], "on": "div “type-mapping-v1-body”"}
+{"t": 1553.5, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [446, 801], "page": [241, 1141], "target": "canvas", "button": 0}
+{"t": 1553.7, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [446, 800], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000016"}
+{"t": 1557, "lane": "ui", "name": "focusout", "summary": "focusout div[application] “tldraw”", "detail": "focus-000017"}
+{"t": 1557.7, "lane": "ui", "name": "focusin", "summary": "focusin div[textbox]", "detail": "focus-000018"}
+{"t": 1559, "lane": "ui", "name": "focusout", "summary": "focusout div[textbox]", "detail": "focus-000019"}
+{"t": 1561.5, "lane": "ui", "name": "focusin", "summary": "focusin div[textbox]", "detail": "focus-000020"}
+{"t": 1629.9, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [446, 801], "on": "div[textbox]", "detail": "ui-hit-000021"}
+{"t": 1758.5, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [446, 801], "on": "div[textbox]"}
+{"t": 1758.6, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [446, 801], "page": [241, 1141], "target": "canvas", "button": 0}
+{"t": 1758.8, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [446, 800], "on": "div[textbox]", "detail": "ui-hit-000022"}
+{"t": 2105.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [446, 801], "page": [241, 1142], "target": "canvas", "button": -1}
+{"t": 2122.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [446, 804], "page": [241, 1145], "target": "canvas", "button": -1}
+{"t": 2139.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [445, 808], "page": [240, 1149], "target": "canvas", "button": -1}
+{"t": 2156.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [443, 810], "page": [238, 1151], "target": "canvas", "button": -1}
+{"t": 2172.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [443, 811], "page": [238, 1151], "target": "canvas", "button": -1}
+{"t": 2315.9, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [443, 811], "on": "div[textbox]", "detail": "ui-hit-000023"}
+{"t": 2418.5, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [443, 811], "on": "div[textbox]"}
+{"t": 2418.6, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [443, 811], "page": [238, 1151], "target": "canvas", "button": 0}
+{"t": 2418.9, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [443, 810], "on": "div[textbox]", "detail": "ui-hit-000024"}
+{"t": 2505.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [444, 811], "page": [239, 1151], "target": "canvas", "button": -1}
+{"t": 2522.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [446, 813], "page": [241, 1154], "target": "canvas", "button": -1}
+{"t": 2539.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [451, 821], "page": [246, 1162], "target": "canvas", "button": -1}
+{"t": 2555.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [458, 830], "page": [253, 1171], "target": "canvas", "button": -1}
+{"t": 2572.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [467, 847], "page": [262, 1187], "target": "canvas", "button": -1}
+{"t": 2588.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [480, 867], "page": [275, 1207], "target": "canvas", "button": -1}
+{"t": 2605.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [494, 890], "page": [289, 1231], "target": "canvas", "button": -1}
+{"t": 2622.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [507, 913], "page": [302, 1253], "target": "canvas", "button": -1}
+{"t": 2639, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [516, 926], "page": [311, 1267], "target": "canvas", "button": -1}
+{"t": 2639, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}], "detail": "store-000025"}
+{"t": 2656.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [521, 932], "page": [316, 1273], "target": "canvas", "button": -1}
+{"t": 2672.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [522, 933], "page": [317, 1273], "target": "canvas", "button": -1}
+{"t": 2739.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [523, 933], "page": [318, 1273], "target": "canvas", "button": -1}
+{"t": 2753.9, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [523, 933], "on": "div “canvas”", "detail": "ui-hit-000026"}
+{"t": 2755.7, "lane": "ui", "name": "focusout", "summary": "focusout div[textbox]", "detail": "focus-000027"}
+{"t": 2757.6, "lane": "input", "name": "pointer_down", "type": "pointer", "screen": [523, 933], "page": [318, 1273], "target": "canvas", "button": 0}
+{"t": 2757.6, "lane": "state", "from": "select.idle", "to": "select.pointing_canvas", "trigger": "pointer_down"}
+{"t": 2761.4, "lane": "ui", "name": "focusin", "summary": "focusin div[application] “tldraw”", "detail": "focus-000028"}
+{"t": 2761.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"selectedShapeIds": []}}], "detail": "store-000029"}
+{"t": 2855.3, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [523, 933], "on": "div “canvas”"}
+{"t": 2855.6, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [523, 933], "page": [318, 1273], "target": "canvas", "button": 0}
+{"t": 2855.6, "lane": "state", "from": "select.pointing_canvas", "to": "select.idle", "trigger": "pointer_up"}
+{"t": 2856.9, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [522, 932], "on": "div “canvas”", "detail": "ui-hit-000030"}
+{"t": 2977.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000031"}
+{"t": 2981.1, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.2 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.2, "level": "info", "detail": "fetch-000032"}
+{"t": 2981.5, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000033"}
+{"t": 3023.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [521, 931], "page": [316, 1271], "target": "canvas", "button": -1}
+{"t": 3038.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [515, 926], "page": [310, 1267], "target": "canvas", "button": -1}
+{"t": 3055.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [498, 913], "page": [293, 1254], "target": "canvas", "button": -1}
+{"t": 3071.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [472, 899], "page": [267, 1240], "target": "canvas", "button": -1}
+{"t": 3089.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [441, 883], "page": [236, 1224], "target": "canvas", "button": -1}
+{"t": 3105.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [409, 869], "page": [204, 1209], "target": "canvas", "button": -1}
+{"t": 3122, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [374, 855], "page": [169, 1196], "target": "canvas", "button": -1}
+{"t": 3122.1, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:mapping"}}], "detail": "store-000034"}
+{"t": 3138.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [350, 843], "page": [145, 1183], "target": "canvas", "button": -1}
+{"t": 3155.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [334, 834], "page": [129, 1175], "target": "canvas", "button": -1}
+{"t": 3172, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [321, 823], "page": [116, 1164], "target": "canvas", "button": -1}
+{"t": 3188.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [313, 815], "page": [108, 1156], "target": "canvas", "button": -1}
+{"t": 3205.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [307, 809], "page": [102, 1149], "target": "canvas", "button": -1}
+{"t": 3222.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [306, 805], "page": [101, 1145], "target": "canvas", "button": -1}
+{"t": 3238.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [305, 803], "page": [100, 1144], "target": "canvas", "button": -1}
+{"t": 3256.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [305, 803], "page": [100, 1143], "target": "canvas", "button": -1}
+{"t": 3273, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [305, 802], "page": [100, 1143], "target": "canvas", "button": -1}
+{"t": 3289.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [304, 799], "page": [99, 1140], "target": "canvas", "button": -1}
+{"t": 3305.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [304, 797], "page": [99, 1138], "target": "canvas", "button": -1}
+{"t": 3321.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [305, 795], "page": [100, 1136], "target": "canvas", "button": -1}
+{"t": 3338.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [306, 794], "page": [101, 1135], "target": "canvas", "button": -1}
+{"t": 3355.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [307, 793], "page": [102, 1133], "target": "canvas", "button": -1}
+{"t": 3372, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [309, 790], "page": [104, 1131], "target": "canvas", "button": -1}
+{"t": 3388.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [309, 788], "page": [104, 1129], "target": "canvas", "button": -1}
+{"t": 3405.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [310, 785], "page": [105, 1126], "target": "canvas", "button": -1}
+{"t": 3422.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [311, 783], "page": [106, 1124], "target": "canvas", "button": -1}
+{"t": 3438.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [311, 781], "page": [106, 1122], "target": "canvas", "button": -1}
+{"t": 3455.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [311, 780], "page": [106, 1121], "target": "canvas", "button": -1}
+{"t": 3471.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [311, 779], "page": [106, 1119], "target": "canvas", "button": -1}
+{"t": 3488.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [311, 778], "page": [106, 1119], "target": "canvas", "button": -1}
+{"t": 3578.9, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [311, 778], "on": "div “canvas”", "detail": "ui-hit-000035"}
+{"t": 3579.2, "lane": "input", "name": "pointer_down", "type": "pointer", "screen": [311, 778], "page": [106, 1119], "target": "canvas", "button": 0}
+{"t": 3579.2, "lane": "state", "from": "select.idle", "to": "select.pointing_shape", "trigger": "pointer_down"}
+{"t": 3585.1, "lane": "action", "name": "chrome-right", "summary": "opened inspector", "level": "info", "detail": "chrome-right-000036"}
+{"t": 3589.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"selectedShapeIds": ["shape:mapping"]}}], "detail": "store-000037"}
+{"t": 3689.3, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [311, 778], "on": "div “canvas”"}
+{"t": 3689.6, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [311, 778], "page": [106, 1119], "target": "canvas", "button": 0}
+{"t": 3689.6, "lane": "state", "from": "select.pointing_shape", "to": "select.idle", "trigger": "pointer_up"}
+{"t": 3691, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [310, 778], "on": "div “canvas”", "detail": "ui-hit-000038"}
+{"t": 4080, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [311, 778], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000039"}
+{"t": 4202.5, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [311, 778], "on": "div “type-mapping-v1-body”"}
+{"t": 4202.7, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [311, 778], "page": [106, 1119], "target": "canvas", "button": 0}
+{"t": 4203, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [310, 778], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000040"}
+{"t": 4477.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000041"}
+{"t": 4481.2, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.2 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.2, "level": "info", "detail": "fetch-000042"}
+{"t": 4481.6, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000043"}
+{"t": 4510.2, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [311, 778], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000044"}
+{"t": 4616.7, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [311, 778], "on": "div “type-mapping-v1-body”"}
+{"t": 4616.9, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [311, 778], "page": [106, 1119], "target": "canvas", "button": 0}
+{"t": 4617.2, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [310, 778], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000045"}
+{"t": 4620.4, "lane": "ui", "name": "focusout", "summary": "focusout div[application] “tldraw”", "detail": "focus-000046"}
+{"t": 4621.1, "lane": "ui", "name": "focusin", "summary": "focusin div[textbox]", "detail": "focus-000047"}
+{"t": 4622.1, "lane": "ui", "name": "focusout", "summary": "focusout div[textbox]", "detail": "focus-000048"}
+{"t": 4624.4, "lane": "ui", "name": "focusin", "summary": "focusin div[textbox]", "detail": "focus-000049"}
+{"t": 5672.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [309, 778], "page": [104, 1119], "target": "canvas", "button": -1}
+{"t": 5689.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [305, 778], "page": [100, 1119], "target": "canvas", "button": -1}
+{"t": 5705.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [301, 777], "page": [96, 1118], "target": "canvas", "button": -1}
+{"t": 5722.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [295, 775], "page": [90, 1116], "target": "canvas", "button": -1}
+{"t": 5739.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [287, 772], "page": [82, 1113], "target": "canvas", "button": -1}
+{"t": 5755.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [279, 768], "page": [74, 1109], "target": "canvas", "button": -1}
+{"t": 5772.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [273, 765], "page": [68, 1106], "target": "canvas", "button": -1}
+{"t": 5788.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [271, 764], "page": [66, 1105], "target": "canvas", "button": -1}
+{"t": 5805.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [270, 763], "page": [65, 1104], "target": "canvas", "button": -1}
+{"t": 5822, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [269, 763], "page": [64, 1103], "target": "canvas", "button": -1}
+{"t": 5838.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [267, 761], "page": [62, 1101], "target": "canvas", "button": -1}
+{"t": 5855.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [267, 760], "page": [62, 1101], "target": "canvas", "button": -1}
+{"t": 5872, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [266, 758], "page": [61, 1099], "target": "canvas", "button": -1}
+{"t": 5888.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [263, 756], "page": [58, 1097], "target": "canvas", "button": -1}
+{"t": 5905.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [262, 755], "page": [57, 1095], "target": "canvas", "button": -1}
+{"t": 5922, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [261, 754], "page": [56, 1095], "target": "canvas", "button": -1}
+{"t": 5938.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [259, 753], "page": [54, 1094], "target": "canvas", "button": -1}
+{"t": 5955.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [257, 753], "page": [52, 1094], "target": "canvas", "button": -1}
+{"t": 5972.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [255, 754], "page": [50, 1095], "target": "canvas", "button": -1}
+{"t": 5977.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000050"}
+{"t": 5981.2, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.2 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.2, "level": "info", "detail": "fetch-000051"}
+{"t": 5981.5, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000052"}
+{"t": 5988.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [250, 756], "page": [45, 1097], "target": "canvas", "button": -1}
+{"t": 6005.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [246, 759], "page": [41, 1100], "target": "canvas", "button": -1}
+{"t": 6022.2, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}, {"op": "update", "id": "instance:instance", "type": "instance", "delta": {"cursor": {"type": "ew-resize", "rotation": 0}}}], "detail": "store-000053"}
+{"t": 6022.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [244, 764], "page": [39, 1105], "target": "canvas", "button": -1}
+{"t": 6038.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [244, 769], "page": [39, 1109], "target": "canvas", "button": -1}
+{"t": 6055.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [247, 773], "page": [42, 1113], "target": "canvas", "button": -1}
+{"t": 6072.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [253, 777], "page": [48, 1117], "target": "canvas", "button": -1}
+{"t": 6089.1, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"cursor": {"type": "default", "rotation": 0}}}, {"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:mapping"}}], "detail": "store-000054"}
+{"t": 6089.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [261, 779], "page": [56, 1119], "target": "canvas", "button": -1}
+{"t": 6105.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [270, 779], "page": [65, 1119], "target": "canvas", "button": -1}
+{"t": 6122.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [277, 778], "page": [72, 1119], "target": "canvas", "button": -1}
+{"t": 6138.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [281, 777], "page": [76, 1117], "target": "canvas", "button": -1}
+{"t": 6155.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [283, 775], "page": [78, 1115], "target": "canvas", "button": -1}
+{"t": 6172.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [285, 772], "page": [80, 1113], "target": "canvas", "button": -1}
+{"t": 6189, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [285, 769], "page": [80, 1109], "target": "canvas", "button": -1}
+{"t": 6206, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [285, 763], "page": [80, 1104], "target": "canvas", "button": -1}
+{"t": 6222.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [285, 758], "page": [80, 1099], "target": "canvas", "button": -1}
+{"t": 6239, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [284, 755], "page": [79, 1095], "target": "canvas", "button": -1}
+{"t": 6255.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [283, 752], "page": [78, 1093], "target": "canvas", "button": -1}
+{"t": 6272.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [281, 751], "page": [76, 1091], "target": "canvas", "button": -1}
+{"t": 6289.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [279, 750], "page": [74, 1091], "target": "canvas", "button": -1}
+{"t": 6306, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [277, 749], "page": [72, 1090], "target": "canvas", "button": -1}
+{"t": 6322.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [273, 749], "page": [68, 1090], "target": "canvas", "button": -1}
+{"t": 6339.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [271, 749], "page": [66, 1090], "target": "canvas", "button": -1}
+{"t": 6355.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [268, 750], "page": [63, 1091], "target": "canvas", "button": -1}
+{"t": 6372.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [265, 751], "page": [60, 1092], "target": "canvas", "button": -1}
+{"t": 6388.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [262, 753], "page": [57, 1093], "target": "canvas", "button": -1}
+{"t": 6405.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [261, 754], "page": [56, 1095], "target": "canvas", "button": -1}
+{"t": 6422, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [261, 755], "page": [56, 1096], "target": "canvas", "button": -1}
+{"t": 6438.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [261, 756], "page": [56, 1097], "target": "canvas", "button": -1}
+{"t": 6455.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [260, 757], "page": [55, 1097], "target": "canvas", "button": -1}
+{"t": 6472.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [260, 758], "page": [55, 1099], "target": "canvas", "button": -1}
+{"t": 6488.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [261, 761], "page": [56, 1101], "target": "canvas", "button": -1}
+{"t": 6505.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [263, 765], "page": [58, 1105], "target": "canvas", "button": -1}
+{"t": 6522.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [267, 771], "page": [62, 1111], "target": "canvas", "button": -1}
+{"t": 6539.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [271, 777], "page": [66, 1117], "target": "canvas", "button": -1}
+{"t": 6556.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [276, 782], "page": [71, 1123], "target": "canvas", "button": -1}
+{"t": 6572.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [288, 790], "page": [83, 1131], "target": "canvas", "button": -1}
+{"t": 6588.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [307, 800], "page": [102, 1141], "target": "canvas", "button": -1}
+{"t": 6605.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [327, 805], "page": [122, 1145], "target": "canvas", "button": -1}
+{"t": 6622.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [341, 808], "page": [136, 1149], "target": "canvas", "button": -1}
+{"t": 6639, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [354, 812], "page": [149, 1153], "target": "canvas", "button": -1}
+{"t": 6655.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [358, 815], "page": [153, 1156], "target": "canvas", "button": -1}
+{"t": 6672.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [359, 817], "page": [154, 1158], "target": "canvas", "button": -1}
+{"t": 6689.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [360, 820], "page": [155, 1161], "target": "canvas", "button": -1}
+{"t": 6705.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [362, 827], "page": [157, 1167], "target": "canvas", "button": -1}
+{"t": 6722.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [367, 843], "page": [162, 1183], "target": "canvas", "button": -1}
+{"t": 6738.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [376, 865], "page": [171, 1206], "target": "canvas", "button": -1}
+{"t": 6755.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [383, 886], "page": [178, 1227], "target": "canvas", "button": -1}
+{"t": 6772.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [390, 905], "page": [185, 1246], "target": "canvas", "button": -1}
+{"t": 6772.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}], "detail": "store-000055"}
+{"t": 6788.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [395, 917], "page": [190, 1257], "target": "canvas", "button": -1}
+{"t": 6806, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [397, 919], "page": [192, 1260], "target": "canvas", "button": -1}
+{"t": 6872.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [397, 919], "page": [192, 1259], "target": "canvas", "button": -1}
+{"t": 6888.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [397, 919], "page": [192, 1259], "target": "canvas", "button": -1}
+{"t": 6927, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [397, 919], "on": "div “canvas”", "detail": "ui-hit-000056"}
+{"t": 6928.4, "lane": "ui", "name": "focusout", "summary": "focusout div[textbox]", "detail": "focus-000057"}
+{"t": 6930.2, "lane": "input", "name": "pointer_down", "type": "pointer", "screen": [397, 919], "page": [192, 1259], "target": "canvas", "button": 0}
+{"t": 6930.3, "lane": "state", "from": "select.idle", "to": "select.pointing_canvas", "trigger": "pointer_down"}
+{"t": 6933.8, "lane": "ui", "name": "focusin", "summary": "focusin div[application] “tldraw”", "detail": "focus-000058"}
+{"t": 6938.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"selectedShapeIds": []}}], "detail": "store-000059"}
+{"t": 7059.5, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [397, 919], "on": "div “canvas”"}
+{"t": 7059.8, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [397, 919], "page": [192, 1259], "target": "canvas", "button": 0}
+{"t": 7059.8, "lane": "state", "from": "select.pointing_canvas", "to": "select.idle", "trigger": "pointer_up"}
+{"t": 7061.1, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [397, 918], "on": "div “canvas”", "detail": "ui-hit-000060"}
+{"t": 7088.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [397, 915], "page": [192, 1256], "target": "canvas", "button": -1}
+{"t": 7105.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [397, 911], "page": [192, 1252], "target": "canvas", "button": -1}
+{"t": 7122.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [395, 907], "page": [190, 1247], "target": "canvas", "button": -1}
+{"t": 7138.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [391, 897], "page": [186, 1238], "target": "canvas", "button": -1}
+{"t": 7155.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [387, 885], "page": [182, 1225], "target": "canvas", "button": -1}
+{"t": 7172.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [380, 867], "page": [175, 1208], "target": "canvas", "button": -1}
+{"t": 7188.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [374, 850], "page": [169, 1191], "target": "canvas", "button": -1}
+{"t": 7205.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [369, 837], "page": [164, 1177], "target": "canvas", "button": -1}
+{"t": 7205.1, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:mapping"}}], "detail": "store-000061"}
+{"t": 7222.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [362, 823], "page": [157, 1164], "target": "canvas", "button": -1}
+{"t": 7239, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [356, 815], "page": [151, 1156], "target": "canvas", "button": -1}
+{"t": 7255.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [352, 810], "page": [147, 1151], "target": "canvas", "button": -1}
+{"t": 7272.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [351, 808], "page": [146, 1149], "target": "canvas", "button": -1}
+{"t": 7288.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [349, 807], "page": [144, 1147], "target": "canvas", "button": -1}
+{"t": 7305.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [348, 805], "page": [143, 1146], "target": "canvas", "button": -1}
+{"t": 7322.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [347, 803], "page": [142, 1143], "target": "canvas", "button": -1}
+{"t": 7338.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [346, 800], "page": [141, 1141], "target": "canvas", "button": -1}
+{"t": 7355.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [345, 798], "page": [140, 1139], "target": "canvas", "button": -1}
+{"t": 7372.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [343, 795], "page": [138, 1135], "target": "canvas", "button": -1}
+{"t": 7388.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [342, 795], "page": [137, 1135], "target": "canvas", "button": -1}
+{"t": 7477.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000062"}
+{"t": 7481.8, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.9 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.9, "level": "info", "detail": "fetch-000063"}
+{"t": 7482.1, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000064"}
+{"t": 7656.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [342, 795], "page": [137, 1136], "target": "canvas", "button": -1}
+{"t": 7672.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [341, 796], "page": [136, 1137], "target": "canvas", "button": -1}
+{"t": 7688.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [341, 797], "page": [136, 1137], "target": "canvas", "button": -1}
+{"t": 7721.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [341, 798], "page": [136, 1139], "target": "canvas", "button": -1}
+{"t": 7738.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [341, 800], "page": [136, 1141], "target": "canvas", "button": -1}
+{"t": 7755.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [341, 801], "page": [136, 1142], "target": "canvas", "button": -1}
+{"t": 7789.2, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [341, 801], "on": "div “canvas”", "detail": "ui-hit-000065"}
+{"t": 7789.4, "lane": "input", "name": "pointer_down", "type": "pointer", "screen": [341, 801], "page": [136, 1142], "target": "canvas", "button": 0}
+{"t": 7789.4, "lane": "state", "from": "select.idle", "to": "select.pointing_shape", "trigger": "pointer_down"}
+{"t": 7795.8, "lane": "action", "name": "chrome-right", "summary": "opened inspector", "level": "info", "detail": "chrome-right-000066"}
+{"t": 7801.2, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"selectedShapeIds": ["shape:mapping"]}}], "detail": "store-000067"}
+{"t": 7884.5, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [341, 801], "on": "div “canvas”"}
+{"t": 7884.8, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [341, 801], "page": [136, 1142], "target": "canvas", "button": 0}
+{"t": 7884.8, "lane": "state", "from": "select.pointing_shape", "to": "select.idle", "trigger": "pointer_up"}
+{"t": 7886, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [341, 801], "on": "div “canvas”", "detail": "ui-hit-000068"}
+{"t": 8004.1, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [341, 801], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000069"}
+{"t": 8106.6, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [341, 801], "on": "div “type-mapping-v1-body”"}
+{"t": 8106.7, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [341, 801], "page": [136, 1142], "target": "canvas", "button": 0}
+{"t": 8106.9, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [341, 801], "on": "div “type-mapping-v1-body”", "detail": "ui-hit-000070"}
+{"t": 8109.7, "lane": "ui", "name": "focusout", "summary": "focusout div[application] “tldraw”", "detail": "focus-000071"}
+{"t": 8110.5, "lane": "ui", "name": "focusin", "summary": "focusin div[textbox]", "detail": "focus-000072"}
+{"t": 8111.5, "lane": "ui", "name": "focusout", "summary": "focusout div[textbox]", "detail": "focus-000073"}
+{"t": 8113.9, "lane": "ui", "name": "focusin", "summary": "focusin div[textbox]", "detail": "focus-000074"}
+{"t": 8805.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [343, 801], "page": [138, 1142], "target": "canvas", "button": -1}
+{"t": 8822.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [344, 800], "page": [139, 1141], "target": "canvas", "button": -1}
+{"t": 8838.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [348, 800], "page": [143, 1141], "target": "canvas", "button": -1}
+{"t": 8855.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [356, 799], "page": [151, 1140], "target": "canvas", "button": -1}
+{"t": 8872.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [365, 799], "page": [160, 1140], "target": "canvas", "button": -1}
+{"t": 8888.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [375, 799], "page": [170, 1140], "target": "canvas", "button": -1}
+{"t": 8905.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [385, 799], "page": [180, 1140], "target": "canvas", "button": -1}
+{"t": 8922.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [394, 799], "page": [189, 1140], "target": "canvas", "button": -1}
+{"t": 8938.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [401, 800], "page": [196, 1141], "target": "canvas", "button": -1}
+{"t": 8955.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [408, 801], "page": [203, 1142], "target": "canvas", "button": -1}
+{"t": 8972, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [420, 804], "page": [215, 1145], "target": "canvas", "button": -1}
+{"t": 8977.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000075"}
+{"t": 8981.9, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 4 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 4, "level": "info", "detail": "fetch-000076"}
+{"t": 8982.3, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000077"}
+{"t": 8989.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [430, 805], "page": [225, 1145], "target": "canvas", "button": -1}
+{"t": 9005.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [436, 805], "page": [231, 1145], "target": "canvas", "button": -1}
+{"t": 9022.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [441, 805], "page": [236, 1145], "target": "canvas", "button": -1}
+{"t": 9038.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [443, 804], "page": [238, 1145], "target": "canvas", "button": -1}
+{"t": 9055.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [444, 803], "page": [239, 1144], "target": "canvas", "button": -1}
+{"t": 9071.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [445, 803], "page": [240, 1143], "target": "canvas", "button": -1}
+{"t": 9088.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [445, 803], "page": [240, 1143], "target": "canvas", "button": -1}
+{"t": 9121.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [446, 803], "page": [241, 1143], "target": "canvas", "button": -1}
+{"t": 9138.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [447, 802], "page": [242, 1143], "target": "canvas", "button": -1}
+{"t": 9155.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [449, 802], "page": [244, 1143], "target": "canvas", "button": -1}
+{"t": 9172.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [449, 801], "page": [244, 1142], "target": "canvas", "button": -1}
+{"t": 9188.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [451, 801], "page": [246, 1142], "target": "canvas", "button": -1}
+{"t": 9205.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [452, 801], "page": [247, 1142], "target": "canvas", "button": -1}
+{"t": 9222.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [454, 801], "page": [249, 1142], "target": "canvas", "button": -1}
+{"t": 9239.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [459, 802], "page": [254, 1143], "target": "canvas", "button": -1}
+{"t": 9255.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [466, 802], "page": [261, 1143], "target": "canvas", "button": -1}
+{"t": 9272.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [471, 802], "page": [266, 1143], "target": "canvas", "button": -1}
+{"t": 9288.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [475, 801], "page": [270, 1142], "target": "canvas", "button": -1}
+{"t": 9305.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [476, 801], "page": [271, 1141], "target": "canvas", "button": -1}
+{"t": 9307.2, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [476, 801], "on": "div[textbox]", "detail": "ui-hit-000078"}
+{"t": 9434.7, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [476, 801], "on": "div[textbox]"}
+{"t": 9434.8, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [476, 801], "page": [271, 1141], "target": "canvas", "button": 0}
+{"t": 9435.2, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [476, 800], "on": "div[textbox]", "detail": "ui-hit-000079"}
+{"t": 9519.1, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [476, 801], "on": "div[textbox]", "detail": "ui-hit-000080"}
+{"t": 9640, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [476, 801], "on": "div[textbox]"}
+{"t": 9640.1, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [476, 801], "page": [271, 1141], "target": "canvas", "button": 0}
+{"t": 9640.4, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [476, 800], "on": "div[textbox]", "detail": "ui-hit-000081"}
+{"t": 9805.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [477, 802], "page": [272, 1143], "target": "canvas", "button": -1}
+{"t": 9822.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [479, 807], "page": [274, 1147], "target": "canvas", "button": -1}
+{"t": 9839.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [483, 816], "page": [278, 1157], "target": "canvas", "button": -1}
+{"t": 9855.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [490, 828], "page": [285, 1169], "target": "canvas", "button": -1}
+{"t": 9872, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [499, 850], "page": [294, 1191], "target": "canvas", "button": -1}
+{"t": 9888.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [506, 873], "page": [301, 1213], "target": "canvas", "button": -1}
+{"t": 9905.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [514, 899], "page": [309, 1239], "target": "canvas", "button": -1}
+{"t": 9922, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [520, 916], "page": [315, 1257], "target": "canvas", "button": -1}
+{"t": 9938.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [524, 925], "page": [319, 1266], "target": "canvas", "button": -1}
+{"t": 9938.8, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}], "detail": "store-000082"}
+{"t": 9955.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [527, 931], "page": [322, 1272], "target": "canvas", "button": -1}
+{"t": 9972.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [528, 933], "page": [323, 1274], "target": "canvas", "button": -1}
+{"t": 10038.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [529, 933], "page": [324, 1274], "target": "canvas", "button": -1}
+{"t": 10059, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [529, 933], "on": "div “canvas”", "detail": "ui-hit-000083"}
+{"t": 10060.1, "lane": "ui", "name": "focusout", "summary": "focusout div[textbox]", "detail": "focus-000084"}
+{"t": 10061.9, "lane": "input", "name": "pointer_down", "type": "pointer", "screen": [529, 933], "page": [324, 1274], "target": "canvas", "button": 0}
+{"t": 10061.9, "lane": "state", "from": "select.idle", "to": "select.pointing_canvas", "trigger": "pointer_down"}
+{"t": 10066, "lane": "ui", "name": "focusin", "summary": "focusin div[application] “tldraw”", "detail": "focus-000085"}
+{"t": 10072, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"selectedShapeIds": []}}], "detail": "store-000086"}
+{"t": 10160.5, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [529, 933], "on": "div “canvas”"}
+{"t": 10160.7, "lane": "input", "name": "pointer_up", "type": "pointer", "screen": [529, 933], "page": [324, 1274], "target": "canvas", "button": 0}
+{"t": 10160.7, "lane": "state", "from": "select.pointing_canvas", "to": "select.idle", "trigger": "pointer_up"}
+{"t": 10162, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [529, 933], "on": "div “canvas”", "detail": "ui-hit-000087"}
+{"t": 10239, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [529, 931], "page": [324, 1272], "target": "canvas", "button": -1}
+{"t": 10255.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [529, 928], "page": [324, 1269], "target": "canvas", "button": -1}
+{"t": 10272.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [529, 924], "page": [324, 1265], "target": "canvas", "button": -1}
+{"t": 10288.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [529, 919], "page": [324, 1260], "target": "canvas", "button": -1}
+{"t": 10305.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [528, 915], "page": [323, 1256], "target": "canvas", "button": -1}
+{"t": 10322.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [527, 912], "page": [322, 1253], "target": "canvas", "button": -1}
+{"t": 10338.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [526, 909], "page": [321, 1249], "target": "canvas", "button": -1}
+{"t": 10355.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [525, 904], "page": [320, 1245], "target": "canvas", "button": -1}
+{"t": 10372.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [522, 897], "page": [317, 1238], "target": "canvas", "button": -1}
+{"t": 10388.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [519, 889], "page": [314, 1230], "target": "canvas", "button": -1}
+{"t": 10405.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [517, 883], "page": [312, 1224], "target": "canvas", "button": -1}
+{"t": 10422.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [513, 879], "page": [308, 1219], "target": "canvas", "button": -1}
+{"t": 10438.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [512, 875], "page": [307, 1215], "target": "canvas", "button": -1}
+{"t": 10438.7, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:mapping"}}], "detail": "store-000088"}
+{"t": 10455.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [509, 867], "page": [304, 1208], "target": "canvas", "button": -1}
+{"t": 10472.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [505, 859], "page": [300, 1200], "target": "canvas", "button": -1}
+{"t": 10477.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000089"}
+{"t": 10481.2, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.2 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.2, "level": "info", "detail": "fetch-000090"}
+{"t": 10481.6, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000091"}
+{"t": 10488.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [501, 853], "page": [296, 1194], "target": "canvas", "button": -1}
+{"t": 10505.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [497, 849], "page": [292, 1189], "target": "canvas", "button": -1}
+{"t": 10522.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [493, 843], "page": [288, 1184], "target": "canvas", "button": -1}
+{"t": 10539.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [491, 841], "page": [286, 1181], "target": "canvas", "button": -1}
+{"t": 10555.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [488, 839], "page": [283, 1180], "target": "canvas", "button": -1}
+{"t": 10572.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [485, 839], "page": [280, 1179], "target": "canvas", "button": -1}
+{"t": 10588.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [476, 841], "page": [271, 1181], "target": "canvas", "button": -1}
+{"t": 10605.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [461, 845], "page": [256, 1186], "target": "canvas", "button": -1}
+{"t": 10622.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [436, 855], "page": [231, 1196], "target": "canvas", "button": -1}
+{"t": 10639.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [403, 874], "page": [198, 1215], "target": "canvas", "button": -1}
+{"t": 10656.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [363, 898], "page": [158, 1239], "target": "canvas", "button": -1}
+{"t": 10672.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [315, 929], "page": [110, 1269], "target": "canvas", "button": -1}
+{"t": 10672.6, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}], "detail": "store-000092"}
+{"t": 10688.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [266, 961], "page": [61, 1301], "target": "canvas", "button": -1}
+{"t": 10705.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [218, 990], "page": [13, 1331], "target": "canvas", "button": -1}
+{"t": 10705.5, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:cue-step4"}}], "detail": "store-000093"}
+{"t": 10715.8, "lane": "network", "name": "fetch", "summary": "GET /api/release → 200 in 3.2 ms", "method": "GET", "url": "/api/release", "status": 200, "ok": true, "durationMs": 3.2, "level": "info", "detail": "fetch-000094"}
+{"t": 10722.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [173, 1018], "page": [-32, 1359], "target": "canvas", "button": -1}
+{"t": 10738.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [127, 1046], "page": [-78, 1387], "target": "canvas", "button": -1}
+{"t": 10738.8, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}], "detail": "store-000095"}
+{"t": 10755.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [93, 1069], "page": [-112, 1409], "target": "canvas", "button": -1}
+{"t": 10772.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [57, 1093], "page": [-148, 1434], "target": "canvas", "button": -1}
+{"t": 10788.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [25, 1113], "page": [-180, 1454], "target": "canvas", "button": -1}
+{"t": 10805.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [0, 1128], "page": [-205, 1469], "target": "canvas", "button": -1}
+{"t": 10805.3, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": false}}], "detail": "store-000096"}
+{"t": 11173, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [55, 1174], "page": [-150, 1515], "target": "canvas", "button": -1}
+{"t": 11173.1, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": true}}], "detail": "store-000097"}
+{"t": 11188.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [163, 1174], "page": [-42, 1515], "target": "canvas", "button": -1}
+{"t": 11205.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [330, 1173], "page": [125, 1513], "target": "canvas", "button": -1}
+{"t": 11222.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [494, 1171], "page": [289, 1512], "target": "canvas", "button": -1}
+{"t": 11239.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [683, 1169], "page": [478, 1509], "target": "canvas", "button": -1}
+{"t": 11239.2, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:cue-step4"}}], "detail": "store-000098"}
+{"t": 11257.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [862, 1167], "page": [657, 1508], "target": "canvas", "button": -1}
+{"t": 11257.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": false}}], "detail": "store-000099"}
+{"t": 11272.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1030, 1166], "page": [825, 1507], "target": "canvas", "button": -1}
+{"t": 11272.8, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": null}}, {"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": true}}], "detail": "store-000100"}
+{"t": 11288.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1181, 1165], "page": [976, 1505], "target": "canvas", "button": -1}
+{"t": 11306.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1299, 1165], "page": [1094, 1505], "target": "canvas", "button": -1}
+{"t": 11306.9, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": false}}], "detail": "store-000101"}
+{"t": 11322.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1402, 1169], "page": [1197, 1509], "target": "canvas", "button": -1}
+{"t": 11339, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1489, 1173], "page": [1284, 1513], "target": "canvas", "button": -1}
+{"t": 11355.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1541, 1174], "page": [1336, 1515], "target": "canvas", "button": -1}
+{"t": 11371.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1574, 1177], "page": [1369, 1517], "target": "canvas", "button": -1}
+{"t": 11388.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1586, 1177], "page": [1381, 1517], "target": "canvas", "button": -1}
+{"t": 11405.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1589, 1177], "page": [1384, 1518], "target": "canvas", "button": -1}
+{"t": 11421.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1589, 1177], "page": [1384, 1518], "target": "canvas", "button": -1}
+{"t": 11455.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1587, 1174], "page": [1382, 1515], "target": "canvas", "button": -1}
+{"t": 11472, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1571, 1161], "page": [1366, 1501], "target": "canvas", "button": -1}
+{"t": 11488.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1547, 1137], "page": [1342, 1478], "target": "canvas", "button": -1}
+{"t": 11505.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1512, 1104], "page": [1307, 1445], "target": "canvas", "button": -1}
+{"t": 11522.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1475, 1065], "page": [1270, 1406], "target": "canvas", "button": -1}
+{"t": 11539.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1440, 1031], "page": [1235, 1371], "target": "canvas", "button": -1}
+{"t": 11539.7, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": true}}], "detail": "store-000102"}
+{"t": 11555.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1415, 1001], "page": [1210, 1342], "target": "canvas", "button": -1}
+{"t": 11572.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1392, 975], "page": [1187, 1315], "target": "canvas", "button": -1}
+{"t": 11588.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1372, 943], "page": [1167, 1283], "target": "canvas", "button": -1}
+{"t": 11605.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1348, 891], "page": [1143, 1231], "target": "canvas", "button": -1}
+{"t": 11622.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1329, 823], "page": [1124, 1163], "target": "canvas", "button": -1}
+{"t": 11638.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1308, 743], "page": [1103, 1083], "target": "canvas", "button": -1}
+{"t": 11656.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1289, 661], "page": [1084, 1002], "target": "canvas", "button": -1}
+{"t": 11672.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1269, 583], "page": [1064, 923], "target": "canvas", "button": -1}
+{"t": 11689.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1249, 505], "page": [1044, 846], "target": "canvas", "button": -1}
+{"t": 11705.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1236, 432], "page": [1031, 773], "target": "canvas", "button": -1}
+{"t": 11722.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1224, 349], "page": [1019, 690], "target": "canvas", "button": -1}
+{"t": 11738.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1215, 272], "page": [1010, 613], "target": "canvas", "button": -1}
+{"t": 11755.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1212, 215], "page": [1007, 555], "target": "canvas", "button": -1}
+{"t": 11755.5, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance_page_state:page:page", "type": "instance_page_state", "delta": {"hoveredShapeId": "shape:priorart"}}], "detail": "store-000103"}
+{"t": 11772, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1207, 170], "page": [1002, 511], "target": "canvas", "button": -1}
+{"t": 11788.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1200, 139], "page": [995, 480], "target": "canvas", "button": -1}
+{"t": 11806.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1195, 127], "page": [990, 467], "target": "canvas", "button": -1}
+{"t": 11822.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1194, 121], "page": [989, 461], "target": "canvas", "button": -1}
+{"t": 11838.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1193, 119], "page": [988, 460], "target": "canvas", "button": -1}
+{"t": 11855.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1193, 118], "page": [988, 459], "target": "canvas", "button": -1}
+{"t": 11889, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1193, 117], "page": [988, 458], "target": "canvas", "button": -1}
+{"t": 11922.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1191, 115], "page": [986, 456], "target": "canvas", "button": -1}
+{"t": 11939.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1189, 111], "page": [984, 452], "target": "canvas", "button": -1}
+{"t": 11955.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1183, 107], "page": [978, 448], "target": "canvas", "button": -1}
+{"t": 11972.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1177, 103], "page": [972, 443], "target": "canvas", "button": -1}
+{"t": 11977.9, "lane": "workspace", "name": "stat", "summary": "board revision check started", "level": "info", "detail": "stat-000104"}
+{"t": 11981.8, "lane": "network", "name": "fetch", "summary": "GET /api/workspace/stat?path=<redacted> → 200 in 3.8 ms", "method": "GET", "url": "/api/workspace/stat?path=<redacted>", "status": 200, "ok": true, "durationMs": 3.8, "level": "info", "detail": "fetch-000105"}
+{"t": 11982.2, "lane": "workspace", "name": "stat", "summary": "board revision check completed", "level": "info", "detail": "stat-000106"}
+{"t": 11988.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1169, 96], "page": [964, 437], "target": "canvas", "button": -1}
+{"t": 12006.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1159, 89], "page": [954, 430], "target": "canvas", "button": -1}
+{"t": 12022.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1154, 85], "page": [949, 425], "target": "canvas", "button": -1}
+{"t": 12038.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1147, 81], "page": [942, 422], "target": "canvas", "button": -1}
+{"t": 12055.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1142, 77], "page": [937, 417], "target": "canvas", "button": -1}
+{"t": 12072, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1138, 73], "page": [933, 414], "target": "canvas", "button": -1}
+{"t": 12088.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1135, 71], "page": [930, 411], "target": "canvas", "button": -1}
+{"t": 12105.5, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1133, 69], "page": [928, 410], "target": "canvas", "button": -1}
+{"t": 12122.2, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1131, 69], "page": [926, 409], "target": "canvas", "button": -1}
+{"t": 12138.7, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1130, 68], "page": [925, 409], "target": "canvas", "button": -1}
+{"t": 12155.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1127, 65], "page": [922, 406], "target": "canvas", "button": -1}
+{"t": 12172.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1123, 61], "page": [918, 402], "target": "canvas", "button": -1}
+{"t": 12188.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1119, 57], "page": [914, 398], "target": "canvas", "button": -1}
+{"t": 12206.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1116, 53], "page": [911, 394], "target": "canvas", "button": -1}
+{"t": 12206.4, "lane": "store", "source": "user", "ops": [{"op": "update", "id": "instance:instance", "type": "instance", "delta": {"isHoveringCanvas": false}}], "detail": "store-000107"}
+{"t": 12222.1, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1113, 50], "page": [908, 391], "target": "canvas", "button": -1}
+{"t": 12239, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1109, 47], "page": [904, 388], "target": "canvas", "button": -1}
+{"t": 12255.4, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1107, 45], "page": [902, 386], "target": "canvas", "button": -1}
+{"t": 12272, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1105, 43], "page": [900, 384], "target": "canvas", "button": -1}
+{"t": 12288.8, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1102, 41], "page": [897, 382], "target": "canvas", "button": -1}
+{"t": 12305.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1101, 40], "page": [896, 381], "target": "canvas", "button": -1}
+{"t": 12321.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1099, 39], "page": [894, 379], "target": "canvas", "button": -1}
+{"t": 12338.6, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1098, 38], "page": [893, 379], "target": "canvas", "button": -1}
+{"t": 12355.3, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1098, 37], "page": [893, 378], "target": "canvas", "button": -1}
+{"t": 12371.9, "lane": "input", "name": "pointer_move", "type": "pointer", "screen": [1097, 37], "page": [892, 378], "target": "canvas", "button": -1}
+{"t": 12415.3, "lane": "dom", "event": "pointerdown", "button": 0, "buttons": 1, "pointerType": "mouse", "screen": [1097, 37], "on": "button “Stop and save”", "detail": "ui-hit-000108"}
+{"t": 12415.5, "lane": "ui", "name": "focusout", "summary": "focusout div[application] “tldraw”", "detail": "focus-000109"}
+{"t": 12415.7, "lane": "ui", "name": "focusin", "summary": "focusin button “Stop and save”", "detail": "focus-000110"}
+{"t": 12517.6, "lane": "dom", "event": "pointerup", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [1097, 37], "on": "button “Stop and save”"}
+{"t": 12518.1, "lane": "dom", "event": "click", "button": 0, "buttons": 0, "pointerType": "mouse", "screen": [1097, 37], "on": "button “Stop and save”", "detail": "ui-hit-000111"}

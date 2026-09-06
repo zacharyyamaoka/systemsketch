@@ -3,6 +3,7 @@ import type { SharedStyle } from 'tldraw'
 import { FIGJAM_COLOR_NAMES, FIGJAM_PALETTE_COLUMNS } from '../appearance/figjamPalette'
 import { isCustomColor } from '../appearance/customColors'
 import { ASYNC_LINE_VALUE, type StrokeMetaField } from '../appearance/strokeMeta'
+import { CODE_LANGUAGES, CODE_LANGUAGE_LABELS } from '../code/codeModel'
 
 export type ContextualControlKind =
   | 'geo'
@@ -11,6 +12,7 @@ export type ContextualControlKind =
   | 'dash'
   | 'lineStyle'
   | 'strokeColor'
+  | 'codeLanguage'
   | 'size'
   | 'weight'
   | 'font'
@@ -151,6 +153,8 @@ const ARROWHEAD_OPTIONS = [
   option('bar', 'Line'),
 ] as const
 
+const CODE_LANGUAGE_OPTIONS = CODE_LANGUAGES.map((value) => option(value, CODE_LANGUAGE_LABELS[value]))
+
 const GEO_OPTIONS = [
   option('rectangle', 'Rectangle'),
   option('ellipse', 'Ellipse'),
@@ -197,6 +201,9 @@ export const CONTEXTUAL_CONTROL_REGISTRY: Readonly<Record<ContextualControlKind,
     layout: 'swatches', trigger: 'icon', columns: FIGJAM_PALETTE_COLUMNS,
     meta: 'color',
   },
+  codeLanguage: {
+    kind: 'codeLanguage', label: 'Language', options: CODE_LANGUAGE_OPTIONS, layout: 'list', trigger: 'text',
+  },
   size: { kind: 'size', label: 'Font size', options: SIZE_OPTIONS, layout: 'list', trigger: 'text' },
   weight: { kind: 'weight', label: 'Weight', options: WEIGHT_OPTIONS, layout: 'row', trigger: 'value' },
   font: { kind: 'font', label: 'Typeface', options: FONT_OPTIONS, layout: 'list', trigger: 'icon' },
@@ -228,7 +235,10 @@ export const SHAPE_CONTEXTUAL_RECIPE: ContextualControlRecipe = {
   groups: [
     { id: 'identity', items: ['geo'] },
     { id: 'paint', items: ['color', 'strokeColor'] },
-    { id: 'type', items: ['font', 'size'] },
+    // `codeLanguage` is absent from every candidate list except a selected
+    // Code block's own — see `buildAppearanceControls` — so it costs nothing
+    // for any other shape's recipe to carry the slot.
+    { id: 'type', items: ['codeLanguage', 'font', 'size'] },
     { id: 'alignment', items: ['align', 'verticalAlign'] },
   ],
 }

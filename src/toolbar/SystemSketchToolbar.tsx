@@ -126,6 +126,8 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
   { id: FLOATING_PORT_TOOL_ID, label: 'Port', icon: <FloatingPortIcon /> },
+  // Type intentionally has no key: T stays stock text, so a Type is reached
+  // from this shared slot rather than a letter collision.
   { id: TYPE_TOOL_ID, label: 'Type', icon: <TypeIcon /> },
   // Callout intentionally has no key: its two-click interaction is reached from
   // the shared system-design muscle-memory slot, not from a letter collision.

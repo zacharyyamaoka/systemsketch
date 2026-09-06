@@ -37,6 +37,8 @@
     "test:propagation-focus": "node tests/propagation_focus_smoke.mjs",
     "test:selection-count": "node tests/selection_count_removal_smoke.mjs",
     "test:appearance": "node tests/appearance_menu_smoke.mjs",
+    "test:font-size": "node tests/custom_font_size_smoke.mjs",
+    "test:type-source": "node tests/type_source_interactions_smoke.mjs",
     "test:arrows": "node tests/arrow_drawing_smoke.mjs",
     "test:slanted-arrow": "node tests/slanted_arrow_smoke.mjs",
     "test:edges": "node tests/block_edges_acceptance.mjs",
@@ -53,6 +55,8 @@
     "test:pill": "node tests/literal_pill_smoke.mjs",
     "test:floating-port": "node tests/floating_port_smoke.mjs",
     "test:generic-block-integrated": "node tests/generic_block_integrated_smoke.mjs",
+    "test:type": "node tests/type_primitive_smoke.mjs",
+    "test:port-text-babble": "node tests/port_text_babble_smoke.mjs",
     "test:unknown": "node tests/unknown_projection_smoke.mjs",
     "test:bundle-quick-insert": "node tests/bundle_unbundle_copy_quick_insert_smoke.mjs",
     "test:ui-hardening": "node tests/ui_hardening_smoke.mjs",
@@ -155,9 +159,11 @@
     "test:frames-panel": "node tests/frames_panel_smoke.mjs",
     "test:semantic-stock-blocks": "node tests/semantic_stock_blocks_smoke.mjs",
     "test:compare": "node tests/compare_modal_smoke.mjs",
-    "test:converged": "node tests/compare_converged_smoke.mjs"
+    "test:converged": "node tests/compare_converged_smoke.mjs",
+    "test:code-block": "node tests/code_block_primitive_smoke.mjs"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.8.1",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.11",
@@ -169,6 +175,7 @@
     "@codemirror/language": "^6.11.3",
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.38.6",
+    "@lezer/highlight": "^1.2.3",
     "codemirror": "^6.0.2",
     "d3-hierarchy": "3.1.2",
     "elkjs": "0.12.0",

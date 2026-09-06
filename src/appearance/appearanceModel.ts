@@ -25,6 +25,7 @@ import {
 } from 'tldraw'
 
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { CodeLanguageStyle } from '../code/codeModel'
 import {
   CONNECTOR_CONTEXTUAL_RECIPE,
   CONTEXTUAL_CONTROL_REGISTRY,
@@ -66,6 +67,10 @@ const STYLE_BY_KIND: Partial<Record<AppearanceControlId, StyleProp<string>>> = {
   dash: DefaultDashStyle as StyleProp<string>,
   lineStyle: DefaultDashStyle as StyleProp<string>,
   strokeColor: DefaultColorStyle as StyleProp<string>,
+  // A Code block's own StyleProp — see `contextualControlRegistry.ts`'s
+  // `codeLanguage` entry for why it rides this same generic loop instead of
+  // a bespoke Code-only control.
+  codeLanguage: CodeLanguageStyle as StyleProp<string>,
   size: DefaultSizeStyle as StyleProp<string>,
   weight: DefaultSizeStyle as StyleProp<string>,
   font: DefaultFontStyle as StyleProp<string>,

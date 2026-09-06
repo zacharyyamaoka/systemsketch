@@ -1,0 +1,235 @@
+[
+  {
+    "id": "TOOL-1",
+    "label": "clicking the Type tool arms it",
+    "observed": "type",
+    "desired": "type",
+    "ok": true
+  },
+  {
+    "id": "CREATE-1",
+    "label": "the drawn Type is the canonical Block primitive, compact and portless",
+    "observed": {
+      "type": "block",
+      "blockType": "type",
+      "view": "port",
+      "icon": "Braces",
+      "source": "field: Type",
+      "w": 380,
+      "h": 264,
+      "inputs": 0,
+      "outputs": 0
+    },
+    "desired": {
+      "type": "block",
+      "blockType": "type",
+      "view": "port",
+      "icon": "Braces",
+      "source": "field: Type",
+      "w": 380,
+      "h": 264,
+      "inputs": 0,
+      "outputs": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "CREATE-2",
+    "label": "a fixed-size Type keeps the drag's centre instead of its top-left corner",
+    "observed": {
+      "dx": 0,
+      "dy": 0
+    },
+    "desired": {
+      "dx": 0,
+      "dy": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "EDIT-1",
+    "label": "the opened textarea takes the cursor immediately",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CANCEL-1",
+    "label": "Escape closes the editor without writing the draft",
+    "observed": {
+      "closed": true,
+      "source": "field: Type"
+    },
+    "desired": {
+      "closed": true,
+      "source": "field: Type"
+    },
+    "ok": true
+  },
+  {
+    "id": "COMMIT-1",
+    "label": "blur commits the exact pasted source, unmodified",
+    "observed": "class EstimatePairOut(NamedTuple):\n    \"\"\"A pose and a confidence score.\n\n    The prose above must not become a fake attribute.\n    \"\"\"\n    pose: Pose\n        position: Position\n    quality: float = 1.0",
+    "desired": "class EstimatePairOut(NamedTuple):\n    \"\"\"A pose and a confidence score.\n\n    The prose above must not become a fake attribute.\n    \"\"\"\n    pose: Pose\n        position: Position\n    quality: float = 1.0",
+    "ok": true
+  },
+  {
+    "id": "COMMIT-2",
+    "label": "blur returns to the compact projection",
+    "observed": null,
+    "desired": null,
+    "ok": true
+  },
+  {
+    "id": "PARSE-1",
+    "label": "the class wrapper and its docstring never become attribute rows",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "PARSE-2",
+    "label": "the compact tree reads name, type, and default exactly as written",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "FOLD-1",
+    "label": "an unfolded branch hides its chevron until the row is hovered",
+    "observed": null,
+    "desired": null,
+    "ok": true
+  },
+  {
+    "id": "FOLD-2",
+    "label": "hovering the row reveals its chevron",
+    "observed": "true",
+    "desired": "true",
+    "ok": true
+  },
+  {
+    "id": "FOLD-3",
+    "label": "a folded branch keeps its chevron visible even without hover",
+    "observed": "true",
+    "desired": "true",
+    "ok": true
+  },
+  {
+    "id": "FOLD-4",
+    "label": "folding hides the nested rows but leaves the source untouched",
+    "observed": {
+      "text": false,
+      "source": "class EstimatePairOut(NamedTuple):\n    \"\"\"A pose and a confidence score.\n\n    The prose above must not become a fake attribute.\n    \"\"\"\n    pose: Pose\n        position: Position\n    quality: float = 1.0"
+    },
+    "desired": {
+      "text": false,
+      "source": "class EstimatePairOut(NamedTuple):\n    \"\"\"A pose and a confidence score.\n\n    The prose above must not become a fake attribute.\n    \"\"\"\n    pose: Pose\n        position: Position\n    quality: float = 1.0"
+    },
+    "ok": true
+  },
+  {
+    "id": "FOLD-5",
+    "label": "reopening restores the nested row",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "UNDO-1",
+    "label": "one Ctrl+Z restores the whole pasted body in a single step",
+    "observed": "field: Type",
+    "desired": "field: Type",
+    "ok": true
+  },
+  {
+    "id": "REDO-1",
+    "label": "redo restores the pasted body",
+    "observed": "class EstimatePairOut(NamedTuple):\n    \"\"\"A pose and a confidence score.\n\n    The prose above must not become a fake attribute.\n    \"\"\"\n    pose: Pose\n        position: Position\n    quality: float = 1.0",
+    "desired": "class EstimatePairOut(NamedTuple):\n    \"\"\"A pose and a confidence score.\n\n    The prose above must not become a fake attribute.\n    \"\"\"\n    pose: Pose\n        position: Position\n    quality: float = 1.0",
+    "ok": true
+  },
+  {
+    "id": "SHORTCUT-1",
+    "label": "T still arms the stock text tool, not Type",
+    "observed": "text",
+    "desired": "text",
+    "ok": true
+  },
+  {
+    "id": "CLEAN-DEV",
+    "label": "the Block Dev journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  },
+  {
+    "id": "PALETTE-1",
+    "label": "the System family menu offers Type with no shortcut kbd hint",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PROD-1",
+    "label": "choosing Type from the family menu arms the Type tool",
+    "observed": "type",
+    "desired": "type",
+    "ok": true
+  },
+  {
+    "id": "PROD-2",
+    "label": "the product Type is the same primitive as the Block Dev one",
+    "observed": "type",
+    "desired": "type",
+    "ok": true
+  },
+  {
+    "id": "PROD-3",
+    "label": "the family slot remembers Type as the last system tool, and rests once the draw is done",
+    "observed": [
+      "type",
+      "false"
+    ],
+    "desired": [
+      "type",
+      "false"
+    ],
+    "ok": true
+  },
+  {
+    "id": "GUTTER-0",
+    "label": "the region starts in the default inline placement",
+    "observed": {
+      "gutter": false,
+      "inline": true
+    },
+    "desired": {
+      "gutter": false,
+      "inline": true
+    },
+    "ok": true
+  },
+  {
+    "id": "GUTTER-1",
+    "label": "the gutter switch fixes every chevron to one column left of the text, and is remembered",
+    "observed": {
+      "gutter": true,
+      "chevronLeftOfLine": true,
+      "remembered": "gutter"
+    },
+    "desired": {
+      "gutter": true,
+      "chevronLeftOfLine": true,
+      "remembered": "gutter"
+    },
+    "ok": true
+  },
+  {
+    "id": "CLEAN-PROD",
+    "label": "the product journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

@@ -116,18 +116,13 @@ describe('Block shape migrations', () => {
 	})
 
 	it('keeps a Type attribute source opaque across the V8 boundary', () => {
-		const v7: BlockMigrationProps = {
-			...getDefaultBlockProps(),
-			blockType: 'type',
-		}
+		const v7: BlockMigrationProps = { ...getDefaultBlockProps(), blockType: 'type' }
 		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
 		expect(v8).toBe(v7)
 
-		const withSource: BlockMigrationProps = {
-			...v8,
-			attributeSource: 'pose: Pose\\nquality: float',
-		}
+		const withSource: BlockMigrationProps = { ...v8, attributeSource: 'pose: Pose\nquality: float' }
 		expect(throughPureStep(withSource, downgradeBlockPropsV8ToV7)).not.toHaveProperty('attributeSource')
+		expect(throughPureStep(v8, downgradeBlockPropsV8ToV7)).toBe(v8)
 	})
 
 	it('loads a V6 Projection record as Unbundle without losing authored fields', () => {

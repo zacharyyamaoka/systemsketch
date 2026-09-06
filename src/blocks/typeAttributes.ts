@@ -1,120 +1,125 @@
 import { getDefaultBlockProps, type BlockShapeProps } from './blockModel'
 
-/** The authored block type that opts into the Type definition presentation. */
+/**
+ * A Type is a Block-shaped domain definition, not a second dataflow engine.
+ * Its one body is text because Python annotations already have a mature,
+ * composable syntax. `TypeAttributeRegion` renders `parseTypeAttributeSource`'s
+ * result as a dense, foldable tree; neither this module nor that one ever
+ * turns a row back into an independently editable field. See
+ * `src/blocks/ui/TypeAttributeRegion.tsx`.
+ */
 export const TYPE_BLOCK_TYPE = 'type'
 
-/** One source line, preserved as text but annotated with its readable pieces. */
+/** One authored source line, preserved verbatim and annotated with its readable pieces. */
 export interface TypeAttribute {
-  id: string
-  line: number
-  indent: number
-  raw: string
-  name: string
-  type: string
-  value: string
-  children: TypeAttribute[]
+	id: string
+	line: number
+	indent: number
+	raw: string
+	name: string
+	type: string
+	value: string
+	children: TypeAttribute[]
 }
 
-/** A parser failure stays a visible text line instead of becoming a validation error. */
-export function parseTypeAttributeSource(source: string): TypeAttribute[] {
-  const roots: TypeAttribute[] = []
-	const stack: TypeAttribute[] = []
-	const lines = source.replace(/\r\n?/g, '\n').split('\n')
-	let classIndent: number | null = null
-	let docstringQuote: `'''` | '"""' | null = null
+const CLASS_HEADER = /^class\s+[A-Za-z_]\w*(?:\[[^\]]+\])?\s*(?:\([^)]*\))?\s*:$/
+const ATTRIBUTE_LINE = /^([A-Za-z_]\w*)\s*:\s*([^=]+?)(?:\s*=\s*(.*))?$/
 
-	lines.forEach((rawLine, line) => {
-		const trimmed = rawLine.trim()
-		if (docstringQuote) {
-			if (trimmed.includes(docstringQuote)) docstringQuote = null
-			return
-		}
-		if (trimmed === '' || trimmed.startsWith('#')) return
-		const openingQuote = trimmed.startsWith('"""') ? '"""' : trimmed.startsWith("'''") ? "'''" : null
-		if (openingQuote) {
-			// A one-line class docstring opens and closes immediately. Otherwise,
-			// suppress its prose until the matching closing delimiter.
-			if (trimmed.slice(3).includes(openingQuote)) return
-			docstringQuote = openingQuote
-			return
-		}
-    const indent = rawLine.length - rawLine.trimStart().length
-    if (/^class\s+[A-Za-z_]\w*(?:\[[^\]]+\])?\s*(?:\([^)]*\))?\s*:$/.test(trimmed)) {
-      classIndent = indent
-      return
-    }
-    // A pasted NamedTuple class body carries one extra authoring indent. It is
-    // not semantic nesting, so remove it before drawing the Type's tree.
-    const relativeIndent = classIndent !== null && indent > classIndent
-      ? indent - classIndent - 4
-      : indent
-    const match = /^([A-Za-z_]\w*)\s*:\s*([^=]+?)(?:\s*=\s*(.*))?$/.exec(trimmed)
-    const attribute: TypeAttribute = match
-      ? {
-          id: `${line}:${match[1]}`,
-          line,
-          indent: Math.max(0, relativeIndent),
-          raw: rawLine,
-          name: match[1],
-          type: match[2].trim(),
-          value: (match[3] ?? '').trim(),
-          children: [],
-        }
-      : {
-          id: `${line}:raw`,
-          line,
-          indent: Math.max(0, relativeIndent),
-          raw: rawLine,
-          name: trimmed,
-          type: '',
-          value: '',
-          children: [],
-        }
-
-    while (stack.length > 0 && attribute.indent <= stack[stack.length - 1]!.indent) stack.pop()
-    const parent = stack[stack.length - 1]
-    if (parent) parent.children.push(attribute)
-    else roots.push(attribute)
-    stack.push(attribute)
-  })
-  return roots
-}
-
-export function typeAttributeDisplay(attribute: Pick<TypeAttribute, 'name' | 'type' | 'value'>): string {
-  const hint = attribute.type ? `: ${attribute.type}` : ''
-  const value = attribute.value ? ` = ${attribute.value}` : ''
-  return `${attribute.name}${hint}${value}`
-}
-
-export function isTypeBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
-  return props.blockType.trim().toLowerCase() === TYPE_BLOCK_TYPE
+function attributeAt(line: number, indent: number, raw: string, trimmed: string): TypeAttribute {
+	const match = ATTRIBUTE_LINE.exec(trimmed)
+	return match
+		? { id: `${line}:${match[1]}`, line, indent, raw, name: match[1], type: match[2].trim(), value: (match[3] ?? '').trim(), children: [] }
+		: { id: `${line}:raw`, line, indent, raw, name: trimmed, type: '', value: '', children: [] }
 }
 
 /**
- * A Type is a Block-shaped definition, not a new dataflow engine. Its one body
- * is text because Python annotations already have mature, composable syntax.
- * The canvas tree is a read projection that can be dense without becoming a
- * parallel editable schema.
+ * Projects a Type's exact source into a nested read tree. A line the grammar
+ * cannot parse stays visible as its own raw row instead of becoming a
+ * validation error — a whiteboard draft is allowed to be mid-thought.
  */
+export function parseTypeAttributeSource(source: string): TypeAttribute[] {
+	const roots: TypeAttribute[] = []
+	const stack: TypeAttribute[] = []
+	const lines = source.replace(/\r\n?/g, '\n').split('\n')
+
+	// A pasted `class Foo(NamedTuple):` body carries one authoring indent that
+	// is not semantic nesting. `bodyIndent` is learned from the first indented
+	// line under the header, so this holds for any indent width the paste
+	// used — two spaces, four, or a tab — rather than assuming PEP 8's four.
+	let classHeaderIndent: number | null = null
+	let bodyIndent: number | null = null
+	let docstringQuote: "'''" | '"""' | null = null
+
+	for (const [line, rawLine] of lines.entries()) {
+		const trimmed = rawLine.trim()
+		if (docstringQuote) {
+			if (trimmed.includes(docstringQuote)) docstringQuote = null
+			continue
+		}
+		if (trimmed === '' || trimmed.startsWith('#')) continue
+
+		const openingQuote = trimmed.startsWith('"""') ? '"""' : trimmed.startsWith("'''") ? "'''" : null
+		if (openingQuote) {
+			// A one-line docstring opens and closes on the same line; only a
+			// multi-line one needs its prose suppressed until the closing quote.
+			if (trimmed.slice(3).includes(openingQuote)) continue
+			docstringQuote = openingQuote
+			continue
+		}
+
+		const indent = rawLine.length - rawLine.trimStart().length
+		if (CLASS_HEADER.test(trimmed)) {
+			classHeaderIndent = indent
+			continue
+		}
+		if (classHeaderIndent !== null && bodyIndent === null && indent > classHeaderIndent) {
+			bodyIndent = indent
+		}
+		const relativeIndent = classHeaderIndent !== null && indent > classHeaderIndent
+			? indent - (bodyIndent ?? indent)
+			: indent
+
+		const attribute = attributeAt(line, Math.max(0, relativeIndent), rawLine, trimmed)
+		while (stack.length > 0 && attribute.indent <= stack[stack.length - 1]!.indent) stack.pop()
+		const parent = stack[stack.length - 1]
+		if (parent) parent.children.push(attribute)
+		else roots.push(attribute)
+		stack.push(attribute)
+	}
+	return roots
+}
+
+/** The one-line rendering of an attribute, used for tooltips and export text. */
+export function typeAttributeDisplay(attribute: Pick<TypeAttribute, 'name' | 'type' | 'value'>): string {
+	const type = attribute.type ? `: ${attribute.type}` : ''
+	const value = attribute.value ? ` = ${attribute.value}` : ''
+	return `${attribute.name}${type}${value}`
+}
+
+export function isTypeBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
+	return props.blockType.trim().toLowerCase() === TYPE_BLOCK_TYPE
+}
+
+/** The props of a freshly drawn Type: a Port-view Block with a placeholder attribute. */
 export function createTypeProps(base = getDefaultBlockProps()): BlockShapeProps {
-  const port = { w: 380, h: 264 }
-  const expanded = { w: 560, h: 460 }
-  return {
-    ...base,
-    title: base.title || 'Type',
-    description: '',
-    blockType: TYPE_BLOCK_TYPE,
-    icon: 'Braces',
-    attributeSource: base.attributeSource || 'field: Type',
-    view: 'port',
-    w: port.w,
-    h: port.h,
-    views: {
-      ...base.views,
-      port,
-      expanded,
-    },
-    inputs: [],
-    outputs: [],
-  }
+	const port = { w: 380, h: 264 }
+	const expanded = { w: 560, h: 460 }
+	return {
+		...base,
+		title: base.title || 'Type',
+		description: '',
+		blockType: TYPE_BLOCK_TYPE,
+		icon: 'Braces',
+		attributeSource: base.attributeSource || 'field: Type',
+		view: 'port',
+		w: port.w,
+		h: port.h,
+		views: {
+			...base.views,
+			port,
+			expanded,
+		},
+		inputs: [],
+		outputs: [],
+	}
 }
