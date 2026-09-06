@@ -145,16 +145,31 @@ export function keyPath(key: string, global: boolean): string {
 /* --------------------------------- glyphs ---------------------------------- */
 
 export const BT_GLYPHS = [
-	'sequence', 'fallback', 'parallel', 'branch', 'switch', 'generic',
+	'sequence', 'sequence-reactive', 'fallback', 'fallback-reactive', 'parallel', 'branch', 'switch', 'generic',
 	'inverter', 'retry', 'repeat', 'timeout', 'delay', 'force-success', 'force-failure',
 	'run-once', 'keep-running', 'loop', 'precondition',
 ] as const
 export type BtGlyph = (typeof BT_GLYPHS)[number]
 export type BtControlTone = 'control' | 'decorator' | 'unknown'
 
-/** Which glyph a control or decorator wears, from its registration ID. */
+/**
+ * Which glyph a control or decorator wears, from its registration ID.
+ *
+ * WHY: `ReactiveSequence`/`ReactiveFallback` share `controlKind` with their
+ * latched siblings (`Sequence`/`Fallback`) — Process-view layout treats both
+ * pairs the same way — but BT.CPP's own runtime does not: `Fallback` latches
+ * `current_child_idx_` across ticks (src/controls/fallback_node.cpp) and does
+ * not re-check an earlier child while a later one is RUNNING, while the
+ * Reactive variant re-evaluates every child from index 0 on every tick. That
+ * is a real behavioral fork a person reading the tree needs to see without
+ * opening the inspector, so the reactive id forks to its own glyph name here
+ * rather than collapsing onto `controlKind` like everything else in this
+ * switch.
+ */
 export function btGlyphFor(node: Pick<BtNode, 'id' | 'kind' | 'controlKind'>): BtGlyph {
 	if (node.kind === 'control' || (node.kind === 'unknown' && node.controlKind)) {
+		if (node.id === 'ReactiveSequence') return 'sequence-reactive'
+		if (node.id === 'ReactiveFallback') return 'fallback-reactive'
 		switch (node.controlKind) {
 			case 'sequence': return 'sequence'
 			case 'fallback': return 'fallback'

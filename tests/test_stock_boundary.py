@@ -194,25 +194,38 @@ class StockBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("BranchShapeUtil", portable_export)
         self.assertIn("BranchArmShapeUtil", portable_export)
-        # Branch lowering is shared with the live Detach command so export
-        # cannot grow a second, subtly different custom-record conversion.
-        self.assertIn("detachBranchToPrimitives", portable_export)
-        self.assertIn("isBranchShape", portable_export)
-        # Loops share that exact portable lowering contract; an export may not
-        # retain a custom Loop record merely because the live menu does not.
+        # Lowering is shared with the live Detach command through the one
+        # registered-kind sweep, so export cannot grow a second, subtly
+        # different custom-record conversion for any kind.
+        self.assertIn("DETACHABLE_KINDS", portable_export)
+        self.assertIn("runDetachSweep", portable_export)
+        self.assertIn("allDetachableIds", portable_export)
+        # Custom records must still be loadable in the isolated export store
+        # before the sweep can lower them.
         self.assertIn("LoopShapeUtil", portable_export)
-        self.assertIn("detachLoopToPrimitives", portable_export)
-        self.assertIn("isLoopShape", portable_export)
-        # A Behavior Tree region is a custom record too, and its projected
-        # children are custom records the export store must be able to load
-        # before it can lower them. Same shared-lowering rule as Branch/Loop.
         self.assertIn("BehaviorTreeShapeUtil", portable_export)
         self.assertIn("BtControlShapeUtil", portable_export)
-        self.assertIn("detachBehaviorTreeToPrimitives", portable_export)
-        self.assertIn("isBehaviorTreeShape", portable_export)
+        self.assertIn("CodeShapeUtil", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)
+
+        # The registry is deliberately the only enumeration of detachable
+        # kinds: each shape kind carries its own reduction, and every surface
+        # (menu, export, composites) consumes this one list. A kind that lowers
+        # outside it would be a second dispatcher growing back.
+        registered_kinds = (
+            PROJECT_ROOT / "src" / "detach" / "registeredKinds.ts"
+        ).read_text(encoding="utf-8")
+        for kind in (
+            "connectionDetachable",
+            "blockDetachable",
+            "codeDetachable",
+            "branchDetachable",
+            "loopDetachable",
+            "behaviorTreeDetachable",
+        ):
+            self.assertIn(kind, registered_kinds)
 
     def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
         """A host runs in Node and bundles separately, so anything it reaches

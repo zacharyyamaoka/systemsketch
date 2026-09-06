@@ -524,6 +524,33 @@ async function main() {
     await delay(350)
     check('insert.undo', 'a second undo takes back the insertion', await regionXml(page), xmlBefore)
 
+    // ---- undo of a MID-tree insert (a path remap, not just an append) --------
+    // The two undo checks just above only ever insert at the LAST position
+    // (`0.5`), where the new occurrence's path never collided with a
+    // survivor once undo put everything else back — so a remap bug in the
+    // undo path had nothing to catch it on. `0.2` here has real later
+    // siblings (`0.3`, `0.4`) that must shift up and then back down again.
+    // The region is still in the `process` projection from the section
+    // above, where controls paint as rails/joins rather than shapes of their
+    // own (see `process.leaves-only`), so the count check below is taken
+    // relative to this section's own baseline rather than the tree
+    // projection's absolute 13 — it asserts the round trip is
+    // count-preserving, not what the count should be in some other view.
+    const countBeforeMidInsert = await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`)
+    await selectPath(page, '0.2')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-action-add-after"]'))`, 'the inspector for 0.2')
+    await clickElement(page, '[data-testid="bt-action-add-after"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml !== ${JSON.stringify(xmlBefore)}`, 'the mid-tree insert to land')
+    await delay(300)
+    const xmlAfterMidInsert = await regionXml(page)
+    check('insert.middle.xml', 'Add after inserts one sibling right after 0.2', (xmlAfterMidInsert.match(/<NewSkill/g) ?? []).length, 1)
+    check('insert.middle.count', 'the new occurrence adds exactly one child shape', await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeMidInsert + 1)
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await delay(350)
+    check('insert.middle.undo', 'one undo restores the pre-insert XML byte-for-byte, including the shifted siblings', await regionXml(page), xmlBefore)
+    check('insert.middle.undo-count', 'the shifted siblings are neither duplicated nor dropped', await evaluate(page, `window.__systemsketch.editor.getSortedChildIdsForParent('${REGION}').length`), countBeforeMidInsert)
+    await evaluate(page, `(window.__systemsketch.editor.selectNone(), null)`)
+
     // ---- free arrangement and Tidy --------------------------------------------
     await setView(page, { projection: 'tree' })
     await fitRegion(page)
@@ -584,6 +611,56 @@ async function main() {
     await setView(page, { projection: 'process', orientation: 'right' })
     await fitRegion(page)
     await shot(page, 'process-recovery-added.png')
+    await setView(page, { projection: 'tree', orientation: 'down' })
+
+    // ---- inspector Library section: caption and click never drift -----------------
+    // Regression for the bug an audit found live: with a region selected and no
+    // node, the Library section used to say "Adds the root node." even when a
+    // root already existed, and clicking any row was silently refused
+    // ("The tree already has a root; insert under it") — the panel promised one
+    // thing and did another. `planBehaviorInsert` now drives both the caption
+    // and the click, so this proves the fix through the actual reachable UI
+    // (not just the pure function's own unit tests).
+    await selectRegion(page)
+    await delay(200)
+    const hintWithRoot = await evaluate(page, `document.querySelector('[data-inspector-section="Library"] .block-inspector__hint')?.textContent ?? null`)
+    check('library.hint-not-root-when-root-exists', 'the Library caption never claims to add a root once one exists',
+      hintWithRoot === 'Adds the root node.', false)
+    const xmlBeforeLibraryClick = await regionXml(page)
+    // The inspector body scrolls as one column; by the time the Library
+    // section is reached (after the Node and View sections above it) its
+    // rows can sit below the fold, so bring the row into view the way a
+    // person would scroll before clicking it.
+    await evaluate(page, `document.querySelector('[data-testid="bt-library-Sequence"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
+    await clickElement(page, '[data-testid="bt-library-Sequence"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}')?.props.xml !== ${JSON.stringify(xmlBeforeLibraryClick)}`, 'the click to land in the XML')
+    const xmlAfterLibraryClick = await regionXml(page)
+    check('library.click-matches-caption', 'clicking a row while nothing is selected actually edits the XML, matching the caption',
+      xmlAfterLibraryClick !== xmlBeforeLibraryClick, true)
+    const noticeAfterLibraryClick = await evaluate(page, `document.querySelector('[data-inspector-section="Library"] .bt-inspector__notice')?.textContent ?? null`)
+    check('library.no-refusal-notice', 'no "tree already has a root" refusal fires for the case the caption promised',
+      noticeAfterLibraryClick, null)
+
+    // Now the true empty-tree case: delete the whole tree and confirm the
+    // Library section both says AND does "adds the root node."
+    await selectPath(page, '0')
+    await delay(200)
+    await clickElement(page, '[data-testid="bt-action-delete"]')
+    await delay(300)
+    check('library.tree-now-empty', 'deleting the root leaves the tree with no occurrences', (await children(page)).length, 0)
+    await selectRegion(page)
+    await delay(200)
+    const hintWithoutRoot = await evaluate(page, `document.querySelector('[data-inspector-section="Library"] .block-inspector__hint')?.textContent ?? null`)
+    check('library.empty-caption', 'with no root, the caption says it will add one', hintWithoutRoot, 'Adds the root node.')
+    await evaluate(page, `document.querySelector('[data-testid="bt-library-Sequence"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
+    await clickElement(page, '[data-testid="bt-library-Sequence"]')
+    await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}')?.props.xml.includes('<Sequence')`, 'the new root to land in the XML')
+    await delay(200)
+    check('library.empty-insert-creates-root', 'clicking actually creates the root the caption promised', (await children(page)).length > 0, true)
+    check('library.empty-insert-xml', 'the new root lands in the XML', (await regionXml(page)).includes('<Sequence'), true)
+    await shot(page, 'library-empty-root-created.png')
 
     // ---- reference-parity captures ----------------------------------------------
     // The same tree Flowstate shows at 15:04 (Initialize Workcell / Pull Part Kit),

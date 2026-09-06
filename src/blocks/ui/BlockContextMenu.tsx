@@ -52,7 +52,7 @@ import {
   selectedDetachableIds,
   selectedConnectionIds,
   selectedDetachedGroupIds,
-} from '../detach'
+} from '../../detach'
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,

@@ -162,7 +162,11 @@ async function main() {
     await mouse(app.page, 'mouseMoved', middle.x, middle.y)
     await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel-edge"] [data-tunnel="preview"]')`, 'edge hover preview')
     paint = await tunnelPaint(app.page)
-    assert.deepEqual({ state: paint.state, vias: paint.vias, dash: paint.dash }, { state: 'preview', vias: 2, dash: null })
+    // WHY: `dash: '5'` replaces `null` — the previewed cable is a plain `data`
+    // cable with its tunnel mouths shown but no tunnel dash applied to the
+    // path itself, so it now carries 2026-09-05's always-on marching-ants
+    // cadence like any other untunneled `data` cable (DataCablePath).
+    assert.deepEqual({ state: paint.state, vias: paint.vias, dash: paint.dash }, { state: 'preview', vias: 2, dash: '5' })
     pass('hover restores the full cable while both outlined tunnel mouths remain visible')
     await screenshot(app.page, HOVER_SHOT)
 
