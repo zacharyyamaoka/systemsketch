@@ -57,6 +57,7 @@ def measured_counts() -> dict[str, int]:
     placement = [
         ROOT / "src" / "blocks" / "portLensPlacement.test.ts",
         ROOT / "src" / "blocks" / "ports" / "communicationPortDrag.test.ts",
+        ROOT / "src" / "prototypes" / "communication" / "portPlacementInference.test.ts",
     ]
     return {
         "unit_tests": len(re.findall(r"^\s*it\(", unit, re.M)),
@@ -127,9 +128,9 @@ def main() -> None:
         ),
         (
             "tags",
-            "2 · + Tag edges",
+            "2 · Split cables",
             ASSETS / "07-components-with-tag-edges.png",
-            "The same view with the leg overlay on. Every protocol leg is painted beside the arrow it belongs to, routed around the cards rather than stacked on top of each other.",
+            "CABLES › Split. One relationship told leg by leg, each tagged with its phase. The three cable styles are exclusive — Split IS the drawn arrow, not an overlay on it.",
         ),
         (
             "dataflow",
@@ -139,9 +140,9 @@ def main() -> None:
         ),
         (
             "overlay",
-            "4 · + Communication",
+            "4 · Dataflow + Summary",
             ASSETS / "06-dataflow-communication-overlay.png",
-            "The communication reading OF a wired board: the collapsed arrows return along the routes the real cables already take, and not one port moves.",
+            "Cable style is paint, never geometry: the same wired board read as relationships, with every socket still on the lane the signature put it on.",
         ),
         (
             "drag",
@@ -282,6 +283,11 @@ ul.checks {{ list-style:none; padding:0; margin:0; }}
 ul.checks li {{ padding:8px 0 8px 26px; border-bottom:1px solid var(--line);
   position:relative; color:var(--muted); font-size:14px; }}
 ul.checks li:last-child {{ border-bottom:0; }}
+table.axes {{ width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px; }}
+table.axes td {{ padding:9px 10px; border-bottom:1px solid var(--line); color:var(--muted);
+  vertical-align:top; }}
+table.axes td:first-child {{ width:78px; color:var(--ink); }}
+table.axes td:nth-child(2) {{ width:230px; font-family:var(--mono); font-size:12px; color:var(--ink); }}
 ul.checks li::before {{ content:"✓"; position:absolute; left:0; top:8px;
   color:#12855f; font-weight:800; }}
 ol.proposals {{ list-style:none; padding:0; margin:0; counter-reset:p; }}
@@ -354,6 +360,30 @@ pair still parses. <code>topic</code> is not drawable for a different reason: it
 is what an <em>un-annotated</em> plain data edge already projects as, so offering
 it would ask which of two spellings you meant.</p>
 
+<h2>Three axes, not three modes</h2>
+<div class="card">
+<p>The controls were tangled: three exclusive "modes" mixed up which lens you
+were reading, what the cards showed, and what the cables said. They are
+independent questions and now they are independent controls.</p>
+<table class="axes"><tbody>
+<tr><td><b>Lens</b></td><td>Dataflow · Communication</td>
+<td>The only axis that moves a port.</td></tr>
+<tr><td><b>Card</b></td><td>S · P · E</td>
+<td>Works in both lenses, board-wide or per component.</td></tr>
+<tr><td><b>Cables</b></td><td>Data · Split · Summary</td>
+<td>Paint only. Never moves a port, and readable in either lens.</td></tr>
+</tbody></table>
+<p>Switching lens lands on that lens's honest default — Dataflow on Port cards
+with grey cables, Communication on Simple cards with one arrow per relationship
+— while an explicit choice inside a lens stands.</p>
+<p><b>The summary cable lost its dropdowns.</b> It always rides the protocol's
+initiating leg: the request for a Service, the goal for an Action, the one leg a
+Stream has. Offering Response or Result or a shortest-path heuristic made a
+board's meaning depend on a selection invisible in a screenshot. The test that
+guards this deliberately makes feedback the shortest route, so a reintroduced
+heuristic fails rather than quietly changing what a board says.</p>
+</div>
+
 <h2>One port, two positions</h2>
 <div class="card">
 <p>The two lenses answer different questions, so a port stores a placement for
@@ -372,11 +402,20 @@ communication lens may call the rail placement at all. <code>blockPorts</code>
 reads the lens off the editor <em>inside</em> the port cache's computed, which
 is what makes cables follow a socket that moved — tldraw's signals track the
 read, so nothing downstream subscribes by hand.</p>
-<p>Press-and-hold slides a socket to another edge, lifted from the System
-boundary-port drag: tldraw's own <code>long_press</code>, a sibling of the
-Dataflow row reorder, nothing written until release so the move is one undo
-step. Sockets sharing a rail auto-space — authored positions are kept and only
-pushed apart when they would collide.</p>
+<p><b>The drag is dnd-kit's</b>, modelled as one container per wall — a Kanban
+whose columns are the four edges and whose cards are the ports. It reuses the
+Behavior Tree's proxy-draggable handoff but needs none of its preempt
+machinery: that one had to cancel a translate tldraw would otherwise have
+started, racing a 4px threshold, whereas <code>long_press</code> only fires for
+a press that has <em>not</em> moved — so the two drag systems can never both
+claim a gesture. <code>SortableContext</code> stays unmounted on purpose:
+dnd-kit's sortable layer measures DOM rects in screen space, which would fork
+from the layout under camera pan/zoom, so the geometry stays in page space.</p>
+<p>A port with no authored placement gets an inferred one that keeps an
+interaction's legs together and in protocol order, so an Action's feedback and
+result land side by side rather than scattered around the perimeter. Sockets
+sharing a wall auto-space: authored positions are kept and only pushed apart
+when they would collide.</p>
 </div>
 
 <h2>Four-sided port labels</h2>
@@ -407,7 +446,7 @@ the dot so the first downward cable cannot strike through the words.</p>
 <div class="grid2">
   <div class="stat"><b>{len(acceptance['checks'])}</b><span>real-browser checks, <code>npm run test:communication-authoring</code></span></div>
   <div class="stat"><b>{counts['unit_tests']}</b><span>round-trip and protocol-table tests</span></div>
-  <div class="stat"><b>{counts['placement_tests']}</b><span>lens-placement and rail-spacing tests</span></div>
+  <div class="stat"><b>{counts['placement_tests']}</b><span>placement, spacing and inference tests</span></div>
   <div class="stat"><b>{total_legs}</b><span>canonical cables the three arrows generate</span></div>
 </div>
 <p style="margin-top:18px"><code>npm run check</code> — tsc, the full vitest

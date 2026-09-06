@@ -85,11 +85,11 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Click the violet Async region. Press Components — the cards go Simple and the DRAW group appears.",
+      "text": "1 · Click the violet Async region. Press Communication — cards go Simple, cables go Summary, and the DRAW group appears.",
       "x": 100,
       "y": 300,
       "w": 420,
-      "h": 140,
+      "h": 160,
       "target": {
         "shapeId": "region",
         "anchor": "left",
@@ -99,11 +99,11 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Press Service, then drag from anywhere on Mission's card onto Robot's. No ports, no port dots. Repeat with Action. Then Stream, Camera → Mission.",
+      "text": "2 · Press Service, drag Mission's card onto Robot's. No ports, no port dots. Repeat with Action. Then Stream, Camera → Mission.",
       "x": 100,
-      "y": 500,
+      "y": 520,
       "w": 420,
-      "h": 180,
+      "h": 170,
       "target": {
         "shapeId": "mission",
         "anchor": "left"
@@ -112,23 +112,23 @@
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Press ALSO › Tag edges. Every protocol leg appears beside the arrow it belongs to, auto-spaced.",
+      "text": "3 · CABLES › Split. One arrow becomes its protocol legs, each tagged with its phase. Summary puts them back — it always rides the request, or the goal.",
       "x": 100,
-      "y": 740,
+      "y": 750,
       "w": 420,
-      "h": 140,
+      "h": 190,
       "target": {
         "shapeId": "region",
         "anchor": "left",
-        "dy": 120
+        "dy": 140
       }
     },
     {
       "id": "step-4",
       "kind": "step",
-      "text": "4 · Press Dataflow. The generated ports are all on the left and right lanes — a socket that sat on a top or bottom edge is repositioned back.",
+      "text": "4 · Press Dataflow. Cards go Port, cables go Data, and every socket is back on a left or right lane — Dataflow has no top or bottom edge.",
       "x": 1800,
-      "y": 330,
+      "y": 320,
       "w": 420,
       "h": 180,
       "target": {
@@ -140,9 +140,9 @@
     {
       "id": "step-5",
       "kind": "step",
-      "text": "5 · Still in Dataflow, press ALSO › Communication. The relationship arrows come back over the real routes and no port moves.",
+      "text": "5 · Still in Dataflow, CABLES › Summary. The relationship arrows come back over the real routes and no port moves.",
       "x": 1800,
-      "y": 570,
+      "y": 560,
       "w": 420,
       "h": 160,
       "target": {
@@ -154,11 +154,11 @@
     {
       "id": "step-6",
       "kind": "step",
-      "text": "6 · Back in Components with CARD › Port, press and HOLD a port dot on Camera, then drag it to another edge. Hold still first — moving straight away draws a cable instead.",
+      "text": "6 · Back in Communication with CARD › P, press and HOLD a port dot on Camera, then drag it to any of the four edges. Hold still first — moving straight away draws a cable instead.",
       "x": 1800,
-      "y": 880,
+      "y": 860,
       "w": 420,
-      "h": 190,
+      "h": 210,
       "target": {
         "shapeId": "camera",
         "anchor": "right"
@@ -167,7 +167,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN the two lenses disagree about where a port is, and neither disturbs the other. Components shows S1 · service · robot, A1 · action · robot and ST1 · stream · camera, with sockets on whichever edge faces the component they talk to. Dataflow shows the same six cables with every socket back on a left or right lane. A port you drag in Components stays put when you flip to Dataflow and back.",
+      "text": "PASS WHEN the two lenses disagree about where a port is and neither disturbs the other. CARD S/P/E works in both. CABLES Data/Split/Summary changes only paint, never a port position. A socket dragged in Communication can sit on any of the four edges, its cable follows it, and Dataflow still shows it on a lane.",
       "x": 620,
       "y": 1290,
       "w": 1080,

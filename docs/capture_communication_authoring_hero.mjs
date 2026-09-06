@@ -172,11 +172,11 @@ async function main() {
       return true
     })()`)
     await delay(700)
-    await waitFor(app.page, `document.querySelector('[data-testid="communication-mode-components"]')`, 'region lens')
+    await waitFor(app.page, `document.querySelector('[data-testid="communication-lens-communication"]')`, 'region lens')
 
     const stop = await startCapture(app.page)
 
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await delay(700)
 
     const mission = await centreOf(app.page, 'shape:mission')
@@ -198,18 +198,18 @@ async function main() {
     await dragSurfaces(app.page, camera, mission)
     await delay(820)
 
-    // The legs, beside the arrows that own them.
-    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    // Split: one arrow told leg by leg.
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await delay(1700)
-    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
     await delay(500)
 
-    // Dataflow: every socket back on a lane.
-    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    // Dataflow: Port cards, grey cables, every socket back on a lane.
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(1600)
 
     // ...and the communication reading of that same wired board.
-    await clickElement(app.page, '[data-testid="communication-overlay-relationships"]')
+    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
     await delay(1800)
 
     const frames = await stop()
