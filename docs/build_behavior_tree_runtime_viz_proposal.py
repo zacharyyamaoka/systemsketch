@@ -138,712 +138,9 @@ def build_lab(geometry: dict, facts: dict) -> str:
     return html
 
 
-LAB_TEMPLATE = r'''<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Behavior Tree runtime lab — mock backend on real chrome</title>
-<style>
-  :root {
-    --ink: #27272a; --ink-soft: #3f3f46; --muted: #71717a; --faint: #a1a1aa;
-    --surface: #ffffff; --sunken: #f4f4f5; --border: #d4d4d8;
-    --running: #2f6fe4; --success: #16a34a; --failure: #dc2626; --halted: #d97706;
-    --accent: #6d5be6;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font: 14px/1.45 Inter, ui-sans-serif, system-ui; color: var(--ink); background: #fafafa; }
-  header { padding: 14px 20px 10px; border-bottom: 1px solid var(--border); background: var(--surface);
-           display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
-  header h1 { font-size: 17px; margin: 0; }
-  header .sub { color: var(--muted); font-size: 12.5px; }
-  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; height: calc(100vh - 118px); }
-  .stage-wrap { overflow: auto; background:
-      repeating-conic-gradient(#fcfffe 0 25%, #f7faf9 0 50%) 0 0 / 28px 28px; position: relative; }
-  .stage { position: relative; transform-origin: 0 0; }
-  .stage img.base { display: block; user-select: none; pointer-events: none; }
-  svg.tissue { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
-  .tissue path.wire { fill: none; stroke: var(--ink-soft); stroke-width: 2; stroke-linejoin: round; }
-  .tissue path.head { fill: var(--ink-soft); }
-  .tissue path.glow { fill: none; stroke: var(--running); stroke-width: 6; stroke-linecap: round;
-                      opacity: 0; transition: opacity .45s ease; }
-  .tissue path.glow[data-hot="true"] { opacity: .34; transition: none; }
-  .tissue line.rail { stroke: var(--ink-soft); stroke-width: 2; }
-  .tissue g.chip rect { fill: var(--surface); stroke: #27272a; stroke-width: 1.4; }
-  .tissue g.chip[data-kind="fail"] rect { fill: var(--sunken); stroke-width: 3; }
-  .tissue g.chip text { font-size: 16px; font-weight: 500; text-anchor: middle; dominant-baseline: middle; fill: var(--ink); }
-  .tissue g.chip[data-kind="fail"] text { font-weight: 700; }
-  .tissue g.groupbox rect.frame { fill: var(--sunken); fill-opacity: .55; stroke: var(--border); stroke-dasharray: 6 5; }
-  .tissue g.groupbox rect.head { fill: #ececee; }
-  .tissue g.groupbox text { font-size: 18px; font-weight: 600; fill: var(--ink); }
-  .tissue g.start rect { fill: var(--surface); stroke: #27272a; stroke-width: 1.6; }
-  .tissue g.start text { font-size: 18px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; fill: var(--ink); }
-  .tissue g.start.hot rect { stroke: var(--running); stroke-width: 3; }
-
-  /* -------- the runtime overlay: one div per node, keyed by btPath -------- */
-  .overlay { position: absolute; border-radius: 12px; pointer-events: auto; cursor: default;
-             transition: box-shadow .22s ease, background-color .22s ease, outline-color .22s ease;
-             outline: 3px solid transparent; outline-offset: 2px; }
-  .overlay[data-role="control"] { border-radius: 8px; }
-  .overlay .badge { position: absolute; top: -11px; right: -9px; min-width: 22px; height: 22px; padding: 0 5px;
-             border-radius: 11px; font: 600 12px/22px Inter, ui-sans-serif; text-align: center; color: #fff;
-             opacity: 0; transform: scale(.6); transition: opacity .2s, transform .2s; }
-  .overlay .ticks { position: absolute; left: 6px; bottom: -9px; font: 600 10.5px/16px ui-monospace, monospace;
-             color: var(--muted); background: var(--surface); border: 1px solid var(--border);
-             border-radius: 8px; padding: 0 6px; opacity: 0; transition: opacity .2s; }
-  .stage[data-counters="true"] .overlay .ticks { opacity: 1; }
-  .overlay[data-status="running"] { outline-color: var(--running);
-             box-shadow: 0 0 0 1px var(--running), 0 0 18px rgba(47,111,228,.45); animation: breathe 1.1s ease-in-out infinite; }
-  .overlay[data-status="running"] .badge { background: var(--running); opacity: 1; transform: scale(1); }
-  .overlay[data-status="success"] { outline-color: var(--success); box-shadow: 0 0 14px rgba(22,163,74,.35);
-             background: rgba(22,163,74,.07); }
-  .overlay[data-status="success"] .badge { background: var(--success); opacity: 1; transform: scale(1); }
-  .overlay[data-status="failure"] { outline-color: var(--failure); box-shadow: 0 0 14px rgba(220,38,38,.4);
-             background: rgba(220,38,38,.07); }
-  .overlay[data-status="failure"] .badge { background: var(--failure); opacity: 1; transform: scale(1); }
-  .overlay[data-status="halted"] { outline-color: var(--halted); outline-style: dashed; }
-  .overlay[data-status="halted"] .badge { background: var(--halted); opacity: 1; transform: scale(1); }
-  /* Monitor mode: resolved outcomes decay back to gray (ISA-101 gray-first). */
-  .stage[data-mode="monitor"] .overlay[data-status="success"][data-age="old"],
-  .stage[data-mode="monitor"] .overlay[data-status="halted"][data-age="old"] {
-      outline-color: transparent; box-shadow: none; background: transparent; }
-  .stage[data-mode="monitor"] .overlay[data-status="success"][data-age="old"] .badge,
-  .stage[data-mode="monitor"] .overlay[data-status="halted"][data-age="old"] .badge { opacity: 0; transform: scale(.6); }
-  .overlay:hover { outline-color: var(--accent) !important; }
-  @keyframes breathe { 0%,100% { box-shadow: 0 0 0 1px var(--running), 0 0 10px rgba(47,111,228,.28); }
-                       50% { box-shadow: 0 0 0 1px var(--running), 0 0 24px rgba(47,111,228,.55); } }
-
-  /* -------- right panel -------- */
-  aside { border-left: 1px solid var(--border); background: var(--surface); overflow-y: auto; padding: 14px 16px; }
-  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 8px; }
-  aside h2:first-child { margin-top: 2px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12.5px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .legend i { width: 13px; height: 13px; border-radius: 4px; border: 2.5px solid var(--faint); }
-  .legend i.running { border-color: var(--running); box-shadow: 0 0 6px rgba(47,111,228,.5); }
-  .legend i.success { border-color: var(--success); } .legend i.failure { border-color: var(--failure); }
-  .legend i.halted { border-color: var(--halted); border-style: dashed; }
-  table.config { width: 100%; border-collapse: collapse; font-size: 12px; }
-  table.config td { padding: 3px 4px; border-bottom: 1px solid var(--sunken); vertical-align: middle; }
-  table.config td.name { font-family: ui-monospace, monospace; font-size: 11.5px; max-width: 130px;
-                         overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  table.config tr:hover td { background: #f0f4ff; }
-  table.config input[type="range"] { width: 74px; vertical-align: middle; }
-  table.config input[type="number"] { width: 40px; }
-  table.config .p { display: inline-block; width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
-  .events { list-style: none; margin: 0; padding: 0; font: 12px/1.5 ui-monospace, monospace; }
-  .events li { padding: 2px 6px; border-radius: 5px; cursor: pointer; display: flex; gap: 8px; }
-  .events li:hover { background: var(--sunken); }
-  .events .t { color: var(--muted); min-width: 40px; }
-  .events .to-success { color: var(--success); } .events .to-failure { color: var(--failure); }
-  .events .to-running { color: var(--running); } .events .to-halted { color: var(--halted); }
-  .events li.outcome { font-weight: 700; }
-
-  /* -------- transport -------- */
-  footer { display: flex; gap: 14px; align-items: center; padding: 10px 20px; border-top: 1px solid var(--border);
-           background: var(--surface); flex-wrap: wrap; }
-  button { font: 600 13px Inter, ui-sans-serif; color: var(--ink); background: var(--surface);
-           border: 1px solid var(--border); border-radius: 8px; padding: 6px 13px; cursor: pointer; }
-  button:hover { background: var(--sunken); }
-  button.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
-  button.primary:hover { background: #3f3f46; }
-  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .seg button { border: 0; border-radius: 0; }
-  .seg button[data-on="true"] { background: var(--ink); color: #fff; }
-  footer label { font-size: 12px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
-  #scrub { flex: 1; min-width: 160px; }
-  #clock { font: 700 13px ui-monospace, monospace; min-width: 118px; }
-  #banner { font-weight: 700; padding: 3px 10px; border-radius: 7px; visibility: hidden; }
-  #banner[data-outcome="success"] { visibility: visible; color: var(--success); background: rgba(22,163,74,.1); }
-  #banner[data-outcome="failure"] { visibility: visible; color: var(--failure); background: rgba(220,38,38,.1); }
-  #live-pill { font: 600 11px Inter; color: var(--running); border: 1px solid var(--running); border-radius: 999px;
-               padding: 1px 8px; cursor: pointer; visibility: hidden; }
-  #live-pill[data-scrubbed="true"] { visibility: visible; }
-</style>
-</head>
-<body>
-<header>
-  <h1>Behavior Tree runtime lab</h1>
-  <span class="sub">A mock backend walking <b>RigidBodyAssembly</b> (the Intrinsic Flowstate 15:04 frame) on real
-  SystemSketch chrome — cards exported by the editor at __GIT_HEAD__, wires replayed from the painted DOM. Layer 1 is
-  the state model, layer 2 this overlay, layer 3 the driver: swap the driver for a real backend and nothing else changes.</span>
-</header>
-<div class="layout">
-  <div class="stage-wrap" id="stage-wrap">
-    <div class="stage" id="stage" data-mode="monitor" data-counters="false"></div>
-  </div>
-  <aside>
-    <h2>Status language <span style="text-transform:none;letter-spacing:0">(ISA-101 gray-first)</span></h2>
-    <div class="legend">
-      <span><i></i> idle = the chrome itself, gray</span>
-      <span><i class="running"></i> running <em>(pulses)</em></span>
-      <span><i class="success"></i> success — decays in Monitor mode</span>
-      <span><i class="failure"></i> failure — persists</span>
-      <span><i class="halted"></i> halted (preempted)</span>
-    </div>
-    <h2>Per-node mock config <span style="text-transform:none;letter-spacing:0">(p·success, duration in ticks)</span></h2>
-    <div style="margin: 0 0 8px; display:flex; gap:8px; align-items:center;">
-      <label style="font-size:12px;color:var(--muted)">Preset
-        <select id="preset">
-          <option value="flaky" selected>Flaky gripper (recovery story)</option>
-          <option value="nominal">Nominal (everything succeeds)</option>
-          <option value="chaos">Chaos (p = .6 everywhere)</option>
-        </select>
-      </label>
-    </div>
-    <table class="config"><tbody id="config-rows"></tbody></table>
-    <h2>Transitions <span style="text-transform:none;letter-spacing:0">(click one to scrub to it)</span></h2>
-    <ul class="events" id="events"></ul>
-  </aside>
-</div>
-<footer>
-  <button class="primary" id="play">Play</button>
-  <button id="step">Step</button>
-  <button id="reset">Reset</button>
-  <span class="seg" id="view-toggle">
-    <button data-view="tree" data-on="true">Tree</button>
-    <button data-view="process">Process</button>
-  </span>
-  <span class="seg" id="mode-toggle" title="Monitor decays resolved outcomes back to gray; Step keeps them painted">
-    <button data-mode="monitor" data-on="true">Monitor</button>
-    <button data-mode="step">Step colors</button>
-  </span>
-  <label>speed <input id="speed" type="range" min="1" max="10" value="3" style="width:80px"> <span id="speed-label">3/s</span></label>
-  <label>seed <input id="seed" type="number" value="7" style="width:58px"></label>
-  <label><input type="checkbox" id="counters"> tick counts</label>
-  <span id="clock">tick 0</span>
-  <span id="banner"></span>
-  <input id="scrub" type="range" min="0" max="0" value="0">
-  <span id="live-pill" data-scrubbed="false">⏵ back to live</span>
-</footer>
-<script>
-'use strict'
-const PAYLOAD = __PAYLOAD__
-
-/* =========================================================================
- * Layer 1 — the state model. What "runtime state" IS, independent of both
- * the driver that produces it and the canvas that paints it.
- *   status: fresh | running | success | failure | halted   (halted ≈ py_trees INVALID)
- *   A frame is one tick's complete snapshot — the same shape the proposal's
- *   /api/bt/run/latest would return, and what a trace file is a list of.
- * ========================================================================= */
-function emptyFrame() {
-  return { tick: 0, statuses: {}, visited: [], events: [], outcome: null }
-}
-
-/* =========================================================================
- * Layer 3 — the mock driver: a miniature BT.CPP v4 interpreter over the
- * SAME canonical XML the region stores. Per-leaf config composes py_trees'
- * TickCounter (duration in ticks) with its ProbabilisticBehaviour (weighted
- * outcome), the way BT.CPP's TestNodeConfig composes async_delay with
- * return_status. Seeded, so a run is replayable.
- * ========================================================================= */
-function mulberry32(seed) {
-  let a = seed >>> 0
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-function parseTree(xml) {
-  const doc = new DOMParser().parseFromString(xml, 'text/xml')
-  const main = doc.querySelector('BehaviorTree')
-  const rootElement = [...main.children][0]
-  const nodes = new Map()
-  const build = (element, path) => {
-    const tag = element.tagName
-    const kindOf = { Sequence: 'sequence', Fallback: 'fallback', Parallel: 'parallel' }[tag]
-      ?? (tag === 'AlwaysFailure' ? 'always-failure' : 'action')
-    const node = {
-      path, tag, kind: kindOf,
-      name: element.getAttribute('name') || tag,
-      successCount: Number(element.getAttribute('success_count') ?? '-1'),
-      failureCount: Number(element.getAttribute('failure_count') ?? '1'),
-      children: [...element.children].map((child, index) => build(child, path + '.' + index)),
-    }
-    nodes.set(path, node)
-    return node
-  }
-  const root = build(rootElement, '0')
-  return { root, nodes }
-}
-
-function makeDriver(xml, config, seed) {
-  const { root, nodes } = parseTree(xml)
-  const rng = mulberry32(seed)
-  const memory = new Map() // path -> { cursor, elapsed, done: Map(childPath -> result) }
-  const frame = { current: emptyFrame() }
-
-  const mark = (path, status) => {
-    const previous = frame.current.statuses[path]?.status
-    if (previous !== status) frame.current.events.push({ path, from: previous ?? 'fresh', to: status })
-    const held = frame.current.statuses[path]
-    frame.current.statuses[path] = { status, since: status === held?.status ? held.since : frame.current.tick }
-  }
-  const halt = (node) => {
-    const held = frame.current.statuses[node.path]?.status
-    if (held === 'running') mark(node.path, 'halted')
-    memory.delete(node.path)
-    node.children.forEach(halt)
-  }
-  const tick = (node) => {
-    frame.current.visited.push(node.path)
-    mark(node.path, 'running')
-    const result = tickInner(node)
-    if (result !== 'running') { mark(node.path, result); memory.delete(node.path) }
-    return result
-  }
-  const tickInner = (node) => {
-    if (node.kind === 'always-failure') return 'failure'
-    if (node.kind === 'action') {
-      const state = memory.get(node.path) ?? { elapsed: 0 }
-      memory.set(node.path, state)
-      state.elapsed += 1
-      const wanted = config[node.path] ?? { durationTicks: 2, pSuccess: 1 }
-      if (state.elapsed < wanted.durationTicks) return 'running'
-      return rng() < wanted.pSuccess ? 'success' : 'failure'
-    }
-    if (node.kind === 'sequence' || node.kind === 'fallback') {
-      const advanceOn = node.kind === 'sequence' ? 'success' : 'failure'
-      const stopOn = node.kind === 'sequence' ? 'failure' : 'success'
-      const state = memory.get(node.path) ?? { cursor: 0 }
-      memory.set(node.path, state)
-      while (state.cursor < node.children.length) {
-        const result = tick(node.children[state.cursor])
-        if (result === 'running') return 'running'
-        if (result === stopOn) { node.children.slice(state.cursor + 1).forEach(halt); return stopOn }
-        state.cursor += 1
-      }
-      return advanceOn
-    }
-    if (node.kind === 'parallel') {
-      const state = memory.get(node.path) ?? { done: new Map() }
-      memory.set(node.path, state)
-      let successes = 0, failures = 0
-      for (const child of node.children) {
-        let result = state.done.get(child.path)
-        if (!result) {
-          result = tick(child)
-          if (result !== 'running') state.done.set(child.path, result)
-        }
-        if (result === 'success') successes += 1
-        if (result === 'failure') failures += 1
-      }
-      const need = node.successCount === -1 ? node.children.length : node.successCount
-      if (failures >= node.failureCount) {
-        node.children.filter((child) => !state.done.has(child.path)).forEach(halt)
-        return 'failure'
-      }
-      if (successes >= need) return 'success'
-      return 'running'
-    }
-    return 'failure'
-  }
-
-  return {
-    nodes,
-    root,
-    /** One tick of the whole tree; returns the completed frame (a snapshot). */
-    step(tickIndex) {
-      frame.current = {
-        tick: tickIndex,
-        statuses: JSON.parse(JSON.stringify(frame.current.statuses)),
-        visited: [], events: [], outcome: null,
-      }
-      // A finished run re-arms on the next tick, like tick_tock with
-      // stop_on_terminal_state=false — but we stop the transport instead.
-      const result = tick(root)
-      if (result !== 'running') frame.current.outcome = result
-      return frame.current
-    },
-  }
-}
-
-/* =========================================================================
- * Layer 2 — rendering. Reads frames, paints real chrome. Never computes
- * semantics: everything it needs is in the frame (the whiteboard stays dumb).
- * ========================================================================= */
-const stage = document.getElementById('stage')
-const stageWrap = document.getElementById('stage-wrap')
-const leafPaths = []
-const state = {
-  view: PAYLOAD.views[0],
-  frames: [emptyFrame()],
-  cursor: 0,
-  live: true,
-  playing: false,
-  timer: null,
-  driver: null,
-  config: {},
-  seed: 7,
-}
-
-function leafTitles(view) {
-  return view.children.filter((child) => child.type === 'block')
-}
-
-function buildStage(view) {
-  const region = view.region
-  stage.style.width = region.w + 'px'
-  stage.style.height = region.h + 'px'
-  stage.innerHTML = ''
-  const base = document.createElement('img')
-  base.className = 'base'
-  base.src = view.image
-  base.width = region.w
-  base.height = region.h
-  stage.appendChild(base)
-
-  const svgNS = 'http://www.w3.org/2000/svg'
-  const tissue = document.createElementNS(svgNS, 'svg')
-  tissue.setAttribute('class', 'tissue')
-  tissue.setAttribute('width', region.w)
-  tissue.setAttribute('height', region.h)
-  // Groups first (under wires), then wires, rails, chips, start — the same
-  // stacking as BehaviorTreeCanvas.
-  for (const group of view.layer.groups) {
-    const holder = document.createElementNS(svgNS, 'g')
-    holder.setAttribute('class', 'groupbox')
-    holder.innerHTML = `<rect class="frame" x="${group.x}" y="${group.y}" width="${group.w}" height="${group.h}" rx="6"/>`
-      + `<rect class="head" x="${group.x}" y="${group.y}" width="${group.w}" height="48" rx="6"/>`
-      + `<text x="${group.x + 44}" y="${group.y + 30}">${group.title}</text>`
-    tissue.appendChild(holder)
-  }
-  for (const edge of view.layer.edges) {
-    const wire = document.createElementNS(svgNS, 'path')
-    wire.setAttribute('class', 'wire')
-    wire.setAttribute('d', edge.d)
-    tissue.appendChild(wire)
-    const points = edge.d.match(/-?\d+(?:\.\d+)?/g).map(Number)
-    if (points.length >= 4) {
-      const [x2, y2] = points.slice(-2)
-      const [x1, y1] = points.slice(-4, -2)
-      const angle = Math.atan2(y2 - y1, x2 - x1)
-      const head = document.createElementNS(svgNS, 'path')
-      head.setAttribute('class', 'head')
-      const size = 8
-      const lx = x2 - size * Math.cos(angle - Math.PI / 7), ly = y2 - size * Math.sin(angle - Math.PI / 7)
-      const rx = x2 - size * Math.cos(angle + Math.PI / 7), ry = y2 - size * Math.sin(angle + Math.PI / 7)
-      head.setAttribute('d', `M ${x2} ${y2} L ${lx} ${ly} L ${rx} ${ry} Z`)
-      tissue.appendChild(head)
-    }
-    const glow = document.createElementNS(svgNS, 'path')
-    glow.setAttribute('class', 'glow')
-    glow.setAttribute('d', edge.d)
-    if (edge.to) glow.dataset.to = edge.to
-    tissue.appendChild(glow)
-  }
-  for (const rail of view.layer.rails) {
-    for (const [x1, y1, x2, y2] of rail.lines) {
-      const line = document.createElementNS(svgNS, 'line')
-      line.setAttribute('class', 'rail')
-      line.setAttribute('x1', x1); line.setAttribute('y1', y1)
-      line.setAttribute('x2', x2); line.setAttribute('y2', y2)
-      tissue.appendChild(line)
-    }
-  }
-  for (const chip of view.layer.chips) {
-    const holder = document.createElementNS(svgNS, 'g')
-    holder.setAttribute('class', 'chip')
-    holder.dataset.kind = chip.kind
-    holder.innerHTML = `<rect x="${chip.x}" y="${chip.y}" width="${chip.w}" height="${chip.h}" rx="${chip.kind === 'fail' ? 4 : 6}"/>`
-      + `<text x="${chip.x + chip.w / 2}" y="${chip.y + chip.h / 2 + 1}">${chip.text}</text>`
-    tissue.appendChild(holder)
-  }
-  if (view.layer.start) {
-    const start = view.layer.start
-    const holder = document.createElementNS(svgNS, 'g')
-    holder.setAttribute('class', 'start')
-    holder.setAttribute('id', 'start-pill')
-    holder.innerHTML = `<rect x="${start.x}" y="${start.y}" width="${start.w}" height="${start.h}" rx="${start.h / 2}"/>`
-      + `<text x="${start.x + start.w / 2}" y="${start.y + start.h / 2 + 1}">Start</text>`
-    tissue.appendChild(holder)
-  }
-  stage.appendChild(tissue)
-
-  for (const child of view.children) {
-    const overlay = document.createElement('div')
-    overlay.className = 'overlay'
-    overlay.dataset.path = child.path
-    overlay.dataset.role = child.type === 'block' ? 'leaf' : 'control'
-    overlay.style.left = child.x + 'px'
-    overlay.style.top = child.y + 'px'
-    overlay.style.width = child.w + 'px'
-    overlay.style.height = child.h + 'px'
-    overlay.title = `${child.title} · ${child.path}`
-    overlay.innerHTML = '<span class="badge"></span><span class="ticks"></span>'
-    stage.appendChild(overlay)
-  }
-  fitStage(view)
-}
-
-function fitStage(view) {
-  const scale = Math.min(1, (stageWrap.clientWidth - 24) / view.region.w, (stageWrap.clientHeight - 24) / view.region.h)
-  stage.style.transform = `scale(${Math.max(scale, 0.12)})`
-}
-
-const BADGE = { running: '▶', success: '✓', failure: '✕', halted: '−' }
-
-function paint(frame) {
-  const decayTicks = 2
-  for (const overlay of stage.querySelectorAll('.overlay')) {
-    const held = frame.statuses[overlay.dataset.path]
-    const status = held?.status
-    if (!status || status === 'fresh') {
-      overlay.dataset.status = ''
-      overlay.querySelector('.badge').textContent = ''
-    } else {
-      overlay.dataset.status = status
-      overlay.dataset.age = frame.tick - held.since >= decayTicks ? 'old' : 'new'
-      overlay.querySelector('.badge').textContent = BADGE[status] ?? ''
-    }
-    const total = countTicks(overlay.dataset.path, frame.tick)
-    overlay.querySelector('.ticks').textContent = total ? '×' + total : ''
-  }
-  const visited = new Set(frame.visited)
-  for (const glow of stage.querySelectorAll('.glow')) {
-    glow.dataset.hot = String(Boolean(glow.dataset.to && visited.has(glow.dataset.to)))
-  }
-  const startPill = document.getElementById('start-pill')
-  if (startPill) startPill.classList.toggle('hot', frame.visited.length > 0)
-  document.getElementById('clock').textContent = 'tick ' + frame.tick
-  const banner = document.getElementById('banner')
-  banner.dataset.outcome = frame.outcome ?? ''
-  banner.textContent = frame.outcome ? 'run ' + frame.outcome.toUpperCase() + ' at tick ' + frame.tick : ''
-}
-
-const tickTotals = [] // tickTotals[t] = Map(path -> cumulative visits) — for the ×N counters
-function countTicks(path, tick) {
-  const totals = tickTotals[Math.min(tick, tickTotals.length - 1)]
-  return totals?.get(path) ?? 0
-}
-
-/* -------- events lane -------- */
-function renderEvents() {
-  const list = document.getElementById('events')
-  list.innerHTML = ''
-  const rows = []
-  for (const frame of state.frames) {
-    for (const event of frame.events) {
-      if (event.to === 'running' && event.from !== 'fresh') continue
-      // The root's terminal transition is the run outcome row below.
-      if (frame.outcome && event.path === '0' && event.to === frame.outcome) continue
-      rows.push({ tick: frame.tick, ...event })
-    }
-    if (frame.outcome) rows.push({ tick: frame.tick, path: '0', from: 'running', to: frame.outcome, outcome: true })
-  }
-  for (const row of rows.slice(-160).reverse()) {
-    const item = document.createElement('li')
-    if (row.outcome) item.className = 'outcome'
-    const label = state.driver?.nodes.get(row.path)?.name ?? row.path
-    item.innerHTML = `<span class="t">t${row.tick}</span><span>${label}</span>`
-      + `<span class="to-${row.to}">→ ${row.to.toUpperCase()}</span>`
-    item.addEventListener('click', () => scrubTo(row.tick))
-    list.appendChild(item)
-  }
-}
-
-/* -------- transport -------- */
-function rebuildDriver() {
-  state.driver = makeDriver(PAYLOAD.xml, state.config, state.seed)
-  state.frames = [emptyFrame()]
-  tickTotals.length = 0
-  tickTotals.push(new Map())
-  state.cursor = 0
-  state.live = true
-  updateScrub()
-  paint(state.frames[0])
-  renderEvents()
-}
-
-function stepOnce() {
-  const latest = state.frames[state.frames.length - 1]
-  if (latest.outcome) { pause(); return }
-  const frame = state.driver.step(latest.tick + 1)
-  state.frames.push(frame)
-  const totals = new Map(tickTotals[tickTotals.length - 1])
-  for (const path of frame.visited) totals.set(path, (totals.get(path) ?? 0) + 1)
-  tickTotals.push(totals)
-  if (state.live) {
-    state.cursor = state.frames.length - 1
-    paint(frame)
-  }
-  updateScrub()
-  renderEvents()
-  if (frame.outcome) pause()
-}
-
-function play() {
-  if (state.playing) { pause(); return }
-  const latest = state.frames[state.frames.length - 1]
-  if (latest.outcome) rebuildDriverKeepingConfig()
-  state.playing = true
-  document.getElementById('play').textContent = 'Pause'
-  const period = () => 1000 / Number(document.getElementById('speed').value)
-  const loop = () => { stepOnce(); if (state.playing) state.timer = setTimeout(loop, period()) }
-  state.timer = setTimeout(loop, period())
-}
-function pause() {
-  state.playing = false
-  clearTimeout(state.timer)
-  document.getElementById('play').textContent = 'Play'
-}
-function rebuildDriverKeepingConfig() { rebuildDriver() }
-
-function updateScrub() {
-  const scrub = document.getElementById('scrub')
-  scrub.max = state.frames.length - 1
-  if (state.live) scrub.value = state.frames.length - 1
-  document.getElementById('live-pill').dataset.scrubbed = String(!state.live)
-}
-
-function scrubTo(tick) {
-  state.cursor = Math.max(0, Math.min(tick, state.frames.length - 1))
-  state.live = state.cursor === state.frames.length - 1
-  document.getElementById('scrub').value = state.cursor
-  document.getElementById('live-pill').dataset.scrubbed = String(!state.live)
-  paint(state.frames[state.cursor])
-}
-
-/* -------- config panel -------- */
-const PRESETS = {
-  nominal: (leaf) => ({ durationTicks: defaultDuration(leaf), pSuccess: 1 }),
-  flaky: (leaf) => ({
-    durationTicks: defaultDuration(leaf),
-    pSuccess: leaf.title === 'command_multi_axis_gripper' ? 0.55 : 0.97,
-  }),
-  chaos: (leaf) => ({ durationTicks: defaultDuration(leaf), pSuccess: 0.6 }),
-}
-function defaultDuration(leaf) {
-  if (leaf.title === 'planned_move') return 4
-  if (leaf.title === 'command_trommel') return 3
-  if (leaf.title === 'AlwaysFailure') return 1
-  return 2
-}
-
-function applyPreset(name) {
-  const build = PRESETS[name] ?? PRESETS.flaky
-  state.config = {}
-  for (const leaf of leafTitles(state.view)) {
-    state.config[leaf.path] = leaf.title === 'AlwaysFailure'
-      ? { durationTicks: 1, pSuccess: 0 }
-      : build(leaf)
-  }
-  renderConfig()
-  rebuildDriver()
-}
-
-function renderConfig() {
-  const body = document.getElementById('config-rows')
-  body.innerHTML = ''
-  for (const leaf of leafTitles(state.view)) {
-    const config = state.config[leaf.path]
-    const row = document.createElement('tr')
-    const locked = leaf.title === 'AlwaysFailure'
-    row.innerHTML = `<td class="name" title="${leaf.title} · ${leaf.path}">${leaf.title}</td>`
-      + `<td><input type="range" min="0" max="100" value="${Math.round(config.pSuccess * 100)}" ${locked ? 'disabled' : ''}>`
-      + ` <span class="p">${Math.round(config.pSuccess * 100)}%</span></td>`
-      + `<td><input type="number" min="1" max="12" value="${config.durationTicks}"><span style="color:var(--muted)">t</span></td>`
-    const [probability, duration] = row.querySelectorAll('input')
-    probability.addEventListener('input', () => {
-      config.pSuccess = Number(probability.value) / 100
-      row.querySelector('.p').textContent = probability.value + '%'
-    })
-    duration.addEventListener('input', () => { config.durationTicks = Math.max(1, Number(duration.value) || 1) })
-    row.addEventListener('mouseenter', () => {
-      const overlay = stage.querySelector(`.overlay[data-path="${CSS.escape(leaf.path)}"]`)
-      if (overlay) overlay.style.outlineColor = 'var(--accent)'
-    })
-    row.addEventListener('mouseleave', () => {
-      const overlay = stage.querySelector(`.overlay[data-path="${CSS.escape(leaf.path)}"]`)
-      if (overlay) overlay.style.outlineColor = ''
-    })
-    body.appendChild(row)
-  }
-}
-
-/* -------- wiring -------- */
-document.getElementById('play').addEventListener('click', play)
-document.getElementById('step').addEventListener('click', () => { pause(); state.live = true; stepOnce() })
-document.getElementById('reset').addEventListener('click', () => { pause(); state.seed = Number(document.getElementById('seed').value) || 7; rebuildDriver() })
-document.getElementById('seed').addEventListener('change', (event) => { state.seed = Number(event.target.value) || 7 })
-document.getElementById('speed').addEventListener('input', (event) => {
-  document.getElementById('speed-label').textContent = event.target.value + '/s'
-})
-document.getElementById('scrub').addEventListener('input', (event) => { pause(); scrubTo(Number(event.target.value)) })
-document.getElementById('live-pill').addEventListener('click', () => scrubTo(state.frames.length - 1))
-document.getElementById('preset').addEventListener('change', (event) => { pause(); applyPreset(event.target.value) })
-document.getElementById('counters').addEventListener('change', (event) => {
-  stage.dataset.counters = String(event.target.checked)
-  paint(state.frames[state.cursor])
-})
-document.getElementById('mode-toggle').addEventListener('click', (event) => {
-  const mode = event.target.dataset.mode
-  if (!mode) return
-  stage.dataset.mode = mode
-  for (const button of event.currentTarget.querySelectorAll('button')) button.dataset.on = String(button.dataset.mode === mode)
-})
-document.getElementById('view-toggle').addEventListener('click', (event) => {
-  const name = event.target.dataset.view
-  if (!name) return
-  const view = PAYLOAD.views.find((candidate) => candidate.name === name)
-  if (!view) return
-  pause()
-  state.view = view
-  for (const button of event.currentTarget.querySelectorAll('button')) button.dataset.on = String(button.dataset.view === name)
-  buildStage(view)
-  // Same run, same frames — a projection is just another lens over the state.
-  paint(state.frames[state.cursor])
-})
-window.addEventListener('resize', () => fitStage(state.view))
-
-buildStage(state.view)
-applyPreset('flaky')
-
-/** Deterministic hooks for the report's screenshot journey. */
-window.__lab = {
-  step: (count = 1) => { for (let index = 0; index < count; index += 1) stepOnce() },
-  reset: (seed) => { pause(); state.seed = seed ?? state.seed; document.getElementById('seed').value = state.seed; rebuildDriver() },
-  preset: (name) => { pause(); document.getElementById('preset').value = name; applyPreset(name) },
-  scrub: scrubTo,
-  view: (name) => {
-    const view = PAYLOAD.views.find((candidate) => candidate.name === name)
-    if (!view) return
-    state.view = view
-    buildStage(view)
-    paint(state.frames[state.cursor])
-  },
-  mode: (mode) => { stage.dataset.mode = mode },
-  state: () => ({
-    frames: state.frames.length,
-    cursor: state.cursor,
-    cursorTick: state.frames[state.cursor].tick,
-    outcome: state.frames[state.frames.length - 1].outcome,
-  }),
-  /** Run-shape summary for the report's deterministic seed scan. */
-  summary: () => {
-    let gripperFailures = 0
-    let firstGripperFailTick = null
-    for (const frame of state.frames) {
-      for (const event of frame.events) {
-        const name = state.driver?.nodes.get(event.path)?.name
-        if (name === 'command_multi_axis_gripper' && event.to === 'failure') {
-          gripperFailures += 1
-          if (firstGripperFailTick === null) firstGripperFailTick = frame.tick
-        }
-      }
-    }
-    const latest = state.frames[state.frames.length - 1]
-    return { ticks: latest.tick, outcome: latest.outcome, gripperFailures, firstGripperFailTick }
-  },
-}
-</script>
-</body>
-</html>
-'''
+# The lab page's markup + script live beside the capture/shoot scripts so the
+# visual language can be edited without scrolling a 700-line Python literal.
+LAB_TEMPLATE = (DOCS / 'labs' / 'bt_runtime_lab_template.html').read_text()
 
 
 # --------------------------------------------------------------------------
@@ -940,9 +237,14 @@ def build_report(geometry: dict, facts: dict) -> str:
         'fs_transport': crop(flowstate, (575, 48, 700, 76), 3.0),
         'fs_caption': crop(flowstate, (0, 26, 215, 48), 2.4),
         'lab_running': shrink(ASSETS / 'lab-running.png', 1360),
-        'lab_recovery_close': crop(ASSETS / 'lab-recovery.png', (884, 108, 1408, 566), 1.35),
+        'lab_recovery_close': crop(ASSETS / 'lab-recovery.png', (884, 108, 1396, 440), 1.35),
+        'lab_deep_close': crop(ASSETS / 'lab-deep-path.png', (14, 100, 832, 578), 1.5),
         'lab_resolved': shrink(ASSETS / 'lab-resolved.png', 1360),
+        'lab_process_running': shrink(ASSETS / 'lab-process-running.png', 1360),
         'lab_process': shrink(ASSETS / 'lab-process.png', 1360),
+        'lab_motion_a': data_uri(ASSETS / 'lab-motion-a.png'),
+        'lab_motion_b': data_uri(ASSETS / 'lab-motion-b.png'),
+        'lab_transitions': data_uri(ASSETS / 'lab-transitions.png'),
     }
 
     endpoints = ' '.join(f'<code>{endpoint}</code>' for endpoint in facts['api_endpoints'])
@@ -983,7 +285,12 @@ def build_report(geometry: dict, facts: dict) -> str:
         'process_children': len(process_view['children']),
         'seed': shoot.get('seed', '—'),
         'run_ticks': shoot.get('finished', {}).get('frames', 1) - 1,
+        'run_frames': shoot.get('finished', {}).get('frames', 1),
+        'run_transitions': shoot.get('finished', {}).get('transitions', '—'),
         'run_outcome': (shoot.get('finished', {}).get('outcome') or '—').upper(),
+        'deep_seed': shoot.get('deepSeed', '—'),
+        'deep_tick': shoot.get('deepTick', '—'),
+        'deep_depth': max((len(str(path).split('.')) for path in shoot.get('deepRunning') or ['0']), default=1),
     }
 
     body = REPORT_TEMPLATE
@@ -1050,8 +357,10 @@ REPORT_TEMPLATE = r'''<!doctype html>
 <body>
 <main>
 <h1>Live runtime state on the Behavior Tree</h1>
-<div class="dek">Three backend&#8596;frontend contracts, the state model they share, a rendering doctrine already settled in the vault,
-and a clickable mock-backend lab running on real chrome — so the visualization can be built and judged before any real backend exists.</div>
+<div class="dek">Three backend&#8596;frontend contracts (still open), the state model they share, and the rendering language Zach
+decided on 2026-09-05 — Groot2&#8217;s transition-log model, Flowstate&#8217;s sampled palette and group aggregation, spinners on the
+whole active path, the marching-dash active-path edge — implemented, photographed, and tested in the clickable mock-backend lab
+on real chrome, before any real backend exists.</div>
 <div class="stampline">@stamp@ · repo at <code>@fact_head@</code> · facts measured from the tree at build time by <code>docs/build_behavior_tree_runtime_viz_proposal.py</code></div>
 
 <h2><span class="n">01</span>The frame, and one correction to it</h2>
@@ -1214,30 +523,74 @@ interface BtRunSnapshot {
   blackboard?: Record&lt;string, string&gt;   // later; py_trees sends visited keys per tick
 }
 
-interface BtRunEvent { tick: number; at: number; path: string; to: BtNodeStatus }  // the trace/ring record</code></pre>
+interface BtRunEvent {                 // the CANONICAL record (decided 2026-09-05):
+  seq: number                          // frames above are folds of a list of these;
+  tick: number; at: number             // tick + timestamp let a scrubber rebuild the
+  path: string                         // exact state at ANY tick — or step INSIDE one
+  from: BtNodeStatus; to: BtNodeStatus
+}</code></pre>
 <p>In-app it lives in a <b>runtime store beside the editor, never inside it</b> (the recorder-store pattern): the tldraw store is the
 document, and the digest fence exists precisely to protect it from non-authored writes. <code>BehaviorTreeCanvas</code> already knows
 every node&#8217;s rect per projection, so rendering subscribes by region + path and paints — no production shape gains a runtime prop.</p>
 
-<h2><span class="n">06</span>Rendering: proven in the lab, on real chrome</h2>
-<p>The doctrine is already settled in the vault (High-Performance HMI / ISA-101, written against Groot2&#8217;s own idiom):
-<b>persistent healthy-idle = gray; transient executing/success = brief color that decays; failure persists until acted on; and the
-palette is mode-dependent</b> — a step/debug run tolerates more color than a live monitor. The lab implements exactly that: Monitor
-mode decays resolved outcomes after 2 ticks; Step mode keeps them painted.</p>
-<figure><img src="@lab_running@" alt="Lab mid-run: running pulses on real chrome">
-<figcaption><b>Mid-run.</b> Real exported node cards; wires replayed from the painted DOM at identical coordinates. Blue rings pulse on
-the active path, the traversed wires glow, the Start pill is hot. Right rail: per-node mock config and the transitions lane.</figcaption></figure>
+<h2><span class="n">06</span>Rendering: the decided language, proven in the lab on real chrome</h2>
+<p><b>Decided 2026-09-05 (Zach, after the UX survey), implemented in the lab the same day:</b></p>
+<ul>
+  <li><b>Groot2&#8217;s model is the base.</b> Status is painted as color/state (no icon system); the history is
+      <b>transition-based, not tick-based</b> — the canonical record is <code>{seq, tick, at, path, from, to}</code> and frames are
+      derived by folding it, which is exactly the fix for py_trees&#8217; &#8220;skips through ticks&#8221; feeling. The scrubber&#8217;s
+      detail view is Groot2&#8217;s real Transitions table (Time · Node · Status, filterable, current row highlighted).</li>
+  <li><b>Flowstate&#8217;s palette, verbatim</b> — the survey&#8217;s sampled values: running <code>#E2D9FC</code> (border
+      <code>#8b5cf6</code>), done <code>#CAFCD0</code>, pending/untaken <code>#DEDEDE</code>, idle = neutral chrome. Failure keeps
+      Groot2&#8217;s <code>#dc2626</code> (Flowstate never shows failure publicly). Group aggregation copied exactly: running tints the
+      <i>header</i> lavender; success turns the header mint <i>and washes the whole surface</i> pale green — children keep their own
+      fills, untaken branches stay gray. Outcomes persist for the run; re-execution clears them, never a timer (so the earlier
+      Monitor-decay mode is gone).</li>
+  <li><b>The spinner rides the whole active path</b> — Zach&#8217;s stated improvement over Flowstate: &#8220;everything that is purple
+      in Intrinsic Flowstate would have a spinner.&#8221; Every RUNNING ancestor (and a running group&#8217;s header) carries MoveIt&#8217;s
+      rotating dotted ring, not just the ticking leaf.</li>
+  <li><b>The active path is an animated marching dash</b> from Start to the current node — Zach&#8217;s explicit call, overriding the
+      survey&#8217;s recommendation against a dashed running edge. The collision it warned about (dash already means async/delayed on
+      this app&#8217;s cables) is resolved on a different channel: <b>the cable vocabulary is a static dash pattern; the active path
+      visibly moves</b>. A screenshot of an async cable is identical from moment to moment; the live path never is. The lab draws
+      this contract into the scene (the edge-vocabulary inset) and its test asserts it in pixels.</li>
+</ul>
+<figure><img src="@lab_deep_close@" alt="Close-up: spinners and marching dash on every ancestor of the ticking leaf">
+<figcaption><b>The whole active path lights</b> (seed @fact_deep_seed@, tick @fact_deep_tick@, deterministic): the ticking
+<code>command_multi_axis_gripper</code> is @fact_deep_depth@ levels deep, and every ancestor — Sequence, Fallback, Parallel, the
+root — holds the lavender fill, the purple ring, <i>and its own spinner</i> while the marching dash runs Start → leaf. The failed
+first gripper persists red beside the live recovery branch; the finished branch keeps its mint; the untaken Pull-Part-Kit branch
+stays pending-gray.</figcaption></figure>
+<figure><img src="@lab_running@" alt="Lab mid-run: the Flowstate palette on real chrome">
+<figcaption><b>Mid-run, wide.</b> Real exported node cards; wires replayed from the painted DOM at identical coordinates. Done work
+holds mint, the active chain is lavender + spinners, pending work is gray, the Start pill is hot. Right rail: per-node mock config
+and the Transitions table.</figcaption></figure>
 <figure><img src="@lab_recovery_close@" alt="Close-up: a gripper fails and the Fallback recovery branch takes over">
 <figcaption><b>The recovery moment</b> (seed @fact_seed@, deterministic): the first
-<code>command_multi_axis_gripper</code> holds FAILURE red while the Fallback&#8217;s second branch runs — and the finished
-Initialize-Workcell branch behind it has already decayed back to gray. That one frame is the ISA-101 rule, the Fallback semantics,
-and the py_trees preemption treatment at once.</figcaption></figure>
-<figure><img src="@lab_resolved@" alt="Lab resolved run, step colors">
-<figcaption><b>Resolved</b> (Step-colors mode): the whole causal story stays painted — @fact_run_outcome@ at tick @fact_run_ticks@ —
-with per-node ✓/✕ badges and the run banner.</figcaption></figure>
-<figure><img src="@lab_process@" alt="The same run projected in the Process view">
-<figcaption><b>Same run, Process view.</b> One status map keyed by btPath paints every projection — flipping views mid-run costs
-nothing, which is the payoff of keeping the state model out of the renderer.</figcaption></figure>
+<code>command_multi_axis_gripper</code> holds FAILURE red while the Fallback&#8217;s second branch runs lavender under its spinner.
+Failure persists until re-execution — Groot2, MoveIt and the vault doctrine agree.</figcaption></figure>
+<figure><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+<img src="@lab_motion_a@" alt="Edge vocabulary inset, first capture" style="max-width:465px">
+<img src="@lab_motion_b@" alt="Edge vocabulary inset, 420ms later" style="max-width:465px"></div>
+<figcaption><b>The dash-collision resolution, photographed.</b> The same inset captured twice, 420&nbsp;ms apart: the active-path
+row&#8217;s dashes have marched (361 pixels differ — measured), the async rail (<code>56 4 10 4</code>, the app&#8217;s real
+constants) and the delayed z⁻¹ dots are <i>byte-identical</i>. Motion is the disambiguating channel, by design, not by hope.</figcaption></figure>
+<figure><img src="@lab_transitions@" alt="The Groot2-style transitions table" style="max-width:640px">
+<figcaption><b>Groot2&#8217;s Transitions table, adopted</b>: Time · Node · Status with colored status text, a name filter, the row at
+the scrub position highlighted and kept in view; clicking a row jumps the canvas there, and <span class="kbd">«</span>/<span
+class="kbd">»</span> step one transition — <i>inside</i> a tick when several land on the same one.</figcaption></figure>
+<figure><img src="@lab_resolved@" alt="Lab resolved run">
+<figcaption><b>Resolved.</b> The whole causal story stays painted — @fact_run_outcome@ at tick @fact_run_ticks@,
+@fact_run_transitions@ transitions — with ✓/✕ badges, the run banner, and the footer&#8217;s self-check:
+&#8220;history ✓ @fact_run_frames@/@fact_run_frames@ ticks reconstruct exactly&#8221; (tick 0 included) runs after every finished
+run, folding the transition log to every tick and comparing every node against the driver&#8217;s own snapshots.</figcaption></figure>
+<figure><img src="@lab_process_running@" alt="Process view mid-run: header tint vs success wash">
+<figcaption><b>Flowstate&#8217;s aggregation, mid-run (Process view).</b> Initialize Workcell is done: mint header <i>and</i> the
+pale-green surface wash, its untaken recovery cards still gray inside it. Pull Part Kit is running: lavender header + spinner,
+<i>no</i> wash (the wash is success-only), the failed gripper red, the recovery gripper lavender, the unreached one gray.</figcaption></figure>
+<figure><img src="@lab_process@" alt="The same run resolved in the Process view">
+<figcaption><b>Same run, resolved, Process view.</b> One status map keyed by btPath paints every projection — flipping views mid-run
+costs nothing, which is the payoff of keeping the state model out of the renderer.</figcaption></figure>
 
 <h2><span class="n">07</span>The mock backend (&#8220;walk it&#8221;), and where its ideas come from</h2>
 <p>The lab&#8217;s driver is a ~120-line BT.CPP-semantics interpreter (Sequence/Fallback with memory, Parallel with
@@ -1245,8 +598,10 @@ success/failure counts, halt cascades) over the <i>same canonical XML</i> the re
 <code>{durationTicks, pSuccess}</code> — py_trees&#8217; TickCounter × ProbabilisticBehaviour composed, the knob BT.CPP&#8217;s
 TestNodeConfig (<code>async_delay</code> + scripted result) stops just short of. Seeded RNG makes every walk replayable
 (the report&#8217;s screenshots are a seed scan choosing seed @fact_seed@ so the captured run tells the recovery story).
-Presets: Nominal, Flaky gripper, Chaos. Every tick appends a frame; the scrubber walks frames backwards and forwards, and the
-transitions lane jumps to any event — py_trees_js&#8217;s rewind/resume, Groot2&#8217;s transitions table.</p>
+Presets: Nominal, Flaky gripper, Chaos. Every status change appends to the canonical transition log; the scrubber <i>folds the
+log</i> — to any tick via the slider, or to any single transition via <span class="kbd">«</span>/<span class="kbd">»</span> and the
+table — and the driver&#8217;s own per-tick snapshots survive only as the independent oracle the fold is verified against, after every
+run and in <code>docs/labs/test_bt_runtime_lab.mjs</code>.</p>
 <p>When the real backend lands, this driver is deleted and nothing else changes: it produces the same frames the wire would.
 A real py_trees run mocks even better than random numbers — swap leaves for <code>StatusQueue</code>/<code>TickCounter</code>
 behaviours via the same substitution idea BT.CPP ships, and the &#8220;draft sim&#8221; is a real tree, fake actuators — Flowstate&#8217;s
@@ -1256,14 +611,23 @@ behaviours via the same substitution idea BT.CPP ships, and the &#8220;draft sim
 <p><a class="launch" href="@lab_href@">Open bt-runtime-lab-@stamp@.html</a></p>
 <pre><code>@lab_abs@</code></pre>
 <p>No server, no build — a self-contained file. <span class="kbd">Play</span> ticks at the chosen rate;
-<span class="kbd">Step</span> single-ticks; drag any probability slider mid-run; scrub the timeline or click a transition to
-jump; flip <span class="kbd">Tree</span>/<span class="kbd">Process</span> mid-run; <span class="kbd">Monitor</span> vs
-<span class="kbd">Step colors</span> shows the mode-dependent palette. Regenerate everything (fresh chrome captures from the live
+<span class="kbd">Step</span> single-ticks; <span class="kbd">«</span>/<span class="kbd">»</span> step one <i>transition</i>
+(inside a tick when several share one); drag any probability slider mid-run; scrub the timeline, click a Transitions row, or
+filter it by node name; flip <span class="kbd">Tree</span>/<span class="kbd">Process</span> mid-run. After every finished run the
+footer self-checks that the transition log reconstructs every tick exactly. The lab&#8217;s own acceptance test (38 checks — the
+reconstruction property across seeds × presets, the whole-path spinners, the wash, the table, and the motion-vs-static pixels) is
+<code>node docs/labs/test_bt_runtime_lab.mjs</code>. Regenerate everything (fresh chrome captures from the live
 app, fresh screenshots, this page) with <code>python3 docs/build_behavior_tree_runtime_viz_proposal.py --recapture --reshoot</code>.</p>
 
 <h2><span class="n">09</span>Decision surface</h2>
-<p><b>Done and proved here:</b> the three contracts with the reference architectures verified at source; the shared state model;
-the rendering layer demonstrated on real chrome with the settled color doctrine; a walkable, configurable mock backend.
+<p><b>Decided since this report was first built (2026-09-05, later the same day):</b> the rendering layer is no longer a proposal.
+Zach picked Groot2&#8217;s model (color-state painting, transition-based history, the Transitions table), Flowstate&#8217;s exact
+palette and group aggregation, spinners on the whole active path, and the animated marching-dash active-path edge (his call,
+overriding the survey&#8217;s dash-collision worry — resolved by the motion-vs-static channel, §06). All of it is implemented and
+tested in the lab; §06 shows the result. <b>The transport contract below remains open</b> — nothing here builds P1/P2/P3.</p>
+<p><b>Done and proved here:</b> the three contracts with the reference architectures verified at source; the shared state model
+with the transition log as the canonical record; the decided rendering language demonstrated on real chrome; a walkable,
+configurable mock backend with its own 38-check acceptance test.
 <b>Not done, deliberately:</b> no production code touched — no store, no endpoints, no overlay in <code>src/</code>; that is the
 implementation this proposal exists to de-risk. Also out of scope by choice: blackboard-value display per tick (py_trees defines the
 wire shape when wanted) and the IDE-host transport case.</p>

@@ -9,8 +9,21 @@
   },
   "finished": {
     "frames": 10,
-    "cursor": 9,
+    "transitions": 40,
+    "cursorIndex": 39,
     "cursorTick": 9,
-    "outcome": "success"
-  }
+    "outcome": "success",
+    "running": []
+  },
+  "deepSeed": 5,
+  "deepTick": 6,
+  "deepRunning": [
+    "0",
+    "0.0",
+    "0.0.0",
+    "0.0.0.0",
+    "0.0.0.0.2",
+    "0.0.0.0.2.1",
+    "0.0.0.0.2.1.0"
+  ]
 }

@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Behavior Tree runtime lab — mock backend on real chrome</title>
+<style>
+  /* Status language, decided 2026-09-05: Groot2's model (transition log, replay,
+     transitions table), Flowstate's palette (fills sampled from the keynote
+     frames in the UX survey), MoveIt's spinner on the WHOLE active path, and
+     Zach's marching-dash active-path edge (animated, so the STATIC async/delayed
+     dash vocabulary stays unambiguous in stills). */
+  :root {
+    --ink: #27272a; --ink-soft: #3f3f46; --muted: #71717a; --faint: #a1a1aa;
+    --surface: #ffffff; --sunken: #f4f4f5; --border: #d4d4d8;
+    --fs-running: #E2D9FC;      /* Flowstate lavender — header & card, sampled */
+    --fs-running-edge: #8b5cf6; /* Flowstate's saturated purple border */
+    --fs-done: #CAFCD0;         /* Flowstate mint — done header & card, sampled */
+    --fs-pending: #DEDEDE;      /* Flowstate gray — pending / untaken, sampled */
+    --fs-idle: #EBE9EA;         /* Flowstate neutral idle header, sampled */
+    --success: #16a34a;         /* Groot2 SUCCESS (matches its recovered border) */
+    --failure: #dc2626;         /* Groot2 FAILURE (Flowstate never shows failure publicly) */
+    --halted: #9ca3af;          /* preempted ≈ py_trees INVALID — quiet gray */
+    --accent: #6d5be6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 Inter, ui-sans-serif, system-ui; color: var(--ink); background: #fafafa;
+         height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  header { flex: none; padding: 14px 20px 10px; border-bottom: 1px solid var(--border); background: var(--surface);
+           display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; }
+  header .sub { color: var(--muted); font-size: 12.5px; }
+  .layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 360px; gap: 0; }
+  .stage-wrap { overflow: auto; background:
+      repeating-conic-gradient(#fcfffe 0 25%, #f7faf9 0 50%) 0 0 / 28px 28px; position: relative; }
+  .stage { position: relative; transform-origin: 0 0; }
+  .stage img.base { display: block; user-select: none; pointer-events: none; }
+  svg.tissue { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+  .tissue path.wire { fill: none; stroke: var(--ink-soft); stroke-width: 2; stroke-linejoin: round; }
+  .tissue path.head { fill: var(--ink-soft); }
+  /* Runtime state on the connective tissue. An edge takes its child's status,
+     Groot2-style; the RUNNING treatment is the one Zach asked for — a marching
+     dash from the root all the way down to the currently ticking node. */
+  .tissue path.status-edge { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+                             opacity: 0; transition: opacity .3s ease; }
+  .tissue path.status-edge[data-s="running"] { opacity: 1; stroke: var(--fs-running-edge); stroke-width: 3.5;
+                             stroke-dasharray: 10 7; animation: march .7s linear infinite; }
+  .tissue path.status-edge[data-s="success"] { opacity: .85; stroke: var(--success); }
+  .tissue path.status-edge[data-s="failure"] { opacity: .9; stroke: var(--failure); }
+  @keyframes march { to { stroke-dashoffset: -17; } }
+  .tissue line.rail { stroke: var(--ink-soft); stroke-width: 2; }
+  .tissue g.chip rect { fill: var(--surface); stroke: #27272a; stroke-width: 1.4; }
+  .tissue g.chip[data-kind="fail"] rect { fill: var(--sunken); stroke-width: 3; }
+  .tissue g.chip text { font-size: 16px; font-weight: 500; text-anchor: middle; dominant-baseline: middle; fill: var(--ink); }
+  .tissue g.chip[data-kind="fail"] text { font-weight: 700; }
+  /* Flowstate group aggregation, verbatim: while anything inside runs only the
+     HEADER tints lavender (+ a spinner, Zach's addition); on subtree success the
+     header goes mint AND the whole surface washes pale green. The wash is
+     success-only. Failure header tint is derived (Flowstate never shows one). */
+  .tissue g.groupbox rect.frame { fill: var(--sunken); fill-opacity: .55; stroke: var(--border); stroke-dasharray: 6 5;
+                                  transition: fill .35s ease, stroke .35s ease; }
+  .tissue g.groupbox rect.head { fill: #ececee; transition: fill .3s ease; }
+  .tissue g.groupbox text { font-size: 18px; font-weight: 600; fill: var(--ink); }
+  .tissue g.groupbox[data-status="running"] rect.head { fill: var(--fs-running); }
+  .tissue g.groupbox[data-status="success"] rect.head { fill: var(--fs-done); }
+  .tissue g.groupbox[data-status="success"] rect.frame { fill: var(--fs-done); fill-opacity: .38;
+                                  stroke: rgba(22,163,74,.55); }
+  .tissue g.groupbox[data-status="failure"] rect.head { fill: #F2CFCF; }
+  .tissue g.groupbox g.gspin { visibility: hidden; }
+  .tissue g.groupbox[data-status="running"] g.gspin { visibility: visible; }
+  .tissue g.gspin circle { fill: none; stroke: var(--fs-running-edge); stroke-width: 3.4;
+                           stroke-linecap: round; stroke-dasharray: 0.1 6.19; }
+  .tissue g.gspin { transform-box: fill-box; transform-origin: center; animation: spin 1.1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .tissue g.start rect { fill: var(--surface); stroke: #27272a; stroke-width: 1.6; transition: stroke .3s ease; }
+  .tissue g.start text { font-size: 18px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; fill: var(--ink); }
+  .tissue g.start.hot rect { stroke: var(--fs-running-edge); stroke-width: 3; }
+  /* Edge-vocabulary inset: the deliberate resolution of the dash collision.
+     async/delayed cables are STATIC dash patterns (identical in any two stills);
+     the active path is the same dash family but VISIBLY MARCHING. Drawn at 2×
+     the real cable metrics for legibility at stage scale. */
+  .tissue g.vocab rect.panel { fill: var(--surface); fill-opacity: .96; stroke: var(--border); }
+  .tissue g.vocab text { font-size: 28px; font-weight: 500; fill: var(--ink-soft); dominant-baseline: middle; }
+  .tissue g.vocab text.vt { font-size: 24px; font-weight: 700; letter-spacing: .06em; fill: var(--muted); }
+  .tissue g.vocab text.note { font-size: 22px; fill: var(--muted); font-weight: 400; }
+  .tissue g.vocab path.spec-async { fill: none; stroke: var(--ink-soft); stroke-width: 5;
+                                    stroke-dasharray: 112 8 20 8; stroke-linecap: butt; }
+  .tissue g.vocab path.spec-delay-solid { fill: none; stroke: var(--ink-soft); stroke-width: 5; }
+  .tissue g.vocab path.spec-delay-dots { fill: none; stroke: var(--ink-soft); stroke-width: 5;
+                                    stroke-linecap: round; stroke-dasharray: 0.2 12; }
+  .tissue g.vocab rect.pill { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6; }
+  .tissue g.vocab text.pillt { font-size: 24px; font-weight: 600; text-anchor: middle; }
+
+  /* -------- the runtime overlay: one div per node, keyed by btPath --------
+     Flowstate's card treatment: status is a flat FILL (their cards are plain
+     white; ours multiply the sampled swatch over the real chrome so where the
+     card is white it reproduces the swatch exactly and the text stays ink). */
+  .overlay { position: absolute; border-radius: 12px; pointer-events: auto; cursor: default;
+             transition: outline-color .22s ease; outline: 2.5px solid transparent; outline-offset: 1px; }
+  .overlay[data-role="control"] { border-radius: 8px; }
+  .overlay .fill { position: absolute; inset: 0; border-radius: inherit; mix-blend-mode: multiply;
+             background: transparent; transition: background-color .25s ease; pointer-events: none; }
+  .overlay[data-status="pending"] .fill { background: var(--fs-pending); }
+  .overlay[data-status="running"] .fill { background: var(--fs-running); }
+  .overlay[data-status="running"] { outline-color: var(--fs-running-edge); }
+  .overlay[data-status="success"] .fill { background: var(--fs-done); }
+  .overlay[data-status="failure"] .fill { background: #F2D2D2; }
+  .overlay[data-status="failure"] { outline-color: var(--failure); }
+  .overlay[data-status="halted"] .fill { background: var(--fs-pending); }
+  .overlay[data-status="halted"] { outline: 2px dashed var(--halted); }
+  .overlay .badge { position: absolute; top: -11px; right: -9px; min-width: 22px; height: 22px; padding: 0 5px;
+             border-radius: 11px; font: 600 12px/22px Inter, ui-sans-serif; text-align: center; color: #fff;
+             opacity: 0; transform: scale(.6); transition: opacity .2s, transform .2s; }
+  .overlay[data-status="running"] .badge { background: var(--surface); border: 1.5px solid var(--fs-running-edge);
+             opacity: 1; transform: scale(1); padding: 0; width: 22px; }
+  .overlay .badge svg { display: block; width: 19px; height: 19px; margin: 0 auto; }
+  .overlay .badge svg g { transform-box: fill-box; transform-origin: center; animation: spin 1.1s linear infinite; }
+  .overlay .badge svg circle { fill: none; stroke: var(--fs-running-edge); stroke-width: 3;
+             stroke-linecap: round; stroke-dasharray: 0.1 6.19; }
+  .overlay[data-status="success"] .badge { background: var(--success); opacity: 1; transform: scale(1); }
+  .overlay[data-status="failure"] .badge { background: var(--failure); opacity: 1; transform: scale(1); }
+  .overlay[data-status="halted"] .badge { background: var(--halted); opacity: 1; transform: scale(1); }
+  .overlay .ticks { position: absolute; left: 6px; bottom: -9px; font: 600 10.5px/16px ui-monospace, monospace;
+             color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+             border-radius: 8px; padding: 0 6px; opacity: 0; transition: opacity .2s; }
+  .stage[data-counters="true"] .overlay .ticks { opacity: 1; }
+  .overlay:hover { outline-color: var(--accent) !important; }
+
+  /* -------- right panel -------- */
+  aside { border-left: 1px solid var(--border); background: var(--surface); overflow-y: auto; padding: 14px 16px;
+          display: flex; flex-direction: column; }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 8px; }
+  aside h2:first-child { margin-top: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 7px 14px; font-size: 12.5px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--border); }
+  .legend i.pending { background: var(--fs-pending); border-color: var(--fs-pending); }
+  .legend i.running { background: var(--fs-running); border-color: var(--fs-running-edge); }
+  .legend i.done { background: var(--fs-done); border-color: var(--fs-done); }
+  .legend i.failure { background: #F2D2D2; border-color: var(--failure); }
+  .legend i.halted { background: var(--fs-pending); border-style: dashed; border-color: var(--halted); }
+  .legend-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  table.config { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.config td { padding: 3px 4px; border-bottom: 1px solid var(--sunken); vertical-align: middle; }
+  table.config td.name { font-family: ui-monospace, monospace; font-size: 11.5px; max-width: 130px;
+                         overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  table.config tr:hover td { background: #f0f4ff; }
+  table.config input[type="range"] { width: 74px; vertical-align: middle; }
+  table.config input[type="number"] { width: 40px; }
+  table.config .p { display: inline-block; width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* -------- the Transitions table: Groot2's design (Time · Node · Status,
+     filter by node name, current-position row highlighted, click to jump) --- */
+  .trans-meta { font: 500 11.5px/1.4 ui-monospace, monospace; color: var(--muted); margin: 0 0 6px; }
+  #trans-filter { width: 100%; font: 12px Inter, ui-sans-serif; padding: 4px 8px; margin: 0 0 6px;
+                  border: 1px solid var(--border); border-radius: 7px; }
+  .trans-scroll { flex: 1; min-height: 180px; overflow-y: auto; border: 1px solid var(--sunken); border-radius: 7px; }
+  table.trans { width: 100%; border-collapse: collapse; font: 12px/1.5 ui-monospace, monospace; }
+  table.trans th { position: sticky; top: 0; background: var(--sunken); color: var(--muted); font: 600 10.5px Inter;
+                   text-transform: uppercase; letter-spacing: .06em; text-align: left; padding: 4px 8px; }
+  table.trans td { padding: 2px 8px; border-bottom: 1px solid var(--sunken); white-space: nowrap; }
+  table.trans td.t { color: var(--muted); font-variant-numeric: tabular-nums; }
+  table.trans td.node { max-width: 148px; overflow: hidden; text-overflow: ellipsis; }
+  table.trans tr { cursor: pointer; }
+  table.trans tr:hover td { background: #f0f4ff; }
+  table.trans tr.current td { background: #ecebff; box-shadow: inset 3px 0 0 var(--accent); }
+  table.trans tr.outcome td { font-weight: 700; }
+  .to-success { color: var(--success); } .to-failure { color: var(--failure); }
+  .to-running { color: var(--fs-running-edge); } .to-halted { color: var(--halted); }
+  .to-fresh { color: var(--muted); }
+
+  /* -------- transport -------- */
+  footer { flex: none; display: flex; gap: 12px; align-items: center; padding: 10px 20px; border-top: 1px solid var(--border);
+           background: var(--surface); flex-wrap: wrap; }
+  button { font: 600 13px Inter, ui-sans-serif; color: var(--ink); background: var(--surface);
+           border: 1px solid var(--border); border-radius: 8px; padding: 6px 13px; cursor: pointer; }
+  button:hover { background: var(--sunken); }
+  button.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+  button.primary:hover { background: #3f3f46; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; }
+  .seg button[data-on="true"] { background: var(--ink); color: #fff; }
+  footer label { font-size: 12px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+  #scrub { flex: 1; min-width: 140px; }
+  #clock { font: 700 13px ui-monospace, monospace; min-width: 86px; }
+  #wallclock { font: 500 12px ui-monospace, monospace; color: var(--muted); min-width: 76px; }
+  #banner { font-weight: 700; padding: 3px 10px; border-radius: 7px; visibility: hidden; }
+  #banner[data-outcome="success"] { visibility: visible; color: var(--success); background: rgba(22,163,74,.1); }
+  #banner[data-outcome="failure"] { visibility: visible; color: var(--failure); background: rgba(220,38,38,.1); }
+  #verify-pill { font: 600 11px ui-monospace, monospace; border-radius: 999px; padding: 1px 8px; visibility: hidden; }
+  #verify-pill[data-ok="true"] { visibility: visible; color: var(--success); border: 1px solid var(--success); }
+  #verify-pill[data-ok="false"] { visibility: visible; color: var(--failure); border: 1px solid var(--failure); }
+  #live-pill { font: 600 11px Inter; color: var(--fs-running-edge); border: 1px solid var(--fs-running-edge);
+               border-radius: 999px; padding: 1px 8px; cursor: pointer; visibility: hidden; }
+  #live-pill[data-scrubbed="true"] { visibility: visible; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Behavior Tree runtime lab</h1>
+  <span class="sub">A mock backend walking <b>RigidBodyAssembly</b> on real SystemSketch chrome (cards exported by the
+  editor, wires replayed from the painted DOM). Visual language decided 2026-09-05: <b>Groot2's transition-log model</b>
+  (the history is every status transition, µs-stamped; frames are derived), <b>Flowstate's sampled palette</b> with its
+  header-tint + success-wash group aggregation, <b>MoveIt's spinner on the whole active path</b>, and an
+  <b>animated marching-dash active-path edge</b> — motion is what separates it from the app's static async/delayed dash
+  vocabulary. Build @ <code>__GIT_HEAD__</code>.</span>
+</header>
+<div class="layout">
+  <div class="stage-wrap" id="stage-wrap">
+    <div class="stage" id="stage" data-counters="false"></div>
+  </div>
+  <aside>
+    <h2>Status language <span style="text-transform:none;letter-spacing:0">(Flowstate-sampled fills · Groot2 failure)</span></h2>
+    <div class="legend">
+      <span><i></i> idle = the chrome itself</span>
+      <span><i class="pending"></i> pending / untaken <code>#DEDEDE</code></span>
+      <span><i class="running"></i> running <code>#E2D9FC</code> + spinner</span>
+      <span><i class="done"></i> done <code>#CAFCD0</code></span>
+      <span><i class="failure"></i> failure <code>#dc2626</code> — persists</span>
+      <span><i class="halted"></i> halted (preempted)</span>
+    </div>
+    <div class="legend-note">Outcomes persist for the run and are cleared by re-execution, never by a timer (all four
+    references agree). Every RUNNING ancestor carries the spinner — the whole active path, not just the ticking leaf.</div>
+    <h2>Per-node mock config <span style="text-transform:none;letter-spacing:0">(p·success, duration in ticks)</span></h2>
+    <div style="margin: 0 0 8px; display:flex; gap:8px; align-items:center;">
+      <label style="font-size:12px;color:var(--muted)">Preset
+        <select id="preset">
+          <option value="flaky" selected>Flaky gripper (recovery story)</option>
+          <option value="nominal">Nominal (everything succeeds)</option>
+          <option value="chaos">Chaos (p = .6 everywhere)</option>
+        </select>
+      </label>
+    </div>
+    <table class="config"><tbody id="config-rows"></tbody></table>
+    <h2>Transitions <span style="text-transform:none;letter-spacing:0">(the canonical history — click a row to jump)</span></h2>
+    <div class="trans-meta"><span id="trans-count">0 transitions</span> · <span id="trans-duration">0:00.000</span></div>
+    <input id="trans-filter" type="search" placeholder="filter by node name" autocomplete="off">
+    <div class="trans-scroll"><table class="trans">
+      <thead><tr><th>Time</th><th>Node</th><th>Status</th></tr></thead>
+      <tbody id="trans-rows"></tbody>
+    </table></div>
+  </aside>
+</div>
+<footer>
+  <button class="primary" id="play">Play</button>
+  <button id="step">Step</button>
+  <button id="prev-trans" title="Step backward one transition (Groot2's unit — steps inside a tick)">«</button>
+  <button id="next-trans" title="Step forward one transition (Groot2's unit — steps inside a tick)">»</button>
+  <button id="reset">Reset</button>
+  <span class="seg" id="view-toggle">
+    <button data-view="tree" data-on="true">Tree</button>
+    <button data-view="process">Process</button>
+  </span>
+  <label>speed <input id="speed" type="range" min="1" max="10" value="3" style="width:80px"> <span id="speed-label">3/s</span></label>
+  <label>seed <input id="seed" type="number" value="7" style="width:58px"></label>
+  <label><input type="checkbox" id="counters"> tick counts</label>
+  <span id="clock">tick 0</span>
+  <span id="wallclock">0:00.000</span>
+  <span id="banner"></span>
+  <span id="verify-pill" title="After each finished run, every tick is reconstructed from the transition log alone and compared against the driver's own per-tick snapshots."></span>
+  <input id="scrub" type="range" min="0" max="0" value="0">
+  <span id="live-pill" data-scrubbed="false">⏵ back to live</span>
+</footer>
+<script>
+'use strict'
+const PAYLOAD = __PAYLOAD__
+
+/* =========================================================================
+ * Layer 1 — the state model. Decided 2026-09-05, on Groot2's side of the one
+ * real divergence in the field: the CANONICAL history is the transition log —
+ *   { seq, tick, at (ms since run start), path, from, to }
+ * — never per-tick snapshots. A frame for ANY tick (or any intra-tick moment)
+ * is derived by folding the log up to a cursor; a node with no entry ≤ cursor
+ * simply still holds its previous status, which is why stable RUNNING ticks
+ * can be skipped on the wire with zero loss (the fix for py_trees' "skips
+ * through ticks"). The driver still emits per-tick snapshots, but only as the
+ * independent ground truth the reconstruction is verified against.
+ *   status: fresh | running | success | failure | halted  (halted ≈ py_trees INVALID)
+ * ========================================================================= */
+function emptyFrame() {
+  return { tick: 0, statuses: {}, visited: [], events: [], outcome: null }
+}
+
+/** Fold transitions[0..index] into the exact end state at that moment. */
+function reconstructAt(log, index) {
+  const statuses = {}
+  let tick = 0
+  let outcome = null
+  for (let i = 0; i <= index && i < log.length; i += 1) {
+    const entry = log[i]
+    tick = entry.tick
+    statuses[entry.path] = { status: entry.to, sinceTick: entry.tick }
+    if (entry.path === '0') {
+      outcome = entry.to === 'success' || entry.to === 'failure' ? entry.to : null
+    }
+  }
+  return { tick, statuses, outcome }
+}
+
+/* =========================================================================
+ * Layer 3 — the mock driver: a miniature BT.CPP v4 interpreter over the
+ * SAME canonical XML the region stores. Per-leaf config composes py_trees'
+ * TickCounter (duration in ticks) with its ProbabilisticBehaviour (weighted
+ * outcome), the way BT.CPP's TestNodeConfig composes async_delay with
+ * return_status. Seeded, so a run is replayable.
+ * ========================================================================= */
+function mulberry32(seed) {
+  let a = seed >>> 0
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function parseTree(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'text/xml')
+  const main = doc.querySelector('BehaviorTree')
+  const rootElement = [...main.children][0]
+  const nodes = new Map()
+  const build = (element, path) => {
+    const tag = element.tagName
+    const kindOf = { Sequence: 'sequence', Fallback: 'fallback', Parallel: 'parallel' }[tag]
+      ?? (tag === 'AlwaysFailure' ? 'always-failure' : 'action')
+    const node = {
+      path, tag, kind: kindOf,
+      name: element.getAttribute('name') || tag,
+      successCount: Number(element.getAttribute('success_count') ?? '-1'),
+      failureCount: Number(element.getAttribute('failure_count') ?? '1'),
+      children: [...element.children].map((child, index) => build(child, path + '.' + index)),
+    }
+    nodes.set(path, node)
+    return node
+  }
+  const root = build(rootElement, '0')
+  return { root, nodes }
+}
+
+function makeDriver(xml, config, seed) {
+  const { root, nodes } = parseTree(xml)
+  const rng = mulberry32(seed)
+  const memory = new Map() // path -> { cursor, elapsed, done: Map(childPath -> result) }
+  const frame = { current: emptyFrame() }
+
+  const mark = (path, status) => {
+    const previous = frame.current.statuses[path]?.status
+    if (previous !== status) frame.current.events.push({ path, from: previous ?? 'fresh', to: status })
+    const held = frame.current.statuses[path]
+    frame.current.statuses[path] = { status, since: status === held?.status ? held.since : frame.current.tick }
+  }
+  const halt = (node) => {
+    const held = frame.current.statuses[node.path]?.status
+    if (held === 'running') mark(node.path, 'halted')
+    memory.delete(node.path)
+    node.children.forEach(halt)
+  }
+  const tick = (node) => {
+    frame.current.visited.push(node.path)
+    mark(node.path, 'running')
+    const result = tickInner(node)
+    if (result !== 'running') { mark(node.path, result); memory.delete(node.path) }
+    return result
+  }
+  const tickInner = (node) => {
+    if (node.kind === 'always-failure') return 'failure'
+    if (node.kind === 'action') {
+      const state = memory.get(node.path) ?? { elapsed: 0 }
+      memory.set(node.path, state)
+      state.elapsed += 1
+      const wanted = config[node.path] ?? { durationTicks: 2, pSuccess: 1 }
+      if (state.elapsed < wanted.durationTicks) return 'running'
+      return rng() < wanted.pSuccess ? 'success' : 'failure'
+    }
+    if (node.kind === 'sequence' || node.kind === 'fallback') {
+      const advanceOn = node.kind === 'sequence' ? 'success' : 'failure'
+      const stopOn = node.kind === 'sequence' ? 'failure' : 'success'
+      const state = memory.get(node.path) ?? { cursor: 0 }
+      memory.set(node.path, state)
+      while (state.cursor < node.children.length) {
+        const result = tick(node.children[state.cursor])
+        if (result === 'running') return 'running'
+        if (result === stopOn) { node.children.slice(state.cursor + 1).forEach(halt); return stopOn }
+        state.cursor += 1
+      }
+      return advanceOn
+    }
+    if (node.kind === 'parallel') {
+      const state = memory.get(node.path) ?? { done: new Map() }
+      memory.set(node.path, state)
+      let successes = 0, failures = 0
+      for (const child of node.children) {
+        let result = state.done.get(child.path)
+        if (!result) {
+          result = tick(child)
+          if (result !== 'running') state.done.set(child.path, result)
+        }
+        if (result === 'success') successes += 1
+        if (result === 'failure') failures += 1
+      }
+      const need = node.successCount === -1 ? node.children.length : node.successCount
+      if (failures >= node.failureCount) {
+        node.children.filter((child) => !state.done.has(child.path)).forEach(halt)
+        return 'failure'
+      }
+      if (successes >= need) return 'success'
+      return 'running'
+    }
+    return 'failure'
+  }
+
+  return {
+    nodes,
+    root,
+    /** One tick of the whole tree; returns the completed frame (a snapshot). */
+    step(tickIndex) {
+      frame.current = {
+        tick: tickIndex,
+        statuses: JSON.parse(JSON.stringify(frame.current.statuses)),
+        visited: [], events: [], outcome: null,
+      }
+      const result = tick(root)
+      if (result !== 'running') frame.current.outcome = result
+      return frame.current
+    },
+  }
+}
+
+/* =========================================================================
+ * Layer 2 — rendering. Reads the reconstruction, paints real chrome. Never
+ * computes semantics: everything it needs folds out of the transition log
+ * (the whiteboard stays dumb).
+ * ========================================================================= */
+const stage = document.getElementById('stage')
+const stageWrap = document.getElementById('stage-wrap')
+const state = {
+  view: PAYLOAD.views[0],
+  frames: [emptyFrame()],  // ground truth ONLY — painting never reads these
+  log: [],                 // the canonical transition log
+  tickAt: [0],             // tickAt[t] = ms-since-run-start when tick t completed
+  cursor: { index: -1, tick: 0 },
+  live: true,
+  playing: false,
+  timer: null,
+  driver: null,
+  config: {},
+  seed: 7,
+}
+
+const SPINNER_SVG = '<svg viewBox="0 0 24 24" aria-label="running"><g><circle cx="12" cy="12" r="7.9"/></g></svg>'
+
+function leafTitles(view) {
+  return view.children.filter((child) => child.type === 'block')
+}
+
+function latestTick() { return state.frames.length - 1 }
+function lastIndexAtOrBeforeTick(tick) {
+  let found = -1
+  for (let i = 0; i < state.log.length; i += 1) {
+    if (state.log[i].tick <= tick) found = i
+    else break
+  }
+  return found
+}
+
+function fmtTime(ms) {
+  const minutes = Math.floor(ms / 60000)
+  const seconds = Math.floor((ms % 60000) / 1000)
+  const millis = Math.floor(ms % 1000)
+  return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`
+}
+
+function buildStage(view) {
+  const region = view.region
+  stage.style.width = region.w + 'px'
+  stage.style.height = region.h + 'px'
+  stage.innerHTML = ''
+  const base = document.createElement('img')
+  base.className = 'base'
+  base.src = view.image
+  base.width = region.w
+  base.height = region.h
+  stage.appendChild(base)
+
+  const svgNS = 'http://www.w3.org/2000/svg'
+  const tissue = document.createElementNS(svgNS, 'svg')
+  tissue.setAttribute('class', 'tissue')
+  tissue.setAttribute('width', region.w)
+  tissue.setAttribute('height', region.h)
+  // Groups first (under wires), then wires, rails, chips, start — the same
+  // stacking as BehaviorTreeCanvas.
+  for (const group of view.layer.groups) {
+    const holder = document.createElementNS(svgNS, 'g')
+    holder.setAttribute('class', 'groupbox')
+    holder.dataset.title = group.title
+    holder.innerHTML = `<rect class="frame" x="${group.x}" y="${group.y}" width="${group.w}" height="${group.h}" rx="6"/>`
+      + `<rect class="head" x="${group.x}" y="${group.y}" width="${group.w}" height="48" rx="6"/>`
+      + `<g class="gspin"><circle cx="${group.x + 24}" cy="${group.y + 24}" r="8"/></g>`
+      + `<text x="${group.x + 44}" y="${group.y + 30}">${group.title}</text>`
+    tissue.appendChild(holder)
+  }
+  for (const edge of view.layer.edges) {
+    const wire = document.createElementNS(svgNS, 'path')
+    wire.setAttribute('class', 'wire')
+    wire.setAttribute('d', edge.d)
+    tissue.appendChild(wire)
+    const points = edge.d.match(/-?\d+(?:\.\d+)?/g).map(Number)
+    if (points.length >= 4) {
+      const [x2, y2] = points.slice(-2)
+      const [x1, y1] = points.slice(-4, -2)
+      const angle = Math.atan2(y2 - y1, x2 - x1)
+      const head = document.createElementNS(svgNS, 'path')
+      head.setAttribute('class', 'head')
+      const size = 8
+      const lx = x2 - size * Math.cos(angle - Math.PI / 7), ly = y2 - size * Math.sin(angle - Math.PI / 7)
+      const rx = x2 - size * Math.cos(angle + Math.PI / 7), ry = y2 - size * Math.sin(angle + Math.PI / 7)
+      head.setAttribute('d', `M ${x2} ${y2} L ${lx} ${ly} L ${rx} ${ry} Z`)
+      tissue.appendChild(head)
+    }
+    const status = document.createElementNS(svgNS, 'path')
+    status.setAttribute('class', 'status-edge')
+    status.setAttribute('d', edge.d)
+    if (edge.to) status.dataset.to = edge.to
+    tissue.appendChild(status)
+  }
+  for (const rail of view.layer.rails) {
+    for (const [x1, y1, x2, y2] of rail.lines) {
+      const line = document.createElementNS(svgNS, 'line')
+      line.setAttribute('class', 'rail')
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1)
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2)
+      tissue.appendChild(line)
+    }
+  }
+  for (const chip of view.layer.chips) {
+    const holder = document.createElementNS(svgNS, 'g')
+    holder.setAttribute('class', 'chip')
+    holder.dataset.kind = chip.kind
+    holder.innerHTML = `<rect x="${chip.x}" y="${chip.y}" width="${chip.w}" height="${chip.h}" rx="${chip.kind === 'fail' ? 4 : 6}"/>`
+      + `<text x="${chip.x + chip.w / 2}" y="${chip.y + chip.h / 2 + 1}">${chip.text}</text>`
+    tissue.appendChild(holder)
+  }
+  if (view.layer.start) {
+    const start = view.layer.start
+    const holder = document.createElementNS(svgNS, 'g')
+    holder.setAttribute('class', 'start')
+    holder.setAttribute('id', 'start-pill')
+    holder.innerHTML = `<rect x="${start.x}" y="${start.y}" width="${start.w}" height="${start.h}" rx="${start.h / 2}"/>`
+      + `<text x="${start.x + start.w / 2}" y="${start.y + start.h / 2 + 1}">Start</text>`
+    tissue.appendChild(holder)
+  }
+  tissue.appendChild(buildVocabInset(view))
+  stage.appendChild(tissue)
+
+  for (const child of view.children) {
+    const overlay = document.createElement('div')
+    overlay.className = 'overlay'
+    overlay.dataset.path = child.path
+    overlay.dataset.role = child.type === 'block' ? 'leaf' : 'control'
+    overlay.style.left = child.x + 'px'
+    overlay.style.top = child.y + 'px'
+    overlay.style.width = child.w + 'px'
+    overlay.style.height = child.h + 'px'
+    overlay.title = `${child.title} · ${child.path}`
+    overlay.innerHTML = '<span class="fill"></span><span class="badge"></span><span class="ticks"></span>'
+    stage.appendChild(overlay)
+  }
+  fitStage(view)
+}
+
+/**
+ * The dash-collision resolution, drawn into the scene so a screenshot carries
+ * it: the app's async rail (56 4 10 4) and delayed z⁻¹ dots are STATIC dash
+ * patterns; the active path is the same dash family but ANIMATED (marching).
+ * Metrics at 2× the real cable constants for legibility at stage scale.
+ */
+function buildVocabInset(view) {
+  const svgNS = 'http://www.w3.org/2000/svg'
+  // Tree view: the top-left corner is empty. Process view: the group frames
+  // start at the far left edge, so sit in the clear top-right corner instead.
+  const spot = view.name === 'tree' ? { x: 70, y: 96 } : { x: view.region.w - 1090, y: 12 }
+  const holder = document.createElementNS(svgNS, 'g')
+  holder.setAttribute('class', 'vocab')
+  holder.setAttribute('transform', `translate(${spot.x}, ${spot.y})`)
+  holder.innerHTML = `
+    <rect class="panel" width="1060" height="226" rx="10"/>
+    <text class="vt" x="24" y="38">EDGE VOCABULARY</text>
+    <path class="status-edge" data-s="running" d="M 24 78 L 350 78"/>
+    <text x="380" y="80">active path — <tspan font-weight="700">marching</tspan> dash (animated)</text>
+    <path class="spec-async" d="M 24 128 L 350 128"/>
+    <text x="380" y="130">async rail — static <tspan font-family="ui-monospace,monospace">56 4 10 4</tspan> dash</text>
+    <path class="spec-delay-solid" d="M 24 178 L 140 178"/>
+    <rect class="pill" x="146" y="160" width="76" height="36" rx="18"/>
+    <text class="pillt" x="184" y="180">z⁻¹</text>
+    <path class="spec-delay-dots" d="M 228 178 L 350 178"/>
+    <text x="380" y="180">delayed — static dots after the z⁻¹ pill</text>
+    <text class="note" x="24" y="214">cable patterns are still in any screenshot; only the live path moves (2× scale)</text>`
+  return holder
+}
+
+function fitStage(view) {
+  const scale = Math.min(1, (stageWrap.clientWidth - 24) / view.region.w, (stageWrap.clientHeight - 24) / view.region.h)
+  stage.style.transform = `scale(${Math.max(scale, 0.12)})`
+}
+
+const BADGE = { success: '✓', failure: '✕', halted: '−' }
+
+/** Paint the exact moment at the cursor, folded from the transition log. */
+function paint() {
+  const rec = reconstructAt(state.log, state.cursor.index)
+  const runActive = state.log.length > 0 && state.cursor.index >= 0
+  for (const overlay of stage.querySelectorAll('.overlay')) {
+    const held = rec.statuses[overlay.dataset.path]
+    const status = held?.status
+    const badge = overlay.querySelector('.badge')
+    if (!status || status === 'fresh') {
+      overlay.dataset.status = runActive ? 'pending' : ''
+      badge.textContent = ''
+    } else {
+      overlay.dataset.status = status
+      if (status === 'running') {
+        if (!badge.querySelector('svg')) badge.innerHTML = SPINNER_SVG
+      } else {
+        badge.textContent = BADGE[status] ?? ''
+      }
+    }
+    const total = countTicks(overlay.dataset.path, state.cursor.tick)
+    overlay.querySelector('.ticks').textContent = total ? '×' + total : ''
+  }
+  // Edges wear the status of the node they lead to (Groot2's rule). Every
+  // parent on the way to a ticking node is itself RUNNING, so the marching
+  // dash lights the whole chain from Start to the current node.
+  for (const edge of stage.querySelectorAll('path.status-edge[data-to]')) {
+    const status = rec.statuses[edge.dataset.to]?.status
+    if (status === 'running' || status === 'success' || status === 'failure') edge.dataset.s = status
+    else delete edge.dataset.s
+  }
+  // Group headers aggregate their own node's status (they ARE tree nodes:
+  // matched by title to the parsed tree so Tree and Process stay one map).
+  for (const group of stage.querySelectorAll('g.groupbox')) {
+    const path = groupPathByTitle.get(group.dataset.title)
+    const status = path ? rec.statuses[path]?.status : null
+    if (status === 'running' || status === 'success' || status === 'failure') group.dataset.status = status
+    else delete group.dataset.status
+  }
+  const startPill = document.getElementById('start-pill')
+  if (startPill) startPill.classList.toggle('hot', rec.statuses['0']?.status === 'running')
+  document.getElementById('clock').textContent = 'tick ' + state.cursor.tick
+  const entry = state.log[state.cursor.index]
+  document.getElementById('wallclock').textContent = fmtTime(state.tickAt[state.cursor.tick] ?? entry?.at ?? 0)
+  const banner = document.getElementById('banner')
+  banner.dataset.outcome = rec.outcome ?? ''
+  banner.textContent = rec.outcome ? 'run ' + rec.outcome.toUpperCase() + ' at tick ' + rec.tick : ''
+  highlightTransition()
+}
+
+const tickTotals = [] // tickTotals[t] = Map(path -> cumulative visits) — for the ×N counters
+function countTicks(path, tick) {
+  const totals = tickTotals[Math.min(tick, tickTotals.length - 1)]
+  return totals?.get(path) ?? 0
+}
+
+/* -------- the transitions table (Groot2: Time · Node · Status) -------- */
+let renderedRows = 0
+function renderTransitions() {
+  const body = document.getElementById('trans-rows')
+  if (renderedRows > state.log.length) { body.innerHTML = ''; renderedRows = 0 }
+  const filter = document.getElementById('trans-filter').value.trim().toLowerCase()
+  for (let i = renderedRows; i < state.log.length; i += 1) {
+    const entry = state.log[i]
+    const name = state.driver?.nodes.get(entry.path)?.name ?? entry.path
+    const row = document.createElement('tr')
+    row.dataset.index = i
+    row.dataset.name = name.toLowerCase()
+    if (entry.path === '0' && (entry.to === 'success' || entry.to === 'failure')) row.classList.add('outcome')
+    row.innerHTML = `<td class="t">${fmtTime(entry.at)}</td>`
+      + `<td class="node" title="${name} · ${entry.path} · tick ${entry.tick}">${name}</td>`
+      + `<td class="to-${entry.to}">${entry.to.toUpperCase()}</td>`
+    if (filter && !row.dataset.name.includes(filter)) row.style.display = 'none'
+    row.addEventListener('click', () => { pause(); setCursor(i) })
+    body.appendChild(row)
+  }
+  renderedRows = state.log.length
+  document.getElementById('trans-count').textContent = state.log.length + ' transitions'
+  const last = state.log[state.log.length - 1]
+  document.getElementById('trans-duration').textContent = fmtTime(last?.at ?? 0)
+}
+
+function highlightTransition() {
+  const body = document.getElementById('trans-rows')
+  body.querySelector('tr.current')?.classList.remove('current')
+  const row = body.querySelector(`tr[data-index="${state.cursor.index}"]`)
+  if (row) {
+    row.classList.add('current')
+    row.scrollIntoView({ block: 'nearest' })
+  }
+}
+
+function applyTransitionFilter() {
+  const filter = document.getElementById('trans-filter').value.trim().toLowerCase()
+  for (const row of document.getElementById('trans-rows').children) {
+    row.style.display = !filter || row.dataset.name.includes(filter) ? '' : 'none'
+  }
+}
+
+/* -------- transport -------- */
+function rebuildDriver() {
+  state.driver = makeDriver(PAYLOAD.xml, state.config, state.seed)
+  state.frames = [emptyFrame()]
+  state.log = []
+  state.tickAt = [0]
+  tickTotals.length = 0
+  tickTotals.push(new Map())
+  renderedRows = 0
+  document.getElementById('trans-rows').innerHTML = ''
+  state.cursor = { index: -1, tick: 0 }
+  state.live = true
+  document.getElementById('verify-pill').dataset.ok = ''
+  document.getElementById('verify-pill').textContent = ''
+  updateScrub()
+  paint()
+  renderTransitions()
+}
+
+function stepOnce() {
+  const latest = state.frames[state.frames.length - 1]
+  if (latest.outcome) { pause(); return }
+  const frame = state.driver.step(latest.tick + 1)
+  state.frames.push(frame)
+  // The mock's clock is simulated: one tick period per tick (the driver stands
+  // in for a backend ticking at a rate), so Step clicks and scripted walks
+  // produce the same honest-looking timeline as Play.
+  const at = Math.round((state.tickAt[frame.tick - 1] ?? 0) + 1000 / Number(document.getElementById('speed').value))
+  state.tickAt[frame.tick] = at
+  for (const event of frame.events) {
+    state.log.push({ seq: state.log.length, tick: frame.tick, at, path: event.path, from: event.from, to: event.to })
+  }
+  const totals = new Map(tickTotals[tickTotals.length - 1])
+  for (const path of frame.visited) totals.set(path, (totals.get(path) ?? 0) + 1)
+  tickTotals.push(totals)
+  renderTransitions()
+  if (state.live) {
+    state.cursor = { index: state.log.length - 1, tick: frame.tick }
+    paint()
+  }
+  updateScrub()
+  if (frame.outcome) {
+    pause()
+    reportVerification()
+  }
+}
+
+/** The 100%-visibility check: fold the log to every tick and compare against
+ * the driver's own snapshots — every node, every tick, status AND since. */
+function verifyReconstruction() {
+  const mismatches = []
+  for (let tick = 0; tick < state.frames.length; tick += 1) {
+    const rec = reconstructAt(state.log, lastIndexAtOrBeforeTick(tick))
+    const truth = state.frames[tick]
+    const paths = new Set([...Object.keys(truth.statuses), ...Object.keys(rec.statuses)])
+    for (const path of paths) {
+      const expected = truth.statuses[path]
+      const got = rec.statuses[path]
+      if (!expected || !got || expected.status !== got.status || expected.since !== got.sinceTick) {
+        mismatches.push({ tick, path, expected: expected ?? null, got: got ?? null })
+      }
+    }
+    if ((truth.outcome ?? null) !== rec.outcome) {
+      mismatches.push({ tick, outcomeExpected: truth.outcome ?? null, outcomeGot: rec.outcome })
+    }
+  }
+  return { ok: mismatches.length === 0, ticksChecked: state.frames.length,
+           transitions: state.log.length, mismatches: mismatches.slice(0, 8) }
+}
+
+function reportVerification() {
+  const verdict = verifyReconstruction()
+  const pill = document.getElementById('verify-pill')
+  pill.dataset.ok = String(verdict.ok)
+  pill.textContent = verdict.ok
+    ? `history ✓ ${verdict.ticksChecked}/${verdict.ticksChecked} ticks reconstruct exactly`
+    : `history ✗ ${verdict.mismatches.length} mismatches`
+}
+
+function play() {
+  if (state.playing) { pause(); return }
+  const latest = state.frames[state.frames.length - 1]
+  if (latest.outcome) rebuildDriver()
+  state.playing = true
+  document.getElementById('play').textContent = 'Pause'
+  const period = () => 1000 / Number(document.getElementById('speed').value)
+  const loop = () => { stepOnce(); if (state.playing) state.timer = setTimeout(loop, period()) }
+  state.timer = setTimeout(loop, period())
+}
+function pause() {
+  state.playing = false
+  clearTimeout(state.timer)
+  document.getElementById('play').textContent = 'Play'
+}
+
+function updateScrub() {
+  const scrub = document.getElementById('scrub')
+  scrub.max = latestTick()
+  if (state.live) scrub.value = latestTick()
+  document.getElementById('live-pill').dataset.scrubbed = String(!state.live)
+}
+
+/** Move the cursor to a transition index (Groot2's unit); tick is derived
+ * unless a whole-tick scrub supplies it (a tick can have zero transitions). */
+function setCursor(index, tick = null) {
+  index = Math.max(-1, Math.min(index, state.log.length - 1))
+  const entryTick = index >= 0 ? state.log[index].tick : 0
+  state.cursor = { index, tick: tick ?? entryTick }
+  state.live = index === state.log.length - 1 && state.cursor.tick === latestTick()
+  document.getElementById('scrub').value = state.cursor.tick
+  document.getElementById('live-pill').dataset.scrubbed = String(!state.live)
+  paint()
+}
+
+function scrubToTick(tick) {
+  const bounded = Math.max(0, Math.min(tick, latestTick()))
+  setCursor(lastIndexAtOrBeforeTick(bounded), bounded)
+}
+
+/* -------- config panel -------- */
+const PRESETS = {
+  nominal: (leaf) => ({ durationTicks: defaultDuration(leaf), pSuccess: 1 }),
+  flaky: (leaf) => ({
+    durationTicks: defaultDuration(leaf),
+    pSuccess: leaf.title === 'command_multi_axis_gripper' ? 0.55 : 0.97,
+  }),
+  chaos: (leaf) => ({ durationTicks: defaultDuration(leaf), pSuccess: 0.6 }),
+}
+function defaultDuration(leaf) {
+  if (leaf.title === 'planned_move') return 4
+  if (leaf.title === 'command_trommel') return 3
+  if (leaf.title === 'AlwaysFailure') return 1
+  return 2
+}
+
+function applyPreset(name) {
+  const build = PRESETS[name] ?? PRESETS.flaky
+  state.config = {}
+  for (const leaf of leafTitles(state.view)) {
+    state.config[leaf.path] = leaf.title === 'AlwaysFailure'
+      ? { durationTicks: 1, pSuccess: 0 }
+      : build(leaf)
+  }
+  renderConfig()
+  rebuildDriver()
+}
+
+function renderConfig() {
+  const body = document.getElementById('config-rows')
+  body.innerHTML = ''
+  for (const leaf of leafTitles(state.view)) {
+    const config = state.config[leaf.path]
+    const row = document.createElement('tr')
+    const locked = leaf.title === 'AlwaysFailure'
+    row.innerHTML = `<td class="name" title="${leaf.title} · ${leaf.path}">${leaf.title}</td>`
+      + `<td><input type="range" min="0" max="100" value="${Math.round(config.pSuccess * 100)}" ${locked ? 'disabled' : ''}>`
+      + ` <span class="p">${Math.round(config.pSuccess * 100)}%</span></td>`
+      + `<td><input type="number" min="1" max="12" value="${config.durationTicks}"><span style="color:var(--muted)">t</span></td>`
+    const [probability, duration] = row.querySelectorAll('input')
+    probability.addEventListener('input', () => {
+      config.pSuccess = Number(probability.value) / 100
+      row.querySelector('.p').textContent = probability.value + '%'
+    })
+    duration.addEventListener('input', () => { config.durationTicks = Math.max(1, Number(duration.value) || 1) })
+    row.addEventListener('mouseenter', () => {
+      const overlay = stage.querySelector(`.overlay[data-path="${CSS.escape(leaf.path)}"]`)
+      if (overlay) overlay.style.outlineColor = 'var(--accent)'
+    })
+    row.addEventListener('mouseleave', () => {
+      const overlay = stage.querySelector(`.overlay[data-path="${CSS.escape(leaf.path)}"]`)
+      if (overlay) overlay.style.outlineColor = ''
+    })
+    body.appendChild(row)
+  }
+}
+
+/* -------- wiring -------- */
+document.getElementById('play').addEventListener('click', play)
+document.getElementById('step').addEventListener('click', () => { pause(); state.live = true; stepOnce() })
+document.getElementById('prev-trans').addEventListener('click', () => { pause(); setCursor(state.cursor.index - 1) })
+document.getElementById('next-trans').addEventListener('click', () => { pause(); setCursor(state.cursor.index + 1) })
+document.getElementById('reset').addEventListener('click', () => { pause(); state.seed = Number(document.getElementById('seed').value) || 7; rebuildDriver() })
+document.getElementById('seed').addEventListener('change', (event) => { state.seed = Number(event.target.value) || 7 })
+document.getElementById('speed').addEventListener('input', (event) => {
+  document.getElementById('speed-label').textContent = event.target.value + '/s'
+})
+document.getElementById('scrub').addEventListener('input', (event) => { pause(); scrubToTick(Number(event.target.value)) })
+document.getElementById('live-pill').addEventListener('click', () => setCursor(state.log.length - 1, latestTick()))
+document.getElementById('preset').addEventListener('change', (event) => { pause(); applyPreset(event.target.value) })
+document.getElementById('trans-filter').addEventListener('input', applyTransitionFilter)
+document.getElementById('counters').addEventListener('change', (event) => {
+  stage.dataset.counters = String(event.target.checked)
+  paint()
+})
+document.getElementById('view-toggle').addEventListener('click', (event) => {
+  const name = event.target.dataset.view
+  if (!name) return
+  const view = PAYLOAD.views.find((candidate) => candidate.name === name)
+  if (!view) return
+  pause()
+  state.view = view
+  for (const button of event.currentTarget.querySelectorAll('button')) button.dataset.on = String(button.dataset.view === name)
+  buildStage(view)
+  // Same run, same log — a projection is just another lens over the state.
+  paint()
+})
+window.addEventListener('resize', () => fitStage(state.view))
+
+/** Group headers are tree nodes seen through the Process lens: title → path. */
+const groupPathByTitle = new Map()
+{
+  const { nodes } = parseTree(PAYLOAD.xml)
+  for (const [path, node] of nodes) {
+    if (node.name !== node.tag) groupPathByTitle.set(node.name, path)
+  }
+}
+
+buildStage(state.view)
+applyPreset('flaky')
+
+/** Deterministic hooks for the report's screenshot journey and the lab test. */
+window.__lab = {
+  step: (count = 1) => { for (let index = 0; index < count; index += 1) stepOnce() },
+  reset: (seed) => { pause(); state.seed = seed ?? state.seed; document.getElementById('seed').value = state.seed; rebuildDriver() },
+  preset: (name) => { pause(); document.getElementById('preset').value = name; applyPreset(name) },
+  scrub: scrubToTick,
+  scrubToTransition: (index) => { pause(); setCursor(index) },
+  stepTransition: (delta = 1) => { pause(); setCursor(state.cursor.index + delta) },
+  view: (name) => {
+    const view = PAYLOAD.views.find((candidate) => candidate.name === name)
+    if (!view) return
+    state.view = view
+    buildStage(view)
+    paint()
+  },
+  state: () => ({
+    frames: state.frames.length,
+    transitions: state.log.length,
+    cursorIndex: state.cursor.index,
+    cursorTick: state.cursor.tick,
+    outcome: state.frames[state.frames.length - 1].outcome,
+    running: Object.entries(reconstructAt(state.log, state.cursor.index).statuses)
+      .filter(([, held]) => held.status === 'running').map(([path]) => path).sort(),
+  }),
+  /** Ground truth for the external test: the driver's snapshot at tick T. */
+  frameStatuses: (tick) => JSON.parse(JSON.stringify(state.frames[tick]?.statuses ?? {})),
+  /** The claim under test: the fold of the transition log at end of tick T. */
+  reconstructedAtTick: (tick) => {
+    const rec = reconstructAt(state.log, lastIndexAtOrBeforeTick(tick))
+    const out = {}
+    for (const [path, held] of Object.entries(rec.statuses)) out[path] = { status: held.status, since: held.sinceTick }
+    return out
+  },
+  log: () => state.log.map((entry) => ({ ...entry })),
+  verify: verifyReconstruction,
+  /** Run-shape summary for the report's deterministic seed scan. */
+  summary: () => {
+    let gripperFailures = 0
+    let firstGripperFailTick = null
+    for (const entry of state.log) {
+      const name = state.driver?.nodes.get(entry.path)?.name
+      if (name === 'command_multi_axis_gripper' && entry.to === 'failure') {
+        gripperFailures += 1
+        if (firstGripperFailTick === null) firstGripperFailTick = entry.tick
+      }
+    }
+    const latest = state.frames[state.frames.length - 1]
+    return { ticks: latest.tick, outcome: latest.outcome, gripperFailures, firstGripperFailTick }
+  },
+}
+</script>
+</body>
+</html>
