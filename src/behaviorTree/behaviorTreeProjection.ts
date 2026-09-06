@@ -41,7 +41,7 @@ import {
 } from './behaviorTreeModel'
 import { controlShapeSize } from './BtControlShapeUtil'
 import { layoutBlackboard, type BtAccessDirection } from './blackboardLayout'
-import { parseBehaviorTreeXml, selectTree, type BtDocument, type BtNode, type BtTree } from './btcppXml'
+import { isAncestorPath, isBtNodeDisabled, parseBehaviorTreeXml, selectTree, type BtDocument, type BtNode, type BtTree } from './btcppXml'
 import { analyzeDataflow, type BtDataflow } from './dataflow'
 import { layoutProcess } from './processLayout'
 import { layoutTree } from './treeLayout'
@@ -54,9 +54,18 @@ export interface BtDesiredChild {
 	/** Region-local. */
 	x: number
 	y: number
+	/** Shape-level opacity; commented-out subtrees dim to `BT_DISABLED_OPACITY`. */
+	opacity?: number
 	props: BlockShapeProps | BtControlShape['props']
 	node?: BtNode
 }
+
+/**
+ * How a commented-out node paints. Shape-level opacity rather than a CSS
+ * class so a projected Block, a control card, Tree and Process views all dim
+ * identically without each face growing a disabled variant.
+ */
+export const BT_DISABLED_OPACITY = 0.35
 
 export interface BtDesiredCable {
 	path: string
@@ -216,9 +225,15 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 	const origin: BtPoint = { x: BT_REGION_PAD - scene.bounds.x, y: BT_HEADER_H + BT_REGION_PAD - scene.bounds.y }
 	const children: BtDesiredChild[] = []
 	const nodeRects = new Map<string, BtRect>()
+	// WHY the whole subtree dims, not just the flagged node: commenting out a
+	// control means "this branch does not run", exactly as MoveIt Pro draws it
+	// — a dimmed parent over full-strength children would read as live.
+	const disabledRoots = (tree?.nodes ?? []).filter(isBtNodeDisabled).map((node) => node.path)
+	const dimmed = (path: string) => disabledRoots.some((root) => isAncestorPath(root, path))
 	for (const entry of scene.nodes) {
 		const rect = { ...entry.rect, x: entry.rect.x + origin.x, y: entry.rect.y + origin.y }
 		nodeRects.set(entry.path, rect)
+		const opacity = dimmed(entry.path) ? BT_DISABLED_OPACITY : undefined
 		if (entry.role === 'control' || isBtControlNode(entry.node)) {
 			const label = btControlLabel(entry.node)
 			const size = controlShapeSize(props.controlFace, label)
@@ -228,6 +243,7 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 				type: 'behaviorTreeControl',
 				x: rect.x,
 				y: rect.y,
+				opacity,
 				node: entry.node,
 				props: {
 					w: size.w,
@@ -241,7 +257,7 @@ function computeProjection(props: BehaviorTreeShapeProps): BtProjectionResult {
 			})
 			continue
 		}
-		children.push({ path: entry.path, role: 'node', type: 'block', x: rect.x, y: rect.y, node: entry.node, props: leafBlockProps(entry.node, rect, nodeFace) })
+		children.push({ path: entry.path, role: 'node', type: 'block', x: rect.x, y: rect.y, opacity, node: entry.node, props: leafBlockProps(entry.node, rect, nodeFace) })
 	}
 	for (const key of scene.keys) {
 		const rect = { ...key.rect, x: key.rect.x + origin.x, y: key.rect.y + origin.y }

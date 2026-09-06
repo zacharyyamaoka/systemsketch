@@ -2,20 +2,32 @@
 
 ## 0.1.0
 
-- Picked up where the 2026-09-03 UI/UX hardening pass left off. The Comments panel's empty state
-  now shares the app's boxed-glyph pattern instead of a bespoke ◌ that read as a stuck spinner, and
-  its aria-live is scoped per thread instead of the whole list. Compare changes shows one calm
-  message instead of four contradictory ones when there's no history to compare against. The Help
-  panel's keyboard-shortcut hint was flatly wrong (Ctrl+Shift+? instead of Ctrl+Alt+/) and its intro
-  promised guidance it didn't hold. The Diagnostics severity filter is now a real radiogroup with
-  arrow-key navigation, matching the pattern already used elsewhere. Escape inside the shape
-  library's search now clears the filter before closing the panel — the fix needed a second pass
-  after the first one changed nothing on screen, because the toolbar's Library trigger hosts the
-  search inside a stock Radix popover whose own dismiss-on-Escape listener runs entirely outside the
-  app's event handling. Organize Nodes now shows a busy state while its async layout pass runs, and
-  Tidy Edges / Organize Nodes toasts report a real limitation at `warning` severity instead of the
-  same neutral tone as routine confirmation. The global Ctrl+P/K/F capture now ignores key-repeat,
-  the recorder's blink animation respects reduced motion, and a disabled Replace match explains why.
+- Closed the Behavior Tree node-survey gaps (`docs/behavior-tree-node-survey-2026-09-05.html`):
+  `AsyncSequence`/`AsyncFallback` joined the built-in controls and `Breakpoint` the decorators —
+  the latter a filled-dot debugging marker that passes its child through until a live executor
+  exists. A node can be commented out without deleting it (context menu or the dock's Node
+  section): the flag rides a `_disabled="true"` reserved attribute so it round-trips the XML, and
+  the whole subtree dims at shape level in both Tree and Process views. Ctrl+G on sibling
+  occurrences — tldraw's own group keystroke, which was a trap on projected children anyway —
+  now wraps them in one new Sequence named `Group` as a single undo step, MoveIt Pro 10.0's
+  "Group Under Sequence"; any other selection still gets stock grouping.
+- Closed the shape appearance vocabulary on FigJam's. Fill is Solid / Transparent / No fill, in that
+  order, not tldraw's six; a shape's Line style became FigJam's Stroke popover — the chips over a
+  palette of its own, so an outline can be a colour the fill is not — and gained the cable's `async`
+  packet cadence beside solid/dashed/dotted; a connector offers Thin and Thick instead of four
+  weights, and its line-style row is now literally the shape's control with the labels turned off:
+  one options list, one glyph set, one `layout` deciding whether each option is named. Two lists is
+  how they had drifted — the connector's own Dotted icon was being drawn by the arrowhead renderer.
+  The three fills also paint what they say now: tldraw resolved Transparent to the theme's flat
+  canvas colour and Solid to an 18% wash, so on a white board Transparent was No fill with extra
+  steps and on a white swatch all three were the same box. Solid is the swatch itself, Transparent
+  is the same colour at 25% you can genuinely see through, and a solid fill takes readable label ink
+  with it.
+  tldraw's sketchy `draw` is gone from the menu, so a new shape is seeded solid, and a stored value
+  the menu no longer offers is named on the trigger rather than called mixed. The edge colour and
+  the async pattern ride in shape metadata: adding a prop to a stock `geo` would stop a `.tldr`
+  written here from opening in plain tldraw, and `PathBuilder` throws on a dash value it does not
+  know.
 - Made host plugins a best-effort follow-up to Preview → Stable. Promotion publishes the verified
   standalone app first, then builds one VSIX shared by VS Code/Cursor plus the guarded Obsidian
   bundle. A host failure cannot interrupt or roll back Stable; successful artifacts are checksummed

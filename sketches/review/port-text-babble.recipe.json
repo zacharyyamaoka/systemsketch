@@ -1,0 +1,244 @@
+{
+  "feature": "Port text-authoring babble (4 variants)",
+  "viewport": {
+    "width": 1760,
+    "height": 1100
+  },
+  "shapes": [
+    {
+      "id": "v1",
+      "type": "block",
+      "x": 80,
+      "y": 280,
+      "props": {
+        "title": "EstimatePose (Two Lanes)",
+        "description": "V1 - toggle UI/Source, side is which half of the doc you're in",
+        "blockType": "",
+        "view": "port",
+        "definitionId": "def-review-v1",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true,
+            "defaultValue": "10"
+          },
+          {
+            "id": "in_2",
+            "name": "window",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "result",
+            "type": "float",
+            "visible": true
+          }
+        ]
+      },
+      "meta": {
+        "portTextBabbleVariant": 1
+      }
+    },
+    {
+      "id": "v2",
+      "type": "block",
+      "x": 520,
+      "y": 280,
+      "props": {
+        "title": "EstimatePose (Sigil List)",
+        "description": "V2 - one flat list, leading >/< marks side, row is genuinely shared",
+        "blockType": "",
+        "view": "port",
+        "definitionId": "def-review-v2",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true,
+            "defaultValue": "10"
+          },
+          {
+            "id": "in_2",
+            "name": "window",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "result",
+            "type": "float",
+            "visible": true
+          }
+        ]
+      },
+      "meta": {
+        "portTextBabbleVariant": 2
+      }
+    },
+    {
+      "id": "v3",
+      "type": "block",
+      "x": 960,
+      "y": 280,
+      "props": {
+        "title": "EstimatePose (Keywords, strict)",
+        "description": "V3 - inputs:/outputs: keyword sections; flags an out-of-subset default",
+        "blockType": "",
+        "view": "port",
+        "definitionId": "def-review-v3",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true,
+            "defaultValue": "10"
+          },
+          {
+            "id": "in_2",
+            "name": "random",
+            "type": "MyComponent",
+            "visible": true,
+            "defaultValue": "Component(var=0.1)"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "result",
+            "type": "float",
+            "visible": true
+          }
+        ]
+      },
+      "meta": {
+        "portTextBabbleVariant": 3
+      }
+    },
+    {
+      "id": "v4",
+      "type": "block",
+      "x": 1400,
+      "y": 280,
+      "props": {
+        "title": "EstimatePose (Always Live)",
+        "description": "V4 - no toggle at all; the source editor is always mounted",
+        "blockType": "",
+        "view": "port",
+        "definitionId": "def-review-v4",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true,
+            "defaultValue": "10"
+          },
+          {
+            "id": "in_2",
+            "name": "window",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "result",
+            "type": "float",
+            "visible": true
+          }
+        ]
+      },
+      "meta": {
+        "portTextBabbleVariant": 4
+      }
+    },
+    {
+      "id": "pose-type",
+      "type": "block",
+      "x": 80,
+      "y": 700,
+      "props": {
+        "title": "Pose",
+        "blockType": "type",
+        "view": "port",
+        "w": 300,
+        "h": 180,
+        "attributeSource": "x: float\ny: float"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 - Select. Click Source. Rename \"pose\" to \"transform\". Add \"--- error\" then \"message: str\". Click away. Inputs panel: transform kept its id.",
+      "x": 80,
+      "y": 30,
+      "w": 380,
+      "h": 170,
+      "target": {
+        "shapeId": "v1",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 - Select. Click Source. Under \"window: int\" add \"< extra: str\" (no divider). Click away. Outputs panel: extra lands in window's own row.",
+      "x": 520,
+      "y": 30,
+      "w": 380,
+      "h": 170,
+      "target": {
+        "shapeId": "v2",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 - Select. Click Source. Change random's default to \"1 + 2\". A wavy underline flags it live. Click away: still kept, never dropped.",
+      "x": 960,
+      "y": 30,
+      "w": 380,
+      "h": 170,
+      "target": {
+        "shapeId": "v3",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 - Select. No toggle - the box is already live. Type \"newinput: str\". The preview above updates as you type. Click away to commit it.",
+      "x": 1400,
+      "y": 30,
+      "w": 380,
+      "h": 170,
+      "target": {
+        "shapeId": "v4",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN - each edit survives click-away into the real Inputs/Outputs panel: V1's rename keeps its id, V2's new port lands in window's row, V3 keeps the flagged default, V4 commits newinput.",
+      "x": 80,
+      "y": 950,
+      "w": 1660,
+      "h": 130
+    }
+  ]
+}

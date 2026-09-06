@@ -1,7 +1,12 @@
 import {
 	blockIcon,
+	blockHeaderAlign,
+	blockIsFolded,
+	blockFoldControlSide,
+	canBlockFold,
 	blockPortLayout,
 	blockPortSections,
+	blockShowsFooter,
 	expandedSectionWeights,
 	isEffectPort,
 	portDefaultValue,
@@ -44,6 +49,8 @@ export const PORT_TEXT_FONT_PX = TLDRAW_TEXT_S_PX
 export const HEADER_ICON_PX = 22
 const HEADER_PAD_X = 12
 const HEADER_GAP_PX = 8
+/** 20px chevron plus its 8px separation from the identity or metadata lane. */
+const FOLD_CONTROL_RESERVE_PX = 28
 
 /** Keep these in step with the painted flex row in `block-canvas.css`. */
 const PORT_LABEL_GAP_PX = 8
@@ -206,6 +213,74 @@ function finiteDimension(value: number): number {
 	return Number.isFinite(value) ? Math.max(1, value) : 1
 }
 
+/**
+ * A folded headed Block is a genuine compact geometry, not a body painted
+ * transparent. Its persisted ports keep their identities and collapse onto
+ * the two header edges, exactly like Simple's coincident side anchors, so
+ * existing exterior cables remain attached and readable when the body closes.
+ */
+function foldedBlockLayout(props: BlockShapeProps): BlockLayout {
+	const width = finiteDimension(props.w)
+	const height = finiteDimension(props.h)
+	const bounds = { x: 0, y: 0, w: width, h: height }
+	const header: BlockRect = { ...bounds }
+	const midpoint = height / 2
+	const ports: LaidOutBlockPort[] = []
+	for (const port of props.inputs) {
+		if (!port.visible) continue
+		ports.push({
+			port, side: 'input', edge: 'left', x: 0, y: midpoint,
+			label: null, labelContent: null, subtle: true, lifted: false,
+		})
+	}
+	for (const port of props.outputs) {
+		if (!port.visible) continue
+		ports.push({
+			port, side: 'output', edge: 'right', x: width, y: midpoint,
+			label: null, labelContent: null, subtle: true, lifted: false,
+		})
+	}
+	const foldSide = blockFoldControlSide(props)
+	const foldInset = HEADER_PAD_X + (foldSide === 'left' ? FOLD_CONTROL_RESERVE_PX : 0)
+	const hasIcon = blockIcon(props) !== ''
+	const headerIcon = hasIcon
+		? { x: foldInset, y: (height - HEADER_ICON_PX) / 2, w: HEADER_ICON_PX, h: HEADER_ICON_PX }
+		: null
+	const titleLeft = foldInset + (hasIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0)
+	return {
+		view: props.view,
+		portLayout: blockPortLayout(props),
+		bounds,
+		width,
+		height,
+		header,
+		headerHeight: height,
+		headerBand: null,
+		sections: [],
+		body: { x: 0, y: height, w: width, h: 0 },
+		bodyTop: height,
+		footerTop: height,
+		footer: null,
+		pitch: NODE_ROW_HEIGHT_PX,
+		description: null,
+		frameInterior: null,
+		ports,
+		hiddenPortSummaries: [],
+		title: null,
+		typeLabel: null,
+		icon: null,
+		dividers: [],
+		headerIcon,
+		headerTitle: {
+			x: titleLeft,
+			y: 0,
+			w: Math.max(0, width - titleLeft - HEADER_PAD_X - (foldSide === 'right' ? FOLD_CONTROL_RESERVE_PX : 0)),
+			h: height,
+		},
+		headerType: null,
+	}
+}
+
 interface BodySlotPlan {
 	slotCount: number
 	slotOf: Map<string, number>
@@ -306,7 +381,7 @@ export function blockPortViewHeightForSlots(
 		+ NODE_ROW_HEIGHT_PX * Math.max(1, slotCount)
 		+ NODE_ROW_BOTTOM_PADDING_PX
 		+ descriptionReserve
-		+ NODE_FOOTER_HEIGHT_PX,
+		+ (layout.footer?.h ?? 0),
 	)
 }
 
@@ -674,6 +749,7 @@ export function layoutBlock(props: BlockShapeProps): BlockLayout {
 }
 
 function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
+	if (blockIsFolded(rawProps)) return foldedBlockLayout(rawProps)
 	// An effect port is an output that leaves by the *top* edge, because the call
 	// gave its value no name to leave by. Keep it out of the right-hand lane
 	// entirely — it must not take a body slot or the rows would space around a
@@ -697,7 +773,16 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			Math.max(BLOCK_HEADER_HEIGHT_PX, visibleHeaderInputs.length * HEADER_PORT_PITCH_PX + 8),
 		)
 	const bodyTop = headerHeight + NODE_ROW_HEADER_GAP_PX
-	const footerTop = Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
+	// WHY: hiding a footer gives its room back to the authored face. Leaving a
+	// blank action-strip-sized dead zone would make the control cosmetic and
+	// would still compress Port rows or an Expanded child canvas for no reason.
+	// Simple reserves its pre-existing lower type strip; it has no footer chrome.
+	const reservesFooter = view === 'simple' || (
+		view !== 'value' && blockShowsFooter(props)
+	)
+	const footerTop = reservesFooter
+		? Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
+		: height
 	const placed: LaidOutBlockPort[] = []
 
 	if (view === 'value') {
@@ -1003,27 +1088,59 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 	}
 
 	const hasHeaderIcon = blockIcon(props) !== ''
+	const foldSide = canBlockFold(props) ? blockFoldControlSide(props) : null
+	const headerLeftInset = HEADER_PAD_X + (foldSide === 'left' ? FOLD_CONTROL_RESERVE_PX : 0)
+	const headerRightInset = HEADER_PAD_X + (foldSide === 'right' ? FOLD_CONTROL_RESERVE_PX : 0)
+	const inlineHeaderType = foldSide === 'right'
+	const headerTypeWidth = props.blockType !== ''
+		? Math.min(measureSimpleText(props.blockType, TLDRAW_TEXT_S_PX, 400), width * 0.35)
+		: 0
+	const centeredHeader = blockHeaderAlign(props) === 'center'
+	const iconReserve = hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0
+	const draftBadgeReserve = props.draftOrdinal === undefined
+		? 0
+		: measureSimpleText(`Draft ${props.draftOrdinal}`, 11, 650) + 18 + HEADER_GAP_PX
+	const inlineTypeReserve = inlineHeaderType && headerTypeWidth > 0
+		? headerTypeWidth + HEADER_GAP_PX
+		: 0
+	const centeredSideReserve = !inlineHeaderType && headerTypeWidth > 0
+		? headerTypeWidth + HEADER_GAP_PX
+		: 0
+	const centeredIdentityMax = Math.max(
+		0,
+		width - Math.max(headerLeftInset, headerRightInset) * 2 - centeredSideReserve * 2,
+	)
+	const centeredTitleWidth = Math.max(0, Math.min(
+		Math.max(0, centeredIdentityMax - iconReserve - draftBadgeReserve - inlineTypeReserve),
+		measureBlockText(props.title, PORT_TITLE_FONT_PX, 500, 'mono'),
+	))
+	const centeredIdentityWidth = iconReserve + centeredTitleWidth + draftBadgeReserve + inlineTypeReserve
+	const identityLeft = centeredHeader
+		? (width - centeredIdentityWidth) / 2
+		: headerLeftInset
 	const headerIcon: BlockRect | null = hasHeaderIcon
 		? {
-			x: HEADER_PAD_X,
+			x: identityLeft,
 			y: (headerHeight - HEADER_ICON_PX) / 2,
 			w: HEADER_ICON_PX,
 			h: HEADER_ICON_PX,
 		}
 		: null
-	const headerTypeWidth = props.blockType !== ''
-		? Math.min(measureSimpleText(props.blockType, TLDRAW_TEXT_S_PX, 400), width * 0.35)
-		: 0
+	const titleLeft = identityLeft + iconReserve
+	const measuredTitleRight = centeredHeader || inlineHeaderType
+		? titleLeft + centeredTitleWidth
+		: width - headerRightInset - draftBadgeReserve - (headerTypeWidth > 0 ? headerTypeWidth + HEADER_GAP_PX : 0)
+	const titleRight = Math.max(titleLeft, measuredTitleRight)
 	const headerType: BlockRect | null = headerTypeWidth > 0
 		? {
-			x: width - HEADER_PAD_X - headerTypeWidth,
+			x: inlineHeaderType
+				? titleRight + draftBadgeReserve + HEADER_GAP_PX
+				: width - headerRightInset - headerTypeWidth,
 			y: 0,
 			w: headerTypeWidth,
 			h: headerHeight,
 		}
 		: null
-	const titleLeft = HEADER_PAD_X + (hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0)
-	const titleRight = headerType ? headerType.x - HEADER_GAP_PX : width - HEADER_PAD_X
 	const headerTitle: BlockRect = {
 		x: titleLeft,
 		y: 0,
@@ -1090,7 +1207,9 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		body,
 		bodyTop,
 		footerTop,
-		footer: { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) },
+		footer: blockShowsFooter(props)
+			? { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) }
+			: null,
 		pitch,
 		description,
 		frameInterior: view === 'expanded'

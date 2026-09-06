@@ -43,6 +43,29 @@ describe('Block inspector content', () => {
     expect(html).toContain('aria-label="Add output port"')
   })
 
+	it('offers the structural member layout only for an Expanded Block', () => {
+		const expanded = renderToStaticMarkup(
+			<BlockInspectorContent
+				props={{ ...getDefaultBlockProps(), view: 'expanded' }}
+				status="selected"
+				actions={noopActions}
+			/>,
+		)
+		const port = renderToStaticMarkup(
+			<BlockInspectorContent
+				props={{ ...getDefaultBlockProps(), view: 'port' }}
+				status="selected"
+				actions={noopActions}
+			/>,
+		)
+
+		expect(expanded).toContain('aria-label="Member layout"')
+		expect(expanded).toContain('data-testid="block-member-layout-inset"')
+		expect(expanded).toContain('data-testid="block-member-layout-edge-to-edge"')
+		expect(expanded).toMatch(/aria-pressed="true"[^>]*data-testid="block-member-layout-inset"/)
+		expect(port).not.toContain('aria-label="Member layout"')
+	})
+
   it('renders the donor information architecture without the old selected header or Connections tab', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent
@@ -82,6 +105,9 @@ describe('Block inspector content', () => {
     expect(html).toContain('value="raw"')
     expect(html).toContain('aria-label="Port layout"')
     expect(html).toContain('Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.')
+		expect(html).toContain('data-inspector-section="Behaviour"')
+		expect(html).toContain('aria-label="Enable block folding"')
+		expect(html).toContain('aria-label="Auto fit Block children"')
 
     const offset = html.indexOf('>offset<')
     const aligned = html.indexOf('>aligned<')
@@ -95,6 +121,29 @@ describe('Block inspector content', () => {
       expect(position).toBeGreaterThan(previous)
       previous = position
     }
+  })
+
+  it('offers header composition alignment only on header-bearing views', () => {
+    const port = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={{ ...getDefaultBlockProps(), view: 'port', headerAlign: 'center' }}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+    const simple = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={getDefaultBlockProps()}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+
+    expect(port).toContain('aria-label="Header alignment"')
+    expect(port).toContain('data-testid="block-header-align-left"')
+    expect(port).toContain('data-testid="block-header-align-center"')
+    expect(port).toContain('data-testid="block-header-align-center" aria-pressed="true"')
+    expect(simple).not.toContain('aria-label="Header alignment"')
   })
 
   it('keeps rare variadic-slot authoring behind the Inputs state toggle', () => {
@@ -249,6 +298,7 @@ describe('Block inspector content', () => {
 const noopActions: BlockInspectorActions = {
   updateDetails() {},
   setView() {},
+  setMemberLayout() {},
   addPort() {},
   addBundleMember() {},
   updatePort() {},

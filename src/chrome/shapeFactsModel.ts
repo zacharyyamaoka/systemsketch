@@ -23,6 +23,8 @@ import {
   type TLShape,
 } from 'tldraw'
 
+import { linePatternOf, readStrokeMeta, sharedEdgeValue } from '../appearance/strokeMeta'
+
 export interface ShapeFact {
   label: string
   value: string
@@ -53,6 +55,12 @@ const REPORTED_STYLES: ReadonlyArray<{ label: string; style: StyleProp<string> }
   { label: 'Size', style: DefaultSizeStyle },
   { label: 'Font', style: DefaultFontStyle },
 ]
+
+/** The dash a shape stores, which an async override deliberately differs from. */
+function shapeDash(shape: TLShape | undefined): string | undefined {
+  const dash = (shape?.props as Record<string, unknown> | undefined)?.dash
+  return typeof dash === 'string' ? dash : undefined
+}
 
 /** `geo` shapes hide the interesting half of their identity in a prop. */
 function shapeKind(shape: TLShape): string {
@@ -117,6 +125,24 @@ export function getShapeFactsModel(editor: Editor): ShapeFactsModel | null {
     styles.push({
       label,
 		value: shared.type === 'shared' ? verbatimToken(String(shared.value)) : 'Mixed',
+    })
+  }
+  // The two edge facts that are not stock styles. WHY they are reported here:
+  // an async shape stores `dash: solid`, so a panel listing only stock props
+  // would say `solid` about an outline the canvas is painting as packets, and
+  // an edge colour would not appear at all.
+  const pattern = sharedEdgeValue(shapes, linePatternOf)
+  if (pattern && !(pattern.type === 'shared' && pattern.value === shapeDash(shapes[0]))) {
+    styles.push({
+      label: 'Line style',
+      value: pattern.type === 'shared' ? verbatimToken(pattern.value) : 'Mixed',
+    })
+  }
+  const edgeColor = sharedEdgeValue(shapes, (shape) => readStrokeMeta(shape).color)
+  if (edgeColor) {
+    styles.push({
+      label: 'Edge colour',
+      value: edgeColor.type === 'shared' ? verbatimToken(edgeColor.value) : 'Mixed',
     })
   }
 

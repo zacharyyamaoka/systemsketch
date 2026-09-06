@@ -1,0 +1,75 @@
+{
+  "feature": "Auto-fit Block drag stability",
+  "viewport": { "width": 1600, "height": 960 },
+  "pages": [{ "id": "review", "name": "Auto-fit drag stability" }],
+  "shapes": [
+    {
+      "id": "pipeline",
+      "type": "block",
+      "x": 610,
+      "y": 330,
+      "props": {
+        "title": "pipeline()",
+        "description": "",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 410,
+        "h": 280,
+        "foldable": true,
+        "folded": false,
+        "autoResize": true,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "decode",
+      "type": "block",
+      "parentId": "pipeline",
+      "x": 76,
+      "y": 76,
+      "props": {
+        "title": "parse()",
+        "description": "",
+        "blockType": "Function",
+        "view": "port",
+        "w": 250,
+        "h": 136,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "drag",
+      "kind": "step",
+      "text": "1 · Press once on parse(), then drag rapidly across pipeline()'s edges. Do not release between moves.",
+      "x": 30,
+      "y": 325,
+      "w": 470,
+      "h": 120,
+      "target": { "shapeId": "decode", "anchor": "left" }
+    },
+    {
+      "id": "verify",
+      "kind": "step",
+      "text": "2 · Release. parse() stays in pipeline(), whose auto-fit boundary follows it without dropping membership.",
+      "x": 1110,
+      "y": 325,
+      "w": 440,
+      "h": 120,
+      "target": { "shapeId": "pipeline", "anchor": "right", "dy": 50 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Fast drags never detach parse(). Right-click Remove from container remains the deliberate way out.",
+      "x": 470,
+      "y": 750,
+      "w": 660,
+      "h": 110
+    }
+  ]
+}

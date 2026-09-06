@@ -37,9 +37,8 @@ describe('Board diagnostics presentation', () => {
 
 		expect(html).toContain('aria-label="Board diagnostics"')
 		expect(html).toContain('aria-label="Diagnostic counts"')
-		expect(html).toContain('role="radiogroup"')
-		expect(html).toContain('role="radio"')
-		expect(html).toContain('aria-checked="true"')
+		expect(html).toContain('role="group"')
+		expect(html).toContain('aria-pressed="true"')
 		expect(html).toContain('aria-label="Board problems"')
 		expect(html).toContain('Warning: Block has no title. Name this Block.')
 		expect(html).toContain(BOARD_DIAGNOSTIC_CODES.blankBlockTitle)

@@ -1,0 +1,65 @@
+[
+  {
+    "t": 154.7,
+    "severity": "warn",
+    "kind": "performance-stall",
+    "lane": "perf",
+    "summary": "main thread blocked for 113.0 ms",
+    "detail": "long-task-000004",
+    "frame": "frames/f-011351.png"
+  },
+  {
+    "t": 1356.0,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000011",
+    "frame": "frames/f-011351.png"
+  },
+  {
+    "t": 3874.0,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000039",
+    "frame": "frames/f-011351.png"
+  },
+  {
+    "t": 4012.6,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000048",
+    "frame": "frames/f-011351.png"
+  },
+  {
+    "t": 6239.2,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000133",
+    "frame": "frames/f-011351.png"
+  },
+  {
+    "t": 7666.5,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000183",
+    "frame": "frames/f-011351.png"
+  },
+  {
+    "t": 9774.6,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000210",
+    "frame": "frames/f-011351.png"
+  }
+]

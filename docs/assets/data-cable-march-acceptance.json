@@ -1,0 +1,92 @@
+[
+  {
+    "id": "DCM-1",
+    "label": "a freshly drawn cable is the plain `data` kind",
+    "observed": "data",
+    "desired": "data",
+    "ok": true
+  },
+  {
+    "id": "DCM-2",
+    "label": "the data cable path is found and painted",
+    "observed": true,
+    "desired": "truthy",
+    "ok": true
+  },
+  {
+    "id": "DCM-3",
+    "label": "stroke-dasharray matches the React-Flow-read 5px cadence",
+    "observed": "5",
+    "desired": "5",
+    "ok": true
+  },
+  {
+    "id": "DCM-4",
+    "label": "butt caps, matching the reference site (not the round default)",
+    "observed": "butt",
+    "desired": "butt",
+    "ok": true
+  },
+  {
+    "id": "DCM-5",
+    "label": "the CSS animation is actually attached",
+    "observed": "systemsketch-data-cable-march",
+    "desired": "systemsketch-data-cable-march",
+    "ok": true
+  },
+  {
+    "id": "DCM-6",
+    "label": "stroke-dashoffset genuinely changed between two reads 260ms apart",
+    "observed": true,
+    "desired": "truthy",
+    "ok": true
+  },
+  {
+    "id": "DCM-7",
+    "label": "a real screenshot of the cable region changed pixel bytes between frames",
+    "observed": true,
+    "desired": "truthy",
+    "ok": true
+  },
+  {
+    "id": "DCM-8",
+    "label": "prefers-reduced-motion turns the animation off",
+    "observed": "none",
+    "desired": "none",
+    "ok": true
+  },
+  {
+    "id": "DCM-9",
+    "label": "toSvg export succeeds and has no template holes",
+    "observed": {
+      "ok": true,
+      "hasHole": false
+    },
+    "desired": {
+      "ok": true,
+      "hasHole": false
+    },
+    "ok": true
+  },
+  {
+    "id": "DCM-10",
+    "label": "export bakes the static dash pattern in place of the live animation",
+    "observed": "5",
+    "desired": "5",
+    "ok": true
+  },
+  {
+    "id": "DCM-11",
+    "label": "export carries no animation/keyframes — a static snapshot, same as the live dasharray",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "DCM-12",
+    "label": "the happy path produced no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

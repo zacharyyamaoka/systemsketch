@@ -1,0 +1,192 @@
+/*
+ * A Type's compact attribute tree, painted over the same body band a Port or
+ * Expanded Block would otherwise leave to its port rows. Geometry (the top
+ * and bottom of the band) is supplied by the caller from `layoutBlock`, so
+ * this file only paints inside that rect — never computes it.
+ */
+
+.systemsketch-block-canvas .TypeAttributeRegion {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 14px;
+  line-height: 22px;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion[data-type-attributes-selected] {
+  pointer-events: auto;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-heading,
+.systemsketch-block-canvas .TypeAttributeRegion-line,
+.systemsketch-block-canvas .TypeAttributeRegion-chevron,
+.systemsketch-block-canvas .TypeAttributeRegion-empty {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-heading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  padding: 2px 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-headingChevron {
+  display: inline-grid;
+  width: 15px;
+  place-items: center;
+  color: var(--ss-text-muted);
+  font-size: 17px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-heading small {
+  margin-left: 2px;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  border-top: 1px solid var(--ss-border);
+  padding-top: 7px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-tree,
+.systemsketch-block-canvas .TypeAttributeRegion-children {
+  display: grid;
+  gap: 1px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-row {
+  position: relative;
+  min-width: 0;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-line {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  color: var(--ss-text);
+  cursor: text;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-line:hover {
+  background: color-mix(in srgb, var(--ss-accent) 8%, transparent);
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-line b {
+  font-weight: 650;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-type {
+  color: color-mix(in srgb, var(--ss-accent) 68%, var(--ss-text));
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-punctuation {
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-chevron {
+  position: absolute;
+  z-index: 1;
+  display: inline-grid;
+  width: 16px;
+  height: 22px;
+  place-items: center;
+  padding: 0;
+  color: var(--ss-text-muted);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+
+/*
+ * WHY: an open branch hides its fold chrome until asked for, keeping the
+ * source-text density Zach chose; a folded branch keeps its chevron visible
+ * so its hidden structure never becomes undiscoverable.
+ */
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-chevron {
+  left: 0;
+  visibility: hidden;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-chevron[data-visible] {
+  visibility: visible;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-row[data-has-children] > .TypeAttributeRegion-line {
+  padding-left: 16px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--inline .TypeAttributeRegion-children {
+  margin-left: 18px;
+  border-left: 2px solid color-mix(in srgb, var(--ss-text-muted) 55%, transparent);
+  padding-left: 8px;
+}
+
+/* The code-style gutter deliberately aligns every fold handle to one column, independent of nesting depth. */
+.systemsketch-block-canvas .TypeAttributeRegion--gutter {
+  left: 28px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--gutter .TypeAttributeRegion-chevron {
+  left: -20px;
+  visibility: visible;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion--gutter .TypeAttributeRegion-children {
+  margin-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--ss-text-muted) 45%, transparent);
+  padding-left: 8px;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-editor {
+  width: 100%;
+  height: 100%;
+  min-height: 96px;
+  resize: none;
+  border: 1px solid var(--ss-accent);
+  border-radius: 4px;
+  outline: none;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-accent) 18%, transparent);
+  font: inherit;
+  line-height: 22px;
+  padding: 7px 9px;
+  tab-size: 2;
+}
+
+.systemsketch-block-canvas .TypeAttributeRegion-empty {
+  width: 100%;
+  padding: 6px 0;
+  color: var(--ss-text-muted);
+  cursor: text;
+  text-align: left;
+}

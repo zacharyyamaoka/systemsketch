@@ -1,0 +1,137 @@
+/*
+ * Type-name autocomplete — now CodeMirror's own completion tooltip
+ * (`typeNameCompletion.ts`), restyled to the look Zach picked from
+ * `docs/type-autocomplete-babble-2026-09-05.html`. The anchoring, keyboard
+ * model, and scroll behaviour are CodeMirror's; only the visual vocabulary
+ * (the kind pill, the quiet name with a bold matched run, the browse
+ * escalation row) is ours.
+ *
+ * Sized against a real side-by-side comparison with VS Code's own
+ * completion popup, not guessed: that popup is noticeably WIDER and its
+ * rows noticeably TALLER than a first pass here had them.
+ */
+
+/* Scoped to .tl-container, NOT .systemsketch-block-canvas: the tooltip is
+   deliberately mounted on the tldraw container (see SourceCodeEditor's
+   `tooltips({ parent })`), outside the transformed shape layer, so that no
+   sibling shape can paint over it. The maximum z-index is Zach's explicit
+   call ("it needs to go to maximum z level ... on top of everything") — the
+   popup must beat every shape AND every app panel, so it takes the largest
+   value the cascade can hold rather than a house scale. */
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm {
+  z-index: 2147483647 !important;
+  min-width: 360px;
+  max-width: 460px;
+  padding: 4px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul {
+  max-height: 280px;
+  font: inherit;
+}
+
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li[aria-selected] {
+  background: var(--ss-accent-soft);
+  color: inherit;
+}
+
+/* The kind pill — this, not a bare glyph alone, is what actually tells rows
+   apart at a glance: board type (accent) vs. mapped type (warning) vs. the
+   least-novel case, a primitive, kept neutral rather than given a strong
+   color of its own. The small icon glyph inside it is VS Code's own habit
+   (a shape per symbol kind) folded into the pill rather than replacing it —
+   Zach confirmed the pill itself is what makes kinds scannable; the icon on
+   its own "told you nothing" in the mockup this shipped from. */
+.tl-container .TypeNameAutocomplete-pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+.tl-container .TypeNameAutocomplete-pillIcon { font-size: 10px; line-height: 1; }
+
+.tl-container .TypeNameAutocomplete-pill--board-type {
+  background: var(--ss-accent-soft);
+  color: var(--ss-accent);
+}
+
+.tl-container .TypeNameAutocomplete-pill--mapped-type {
+  background: var(--ss-warning-soft);
+  color: var(--ss-warning);
+}
+
+.tl-container .TypeNameAutocomplete-pill--primitive {
+  background: color-mix(in srgb, var(--ss-text-muted) 16%, transparent);
+  color: var(--ss-text-muted);
+}
+
+/* VS Code's own hierarchy, matched directly against a side-by-side
+   screenshot: the WHOLE name is never highlighted with a background box —
+   the matched run is bold and full-brightness, the rest recedes to a
+   quieter tone, so the eye finds the query letters first. */
+.tl-container .TypeNameAutocomplete-cm .cm-completionLabel {
+  flex: 0 1 auto;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl-container .TypeNameAutocomplete-cm .cm-completionMatchedText {
+  text-decoration: none;
+  color: var(--ss-text);
+  font-weight: 700;
+}
+
+.tl-container .TypeNameAutocomplete-cm .cm-completionDetail {
+  flex: 1 1 auto;
+  overflow: hidden;
+  margin-left: auto;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-style: normal;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The browse escalation — an explicit escape hatch into "scroll through this
+   like an open library", kept as the final row with the button styling the
+   old dropdown's footer had. */
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow {
+  margin-top: 2px;
+  border-top: 1px solid var(--ss-border);
+  border-radius: 0 0 5px 5px;
+  color: var(--ss-text-muted);
+}
+
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow .cm-completionLabel {
+  color: inherit;
+}
+
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow:hover,
+.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow[aria-selected] {
+  color: var(--ss-accent);
+  background: transparent;
+}

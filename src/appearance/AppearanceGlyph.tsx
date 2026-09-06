@@ -1,7 +1,10 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useValue, type Editor } from 'tldraw'
 
-import type { AppearanceControl } from './appearanceModel'
+import type {
+  AppearanceControlId,
+  ContextualControl,
+} from '../contextualMenus/contextualControlRegistry'
 import { FIGJAM_ICONS } from './figjamIcons'
 import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
 
@@ -16,49 +19,58 @@ import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
 export function AppearanceGlyph({
   control, value, editor,
 }: {
-  control: AppearanceControl
+  control: ContextualControl
   value: string | undefined
   editor: Editor
 }) {
-  if (control.id === 'color') {
+  // The edge palette draws the same swatch the fill palette does; only the
+  // style it writes differs.
+  if (control.kind === 'color' || control.kind === 'strokeColor') {
     return <ColorSwatch editor={editor} name={value} />
   }
   // FigJam's Font size list draws no glyph: each row is its own name, at its
   // own size, and the label carries that.
-  if (control.id === 'size' && control.layout === 'list') {
+  if (control.kind === 'size' && control.layout === 'list') {
     return null
+  }
+  // Every typeface list uses the same compact Aa preview. The traced FigJam
+  // wordmarks already spell “Bookish” / “Technical”; adding the option label
+  // beside them produced the duplicated text visible in the old Text menu.
+  if (control.kind === 'font') {
+    return <FontGlyph value={value} />
   }
   // FigJam's own icon wherever FigJam draws this value. The drawn glyphs below
   // stay for the states tldraw has and FigJam does not.
-  const figjam = figjamIconName(control.id, value)
+  const appearanceKind = control.kind as AppearanceControlId
+  const figjam = figjamIconName(appearanceKind, value)
   if (figjam && FIGJAM_ICONS[figjam]) {
     // FigJam draws one arrowhead set and mirrors it for the far end, so the
     // icon always points the way the arrow travels. The traced paths are the
     // start orientation; the end control flips them.
-    return <FigjamGlyph name={figjam} flipped={control.id === 'arrowheadEnd'} />
+    return <FigjamGlyph name={figjam} flipped={control.kind === 'arrowheadEnd'} />
   }
-  if (control.id === 'fill') {
+  if (control.kind === 'fill') {
     return <FillGlyph value={value} />
   }
-  if (control.id === 'geo') {
+  if (control.kind === 'geo') {
     return <GeoGlyph value={value} />
   }
-  if (control.id === 'dash') {
+  // One glyph for the one line-style vocabulary, whichever menu asks. Before
+  // this the connector's control id missed this branch entirely and its Dotted
+  // option was drawn by the arrowhead renderer below — a plain line.
+  if (control.kind === 'dash' || control.kind === 'lineStyle') {
     return <DashGlyph value={value} />
   }
-  if (control.id === 'size') {
+  if (control.kind === 'size' || control.kind === 'weight') {
     return <SizeGlyph value={value} />
   }
-  if (control.id === 'font') {
-    return <FontGlyph value={value} />
+  if (control.kind === 'align' || control.kind === 'verticalAlign') {
+    return <AlignGlyph value={value} vertical={control.kind === 'verticalAlign'} />
   }
-  if (control.id === 'align' || control.id === 'verticalAlign') {
-    return <AlignGlyph value={value} vertical={control.id === 'verticalAlign'} />
-  }
-  if (control.id === 'arrowKind' || control.id === 'spline') {
+  if (control.kind === 'arrowKind' || control.kind === 'spline') {
     return <RoutingGlyph value={value} />
   }
-  return <ArrowheadGlyph value={value} atStart={control.id === 'arrowheadStart'} />
+  return <ArrowheadGlyph value={value} atStart={control.kind === 'arrowheadStart'} />
 }
 
 /**
@@ -69,11 +81,13 @@ export function AppearanceGlyph({
 export function TriggerGlyph({
   control, value, editor,
 }: {
-  control: AppearanceControl
+  control: ContextualControl
   value: string | undefined
   editor: Editor
 }) {
-  const fixed = control.trigger === 'icon' ? FIGJAM_TRIGGER_ICON[control.id] : undefined
+  const fixed = control.trigger === 'icon'
+    ? FIGJAM_TRIGGER_ICON[control.kind as AppearanceControlId]
+    : undefined
   if (fixed && FIGJAM_ICONS[fixed]) return <FigjamGlyph name={fixed} />
   return <AppearanceGlyph control={control} value={value} editor={editor} />
 }
@@ -159,7 +173,10 @@ function FillGlyph({ value }: { value: string | undefined }) {
       : ['M4 8h12', 'M4 11.5h12', 'M4 15h12']
     return <Svg>{box}{lines.map((d) => <path key={d} d={d} strokeWidth={1} />)}</Svg>
   }
-  const opacity = value === 'semi' ? 0.35 : value === 'solid' ? 0.7 : 1
+  // The glyph says what the fill does: Solid is fully painted, Transparent is
+  // a wash you can read through. Both match `fillPaint.TRANSPARENT_FILL_ALPHA`
+  // closely enough to be recognised in a 16px cell.
+  const opacity = value === 'semi' ? 0.35 : 1
   return (
     <Svg>
       <rect x="3.5" y="3.5" width="13" height="13" rx="2" data-role="solid" opacity={opacity} />
@@ -196,11 +213,18 @@ function GeoGlyph({ value }: { value: string | undefined }) {
   return <Svg><path d={GEO_PATHS[value ?? 'rectangle'] ?? GEO_PATHS.rectangle} /></Svg>
 }
 
+/**
+ * The glyph's cadence per line style. `async` is the cable's own packet
+ * rhythm — a long carrier, a hair of a gap, a short packet — scaled from the
+ * 56/4/10/4 the canvas paints (`connectionPresentation.ASYNC_PACKET_DASHARRAY`)
+ * down to the 14 units this glyph has to say it in.
+ */
 const DASH_ARRAYS: Record<string, string | undefined> = {
   draw: undefined,
   solid: undefined,
   dashed: '4 3',
   dotted: '0.1 3.2',
+  async: '9 1 2 1',
   none: undefined,
 }
 
@@ -214,6 +238,7 @@ function DashGlyph({ value }: { value: string | undefined }) {
         d={value === 'draw' ? 'M3 12.5c4-6 6 2 14-4.5' : 'M3 10h14'}
         strokeDasharray={DASH_ARRAYS[value ?? 'solid']}
         strokeLinecap={value === 'dotted' ? 'round' : 'butt'}
+        data-dash={value}
       />
     </Svg>
   )

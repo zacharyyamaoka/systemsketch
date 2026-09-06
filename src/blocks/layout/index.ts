@@ -11,5 +11,4 @@ export {
 	canOrganizeNodes,
 	describeOrganizeNodesOutcome,
 	organizeNodes,
-	organizeNodesOutcomeSeverity,
 } from './organizeNodes'

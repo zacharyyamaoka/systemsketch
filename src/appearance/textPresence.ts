@@ -11,12 +11,20 @@
  */
 import { renderPlaintextFromRichText, richTextValidator, type Editor, type TLRichText, type TLShape } from 'tldraw'
 
+import { isCodeShape } from '../code/codeModel'
+
 function richTextOf(shape: TLShape): TLRichText | undefined {
   const richText = Reflect.get(shape.props, 'richText')
   return richTextValidator.isValid(richText) ? richText : undefined
 }
 
 function shapeHasVisibleText(editor: Editor, shape: TLShape): boolean {
+  // A Code block IS a text surface — its CodeMirror document is always on
+  // screen (an empty one still shows a caret line), so the typography gate
+  // that hides Font size until a label exists never applies to it. Without
+  // this the standard size control would vanish for exactly the one shape
+  // whose whole body is text.
+  if (isCodeShape(shape)) return true
   const richText = richTextOf(shape)
   if (richText === undefined) return false
   return renderPlaintextFromRichText(editor, richText).trim().length > 0
@@ -26,10 +34,11 @@ function shapeHasVisibleText(editor: Editor, shape: TLShape): boolean {
  * True once every text-capable shape in the selection has visible text.
  * A shape with no `richText` prop at all (a bare Line, a Block) does not
  * count against this — only shapes that could hold a label and currently
- * don't.
+ * don't. A Code block counts as text-capable and always-visible.
  */
 export function selectionHasVisibleText(editor: Editor): boolean {
-  const textCapable = editor.getSelectedShapes().filter((shape) => richTextOf(shape) !== undefined)
+  const textCapable = editor.getSelectedShapes()
+    .filter((shape) => richTextOf(shape) !== undefined || isCodeShape(shape))
   if (textCapable.length === 0) return false
   return textCapable.every((shape) => shapeHasVisibleText(editor, shape))
 }

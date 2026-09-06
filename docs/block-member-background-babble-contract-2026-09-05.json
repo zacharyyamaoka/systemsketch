@@ -1,0 +1,97 @@
+{
+  "title": "Edge-to-edge member background — frozen comparison contract",
+  "frozenBeforeVariants": true,
+  "representativeScenario": "An Expanded Branch-like Block containing two direct member Blocks, if and else, with footers shown or hidden.",
+  "outcome": "Find a quiet background treatment that makes an edge-to-edge member stack read as one container without erasing the individual Blocks.",
+  "invariants": [
+    "Member layout remains a two-state Inset / Edge-to-edge structural control.",
+    "Member Blocks keep real boundaries, titles, hit targets, and direct membership.",
+    "The treatment composes with both shown and hidden member footers.",
+    "No candidate changes production code until Zach picks or explicitly accepts the provisional recommendation."
+  ],
+  "prototypeStopLine": "The gallery runs the layout and footer state machine in the real SystemSketch visual idiom; tldraw editing, persistence, wiring, and production theme switching remain simulated.",
+  "axes": [
+    "Which structural surface carries tone: none, shared bed, alternating body, header, or inset body field",
+    "Whether hierarchy comes from seams, luminance, repetition, or depth",
+    "How the treatment survives when footers disappear"
+  ],
+  "criteria": [
+    {
+      "id": "fr1",
+      "name": "Continuous-stack clarity",
+      "weight": 30,
+      "why": "The Branch-like case should read as one solid structure at a glance.",
+      "passCondition": "With Edge-to-edge selected, the two members share a clear continuous silhouette.",
+      "anchors": {
+        "1": "Still reads as two unrelated floating cards.",
+        "3": "Reads as a stack after inspection.",
+        "5": "Immediately reads as one container with internal members."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Member hierarchy without noise",
+      "weight": 25,
+      "why": "Each function or arm must remain separately scannable without turning the board into a striped table.",
+      "passCondition": "Both titles and boundaries are easy to follow while the background stays recessive.",
+      "anchors": {
+        "1": "Members blur together or the treatment dominates.",
+        "3": "Boundaries are clear with some visual competition.",
+        "5": "Members scan instantly and the treatment recedes."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Hidden-footer compatibility",
+      "weight": 20,
+      "why": "Zach expects branch-like stacks to hide footers and still feel structurally complete.",
+      "passCondition": "Turning footers off leaves intentional seams and no stranded bands.",
+      "anchors": {
+        "1": "The composition visibly depends on footers.",
+        "3": "Still works but loses some rhythm.",
+        "5": "Looks equally intentional with either footer state."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Theme robustness",
+      "weight": 15,
+      "why": "SystemSketch uses host and canvas themes, so the treatment should be token-shaped rather than luminance-fragile.",
+      "passCondition": "The design needs only existing surface and border roles and maintains contrast.",
+      "anchors": {
+        "1": "Depends on a brittle literal shade or low contrast.",
+        "3": "Likely portable with tuning.",
+        "5": "Maps directly to existing semantic tokens."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Low visual weight",
+      "weight": 10,
+      "why": "The background should support fast diagram reading rather than becoming a new notation.",
+      "passCondition": "The treatment does not compete with ports, titles, or dataflow.",
+      "anchors": {
+        "1": "Adds a strong new pattern or accent.",
+        "3": "Noticeable but manageable.",
+        "5": "Quiet enough to disappear during normal reading."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Readable text",
+      "passCondition": "Every title stays legible in shown and hidden-footer states."
+    },
+    {
+      "id": "g2",
+      "name": "Visible member boundaries",
+      "passCondition": "The if and else Blocks remain distinguishable without hover."
+    },
+    {
+      "id": "g3",
+      "name": "No semantic color claim",
+      "passCondition": "No treatment introduces an accent that could be mistaken for type, state, or flow meaning."
+    }
+  ]
+}

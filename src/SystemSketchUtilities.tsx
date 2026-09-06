@@ -46,6 +46,7 @@ import { useTopNoticePlacement } from './chrome/topNoticePlacement'
 import { useLocalWorkspace } from './workspace/LocalWorkspace'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setSolidBeforePill } from './blocks/connections/connectionPresentation'
+import { setTypeChevronPlacement, typeAttributePresentation } from './blocks/typeAttributePresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
 import { useBoardDiagnosticsModel } from './diagnostics'
@@ -183,6 +184,11 @@ export function SystemSketchNavigationPanel() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [recentIds, setRecentIds] = useState<DevelopmentPresetId[]>(readRecentDevelopmentPresets)
   const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
+  const typeChevronPlacement = useValue(
+    'Type attribute chevron placement',
+    () => typeAttributePresentation.get().chevronPlacement,
+    [],
+  )
   const [busy, setBusy] = useState<BusyKey | null>(null)
   const [armed, setArmed] = useState(false)
   const [published, setPublished] = useState(false)
@@ -495,6 +501,23 @@ export function SystemSketchNavigationPanel() {
           </label>
 
           <div className="systemsketch-dev-section-label">
+            <span>Type attributes</span>
+            <small>This browser, live</small>
+          </div>
+          <label className="systemsketch-dev-toggle">
+            <input
+              type="checkbox"
+              data-testid="systemsketch-dev-type-chevron-gutter"
+              checked={typeChevronPlacement === 'gutter'}
+              onChange={(event) => setTypeChevronPlacement(event.target.checked ? 'gutter' : 'inline')}
+            />
+            <span>
+              <b>Chevrons in code gutter</b>
+              <small>Fold controls: align left in a fixed column instead of beside the text</small>
+            </span>
+          </label>
+
+          <div className="systemsketch-dev-section-label">
             <span>Isolated presets</span>
             <small>{recentIds.length ? 'Recent first' : 'Independent boards'}</small>
           </div>
@@ -583,10 +606,10 @@ export function SystemSketchNavigationPanel() {
             <button type="button" aria-label="Close help" onClick={() => setHelpOpen(false)}>×</button>
           </header>
 
-          <p className="systemsketch-help-intro">Preview, publishing, and isolated feature views live under Dev.</p>
+          <p className="systemsketch-help-intro">Canvas guidance stays here. Preview, publishing, and isolated feature views now live under Dev.</p>
           <button type="button" className="systemsketch-help-row" onClick={openKeyboardShortcuts}>
             <span>Keyboard shortcuts</span>
-            <kbd>Ctrl Alt /</kbd>
+            <kbd>Ctrl Shift ?</kbd>
           </button>
         </section>
       ) : null}

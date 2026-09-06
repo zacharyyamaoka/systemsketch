@@ -11,6 +11,7 @@ import { BranchArmShapeUtil, BranchShapeUtil } from '../branch'
 import { LoopShapeUtil } from '../loop'
 import { BehaviorTreeShapeUtil, BtControlShapeUtil } from '../behaviorTree'
 import { CodeShapeUtil } from '../code'
+import { FloatingPortShapeUtil } from '../floatingPort'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -40,6 +41,7 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
     BehaviorTreeShapeUtil,
     BtControlShapeUtil,
     CodeShapeUtil,
+    FloatingPortShapeUtil,
     BranchArmShapeUtil,
     ...blockConnectionShapeUtils,
   ],

@@ -1,276 +1,220 @@
-.code-block-canvas,
-.code-block-canvas * {
-	box-sizing: border-box;
-}
+/*
+ * Code block — CodeMirror inside a stock tldraw shape.
+ *
+ * Everything is painted from `--ss-*` tokens so the document follows every
+ * board theme (the house rule: tokens on the container, never a second
+ * palette). The unselected block is deliberately a calm code surface with NO
+ * persistent chrome — the babble record scored the always-visible header
+ * direction (V4) a 2/5 on "readable code, quiet canvas" and rejected it, so
+ * language / width metadata live only in the selection menu and resize HUD.
+ */
 
 .code-block-canvas {
-	display: flex;
-	width: 100%;
-	height: 100%;
-	min-width: 0;
-	min-height: 0;
-	flex-direction: column;
-	overflow: hidden;
-	border: 1px solid var(--ss-border-inverse);
-	border-radius: 8px;
-	background: var(--ss-code-surface);
-	box-shadow: var(--ss-shadow-1);
-	color: var(--ss-code-text);
-}
-
-.code-block-canvas__header {
-	display: flex;
-	min-height: 24px;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-	padding: 4px 10px;
-	border-bottom: 1px solid var(--ss-border-inverse);
-	color: var(--ss-text-muted);
-	background: var(--ss-surface-inverse);
-	font: 600 10px/1 ui-sans-serif, system-ui, sans-serif;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-}
-
-.code-block-canvas__editor {
-	min-width: 0;
-	min-height: 0;
-	flex: 1;
-	overflow: hidden;
-}
-
-.code-block-canvas__editor .cm-editor {
-	height: 100%;
-	outline: 0;
-}
-
-.code-block-canvas__editor .cm-scroller {
-	padding: 10px 0;
-}
-
-.code-block-canvas__editor .cm-content,
-.code-block-canvas__editor .cm-gutter {
-	min-height: 100%;
-}
-
-.code-block-canvas[data-editing='false'] .code-block-canvas__editor,
-.code-block-canvas[data-editing='false'] .code-block-canvas__editor * {
-	pointer-events: none;
-}
-
-.code-mini-menu {
-	display: flex;
-	height: 40px;
-	align-items: stretch;
-	font: 11px/1 ui-sans-serif, system-ui, sans-serif;
-}
-
-.code-contextual-control {
-	display: flex;
-	height: 40px;
-	align-items: center;
-	gap: 7px;
-	padding: 0 9px;
-	border: 0;
-	border-radius: 6px;
-	color: var(--ss-text-inverse);
-	background: transparent;
-	font: inherit;
-	font-weight: 550;
-	white-space: nowrap;
-	cursor: pointer;
-}
-
-.code-contextual-control:hover,
-.code-contextual-control[data-state='open'],
-.code-contextual-control[aria-pressed='true'] {
-	background: var(--ss-surface-inverse-hover);
-}
-
-.code-contextual-control:focus-visible,
-.code-contextual-panel button:focus-visible,
-.code-contextual-panel input:focus-visible {
-	outline: 0;
-	box-shadow: var(--ss-focus-ring);
-}
-
-.code-contextual-control--language { min-width: 130px; }
-.code-contextual-control--font-size { min-width: 80px; }
-.code-contextual-control--width { min-width: 86px; }
-.code-contextual-control--icon { width: 40px; justify-content: center; padding: 0; }
-
-.code-contextual-control__chevron {
-	margin-left: 1px;
-	color: var(--ss-text-muted);
-}
-
-.code-contextual-control__separator {
-	width: 1px;
-	height: 24px;
-	align-self: center;
-	background: var(--ss-border-inverse);
-}
-
-.code-contextual-control__sr-only {
 	position: absolute;
-	width: 1px;
-	height: 1px;
-	margin: -1px;
+	inset: 0;
+	display: flex;
 	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
+	border: 1px solid var(--ss-border);
+	border-radius: 10px;
+	background: var(--ss-code-surface);
+	color: var(--ss-code-text);
+	pointer-events: all;
 }
 
-/* Code panels deliberately use the selection pill's inverse surface. This
- * keeps their light and dark appearances tied to the product chrome rather
- * than borrowing CodeMirror's document theme or the browser's native select. */
-.code-contextual-panel {
-	width: 224px;
-	padding: 8px;
-	border-radius: 13px;
-	color: var(--ss-text-inverse);
-	background: var(--ss-surface-inverse);
-	box-shadow: var(--ss-shadow-2);
-	font: 11px/1.35 ui-sans-serif, system-ui, sans-serif;
-}
-
-.code-contextual-panel__heading {
-	padding: 4px 8px 6px 28px;
-	color: var(--ss-text-muted);
-	font-size: 10px;
-	font-weight: 750;
-	letter-spacing: .04em;
-	text-transform: uppercase;
-}
-
-.code-contextual-panel__list {
-	display: grid;
-	gap: 1px;
-}
-
-.code-contextual-panel__option {
-	display: flex;
-	width: 100%;
-	min-height: 28px;
-	align-items: center;
-	gap: 5px;
-	padding: 4px 8px 4px 4px;
-	border: 0;
-	border-radius: 6px;
-	color: inherit;
-	background: transparent;
-	font: inherit;
-	text-align: left;
-	cursor: pointer;
-}
-
-.code-contextual-panel__option:hover { background: var(--ss-surface-inverse-hover); }
-
-.code-contextual-panel__option--font-size {
-	min-height: 31px;
-}
-
-.code-contextual-panel__check {
-	width: 16px;
-	flex: 0 0 16px;
-	opacity: 0;
-}
-
-.code-contextual-panel__check[data-current] { opacity: 1; }
-
-.code-contextual-panel__description {
-	margin: 0 8px 9px 28px;
-	color: var(--ss-text-muted);
-	font-size: 10px;
-	line-height: 1.4;
-}
-
-.code-contextual-panel__presets {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 4px;
-	margin-bottom: 8px;
-}
-
-.code-contextual-panel__preset {
-	display: flex;
-	min-height: 46px;
-	align-items: center;
-	gap: 3px;
-	padding: 5px 6px 5px 3px;
-	border: 0;
-	border-radius: 7px;
-	color: inherit;
-	background: var(--ss-surface-inverse-hover);
-	font: inherit;
-	text-align: left;
-	cursor: pointer;
-}
-
-.code-contextual-panel__preset:hover,
-.code-contextual-panel__preset[data-active] {
-	background: var(--ss-accent-soft);
-}
-
-.code-contextual-panel__preset strong,
-.code-contextual-panel__preset small {
-	display: block;
-}
-
-.code-contextual-panel__preset strong { font-size: 11px; }
-.code-contextual-panel__preset small { color: var(--ss-text-muted); font-size: 10px; }
-
-.code-contextual-panel__custom {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-	padding: 8px 4px 0;
-	border-top: 1px solid var(--ss-border-inverse);
-	font-weight: 650;
-}
-
-.code-contextual-panel__input-wrap {
-	display: flex;
-	width: 76px;
-	height: 28px;
-	align-items: center;
-	padding-right: 7px;
-	border: 1px solid var(--ss-border-inverse);
-	border-radius: 6px;
-	background: var(--ss-surface-inverse-hover);
-}
-
-.code-contextual-panel__input-wrap:focus-within {
+.code-block-canvas[data-editing='true'] {
 	border-color: var(--ss-accent);
 }
 
-.code-contextual-panel__input-wrap input {
+.code-block-canvas__editor {
+	flex: 1 1 auto;
 	min-width: 0;
-	flex: 1;
-	padding: 0 3px 0 7px;
-	border: 0;
-	color: inherit;
-	background: transparent;
-	font: inherit;
-	text-align: right;
-	outline: 0;
+	display: flex;
 }
 
-.code-contextual-panel__input-wrap span {
-	color: var(--ss-text-muted);
-	font-size: 10px;
+.code-block-canvas__editor .cm-editor {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: 100%;
+	background: transparent;
+	color: var(--ss-code-text);
+	outline: none;
 }
+
+.code-block-canvas__editor .cm-scroller {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	line-height: 1.45;
+	padding: 10px 0;
+}
+
+.code-block-canvas__editor .cm-content {
+	padding: 0 16px;
+	caret-color: var(--ss-accent);
+}
+
+.code-block-canvas__editor .cm-cursor,
+.code-block-canvas__editor .cm-dropCursor {
+	border-left-color: var(--ss-accent);
+}
+
+.code-block-canvas__editor .cm-gutters {
+	background: transparent;
+	color: var(--ss-text-faint);
+	border-right: 1px solid var(--ss-border);
+	min-width: 36px;
+	justify-content: flex-end;
+}
+
+.code-block-canvas__editor .cm-lineNumbers .cm-gutterElement {
+	padding: 0 8px 0 6px;
+}
+
+.code-block-canvas[data-editing='true'] .cm-activeLine {
+	background: color-mix(in srgb, var(--ss-accent) 7%, transparent);
+}
+
+.code-block-canvas[data-editing='true'] .cm-activeLineGutter {
+	background: color-mix(in srgb, var(--ss-accent) 7%, transparent);
+	color: var(--ss-text-muted);
+}
+
+.code-block-canvas__editor .cm-selectionBackground,
+.code-block-canvas__editor .cm-focused .cm-selectionBackground,
+.code-block-canvas__editor ::selection {
+	background: color-mix(in srgb, var(--ss-accent) 30%, transparent);
+}
+
+/* --------------------------- syntax vocabulary ---------------------------
+ * `classHighlighter` emits stable `tok-*` classes; the palette is the same
+ * restrained accent-mixed scheme the Type primitive's spans use, so a board's
+ * code reads as one family across light and dark themes rather than a third
+ * editor theme pasted onto the canvas. */
+
+.code-block-canvas .tok-keyword,
+.code-block-canvas .tok-operatorKeyword,
+.code-block-canvas .tok-controlKeyword,
+.code-block-canvas .tok-definitionKeyword,
+.code-block-canvas .tok-moduleKeyword {
+	color: color-mix(in srgb, var(--ss-accent) 78%, var(--ss-code-text));
+	font-weight: 600;
+}
+
+.code-block-canvas .tok-string,
+.code-block-canvas .tok-docString,
+.code-block-canvas .tok-character,
+.code-block-canvas .tok-attributeValue {
+	color: color-mix(in srgb, var(--ss-success) 62%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-number,
+.code-block-canvas .tok-integer,
+.code-block-canvas .tok-float,
+.code-block-canvas .tok-bool,
+.code-block-canvas .tok-atom,
+.code-block-canvas .tok-null,
+.code-block-canvas .tok-unit {
+	color: color-mix(in srgb, var(--ss-warning) 58%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-comment,
+.code-block-canvas .tok-lineComment,
+.code-block-canvas .tok-blockComment,
+.code-block-canvas .tok-meta {
+	color: var(--ss-text-muted);
+	font-style: italic;
+}
+
+.code-block-canvas .tok-typeName,
+.code-block-canvas .tok-className,
+.code-block-canvas .tok-namespace {
+	color: color-mix(in srgb, var(--ss-accent) 55%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-propertyName,
+.code-block-canvas .tok-attributeName,
+.code-block-canvas .tok-labelName {
+	color: color-mix(in srgb, var(--ss-danger) 42%, var(--ss-code-text));
+}
+
+.code-block-canvas .tok-function,
+.code-block-canvas .tok-macroName {
+	color: var(--ss-code-text);
+	font-weight: 600;
+}
+
+.code-block-canvas .tok-operator,
+.code-block-canvas .tok-punctuation,
+.code-block-canvas .tok-separator,
+.code-block-canvas .tok-bracket {
+	color: var(--ss-text-muted);
+}
+
+.code-block-canvas .tok-invalid {
+	color: var(--ss-danger);
+}
+
+/* --------------------- selection-menu contributions ---------------------
+ * The controls reuse the appearance pill's own classes so a Code selection's
+ * pill is indistinguishable from any other shape's; only the pressed state of
+ * the line-number toggle and the compact width combobox are Code-specific. */
+
+.code-selection-controls__lines[data-active] {
+	color: var(--ss-accent);
+}
+
+/* A "48 ch" value never needs the Font-size combobox's 144px; keep the
+ * trigger to its content, matching the pill's icon triggers. */
+.systemsketch-appearance__trigger[data-control='codeWidth'] {
+	width: auto;
+	min-width: 64px;
+}
+
+.code-width-custom {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 6px;
+	padding: 6px 8px 2px;
+	border-top: 1px solid var(--ss-border-inverse);
+	font-size: 11px;
+	color: var(--ss-text-inverse);
+}
+
+.code-width-custom span:first-child {
+	flex: 1;
+}
+
+.code-width-custom input {
+	width: 56px;
+	padding: 4px 6px;
+	border: 1px solid var(--ss-border-inverse);
+	border-radius: 4px;
+	background: var(--ss-surface-inverse-hover);
+	color: var(--ss-text-inverse);
+	font: inherit;
+	text-align: right;
+}
+
+.code-width-custom input:focus {
+	outline: none;
+	border-color: var(--ss-accent);
+}
+
+.code-width-custom__unit {
+	color: color-mix(in srgb, var(--ss-text-inverse) 65%, transparent);
+}
+
+/* ------------------------------ resize HUD ------------------------------ */
 
 .code-resize-hud {
 	position: absolute;
-	z-index: var(--tl-layer-menus, 400);
-	pointer-events: none;
-	padding: 5px 7px;
+	z-index: 10;
+	padding: 3px 8px;
 	border-radius: 6px;
-	color: var(--ss-text-inverse);
 	background: var(--ss-surface-inverse);
-	box-shadow: var(--ss-shadow-1);
-	font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+	color: var(--ss-text-inverse);
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+	white-space: nowrap;
+	box-shadow: var(--ss-shadow-2);
 }

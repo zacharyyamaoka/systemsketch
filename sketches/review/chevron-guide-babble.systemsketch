@@ -1,0 +1,2164 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 6,
+      "geo": 13,
+      "text": 4,
+      "block": 8,
+      "image": 5,
+      "line": 2
+    },
+    "bindings": {
+      "arrow": 12
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 8,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 720,
+      "y": 180,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -20,
+          "y": 100
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a9xnDl",
+      "typeName": "shape"
+    },
+    {
+      "x": -541.8183441162109,
+      "y": 845.3891936453559,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:6bhQFHcqQH3OP9_aAjS6H",
+      "type": "geo",
+      "props": {
+        "w": 58.18180847167969,
+        "h": 35.4544677734375,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "red",
+        "labelColor": "black",
+        "fill": "solid",
+        "size": "m",
+        "font": "draw",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aOyzL",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 1200,
+      "y": 160,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -20,
+          "y": 120
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aAzlMG",
+      "typeName": "shape"
+    },
+    {
+      "x": 250,
+      "y": 1060,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -30,
+          "y": -80
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aBxUJd",
+      "typeName": "shape"
+    },
+    {
+      "x": -599.0910339355469,
+      "y": 1217.2074158488867,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:fo5Hv7KwV2mzQvO1SuQ38",
+      "type": "geo",
+      "props": {
+        "w": 16.36358642578125,
+        "h": 20.9091796875,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "white",
+        "labelColor": "black",
+        "fill": "solid",
+        "size": "m",
+        "font": "draw",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aRsWI",
+      "typeName": "shape"
+    },
+    {
+      "x": 730,
+      "y": 1060,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-5-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -30,
+          "y": -80
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aCwQeV",
+      "typeName": "shape"
+    },
+    {
+      "x": -585.805492401123,
+      "y": 692.1149014955364,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:FiQ6Sq_HmbEyVtd7WOgMC",
+      "type": "text",
+      "props": {
+        "color": "black",
+        "size": "m",
+        "w": 93.2585220336914,
+        "font": "draw",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "attrs": {
+            "dir": "auto"
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Desired"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aJ3IE",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 30,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 150,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Original pick: trailing chevron, accent-tinted rail. Expand \"pose: Pose\" to compare against the rest of this row."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a8PBv",
+      "typeName": "shape"
+    },
+    {
+      "x": 1000,
+      "y": 700,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "babbleVariant": 10
+      },
+      "id": "shape:dottoggle",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 280,
+        "title": "Dot Toggle",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "YO8bWYDlJykW0r83IM9Nw",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "pose: Pose = 10\nquality: float",
+        "definitionKey": "Dot_Toggle"
+      },
+      "parentId": "page:page",
+      "index": "a7v1v",
+      "typeName": "shape"
+    },
+    {
+      "x": 1460,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-note-citations",
+      "type": "geo",
+      "props": {
+        "w": 480,
+        "h": 360,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 32,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Prior art (full citations in the linked report): VS Code, Finder, Windows Explorer and GitHub all place the disclosure triangle BEFORE the label and keep it always visible — hover-hiding the ONLY expand affordance measurably hurts discoverability (Nielsen Norman Group; Zach's own Information Scent note). VS Code's own indent-guide default is a faint, low-contrast line, not accent-colored. Block 4 applies all three; blocks 1, 2, 3, 5 and 6 show what changes when you depart from it."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aEzJ1",
+      "typeName": "shape"
+    },
+    {
+      "x": 1200,
+      "y": 1060,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-6-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -20,
+          "y": -80
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aDx94t",
+      "typeName": "shape"
+    },
+    {
+      "x": 1460,
+      "y": 688,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 225,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 17,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · For each block you can name the trade-off — which reads fastest as \"this expands\", which best avoids competing with real content — and confirm that collapsing an already-open hover-reveal row never depends on hovering it first."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aFORn",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 30,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 150,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Leading chevron + accent rail — closer to file-browser convention, but the rail still competes with real content for attention."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a9fzo",
+      "typeName": "shape"
+    },
+    {
+      "x": -603.6365203857422,
+      "y": 847.2073088797309,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ljmO4Vv2dZbD819rittwT",
+      "type": "geo",
+      "props": {
+        "w": 25.454544067382812,
+        "h": 31.8182373046875,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "red",
+        "labelColor": "black",
+        "fill": "solid",
+        "size": "m",
+        "font": "draw",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aNj9U",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 1000,
+      "y": 30,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 130,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Trailing chevron (like V1) with a dotted rail instead of a solid one."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aAaKn",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 1060,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 195,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Prior-art recommendation: leading chevron (Explorer/Finder/VS Code/GitHub all agree), always visible, and a faint muted guide instead of an accent one. See the note for citations."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aBnRU",
+      "typeName": "shape"
+    },
+    {
+      "x": 512.5796069046758,
+      "y": 1256.6404170260919,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-5",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 150,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 · Hover to reveal the chevron — cleaner at rest, but hides the only way to know a row expands until you are already hovering it."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aCDZv",
+      "typeName": "shape"
+    },
+    {
+      "x": 647.6911524784412,
+      "y": 1608.6515599930117,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:RaRRrqqz-C7qXdtAwDx9o",
+      "type": "block",
+      "props": {
+        "w": 469,
+        "h": 330,
+        "title": "",
+        "description": "",
+        "blockType": "",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 469,
+            "h": 288
+          },
+          "port": {
+            "w": 469,
+            "h": 330
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "XKnUAvEqfjQR4NdsTAt8h",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true,
+            "defaultValue": "10"
+          },
+          {
+            "id": "in_2",
+            "name": "random",
+            "type": "float",
+            "visible": true,
+            "defaultValue": "0.1"
+          },
+          {
+            "id": "in_3",
+            "name": "random",
+            "type": "MyComponent",
+            "visible": true,
+            "defaultValue": "Component(var=0.1)"
+          },
+          {
+            "id": "in_4",
+            "name": "port_below_line",
+            "type": "",
+            "visible": true
+          },
+          {
+            "id": "in_5",
+            "name": "data_in",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": ""
+      },
+      "parentId": "page:page",
+      "index": "aUbQr",
+      "typeName": "shape"
+    },
+    {
+      "x": 1000,
+      "y": 1060,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-6",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 130,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "6 · A filled/hollow dot instead of a triangle — does it still read as \"this expands\" at a glance?"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aDswj",
+      "typeName": "shape"
+    },
+    {
+      "x": -587.8637390136719,
+      "y": 1212.6618376883248,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:BMZ5WTGsGeCNvkPKQ9w9t",
+      "type": "image",
+      "props": {
+        "w": 139.36358642578125,
+        "h": 26.3636474609375,
+        "assetId": "asset:-1249018945",
+        "playing": true,
+        "url": "",
+        "crop": {
+          "topLeft": {
+            "x": 0.04925096223370485,
+            "y": 0.39839585248161763
+          },
+          "bottomRight": {
+            "x": 0.36384145077948643,
+            "y": 0.4759359920726103
+          }
+        },
+        "flipX": false,
+        "flipY": false,
+        "altText": ""
+      },
+      "parentId": "page:page",
+      "index": "aQ6XA",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:v1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": -440,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pose",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 280,
+        "title": "Pose",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "kSvhP3v1BfvhurVL2Tpi3",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "x: Pose\ny: float = 10\nz: float",
+        "definitionKey": "Pose"
+      },
+      "parentId": "page:page",
+      "index": "a1Yhr",
+      "typeName": "shape"
+    },
+    {
+      "x": 639.9133747006634,
+      "y": 1797.5404488819006,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:7kQ03sv4TjRCWHjf_Fw4L",
+      "type": "line",
+      "props": {
+        "dash": "draw",
+        "size": "m",
+        "color": "black",
+        "spline": "line",
+        "points": {
+          "a1": {
+            "id": "a1",
+            "index": "a1",
+            "x": 0,
+            "y": 0
+          },
+          "a2Egj": {
+            "id": "a2Egj",
+            "index": "a2Egj",
+            "x": 474.44444444444446,
+            "y": 1.1111111111110858
+          }
+        },
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aW396",
+      "typeName": "shape"
+    },
+    {
+      "x": -630.5910949707031,
+      "y": 1071.7528411062935,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:iCFxWeKd8k-XCLQVMnVHU",
+      "type": "image",
+      "props": {
+        "w": 443,
+        "h": 340,
+        "assetId": "asset:-1249018945",
+        "playing": true,
+        "url": "",
+        "crop": null,
+        "flipX": false,
+        "flipY": false,
+        "altText": ""
+      },
+      "parentId": "page:page",
+      "index": "aP8FU",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:alta",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:altb",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "id": "asset:-1249018945",
+      "type": "image",
+      "typeName": "asset",
+      "props": {
+        "name": "tldrawFile",
+        "src": "data:image/png;base64,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",
+        "w": 443,
+        "h": 340,
+        "fileSize": 15601,
+        "mimeType": "image/png",
+        "isAnimated": false
+      },
+      "meta": {}
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-4-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-4-arrow",
+      "toId": "shape:priorart",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": -1062.4090881347656,
+      "y": 734.5454101562501,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:0duN81hn2KdzrSKWrMovp",
+      "type": "image",
+      "props": {
+        "w": 443,
+        "h": 340,
+        "assetId": "asset:-1249018945",
+        "playing": true,
+        "url": "",
+        "crop": null,
+        "flipX": false,
+        "flipY": false,
+        "altText": ""
+      },
+      "parentId": "page:page",
+      "index": "aGwf6",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-5-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-5-arrow",
+      "toId": "shape:hoverreveal",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-6-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-6-arrow",
+      "toId": "shape:dottoggle",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": -31.19773641044776,
+      "y": 1660.4293377707897,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:vICZpM3DRP0egX907iUz1",
+      "type": "text",
+      "props": {
+        "color": "black",
+        "size": "m",
+        "w": 559.984375,
+        "font": "draw",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "attrs": {
+            "dir": "auto"
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "---header"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pose: Pose = 10"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "random: float = 0.1"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "random: MyComponent = Component(var=0.1)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "---"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "port_below_line"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "data_in:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "---"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              }
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              }
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aTszq",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:pjpNz_dQGJqybCf9SRbKO",
+      "typeName": "user"
+    },
+    {
+      "x": -612.7274322509766,
+      "y": 843.5709563406684,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:DAuFwRR_ZR5EMT1bpqaIG",
+      "type": "geo",
+      "props": {
+        "w": 400.9091033935547,
+        "h": 178.1817626953125,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "draw",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aMVLf",
+      "typeName": "shape"
+    },
+    {
+      "x": -590.5909729003906,
+      "y": 875.3890866762005,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:edr7ivci0N7ubdjy3kzju",
+      "type": "image",
+      "props": {
+        "w": 139.36358642578125,
+        "h": 26.3636474609375,
+        "assetId": "asset:-1249018945",
+        "playing": true,
+        "url": "",
+        "crop": {
+          "topLeft": {
+            "x": 0.04925096223370485,
+            "y": 0.39839585248161763
+          },
+          "bottomRight": {
+            "x": 0.36384145077948643,
+            "y": 0.4759359920726103
+          }
+        },
+        "flipX": false,
+        "flipY": false,
+        "altText": ""
+      },
+      "parentId": "page:page",
+      "index": "aKLeb",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 700,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "babbleVariant": 9
+      },
+      "id": "shape:hoverreveal",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 202,
+        "title": "Hover Reveal",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 360,
+            "h": 202
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "WDWaCZ2FLYCxdrOj4XtV-",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "pose: Pose = 10\nquality: Pose",
+        "definitionKey": "Hover_Reveal"
+      },
+      "parentId": "page:page",
+      "index": "a6ccr",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 520,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "babbleVariant": 6
+      },
+      "id": "shape:alta",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 280,
+        "title": "AltA (leading, accent rail)",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "OCITK_zKGimkR2Mw53yjm",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "pose: Pose = 10\nquality: float",
+        "definitionKey": "AltA_leading_accent_rail"
+      },
+      "parentId": "page:page",
+      "index": "a3z63",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#02B1CC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:14CduCnEKdhjbG8T8LwW9",
+      "typeName": "user"
+    },
+    {
+      "x": 1000,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "babbleVariant": 7
+      },
+      "id": "shape:altb",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 280,
+        "title": "AltB (trailing, dotted)",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "VGhBWVqWa66JrBV4tTMXB",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "pose: Pose = 10\nquality: float",
+        "definitionKey": "AltB_trailing_dotted"
+      },
+      "parentId": "page:page",
+      "index": "a4eYQ",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 700,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "babbleVariant": 8
+      },
+      "id": "shape:priorart",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 280,
+        "title": "Prior Art (recommended)",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "KOpfvYNDLululZBdW3HF_",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "pose: Pose = 10\nquality: float",
+        "definitionKey": "Prior_Art_recommended"
+      },
+      "parentId": "page:page",
+      "index": "a5abU",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:PkcDZVsvRV2QATEVSk52x",
+      "typeName": "user"
+    },
+    {
+      "x": -974.5455627441406,
+      "y": 692.1149625306928,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:HegVBRl3YRk8LfX1XWGbB",
+      "type": "text",
+      "props": {
+        "color": "black",
+        "size": "m",
+        "w": 95.24715423583984,
+        "font": "draw",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "attrs": {
+            "dir": "auto"
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Current"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aHrdz",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-4-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-4-arrow",
+      "toId": "shape:cue-step-4",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "babbleVariant": 1
+      },
+      "id": "shape:v1",
+      "type": "block",
+      "props": {
+        "w": 360,
+        "h": 280,
+        "title": "V1 (trailing, accent rail)",
+        "description": "",
+        "blockType": "type",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "KPoR2e-5UDrkbnfez0dvW",
+        "inputs": [],
+        "outputs": [],
+        "attributeSource": "pose: Pose = 10\nquality: float",
+        "definitionKey": "V1_trailing_accent_rail"
+      },
+      "parentId": "page:page",
+      "index": "a2qvj",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-5-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-5-arrow",
+      "toId": "shape:cue-step-5",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": -627.8637390136719,
+      "y": 739.0255002504192,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:CNP2baQPh8YiDAJZNxfoY",
+      "type": "image",
+      "props": {
+        "w": 443,
+        "h": 340,
+        "assetId": "asset:-1249018945",
+        "playing": true,
+        "url": "",
+        "crop": null,
+        "flipX": false,
+        "flipY": false,
+        "altText": ""
+      },
+      "parentId": "page:page",
+      "index": "aINRn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-6-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-6-arrow",
+      "toId": "shape:cue-step-6",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 644.3578191451078,
+      "y": 1880.873782215234,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:a47IKSB1_0OAGoHiUoei5",
+      "type": "line",
+      "props": {
+        "dash": "draw",
+        "size": "m",
+        "color": "black",
+        "spline": "line",
+        "points": {
+          "a1": {
+            "id": "a1",
+            "index": "a1",
+            "x": 0,
+            "y": 0
+          },
+          "a2bEI": {
+            "id": "a2bEI",
+            "index": "a2bEI",
+            "x": 471.111111111111,
+            "y": 0
+          }
+        },
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aVHRn",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#39B178",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:cVyuf-Z9AMhfJktcu1-VY",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1849,
+        "h": 1972
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": -601.8182678222656,
+      "y": 879.9346648367622,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:53MB-izChi9yKwI6X7O1F",
+      "type": "geo",
+      "props": {
+        "w": 16.36358642578125,
+        "h": 20.9091796875,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "white",
+        "labelColor": "black",
+        "fill": "solid",
+        "size": "m",
+        "font": "draw",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aLacX",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:Clf0MLvD0T3FAgFaoQpOg",
+      "typeName": "user"
+    },
+    {
+      "x": -200.94253626003842,
+      "y": 871.2655713136609,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:gXL4fxzadN7oPzQkrzUTW",
+      "type": "text",
+      "props": {
+        "color": "green",
+        "size": "m",
+        "w": 214.9630584716797,
+        "font": "draw",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "attrs": {
+            "dir": "auto"
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Click regions"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "dir": "auto"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "that go to source"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aS4UN",
+      "typeName": "shape"
+    },
+    {
+      "x": 240,
+      "y": 180,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -20,
+          "y": 100
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a8sf3",
+      "typeName": "shape"
+    }
+  ]
+}

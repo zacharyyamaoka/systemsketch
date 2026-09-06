@@ -143,6 +143,89 @@ button {
   outline: none;
 }
 
+/* -------------------------------------------------------------------------
+ * Panel scrollbars.
+ *
+ * Every app panel scrolls its own body, and each one was drawing the OS
+ * scrollbar — a wide grey trough against a 18px-radius designed panel. Thin
+ * and themed instead, from the same two tokens the panel is painted with.
+ * Firefox takes `scrollbar-*`; WebKit/Blink take the pseudo-elements, so both
+ * are declared rather than one being assumed.
+ * ---------------------------------------------------------------------- */
+.systemsketch-popout,
+.systemsketch-command-palette,
+.systemsketch-comments,
+.systemsketch-library-browser,
+.systemsketch-settings,
+.systemsketch-workspace-dialog,
+.block-inspector,
+.systemsketch-block-canvas {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ss-border-strong) transparent;
+}
+
+.systemsketch-popout ::-webkit-scrollbar,
+.systemsketch-command-palette ::-webkit-scrollbar,
+.systemsketch-comments ::-webkit-scrollbar,
+.systemsketch-library-browser ::-webkit-scrollbar,
+.systemsketch-settings ::-webkit-scrollbar,
+.systemsketch-workspace-dialog ::-webkit-scrollbar,
+.block-inspector ::-webkit-scrollbar,
+.systemsketch-block-canvas ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-track,
+.systemsketch-command-palette ::-webkit-scrollbar-track,
+.systemsketch-comments ::-webkit-scrollbar-track,
+.systemsketch-library-browser ::-webkit-scrollbar-track,
+.systemsketch-settings ::-webkit-scrollbar-track,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-track,
+.block-inspector ::-webkit-scrollbar-track,
+.systemsketch-block-canvas ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-thumb,
+.systemsketch-command-palette ::-webkit-scrollbar-thumb,
+.systemsketch-comments ::-webkit-scrollbar-thumb,
+.systemsketch-library-browser ::-webkit-scrollbar-thumb,
+.systemsketch-settings ::-webkit-scrollbar-thumb,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-thumb,
+.block-inspector ::-webkit-scrollbar-thumb,
+.systemsketch-block-canvas ::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  /* `background-clip: content-box` is what turns the 10px track into a 4px
+   * thumb without a second element to inset it. */
+  background: var(--ss-border-strong);
+  background-clip: content-box;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-thumb:hover,
+.systemsketch-command-palette ::-webkit-scrollbar-thumb:hover,
+.systemsketch-comments ::-webkit-scrollbar-thumb:hover,
+.systemsketch-library-browser ::-webkit-scrollbar-thumb:hover,
+.systemsketch-settings ::-webkit-scrollbar-thumb:hover,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-thumb:hover,
+.block-inspector ::-webkit-scrollbar-thumb:hover,
+.systemsketch-block-canvas ::-webkit-scrollbar-thumb:hover {
+  background: var(--ss-text-muted);
+  background-clip: content-box;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-corner,
+.systemsketch-command-palette ::-webkit-scrollbar-corner,
+.systemsketch-comments ::-webkit-scrollbar-corner,
+.systemsketch-library-browser ::-webkit-scrollbar-corner,
+.systemsketch-settings ::-webkit-scrollbar-corner,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-corner,
+.block-inspector ::-webkit-scrollbar-corner,
+.systemsketch-block-canvas ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Stock text protects labels that cross other shapes with a canvas-coloured
  * halo. A detached Block label sits on its own opaque card, just like the DOM
  * label it replaced, so that halo only makes the glyph falsely bold. Keep the

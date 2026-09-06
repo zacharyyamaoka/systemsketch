@@ -6,6 +6,8 @@ import {
   type TLGeoShape,
   type TLShape,
 } from 'tldraw'
+
+import { withAsyncEdge } from './appearance/asyncEdge'
 import {
   SYSTEMSKETCH_ROUNDED_RECT_GEO,
   getSystemSketchRoundedRectPath,
@@ -128,14 +130,15 @@ const ConfiguredExcalidrawGeoShapeUtil = GeoShapeUtil.configure({
       },
     },
   },
-  getCustomDisplayValues: (_editor, shape) => systemSketchGeoDisplayValues(shape),
+  getCustomDisplayValues: (_editor, shape, theme, colorMode) =>
+    systemSketchGeoDisplayValues(shape, theme, colorMode),
 })
 
 // Detachment must not opt a normal `geo` record into SystemSketch paint. The
 // configured util remains only for Excalidraw's own custom geometry ids; a
 // detached card now uses the default rectangle/oval and receives no wrapper,
 // shadow, display metadata, or alternate renderer.
-export const EXCALIDRAW_SHAPE_UTILS = [ConfiguredExcalidrawGeoShapeUtil]
+export const EXCALIDRAW_SHAPE_UTILS = [withAsyncEdge(ConfiguredExcalidrawGeoShapeUtil)]
 
 function getConvertibleGeoElements(content: unknown): ExcalidrawElement[] {
   if (!isRecord(content) || !Array.isArray((content as ExcalidrawClipboardContent).elements)) {

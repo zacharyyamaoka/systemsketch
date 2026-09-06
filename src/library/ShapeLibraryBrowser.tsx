@@ -13,6 +13,7 @@ import {
   type ShapeLibrarySection,
 } from './shapeLibraryModel'
 import { useToolAliases } from './toolAliases'
+import { SCROLL_AREA_CLASS } from '../scroll/ScrollArea'
 import './shape-library.css'
 
 interface ShapeLibraryBrowserProps {
@@ -136,24 +137,7 @@ export function ShapeLibraryBrowser({
       ]
 
   return (
-    <div
-      className={`systemsketch-library-browser ${className}`.trim()}
-      onKeyDownCapture={(event) => {
-        // Own Escape outright rather than letting it fall through: the
-        // toolbar's Library trigger hosts this browser inside a stock Radix
-        // popover, whose DismissableLayer closes on Escape via its own
-        // document-level listener — a separate mechanism from this React
-        // tree entirely, so `disableEscapeKeyDown` on that popover (see
-        // SystemSketchToolbar.tsx) hands the key fully to us. First Escape
-        // clears an active filter; only a second, on an already-empty
-        // search, closes the panel via the normal onCancel.
-        if (event.key !== 'Escape') return
-        event.preventDefault()
-        event.stopPropagation()
-        if (query) setQuery('')
-        else onCancel?.()
-      }}
-    >
+    <div className={`systemsketch-library-browser ${className}`.trim()}>
       <TldrawUiInput
         autoFocus={autoFocus}
         autoSelect={autoFocus}
@@ -164,7 +148,7 @@ export function ShapeLibraryBrowser({
         onValueChange={setQuery}
         onCancel={onCancel}
       />
-      <div className="systemsketch-library-panel__body">
+      <div className={`${SCROLL_AREA_CLASS} systemsketch-library-panel__body`}>
         {sections.map(({ name, items }) => {
           if (normalizedQuery && items.length === 0) return null
           const isOpen = openSections[name]

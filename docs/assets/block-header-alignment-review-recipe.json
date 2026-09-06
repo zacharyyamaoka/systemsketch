@@ -1,0 +1,95 @@
+{
+  "feature": "Block header alignment",
+  "viewport": { "width": 1500, "height": 900 },
+  "pages": [
+    { "id": "review", "name": "Review" }
+  ],
+  "shapes": [
+    {
+      "id": "header-subject",
+      "type": "block",
+      "x": 690,
+      "y": 205,
+      "props": {
+        "title": "parse_frame",
+        "description": "Use the inspector to change this header composition.",
+        "blockType": "Transform",
+        "icon": "SquareFunction",
+        "draftOrdinal": 2,
+        "view": "port",
+        "w": 500,
+        "h": 250,
+        "inputs": [
+          { "id": "in_1", "name": "frame", "type": "Image", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "tokens", "type": "Text", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "centered-reference",
+      "type": "block",
+      "x": 690,
+      "y": 545,
+      "props": {
+        "title": "centered_reference",
+        "description": "The icon/title/Draft group is centered; the type stays at the edge.",
+        "blockType": "Transform",
+        "icon": "SquareFunction",
+        "headerAlign": "center",
+        "view": "port",
+        "w": 500,
+        "h": 220,
+        "inputs": [
+          { "id": "in_1", "name": "frame", "type": "Image", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "tokens", "type": "Text", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select parse_frame to open its inspector",
+      "x": 70,
+      "y": 155,
+      "w": 430,
+      "h": 100,
+      "target": { "shapeId": "header-subject", "anchor": "left", "dy": -58 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Under View → Header alignment, click Center; then try Left",
+      "x": 70,
+      "y": 325,
+      "w": 520,
+      "h": 110,
+      "target": { "shapeId": "header-subject", "anchor": "left", "dy": 58 }
+    },
+    {
+      "id": "step-3",
+      "kind": "note",
+      "text": "3 · Switch between Port and Expanded: the same alignment persists",
+      "x": 70,
+      "y": 505,
+      "w": 500,
+      "h": 105,
+      "target": { "shapeId": "centered-reference", "anchor": "left", "dy": -45 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Center keeps icon + title + optional Draft badge on the Block midpoint; Type stays right and fold remains separate",
+      "x": 70,
+      "y": 700,
+      "w": 590,
+      "h": 120
+    }
+  ]
+}

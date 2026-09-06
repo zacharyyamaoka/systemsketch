@@ -1,0 +1,161 @@
+{
+  "feature": "Type primitive V1 engine: recursion, chevron/guide variants, Type Mapping unification, autocomplete",
+  "viewport": { "width": 2000, "height": 1400 },
+  "shapes": [
+    {
+      "id": "pose",
+      "type": "block",
+      "x": 40,
+      "y": 280,
+      "props": {
+        "title": "Pose",
+        "blockType": "type",
+        "view": "port",
+        "w": 340,
+        "h": 280,
+        "attributeSource": "x: Pose\ny: float = 10\nz: float"
+      }
+    },
+    {
+      "id": "v1",
+      "type": "block",
+      "x": 460,
+      "y": 280,
+      "props": {
+        "title": "V1 Segmented toggle",
+        "blockType": "type",
+        "view": "port",
+        "w": 380,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 1 }
+    },
+    {
+      "id": "alta",
+      "type": "block",
+      "x": 920,
+      "y": 280,
+      "props": {
+        "title": "V1 AltA (leading chevron)",
+        "blockType": "type",
+        "view": "port",
+        "w": 380,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 6 }
+    },
+    {
+      "id": "altb",
+      "type": "block",
+      "x": 1380,
+      "y": 280,
+      "props": {
+        "title": "V1 AltB (dotted guide)",
+        "blockType": "type",
+        "view": "port",
+        "w": 380,
+        "h": 280,
+        "attributeSource": "pose: Pose = 10\nquality: float"
+      },
+      "meta": { "babbleVariant": 7 }
+    },
+    {
+      "id": "mapping",
+      "type": "block",
+      "x": 920,
+      "y": 900,
+      "props": {
+        "title": "Estimator mapping",
+        "blockType": "type",
+        "view": "port",
+        "w": 460,
+        "h": 200,
+        "attributeSource": "Estimator = Callable[[Frame, float], Pose]\nClient = Any"
+      },
+      "meta": { "typeMappingBabbleVariant": 1 }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click \"pose: Pose\" to expand it in place. Click the nested \"x: Pose\" again to go deeper — Pose is self-referential, so there is no depth limit.",
+      "x": 440,
+      "y": 20,
+      "w": 420,
+      "h": 170,
+      "target": { "shapeId": "v1", "anchor": "top" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Double-click the \"quality: float\" row (or any row) to drop straight into Source mode with your cursor placed exactly where you clicked.",
+      "x": 440,
+      "y": 650,
+      "w": 420,
+      "h": 145,
+      "target": { "shapeId": "v1", "anchor": "bottom" }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Same engine as V1 — leading chevron (before the name) and a solid guide rail down the nested column.",
+      "x": 920,
+      "y": 60,
+      "w": 400,
+      "h": 130,
+      "target": { "shapeId": "alta", "anchor": "top" }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Same engine again — trailing chevron (like V1) with a dotted guide instead of a solid rail.",
+      "x": 1380,
+      "y": 60,
+      "w": 400,
+      "h": 130,
+      "target": { "shapeId": "altb", "anchor": "top" }
+    },
+    {
+      "id": "note-autocomplete",
+      "kind": "note",
+      "text": "Note · In Source mode on any of these (or the Mapping below), start a new line or edit a type and type a partial name. A dropdown anchored under your cursor suggests board types (purple pill), Type Mappings (orange pill) and Python primitives (grey pill), ranked by relevance — with a \"show every type\" link to browse the whole board.",
+      "x": 1460,
+      "y": 900,
+      "w": 480,
+      "h": 270
+    },
+    {
+      "id": "step-5",
+      "kind": "step",
+      "text": "5 · Click the blue \"Pose\" token inside the expression — it jumps the camera to the real Pose block above, confirming a Mapping resolves against live board Types.",
+      "x": 920,
+      "y": 650,
+      "w": 420,
+      "h": 170,
+      "target": { "shapeId": "mapping", "anchor": "top" }
+    },
+    {
+      "id": "step-6",
+      "kind": "step",
+      "text": "6 · Click Source, then position your cursor inside \"Callable[[Frame, float], Po|\" and keep typing — the same autocomplete matches an identifier anywhere inside a nested expression, not just right after a colon.",
+      "x": 920,
+      "y": 1180,
+      "w": 460,
+      "h": 195,
+      "target": { "shapeId": "mapping", "anchor": "bottom" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Expanding stays instant at any depth (no reselecting needed to see a fresh default value), double-click lands the cursor where you clicked, the Mapping token jump selects the real Pose block, and typing a partial name in either editor's Source mode opens a colored-pill autocomplete dropdown.",
+      "x": 40,
+      "y": 900,
+      "w": 460,
+      "h": 245
+    }
+  ]
+}

@@ -20,6 +20,7 @@ import {
 	insertBehaviorTreeChild,
 	insertBehaviorTreeSiblingOf,
 	nudgeBehaviorTreeOccurrence,
+	setBehaviorTreeNodeDisabled,
 	setBehaviorTreeNodeName,
 	setBehaviorTreePortValue,
 	setBehaviorTreeView,
@@ -37,7 +38,7 @@ import {
 } from '../behaviorTreeModel'
 import { planBehaviorInsert } from '../behaviorLibraryModel'
 import { projectBehaviorTree } from '../behaviorTreeProjection'
-import { type BtDocument, type BtInsertTemplate, type BtNode, type BtTree } from '../btcppXml'
+import { isBtNodeDisabled, type BtDocument, type BtInsertTemplate, type BtNode, type BtTree } from '../btcppXml'
 import '../../blocks/ui/block-inspector.css'
 import './behavior-tree-inspector.css'
 
@@ -214,6 +215,11 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 				</button>
 				<button type="button" className="bt-inspector__action" data-testid="bt-action-later" disabled={isRoot} onClick={() => report(nudgeBehaviorTreeOccurrence(editor, regionId, node.path, 1))}>
 					Move later
+				</button>
+				{/* MoveIt Pro's "Comment out": disable in place, distinct from Delete.
+				    Authoring-time only — see setBehaviorTreeNodeDisabled. */}
+				<button type="button" className="bt-inspector__action" data-testid="bt-action-disable" aria-pressed={isBtNodeDisabled(node)} onClick={() => report(setBehaviorTreeNodeDisabled(editor, regionId, node.path, !isBtNodeDisabled(node)))}>
+					{isBtNodeDisabled(node) ? 'Comment in' : 'Comment out'}
 				</button>
 				<button type="button" className="bt-inspector__action bt-inspector__action--danger" data-testid="bt-action-delete" onClick={() => report(deleteBehaviorTreeOccurrence(editor, regionId, node.path))}>
 					Delete

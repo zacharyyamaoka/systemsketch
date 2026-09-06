@@ -8,7 +8,10 @@ import {
   BlockShapeUtil,
   BlockTool,
   PillTool,
+  TypeTool,
   getBlockShapeVisibility,
+  installBlockAutoResize,
+  installBlockChildSelection,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
@@ -25,6 +28,7 @@ import { LoopShapeUtil, LoopTool } from './loop'
 import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from './behaviorTree'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
+import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -72,6 +76,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
+import { seedDefaultLineStyle } from './appearance/strokeMeta'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
@@ -106,10 +111,11 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BehaviorTreeShapeUtil,
   BtControlShapeUtil,
   CodeShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -129,9 +135,10 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BehaviorTreeShapeUtil,
   BtControlShapeUtil,
   CodeShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -151,9 +158,11 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     setMountedEditor(editor)
+    seedDefaultLineStyle(editor)
     const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
+		const stopBlockAutoResize = installBlockAutoResize(editor)
     const stopWorkspace = attach(editor)
     // Right after attach, same tick: a resumed draft must swap its content in
     // before the first paint, or reload flashes Main first. See DraftProvider.tsx.
@@ -165,6 +174,7 @@ function SystemSketchCanvas() {
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockChildSelection = installBlockChildSelection(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
@@ -180,8 +190,9 @@ function SystemSketchCanvas() {
       stopBlockPortMenuTarget()
       stopBehaviorTreeRegions()
       stopBranchRegions()
-      stopBranchClickToEdit()
       stopCodeClickToEdit()
+      stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopArrowClickToPlace()
       stopInstantTextEditing()
@@ -189,6 +200,7 @@ function SystemSketchCanvas() {
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+		stopBlockAutoResize()
       stopBoardTheme()
       stopDrafts()
       stopWorkspace()
@@ -265,11 +277,17 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopDefinitionLinking = isBlockDevelopment
       ? installDefinitionLinking(editor)
       : () => undefined
+		const stopBlockAutoResize = isBlockDevelopment
+			? installBlockAutoResize(editor)
+			: () => undefined
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
       : () => undefined
     const stopBlockClickToEdit = isBlockDevelopment
       ? installBlockClickToEdit(editor)
+      : () => undefined
+    const stopBlockChildSelection = isBlockDevelopment
+      ? installBlockChildSelection(editor)
       : () => undefined
     const stopBranchClickToEdit = isBlockDevelopment
       ? installBranchClickToEdit(editor)
@@ -290,13 +308,15 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopDevelopmentSeam()
       stopBlockPortMenuTarget()
       stopBranchRegions()
-      stopBranchClickToEdit()
       stopCodeClickToEdit()
+      stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+		stopBlockAutoResize()
       stopBoardTheme()
       stopWheelZoom()
     }

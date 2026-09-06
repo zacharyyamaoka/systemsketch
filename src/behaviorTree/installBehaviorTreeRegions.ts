@@ -118,8 +118,11 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId): BtRe
 				if (current && current.type === child.type) {
 					idByPath.set(child.path, current.id)
 					const wanted = desiredRecordProps(child, current)
-					if (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || !sameProps(current.props as Record<string, unknown>, wanted)) {
-						editor.updateShape({ id: current.id, type: current.type, x: child.x, y: child.y, props: wanted } as never)
+					// The region owns its children's opacity: the disabled dim is a
+					// projection fact, so a hand-set opacity is repaired like a drag.
+					const wantedOpacity = child.opacity ?? 1
+					if (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || current.opacity !== wantedOpacity || !sameProps(current.props as Record<string, unknown>, wanted)) {
+						editor.updateShape({ id: current.id, type: current.type, x: child.x, y: child.y, opacity: wantedOpacity, props: wanted } as never)
 						report.updated += 1
 					}
 					// A copied child arrives naming the region it was copied from.
@@ -141,6 +144,7 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId): BtRe
 					parentId: region.id,
 					x: child.x,
 					y: child.y,
+					opacity: child.opacity ?? 1,
 					props: child.props,
 					meta: btChildMeta(region.id, child.path, child.role),
 				} as never)
