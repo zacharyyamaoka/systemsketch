@@ -35,11 +35,31 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { TldrawUiButton, type Editor } from 'tldraw'
 
-import { CompareDialog } from './CompareDialog'
+import {
+	CompareDialog,
+	type CompareAction,
+	type CompareActionOutcome,
+	type CompareExplicitSource,
+} from './CompareDialog'
+
+export type { CompareAction, CompareActionOutcome, CompareExplicitSource }
 
 interface CompareController {
 	readonly isOpen: boolean
-	open(): void
+	/**
+	 * Open the dialog. With no argument it compares the live editor against
+	 * file history, exactly as today (`CompareTrigger`'s Shift+D path). Pass a
+	 * `source` to compare two already-in-memory snapshots instead — a caller
+	 * that already holds both sides (e.g. a draft vs. Main) with no file
+	 * history involved.
+	 *
+	 * `action` turns the review into a review-and-APPLY — the Merge and Rebase
+	 * entry points in the draft bar. It rides the same positional-optional
+	 * shape `source` already uses rather than an options object, so the three
+	 * call sites (`open()`, `open(source)`, `open(source, action)`) read as one
+	 * escalating signature instead of two competing ones.
+	 */
+	open(source?: CompareExplicitSource, action?: CompareAction): void
 	close(): void
 	toggle(): void
 }
@@ -66,7 +86,22 @@ export interface CompareProviderProps {
 
 export function CompareProvider({ editor, currentPath, children }: CompareProviderProps) {
 	const [isOpen, setIsOpen] = useState(false)
-	const close = useCallback(() => setIsOpen(false), [])
+	// Stashed only for an explicit-source open — the plain trigger (Shift+D,
+	// the top-right icon) never sets this, so its path never reads it either.
+	const [explicitSource, setExplicitSource] = useState<CompareExplicitSource | undefined>(undefined)
+	/**
+	 * Cleared alongside the source, and for a sharper reason: a stale ACTION is
+	 * a button that would run Merge from a dialog the user opened to look at
+	 * file history. Every path that drops the source drops this with it.
+	 */
+	const [explicitAction, setExplicitAction] = useState<CompareAction | undefined>(undefined)
+	const close = useCallback(() => {
+		setIsOpen(false)
+		// Cleared on close, not just on the next open — otherwise re-opening via
+		// the plain trigger later would silently reuse a stale explicit source.
+		setExplicitSource(undefined)
+		setExplicitAction(undefined)
+	}, [])
 
 	// Shift+D, beside the other review surfaces. Ignored while typing, and
 	// while any other overlay already owns the keyboard.
@@ -79,7 +114,17 @@ export function CompareProvider({ editor, currentPath, children }: CompareProvid
 			if (target?.closest('input, textarea, [contenteditable="true"]')) return
 			if (editor.getEditingShapeId()) return
 			event.preventDefault()
-			setIsOpen((wasOpen) => !wasOpen)
+			// Same clear-on-close as `controller.toggle` — a no-op when nothing
+			// opened this with a `source` in the first place, which is every
+			// Shift+D-only session today.
+			setIsOpen((wasOpen) => {
+				const next = !wasOpen
+				if (!next) {
+					setExplicitSource(undefined)
+					setExplicitAction(undefined)
+				}
+				return next
+			})
 		}
 		window.addEventListener('keydown', onKeyDown)
 		return () => window.removeEventListener('keydown', onKeyDown)
@@ -88,18 +133,38 @@ export function CompareProvider({ editor, currentPath, children }: CompareProvid
 	const controller = useMemo<CompareController>(
 		() => ({
 			isOpen,
-			open: () => setIsOpen(true),
-			close: () => setIsOpen(false),
-			toggle: () => setIsOpen((wasOpen) => !wasOpen),
+			open: (source, action) => {
+				setExplicitSource(source)
+				setExplicitAction(action)
+				setIsOpen(true)
+			},
+			close,
+			// Toggling closed goes through the same clear as `close` — an explicit
+			// source is stale the moment its dialog is gone, however it got there.
+			toggle: () =>
+				setIsOpen((wasOpen) => {
+					const next = !wasOpen
+					if (!next) {
+						setExplicitSource(undefined)
+						setExplicitAction(undefined)
+					}
+					return next
+				}),
 		}),
-		[isOpen],
+		[isOpen, close],
 	)
 
 	return (
 		<CompareContext.Provider value={controller}>
 			{children}
 			{isOpen && editor ? (
-				<CompareDialog editor={editor} currentPath={currentPath} onClose={close} />
+				<CompareDialog
+					editor={editor}
+					currentPath={currentPath}
+					onClose={close}
+					source={explicitSource}
+					action={explicitAction}
+				/>
 			) : null}
 		</CompareContext.Provider>
 	)

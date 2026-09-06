@@ -140,6 +140,12 @@ export interface LocalWorkspaceController {
   trash(): Promise<void>
   reveal(): Promise<void>
   takeDisk(): Promise<void>
+  /**
+   * WHY: while a document draft is active, edits must autosave to the draft's
+   * own localStorage slot instead of overwriting Main's file. `DraftProvider`
+   * holds this open for the draft's lifetime — see src/drafts/DraftProvider.tsx.
+   */
+  setDraftHold(active: boolean): void
   openWindow(path?: string): Promise<void>
   newWindow(): Promise<void>
   runAction(action: () => Promise<unknown>): void
@@ -289,6 +295,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const savingRef = useRef(false)
   /** True for unreadable recovery and parseable future-format documents alike. */
   const protectedRef = useRef(false)
+  /** True while a document draft is active — see `setDraftHold` above. */
+  const draftHoldRef = useRef(false)
   // Once a digest conflict is known, automatic saves stay paused until the
   // person explicitly keeps their version or accepts the disk revision.
   const conflictRef = useRef(false)
@@ -519,6 +527,10 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       setNotice('This file is protected. Create a separate editable copy to keep the original untouched.')
       return
     }
+    // A draft is editing on its own localStorage slot; Main's file must not
+    // move underneath it. Silent, unlike the protectedRef case above — this
+    // is expected steady state while a draft is open, not an error to surface.
+    if (draftHoldRef.current) return
     if (savingRef.current) {
       // The active save's `finally` schedules any newer dirty revision. Avoid
       // a second timer here, especially after the 30-second ceiling expires.
@@ -634,7 +646,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
   const finalFlush = useCallback(() => {
     const boardPath = pathRef.current
-    if (protectedRef.current || !dirtyRef.current || boardPath === null) return
+    if (protectedRef.current || draftHoldRef.current || !dirtyRef.current || boardPath === null) return
     if (saveTimerRef.current !== null) {
       window.clearTimeout(saveTimerRef.current)
       saveTimerRef.current = null
@@ -966,6 +978,10 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     if (pathRef.current) await revealWorkspaceDocument(pathRef.current)
   }, [])
 
+  const setDraftHold = useCallback((active: boolean) => {
+    draftHoldRef.current = active
+  }, [])
+
   const attach = useCallback((editor: Editor) => {
     editorRef.current = editor
     let disposed = false
@@ -981,6 +997,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
       autosaveStopRef.current = editor.store.listen((entry) => {
         if (removesDocumentBoundary(entry)) return
+        // A draft edit belongs to the draft's own localStorage autosave
+        // (DraftProvider's listener), never to Main's dirty/save cycle.
+        if (draftHoldRef.current) return
         dirtyRef.current = true
         changeEpochRef.current += 1
         // No serialisation here. The store flushes listeners once per frame, so
@@ -1038,6 +1057,12 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
         || savingRef.current
         || retrySaveRef.current !== null
         || !editorRef.current
+        // WHY: while a draft is open, this poll cannot tell "the draft is
+        // editing" from "Main changed on disk somewhere else" — so it is
+        // suspended for the hold's duration rather than risk reloading over a
+        // draft's held content. Deliberate trade-off, not an oversight:
+        // Compare/Rebase compensate by always reading Main fresh.
+        || draftHoldRef.current
       ) return
       polling = true
       const controller = new AbortController()
@@ -1124,7 +1149,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     return installWorkspaceLifecycleProtection({
       windowTarget: window,
       documentTarget: document,
-      hasUnsavedChanges: () => !protectedRef.current && dirtyRef.current,
+      hasUnsavedChanges: () => !protectedRef.current && !draftHoldRef.current && dirtyRef.current,
       flush: () => {
         if (saveTimerRef.current !== null) {
           window.clearTimeout(saveTimerRef.current)
@@ -1166,6 +1191,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     closeDialog,
     notice,
     dismissNotice: () => setNotice(null),
+    setDraftHold,
   }), [
     attach,
     browserHome,
@@ -1177,6 +1203,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     openWindow,
     path,
     persist,
+    setDraftHold,
     recents,
     exportTldraw,
     makePortableCopy,

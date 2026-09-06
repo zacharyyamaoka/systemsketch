@@ -1,0 +1,130 @@
+{
+  "feature": "Document draft branching — Merge/Rebase open the Compare dialog to review before applying",
+  "viewport": {
+    "width": 1280,
+    "height": 1320
+  },
+  "shapes": [
+    {
+      "id": "planner",
+      "type": "block",
+      "x": 420,
+      "y": 580,
+      "props": {
+        "title": "Planner",
+        "description": "Plans the trajectory",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 160,
+        "inputs": [
+          {
+            "id": "goal",
+            "name": "goal",
+            "type": "Goal",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "plan",
+            "name": "plan",
+            "type": "Plan",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "controller",
+      "type": "block",
+      "x": 820,
+      "y": 580,
+      "props": {
+        "title": "Controller",
+        "description": "Executes the plan",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 160,
+        "inputs": [
+          {
+            "id": "plan",
+            "name": "plan",
+            "type": "Plan",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "cmd",
+            "name": "cmd",
+            "type": "Command",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click Drafts in the top-left shell, then New draft",
+      "x": 40,
+      "y": 330,
+      "w": 380,
+      "h": 140
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Rename Planner to \"Planner v2\" in the inspector — the bar's Compare count becomes 1",
+      "x": 470,
+      "y": 330,
+      "w": 380,
+      "h": 140,
+      "target": {
+        "shapeId": "planner",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Click Compare 1 Change. This stays a PURE review: no checkboxes, no confirm bar, nothing to press.",
+      "x": 900,
+      "y": 330,
+      "w": 340,
+      "h": 140
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Close it, then click Merge — ONE click, no arming. The SAME dialog reopens, titled \"Merge changes\", every changed element ticked, with \"› Merge 1 change\" at the bottom right. Untick Planner v2: the confirm greys out and says applying only some changes isn't supported yet.",
+      "x": 40,
+      "y": 830,
+      "w": 560,
+      "h": 200
+    },
+    {
+      "id": "step-5",
+      "kind": "step",
+      "text": "5 · Re-tick it and close. Now click the chevron beside Merge, then Rebase. The right-hand board is captioned \"<draft> (after Rebase)\" — the draft as it WOULD look, computed before anything is applied. Confirming runs the real Rebase.",
+      "x": 650,
+      "y": 830,
+      "w": 560,
+      "h": 200
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Compare opens with NO checkboxes and NO bottom bar · Merge and Rebase each open the same dialog with a per-element tick and one confirm · unticking anything disables the confirm and explains why instead of quietly applying everything · the Rebase review's after-board is the proposed draft, not Main · confirming Merge writes to Main and closes the dialog; a Main that moved underneath refuses IN the dialog and leaves both sides intact",
+      "x": 40,
+      "y": 1080,
+      "w": 1170,
+      "h": 190
+    }
+  ]
+}
