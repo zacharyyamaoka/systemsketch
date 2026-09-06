@@ -169,15 +169,44 @@ async function projectionState(page) {
   })())`))
 }
 
+/**
+ * Press a relationship's own stroke.
+ *
+ * The midpoint alone is not safe: several relationships between one pair of
+ * cards run as parallel channels whose LABEL pills all sit near the middle, so
+ * a midpoint press can land on a neighbour's pill and focus the wrong one.
+ * Sample along the path and take the first point that actually hit-tests back
+ * to this relationship.
+ */
 async function clickRelationship(page, id, mode = 'components') {
   const point = JSON.parse(await evaluate(page, `JSON.stringify((() => {
     const root = [...document.querySelectorAll('[data-communication-mode="${mode}"]')]
       .find((node) => node.dataset.communicationId === ${JSON.stringify(id)})
     const path = root?.querySelector('[data-communication-focus-hit]')
     if (!path || !path.getTotalLength || !path.getScreenCTM) return null
-    const local = path.getPointAtLength(path.getTotalLength() * .5)
-    const screen = new DOMPoint(local.x, local.y).matrixTransform(path.getScreenCTM())
-    return { x: screen.x, y: screen.y }
+    // Prefer the label pill: it is a dedicated hit target that is never under a
+    // card, which the stroke can be once an interaction's ports are bundled on
+    // one edge and its legs run as a tight parallel bundle.
+    const label = root.querySelector('[data-communication-label]')
+    if (label) {
+      const box = label.getBoundingClientRect()
+      const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      const onTop = document.elementFromPoint(centre.x, centre.y)
+      if (onTop && root.contains(onTop)) return centre
+    }
+    const length = path.getTotalLength()
+    const ctm = path.getScreenCTM()
+    const fractions = [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78, 0.15, 0.85]
+    let fallback = null
+    for (const fraction of fractions) {
+      const local = path.getPointAtLength(length * fraction)
+      const screen = new DOMPoint(local.x, local.y).matrixTransform(ctm)
+      const candidate = { x: screen.x, y: screen.y }
+      if (!fallback) fallback = candidate
+      const hit = document.elementFromPoint(candidate.x, candidate.y)
+      if (hit && root.contains(hit)) return candidate
+    }
+    return fallback
   })())`))
   if (!point) throw new Error(`Missing ${mode} relationship ${id}`)
   await clickAt(page, point.x, point.y)

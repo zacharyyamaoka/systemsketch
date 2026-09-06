@@ -1138,12 +1138,19 @@ function componentRelationshipGeometry(
 	relation: CommunicationRelation,
 	representative: CommunicationDescriptor,
 ) {
-	void relation
 	void representative
 	const points = getConnectionRenderPoints(editor, connection)
+	// WHY the lane stagger: several relationships between one pair of cards run
+	// as near-parallel channels, so their labels all want the same midpoint and
+	// pile up — badly enough that a pill can cover its neighbour's and make it
+	// unclickable. `lane` already numbers the siblings of a pair, so offsetting
+	// each label along ITS OWN route by that number separates them without
+	// moving a single cable. (This is the one idea worth keeping from the
+	// centre-to-centre line that used to need it far more.)
+	const labelFraction = Math.max(0.18, Math.min(0.82, 0.5 + relation.lane * 0.13))
 	return {
 		path: getConnectionShapePath(editor, connection),
-		label: pointAtFraction(points, 0.5),
+		label: pointAtFraction(points, labelFraction),
 	}
 }
 
