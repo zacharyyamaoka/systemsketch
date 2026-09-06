@@ -1,6 +1,6 @@
 # Work order: take over contextual Async regions
 
-**Status:** implemented, verified, committed at `ff3d4cbd`, reconciled through
+**Status:** implemented, verified, committed through `2a6f4bfd`, reconciled through
 `main` commit `3a648701`, and intentionally not integrated. The adversarial
 review has five components, 18 protocol legs, nine semantic relationships,
 selectable fixed/shortest carrier edges, and a live nineteenth-wire defaulting
@@ -40,6 +40,7 @@ components move, boards load, or users edit temporal behavior.
 | Original implementation and focused browser proof | `7a959d11d2ed7adce989a2a26e99944b9de6cc80` |
 | Reconciled communication/Async-region predecessor | `9a36d399893a2087f6c678afd819f7bf258e1f8a` |
 | Representative-edge implementation and proof | `ff3d4cbde0aa6000d8bbcc130d341185682b36d8` |
+| Exact focused-phase labels and proof | `2a6f4bfdc9f4abc3140583429120d9055cbc58dd` |
 | Latest reconciled `main` baseline | `3a648701a31c13705d01fb457fc4b2f61286e295` |
 | Integration state | Not merged into `main`; no integration was authorized |
 | Retained review | Run `python3 scripts/review_runtime.py list` for the current commit-pinned stress URL |
@@ -106,6 +107,11 @@ unrelated review runtimes.
    cannot win Shortest while goal, feedback, or result exists. A missing
    optional phase falls back to the initiating leg. Straight disables both
    selectors because every candidate becomes the same center line.
+8. **Focus names exact legs.** An unfocused A#/S# tag summarizes the collapsed
+   family and interaction. Once focused, its carrier tag switches to the exact
+   representative phase alongside the already expanded member phases—for
+   example `S1 · request` and `S1 · response`, never `S1 · service · health`.
+   The stable relationship ID remains so the legs are visibly associated.
 
 These decisions match `docs/project-preferences.md`: one canonical definition,
 dataflow first, and a strict boundary between semantics and canvas
@@ -155,6 +161,8 @@ The next change is acceptable only if all of these remain true:
   cancel when an Action has a work/outcome leg, and leaves all authored shape
   records byte-identical.
 - Topic and Stream remain on data, and Straight makes both selectors disabled.
+- Focused relationships label every visible member with its exact phase while
+  keeping the stable A#/S# association ID.
 
 ## Verification commands
 
@@ -213,7 +221,8 @@ visually inspect the result. Never hand-edit tldraw schema JSON.
 > handoff. Start by inspecting the exact branch/worktree and opening the retained
 > board and report. Do not recreate the feature: the Async-region base started
 > at `7a959d11`, and representative-edge selection plus its current proof is at
-> `ff3d4cbd`. Preserve both central contracts: a region supplies a one-time
+> `ff3d4cbd`; exact focused-phase labels are verified at `2a6f4bfd`. Preserve
+> both central contracts: a region supplies a one-time
 > creation default rather than continuous semantic enforcement, and carrier
 > selection is a transient projection over authored data edges rather than a
 > second graph. Check current `main` and concurrent work before editing. Run the
