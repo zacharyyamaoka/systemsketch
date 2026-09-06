@@ -52,6 +52,17 @@ export interface WorkspaceDirectoryCreated {
   path: string
 }
 
+/**
+ * Off by default (Settings > General). Confining every workspace read/write
+ * to the configured workspace root is the same fence that keeps a stray web
+ * request from reaching arbitrary files; this is a durable, explicit opt-out
+ * of it, persisted server-side because Stable and Preview enforce it
+ * independently and both need to see the same choice.
+ */
+export interface FileAccessSettings {
+  allowAnyPath: boolean
+}
+
 export class WorkspaceConflict extends Error {
   readonly diskMtime: number | null
   readonly diskDigest: string | null
@@ -360,4 +371,19 @@ export async function revealWorkspaceDocument(
   options: WorkspaceRequestOptions = {},
 ): Promise<void> {
   await traceWorkspace('reveal', 'board reveal', { path }, async () => { await post('/api/workspace/reveal', { path }, options) })
+}
+
+export async function readFileAccessSettings(
+  options: WorkspaceRequestOptions = {},
+): Promise<FileAccessSettings> {
+  return (
+    await requestPayload('/api/settings/file-access', {}, options, METADATA_TIMEOUT_MS)
+  ) as unknown as FileAccessSettings
+}
+
+export async function writeFileAccessSettings(
+  allowAnyPath: boolean,
+  options: WorkspaceRequestOptions = {},
+): Promise<FileAccessSettings> {
+  return (await post('/api/settings/file-access', { allowAnyPath }, options)) as unknown as FileAccessSettings
 }

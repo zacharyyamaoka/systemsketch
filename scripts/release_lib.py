@@ -20,6 +20,7 @@ from pathlib import Path
 PRODUCT = "systemsketch"
 CHANNELS_SCHEMA_VERSION = 1
 MANIFEST_SCHEMA_VERSION = 1
+FILE_ACCESS_SCHEMA_VERSION = 1
 CONTROLLER_RUNTIME_FILES = (
     "recorder_frames.mjs",
     "recording_store.py",
@@ -70,6 +71,22 @@ class ReleaseChannels:
 
 
 @dataclass(frozen=True)
+class FileAccessSettings:
+    """Whether workspace file operations may reach outside the configured root.
+
+    WHY: opening a board from an arbitrary path (an agent worktree, another
+    drive) hits the same confinement fence in workspace_store.py that keeps a
+    stray web request from reading or overwriting files elsewhere on the
+    machine. Off by default — a person opts in from Settings — and persisted
+    here rather than in browser storage because the fence itself is enforced
+    server-side and shared by every Stable and Preview process on this
+    machine.
+    """
+
+    allow_any_path: bool = False
+
+
+@dataclass(frozen=True)
 class SourceProvenance:
     """Which source a build came from.
 
@@ -113,6 +130,10 @@ def release_root(release_home: Path, build: str) -> Path:
 
 def channels_path(release_home: Path) -> Path:
     return release_home / "channels.json"
+
+
+def file_access_path(release_home: Path) -> Path:
+    return release_home / "file-access.json"
 
 
 def controller_dir(release_home: Path) -> Path:
@@ -170,6 +191,36 @@ def write_channels(release_home: Path, channels: ReleaseChannels) -> None:
     _atomic_json(
         channels_path(release_home),
         {"product": PRODUCT, "schemaVersion": CHANNELS_SCHEMA_VERSION, **asdict(channels)},
+    )
+
+
+def read_file_access_settings(release_home: Path) -> FileAccessSettings:
+    try:
+        payload = json.loads(file_access_path(release_home).read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return FileAccessSettings()
+    except (OSError, ValueError) as cause:
+        raise ReleaseError(f"could not read file access settings: {cause}") from cause
+    if (
+        not isinstance(payload, dict)
+        or payload.get("product") != PRODUCT
+        or payload.get("schemaVersion") != FILE_ACCESS_SCHEMA_VERSION
+    ):
+        raise ReleaseError("file access settings belong to an unsupported product or schema")
+    allow_any_path = payload.get("allowAnyPath")
+    if not isinstance(allow_any_path, bool):
+        raise ReleaseError("file access settings are invalid")
+    return FileAccessSettings(allow_any_path=allow_any_path)
+
+
+def write_file_access_settings(release_home: Path, settings: FileAccessSettings) -> None:
+    _atomic_json(
+        file_access_path(release_home),
+        {
+            "product": PRODUCT,
+            "schemaVersion": FILE_ACCESS_SCHEMA_VERSION,
+            "allowAnyPath": settings.allow_any_path,
+        },
     )
 
 
