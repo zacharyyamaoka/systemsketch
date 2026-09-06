@@ -1,0 +1,126 @@
+{
+  "feature": "Bulk reset arrow routing",
+  "viewport": { "width": 1600, "height": 1080 },
+  "shapes": [
+    {
+      "id": "block-a",
+      "type": "block",
+      "x": 100,
+      "y": 380,
+      "props": {
+        "title": "A",
+        "description": "Source",
+        "view": "port",
+        "w": 280,
+        "h": 180,
+        "outputs": [{ "id": "out0", "name": "out", "type": "data", "visible": true }]
+      }
+    },
+    {
+      "id": "block-b",
+      "type": "block",
+      "x": 660,
+      "y": 160,
+      "props": {
+        "title": "B",
+        "description": "Middle",
+        "view": "port",
+        "w": 280,
+        "h": 180,
+        "inputs": [{ "id": "in0", "name": "in", "type": "data", "visible": true }],
+        "outputs": [{ "id": "out0", "name": "out", "type": "data", "visible": true }]
+      }
+    },
+    {
+      "id": "block-c",
+      "type": "block",
+      "x": 1220,
+      "y": 480,
+      "props": {
+        "title": "C",
+        "description": "Sink",
+        "view": "port",
+        "w": 280,
+        "h": 180,
+        "inputs": [{ "id": "in0", "name": "in", "type": "data", "visible": true }]
+      }
+    },
+    {
+      "id": "edge-ab",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [{ "index": 1, "axis": "y", "t": 0.5, "offset": 90 }],
+        "elbowRoute": null,
+        "routeMode": "authored"
+      }
+    },
+    {
+      "id": "edge-bc",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic"
+      }
+    }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "edge-ab", "toId": "block-a", "props": { "portId": "out0", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-ab", "toId": "block-b", "props": { "portId": "in0", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc", "toId": "block-b", "props": { "portId": "out0", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc", "toId": "block-c", "props": { "portId": "in0", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select Block A alone — do not try to select the kinked A→B arrow itself",
+      "x": 60,
+      "y": 620,
+      "w": 420,
+      "h": 130,
+      "target": { "shapeId": "block-a", "anchor": "bottom" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Reset it any of three ways: the ↺ icon in the selection toolbar, right-click → Reset to automatic, or Ctrl+K → \"reset routing\"",
+      "x": 560,
+      "y": 20,
+      "w": 480,
+      "h": 130,
+      "target": { "shapeId": "block-b", "anchor": "top" }
+    },
+    {
+      "id": "note-scope",
+      "kind": "note",
+      "text": "Selecting only Block A is deliberate: Reset scans every hand-routed edge touching your selection, same as Tidy edges. You never click the thin arrow itself.",
+      "x": 60,
+      "y": 20,
+      "w": 420,
+      "h": 210
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The kinked A→B arrow snaps to a plain automatic elbow; Blocks A, B, and C never move; the already-automatic B→C arrow is untouched.",
+      "x": 1060,
+      "y": 760,
+      "w": 480,
+      "h": 170,
+      "target": { "shapeId": "block-c", "anchor": "bottom" }
+    }
+  ]
+}

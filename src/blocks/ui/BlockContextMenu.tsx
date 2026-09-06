@@ -74,6 +74,7 @@ import {
   type ConnectionRoutingKind,
   type ConnectionTemporalKind,
 } from '../connections/connectionModel'
+import { describeResetEdgeRoutingOutcome, resetEdgeRouting } from '../connections/resetEdges'
 import { describeTidyEdgesOutcome, tidyEdges } from '../connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
 import { getSelectionLayoutActionAvailability } from '../../chrome/SelectionLayoutActions'
@@ -295,6 +296,11 @@ function BlockContextMenuItems() {
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+  }
+
+  const runResetRouting = () => {
+    const outcome = resetEdgeRouting(editor)
+    addToast({ title: describeResetEdgeRoutingOutcome(outcome), severity: 'info' })
   }
 
   const runOrganizeNodes = async () => {
@@ -695,13 +701,24 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {layoutSelection.tidyEdges || layoutSelection.organizeNodes ? (
+      {layoutSelection.tidyEdges || layoutSelection.resetRouting || layoutSelection.organizeNodes ? (
         <TldrawUiMenuGroup id="systemsketch-layout">
           <TldrawUiMenuItem
             id="tidy-edges"
             label="Tidy edges"
             disabled={!layoutSelection.tidyEdges}
             onSelect={runTidyEdges}
+          />
+          {/* The bulk escape hatch Tidy cannot be: Tidy leaves hand-routed and
+              curved/straight bends alone on purpose, so a selection that
+              includes any of those needs a separate command to clear them —
+              reachable from the same mixed node+edge selection Tidy accepts,
+              since selecting only arrows is the hard case in the first place. */}
+          <TldrawUiMenuItem
+            id="reset-routing"
+            label="Reset to automatic"
+            disabled={!layoutSelection.resetRouting}
+            onSelect={runResetRouting}
           />
           <TldrawUiMenuItem
             id="organize-nodes"

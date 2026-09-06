@@ -42,6 +42,7 @@ import {
 import { getPortHostPort, isPortHostShape, portHostLabel } from '../connections/blockPorts'
 import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
+import { resetEdgeRouting } from '../connections/resetEdges'
 import { cablePillLabel } from '../connections/connectionPresentation'
 import { isEffectCable } from '../connections/effectCable'
 import { resolveConnectionSemanticRole, roleLabel, roleOriginLabel, type ConnectionSemanticRole } from '../connections/semanticRoles'
@@ -212,14 +213,7 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 		[editor],
 	)
 	const clearAuthored = useCallback(() => {
-		const selected = selectedConnections(editor)
-		if (selected.length === 0) return
-		editor.markHistoryStoppingPoint('reset connection route')
-		editor.updateShapes(selected.map((connection) => ({
-			id: connection.id,
-			type: CONNECTION_SHAPE_TYPE,
-			props: { curve: null, pins: [], elbowRoute: null, routeMode: 'automatic' },
-		})))
+		resetEdgeRouting(editor, selectedConnections(editor))
 	}, [editor])
 	const setTunnel = useCallback((enabled: boolean) => {
 		const selected = selectedConnections(editor)

@@ -32,6 +32,7 @@ import {
   getOnlySelectedFloatingPort,
 } from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
+import { describeResetEdgeRoutingOutcome, resetEdgeRouting } from '../blocks/connections/resetEdges'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
@@ -353,6 +354,10 @@ function SelectionMiniMenu() {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
   }
+  const runResetRouting = () => {
+    const outcome = resetEdgeRouting(editor)
+    addToast({ title: describeResetEdgeRoutingOutcome(outcome), severity: 'info' })
+  }
   const runOrganizeNodes = async () => {
     const outcome = await organizeNodes(editor)
     addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
@@ -366,6 +371,7 @@ function SelectionMiniMenu() {
     || canWrap
     || propagationSeed !== null
     || layoutActions.tidyEdges
+    || layoutActions.resetRouting
     || layoutActions.organizeNodes
   if (!canShow || !hasVisibleActions) return null
 
@@ -398,6 +404,7 @@ function SelectionMiniMenu() {
       <SelectionLayoutActions
         {...layoutActions}
         onTidyEdges={runTidyEdges}
+        onResetRouting={runResetRouting}
         onOrganizeNodes={() => void runOrganizeNodes()}
       />
     ),
@@ -639,6 +646,18 @@ export function SystemSketchSurfaceHost() {
         run: () => {
           const outcome = tidyEdges(editor)
           addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+        },
+      },
+      {
+        id: 'reset-routing',
+        label: 'Reset routing to automatic',
+        description: 'Clear hand-routed rails and bends on edges — including edges Tidy leaves alone',
+        keywords: ['reset', 'arrows', 'cables', 'connections', 'hand-routed', 'authored', 'straighten', 'layout'],
+        icon: '↺',
+        disabled: () => !getSelectionLayoutActionAvailability(editor).resetRouting,
+        run: () => {
+          const outcome = resetEdgeRouting(editor)
+          addToast({ title: describeResetEdgeRoutingOutcome(outcome), severity: 'info' })
         },
       },
       {

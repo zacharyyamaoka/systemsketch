@@ -17,6 +17,7 @@ export * from './connectionCommands'
 export * from './connectionPresentation'
 export * from './semanticRoles'
 export * from './tidyEdges'
+export * from './resetEdges'
 
 import { ConnectionBindingUtil } from './ConnectionBindingUtil'
 import { ConnectionShapeUtil } from './ConnectionShapeUtil'
