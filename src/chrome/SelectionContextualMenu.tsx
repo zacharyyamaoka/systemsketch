@@ -8,6 +8,7 @@ import {
   useValue,
 } from 'tldraw'
 
+import { btDndDragState } from '../behaviorTree/treeDndDragState'
 import {
   isSelectionOnScreen,
   placeSelectionMenu,
@@ -70,7 +71,10 @@ export function SelectionContextualMenu(props: SelectionContextualMenuProps) {
   const editor = useEditor()
   const isManipulating = useValue(
     'systemsketch selection menu manipulating',
-    () => MANIPULATING_STATES.some((path) => editor.isIn(path)),
+    // A claimed Behavior Tree reorder drag (dnd-kit, `treeDndDrag.tsx`) is a
+    // manipulation too, but the select tool sits in `select.idle` for it —
+    // the drag lane's editor-scoped atom is its `select.translating`.
+    () => btDndDragState.get(editor) !== null || MANIPULATING_STATES.some((path) => editor.isIn(path)),
     [editor],
   )
 

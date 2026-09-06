@@ -12,6 +12,7 @@
 import {
 	createShapeId,
 	isShapeId,
+	react,
 	type Editor,
 	type TLShape,
 	type TLShapeId,
@@ -33,12 +34,25 @@ import {
 } from './behaviorTreeModel'
 import { BT_IN_PORT, projectBehaviorTree, type BtDesiredChild } from './behaviorTreeProjection'
 import { deleteBehaviorTreeNode, setBehaviorTreeNodeAttribute } from './btcppXml'
+import { btDndDragState } from './treeDndDragState'
 
 /** True while a projection is writing children, so its writes are not read as gestures. */
 const projecting = new WeakMap<Editor, number>()
 
 function isProjecting(editor: Editor): boolean {
 	return (projecting.get(editor) ?? 0) > 0
+}
+
+/**
+ * True only for a shape tldraw's own select tool is natively translating
+ * right now. In tidy Tree view that can only be a gesture the dnd drag lane
+ * (`treeDndDrag.tsx`) deliberately left native — a multi-select drag or an
+ * alt-clone — because its claim protocol cancels every sole-node translate
+ * before or at `select.translating` entry. Those native glides are tracked
+ * so the repair pass never writes the same shapes tldraw is writing.
+ */
+function isNativelyTranslatingThisShape(editor: Editor, shapeId: TLShapeId): boolean {
+	return editor.isIn('select.translating') && editor.getSelectedShapeIds().includes(shapeId)
 }
 
 /**
@@ -80,7 +94,27 @@ function sameProps(current: Record<string, unknown>, wanted: Record<string, unkn
  * Make the store agree with the projection. Idempotent: a second call with
  * nothing changed writes nothing.
  */
-export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId): BtRepairReport {
+export interface BtReconcileOptions {
+	/**
+	 * WHY: a live Tree view drag commits a fresh candidate XML on every
+	 * pointer frame, and this is the repair that follows any XML write —
+	 * including that one. Repositioning EVERY child to match, the dragged one
+	 * included, sounds right ("auto layout" means a rect is always exactly
+	 * what the layout says) but is not: whichever system owns the gesture —
+	 * dnd-kit's sensor for a claimed reorder drag (`treeDndDrag.tsx`),
+	 * tldraw's own translate for a native multi-select glide — is issuing its
+	 * OWN `x`/`y` for those same shapes from the raw pointer on the very next
+	 * frame, and it does not read this call's answer back. Two writers on one
+	 * shape corrupts the drag (a real regression caught by
+	 * `test:tree-drag-reorder` when the observer-based ancestor of this code
+	 * reconciled the dragged shape mid-gesture, not a hypothetical). The
+	 * gesture owner's shapes are skipped while the gesture lasts and settled
+	 * like everything else the instant it ends.
+	 */
+	skipShapeIds?: readonly TLShapeId[]
+}
+
+export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId, options: BtReconcileOptions = {}): BtRepairReport {
 	const report: BtRepairReport = { created: 0, updated: 0, removed: 0, cables: 0, refused: [] }
 	const region = editor.getShape(regionId)
 	if (!isBehaviorTreeShape(region)) return report
@@ -118,7 +152,8 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId): BtRe
 				if (current && current.type === child.type) {
 					idByPath.set(child.path, current.id)
 					const wanted = desiredRecordProps(child, current)
-					if (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || !sameProps(current.props as Record<string, unknown>, wanted)) {
+					const skip = options.skipShapeIds?.includes(current.id) ?? false
+					if (!skip && (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || !sameProps(current.props as Record<string, unknown>, wanted))) {
 						editor.updateShape({ id: current.id, type: current.type, x: child.x, y: child.y, props: wanted } as never)
 						report.updated += 1
 					}
@@ -333,10 +368,34 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		}
 		const dragged = !arrived.has(after.id)
 		if (dragged && meta.btRole === 'node' && (before.x !== after.x || before.y !== after.y)) {
-			recordOffset(editor, region, meta[BT_META_PATH], after)
+			// WHY: "auto layout" (item 6, the promoted Tidy toggle,
+			// `arrangement === 'tidy'`) means position is never a person's to set
+			// by hand — a drag is a request to reorder the model, not a pixel
+			// offset. Since the 2026-09-06 Process port this contract covers
+			// BOTH diagram views. The reorder gesture itself no longer lives
+			// here: dnd-kit owns it end to end (`treeDndDrag.tsx` — Zach's
+			// scoped exception to the stock-boundary rule), its claim protocol
+			// cancels tldraw's select tool before `select.translating` can
+			// engage for a sole tidy node, and its writes arrive under
+			// `withoutBehaviorTreeRepair` so this handler never sees them. What
+			// CAN still reach this branch natively in tidy is a gesture the dnd
+			// lane deliberately leaves to tldraw — a multi-select drag, an
+			// alt-clone — and the contract for those is glide-and-settle:
+			// remember which region is being glided so the repair pass skips
+			// tldraw's shapes while the gesture lasts (two writers on one shape
+			// corrupts — the measured `test:tree-drag-reorder` regression) and
+			// snaps everything back to the layout on release. The toggle OFF
+			// (`'free'`) keeps the exact free-offset behaviour both views always
+			// had, with zero dnd-kit involvement.
+			if (region.props.arrangement === 'tidy' && isNativelyTranslatingThisShape(editor, after.id)) {
+				nativeGlidesFor(editor).set(after.id, regionId)
+			} else if (region.props.arrangement !== 'tidy') {
+				recordOffset(editor, region, meta[BT_META_PATH], after)
+			}
 		}
 		if (dragged && meta.btRole === 'node' && isBlockShape(after) && isBlockShape(before) && source !== 'remote') {
 			compileBlockEdit(editor, region, meta[BT_META_PATH], before, after)
+			recordNodeViewOverride(editor, region, meta[BT_META_PATH], after)
 		}
 		queue(regionId, repairSource)
 	})
@@ -358,7 +417,16 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		const result = deleteBehaviorTreeNode(region.props.xml, region.props.treeId, meta[BT_META_PATH])
 		if (result.ok) {
 			restampChildren(editor, region, result.remap)
-			editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, xml: result.xml, offsets: remapOffsets(region.props.offsets, result.remap) } })
+			editor.updateShape<BehaviorTreeShape>({
+				id: region.id,
+				type: BEHAVIOR_TREE_SHAPE_TYPE,
+				props: {
+					...region.props,
+					xml: result.xml,
+					offsets: remapByPath(region.props.offsets, result.remap),
+					nodeViewOverrides: remapByPath(region.props.nodeViewOverrides, result.remap),
+				},
+			})
 		}
 		queue(regionId, source === 'remote' ? 'remote' : 'user')
 	})
@@ -366,6 +434,39 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 	const repairPending = () => {
 		repairQueued = false
 		arrived.clear()
+		// A live drag's own writer already reconciled this frame inline with
+		// its shapes skipped — dnd-kit's move handler for a claimed reorder
+		// (`treeDndDrag.tsx`), nobody for a native glide (which commits no
+		// XML). The generic queue below still schedules its OWN follow-up
+		// repair for the same region on every frame (the same path the
+		// free-offset drag relies on to keep cables in sync), and that one
+		// does not know to skip anything. Left alone it re-fights the
+		// gesture's writer a moment later on almost every frame — a real
+		// corruption `test:tree-drag-reorder` caught, not a hypothetical.
+		const stillTranslating = editor.isIn('select.translating')
+		const glides = nativeGlidesFor(editor)
+		const skipShapeIdsByRegion = new Map<TLShapeId, TLShapeId[]>()
+		const dndDrag = btDndDragState.get(editor)
+		if (dndDrag) {
+			skipShapeIdsByRegion.set(dndDrag.regionId, [dndDrag.shapeId])
+		}
+		if (stillTranslating) {
+			for (const [shapeId, regionId] of glides) {
+				const list = skipShapeIdsByRegion.get(regionId)
+				if (list) list.push(shapeId)
+				else skipShapeIdsByRegion.set(regionId, [shapeId])
+			}
+		} else if (glides.size > 0) {
+			// The glide just ended: snap every natively-translated tidy node
+			// back onto the layout the XML dictates, the same settle a claimed
+			// drag's drop performs for its own shape in `treeDndDrag.tsx`.
+			for (const regionId of new Set(glides.values())) {
+				if (isBehaviorTreeShape(editor.getShape(regionId))) {
+					editor.run(() => reconcileBehaviorTree(editor, regionId), { history: 'ignore' })
+				}
+			}
+			glides.clear()
+		}
 		if (disposed) return
 		let pass = 0
 		while (pending.size > 0 && pass < 3) {
@@ -373,8 +474,9 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 			const entries = pending
 			pending = new Map()
 			for (const [id, source] of entries) {
+				const skipShapeIds = skipShapeIdsByRegion.get(id)
 				const repair = () => {
-					if (isBehaviorTreeShape(editor.getShape(id))) reconcileBehaviorTree(editor, id)
+					if (isBehaviorTreeShape(editor.getShape(id))) reconcileBehaviorTree(editor, id, { skipShapeIds })
 				}
 				if (source === 'remote') editor.store.mergeRemoteChanges(repair)
 				else editor.run(repair, { history: 'ignore' })
@@ -391,6 +493,29 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		else arrived.clear()
 	})
 
+	// WHY: the settle branch in `repairPending` (the `!stillTranslating` path
+	// that snaps a natively-glided node back onto its tidy slot and clears
+	// the glide records) only runs when a repair runs — and the
+	// operation-complete handler above only schedules one when `pending` is
+	// non-empty. A clean mouseup writes no BT shape change (the last pointer
+	// MOVE did), so the release itself queues nothing and the settle starves:
+	// the glided card sat at the raw pointer position, its wires snapped to
+	// the tidy anchor without it, until any later BT store activity happened
+	// to run a repair (`wire.settles-on-drop` in
+	// `behavior_tree_drag_polish_smoke.mjs` measured exactly this on the
+	// observer path's drops). This reactor watches the one signal that
+	// actually changes on a clean release — the state chart leaving
+	// `select.translating` — and wakes the repair while glide records exist.
+	// A claimed dnd-kit drag needs none of this: its own `onDragEnd` settles
+	// synchronously in `treeDndDrag.tsx`. `scheduleRepair` alone is enough:
+	// the settle branch runs before the `pending` drain, so seeding `pending`
+	// here would only queue a redundant second reconcile.
+	const stopSettle = react('behavior tree: settle after drag', () => {
+		if (editor.isIn('select.translating')) return
+		if (nativeGlidesFor(editor).size === 0) return
+		scheduleRepair()
+	})
+
 	editor.store.mergeRemoteChanges(() => {
 		for (const record of editor.store.allRecords()) {
 			if (record.typeName !== 'shape') continue
@@ -405,14 +530,16 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		stopChange()
 		stopDelete()
 		stopComplete()
+		stopSettle()
 	}
 }
 
-function remapOffsets(offsets: Record<string, { dx: number; dy: number }>, remap: Record<string, string>) {
-	const next: Record<string, { dx: number; dy: number }> = {}
-	for (const [path, offset] of Object.entries(offsets)) {
+/** Carry a per-path presentation dict (an offset, a node view override) across a structural edit's remap. */
+function remapByPath<T>(dict: Record<string, T>, remap: Record<string, string>): Record<string, T> {
+	const next: Record<string, T> = {}
+	for (const [path, value] of Object.entries(dict)) {
 		const to = remap[path]
-		if (to !== undefined) next[to] = offset
+		if (to !== undefined) next[to] = value
 	}
 	return next
 }
@@ -444,6 +571,29 @@ function recordOffset(editor: Editor, region: BehaviorTreeShape, path: string, s
 	editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, offsets } })
 }
 
+/**
+ * The tidy-node shapes tldraw's own translate is gliding right now, mapped
+ * to their regions. Only gestures the dnd drag lane deliberately leaves
+ * native land here — a multi-select drag, an alt-clone — because
+ * `treeDndDrag.tsx` claims every sole-node reorder gesture for dnd-kit
+ * before tldraw's translate can own it. A glide commits nothing: the shapes
+ * ride the pointer while the repair pass skips them, and the settle in
+ * `repairPending` snaps them back onto the layout the XML dictates the
+ * moment `select.translating` ends. The reorder machinery that used to live
+ * here (per-shape sessions, frozen base XML, baseline restamps) moved to
+ * `treeDndDrag.tsx` with the gesture itself.
+ */
+const nativeGlides = new WeakMap<Editor, Map<TLShapeId, TLShapeId>>()
+
+function nativeGlidesFor(editor: Editor): Map<TLShapeId, TLShapeId> {
+	let map = nativeGlides.get(editor)
+	if (!map) {
+		map = new Map()
+		nativeGlides.set(editor, map)
+	}
+	return map
+}
+
 /** A title or port value typed on the projected Block becomes an XML attribute. */
 function compileBlockEdit(editor: Editor, region: BehaviorTreeShape, path: string, before: BlockShape, after: BlockShape) {
 	let xml = region.props.xml
@@ -465,4 +615,29 @@ function compileBlockEdit(editor: Editor, region: BehaviorTreeShape, path: strin
 		}
 	}
 	if (changed) editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, xml } })
+}
+
+/**
+ * Item 2: a leaf set to Expanded from the ordinary Block view pill disagrees
+ * with the region's own `nodeFace` on purpose — `desiredRecordProps` would
+ * otherwise stomp it back to Simple/Port on the very next repair, since the
+ * projection always wins there. Remembering the box on the REGION (not the
+ * child) keeps that invariant intact: once `nodeViewOverrides` carries this
+ * path, `leafBlockProps` computes the very `view`/`views` the child already
+ * has, so the repair that follows is a no-op for it and only the surrounding
+ * rails/wires (which now read the real box via `nodeViewOverrides`) move.
+ * Reverting the pill to Simple or Port forgets the override the same way.
+ */
+function recordNodeViewOverride(editor: Editor, region: BehaviorTreeShape, path: string, after: BlockShape) {
+	const existing = region.props.nodeViewOverrides[path]
+	if (after.props.view === 'expanded') {
+		if (existing?.view === 'expanded' && existing.w === after.props.w && existing.h === after.props.h) return
+		const nodeViewOverrides = { ...region.props.nodeViewOverrides, [path]: { view: 'expanded', w: after.props.w, h: after.props.h } }
+		editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, nodeViewOverrides } })
+		return
+	}
+	if (!existing) return
+	const nodeViewOverrides = { ...region.props.nodeViewOverrides }
+	delete nodeViewOverrides[path]
+	editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, nodeViewOverrides } })
 }

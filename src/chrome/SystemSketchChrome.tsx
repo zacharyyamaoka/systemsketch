@@ -46,7 +46,9 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
-import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree } from '../behaviorTree'
+import { BehaviorTreeDndDragHost, EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree, treeDragRefusalState } from '../behaviorTree'
+import { BtDragModelSurface } from '../behaviorTree/BtDragModelSurface'
+import { BtDragModelTunerPanel, dragModelTunerOpen } from '../behaviorTree/ui/BtDragModelTunerPanel'
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
@@ -296,6 +298,11 @@ function SelectionMiniMenu() {
     () => getSelectedBehaviorTree(editor) !== null,
     [editor],
   )
+  const dragModelTunerIsOpen = useValue(
+    'systemsketch drag model tuner open',
+    () => dragModelTunerOpen.get(),
+    [],
+  )
   const hasCode = useValue(
     'systemsketch selection is one Code block',
     () => getOnlySelectedCode(editor) !== null,
@@ -377,6 +384,21 @@ function SelectionMiniMenu() {
   }
 
   if (hasBehaviorTree) {
+    /*
+     * The Drag Model Tuner suppresses this pill (Zach, 2026-09-06: it "sits on
+     * top of and obstructs the overlay marks/labels").
+     *
+     * The pill floats over the selection, and the selection during tuning IS
+     * the region the overlay is drawing on — so the one dock that must be
+     * legible and the one dock that covers it are always in the same place.
+     * Suppressed rather than nudged aside: anywhere it moves is still over the
+     * model. `return null` and not a fall-through, because the generic pill
+     * below would take the same spot and obstruct the same marks. Its Auto
+     * layout switch is not lost — the tuner carries one, and so does the
+     * inspector dock on the opposite side. Restored the instant the tuner
+     * closes; nothing here is persisted.
+     */
+    if (dragModelTunerIsOpen) return null
     return (
       <SelectionContextualMenu
         className="systemsketch-selection-menu"
@@ -454,6 +476,19 @@ export function SystemSketchSurfaceHost() {
     setRight,
     setToolbar,
   } = useChrome()
+  // A Tree view auto-layout drag that lands somewhere illegal (a cycle, a
+  // full decorator, a leaf) has nothing else to say so — the preview just
+  // freezes at the last legal slot. `installBehaviorTreeRegions.ts` writes
+  // the refusal onto an editor-scoped atom (never the document; see
+  // `treeDragRefusal.ts`), and this is the one place in the React tree with
+  // both `useToasts()` and a reason to watch every region's drags at once.
+  const dragRefusal = useValue('behavior tree drag refusal', () => treeDragRefusalState.get(editor), [editor])
+  const lastShownRefusalAt = useRef<number | null>(null)
+  useEffect(() => {
+    if (!dragRefusal || dragRefusal.at === lastShownRefusalAt.current) return
+    lastShownRefusalAt.current = dragRefusal.at
+    addToast({ title: `Can't move it there — ${dragRefusal.reason}`, severity: 'warning' })
+  }, [dragRefusal, addToast])
   /**
    * What the dock is currently about, as one comparable string.
    *
@@ -722,6 +757,18 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      {/* The Behavior Tree's conditional second drag system (dnd-kit), inert
+          until its claim protocol fires — see treeDndDrag.tsx for the scoped
+          exception it implements. */}
+      <BehaviorTreeDndDragHost />
+      {/* The drag-model debug overlay's own layer. It lives HERE, not inside
+          the region, because a region's projected nodes are real shapes and
+          would paint over anything drawn in the region's SVG — see
+          BtDragModelSurface.tsx. Off by default; renders nothing when off. */}
+      <BtDragModelSurface />
+      {/* Its dev cockpit: overlay layers, live tuning knobs, measured swap
+          costs — opened from Dev → Behavior Tree → Drag Model Tuner. */}
+      <BtDragModelTunerPanel />
       <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />

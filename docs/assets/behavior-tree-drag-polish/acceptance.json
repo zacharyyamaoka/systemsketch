@@ -1,0 +1,130 @@
+{
+  "generatedAt": "2026-09-06T14:37:05.503Z",
+  "passed": 14,
+  "total": 14,
+  "results": [
+    {
+      "id": "wire.samples",
+      "label": "mid-drag frames were actually sampled",
+      "observed": 8,
+      "desired": 8,
+      "ok": true
+    },
+    {
+      "id": "wire.live-tracking",
+      "label": "the wire endpoint rides the dragged card every sampled frame (worst gap 0px, per-step [0,0,0,0,0,0,0,0])",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "wire.settles-on-drop",
+      "label": "after the drop, the wire sits on the settled tidy anchor too",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "wire.composite-in",
+      "label": "a mid-slot-held composite keeps its incoming wire on its live top-center (gap 0px)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "wire.composite-out",
+      "label": "…and its child wires leaving its live bottom-center (gap 0px)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "wire.elbow",
+      "label": "the elbow wire's final leg lands on the live anchor too (gap 0px)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "spacing.default",
+      "label": "the slider starts at 1×",
+      "observed": "1",
+      "desired": "1",
+      "ok": true
+    },
+    {
+      "id": "spacing.prop",
+      "label": "the region persists spacingScale = 2",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "spacing.tree-gap",
+      "label": "the Tree level gap doubles live (84px → 168px)",
+      "observed": [
+        84,
+        168
+      ],
+      "desired": [
+        84,
+        168
+      ],
+      "ok": true
+    },
+    {
+      "id": "spacing.cards-untouched",
+      "label": "a card keeps its exact size — spacing scales gaps, never boxes",
+      "observed": [
+        343,
+        112
+      ],
+      "desired": [
+        343,
+        112
+      ],
+      "ok": true
+    },
+    {
+      "id": "spacing.process-gap",
+      "label": "Process view's unit doubles from the same prop (120px)",
+      "observed": 120,
+      "desired": 120,
+      "ok": true
+    },
+    {
+      "id": "spacing.survives-view-switch",
+      "label": "spacingScale survives the round trip through Process view",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "spacing.drag-still-lands",
+      "label": "a reorder at 2× spacing lands exactly where the pointer is",
+      "observed": [
+        "CloseGrip",
+        "SubTree",
+        "Fallback",
+        "MoveHome",
+        "Parallel"
+      ],
+      "desired": [
+        "CloseGrip",
+        "SubTree",
+        "Fallback",
+        "MoveHome",
+        "Parallel"
+      ],
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

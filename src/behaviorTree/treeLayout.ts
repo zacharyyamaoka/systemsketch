@@ -20,6 +20,7 @@ import {
 	type BtControlFace,
 	type BtEdgeStyle,
 	type BtNodeFace,
+	type BtNodeViewOverride,
 	type BtOrientation,
 	type BtPoint,
 	type BtRect,
@@ -35,6 +36,14 @@ export interface TreeLayoutOptions {
 	edgeStyle: BtEdgeStyle
 	/** Free-arrangement offsets applied after the tidy pass. */
 	offsets?: Record<string, { dx: number; dy: number }>
+	/** Leaves pinned to a size other than their `nodeFace` formula. See `ProcessLayoutOptions`. */
+	nodeViewOverrides?: Record<string, BtNodeViewOverride>
+	/**
+	 * Multiplier on `TREE_LEVEL_GAP`/`TREE_SIBLING_GAP` (the region's
+	 * `spacingScale` prop). Gaps scale; card sizes never do — a spacing knob
+	 * that also grew the cards would silently re-measure every title.
+	 */
+	spacing?: number
 }
 
 /** Gap between a parent and its children along the reading direction. */
@@ -46,12 +55,21 @@ export const TREE_START_GAP = 40
 export function layoutTree(tree: BtTree, options: TreeLayoutOptions): BtScene {
 	const scene = emptyScene()
 	const down = options.orientation === 'down'
+	const spacing = options.spacing ?? 1
+	const levelGap = TREE_LEVEL_GAP * spacing
+	const siblingGap = TREE_SIBLING_GAP * spacing
 	const sizeOptions = { nodeFace: options.nodeFace, controlFace: options.controlFace }
 	const crossOf = (size: { w: number; h: number }) => (down ? size.w : size.h)
 	const flowOf = (size: { w: number; h: number }) => (down ? size.h : size.w)
 
 	if (tree.root) {
-		const sizeByPath = new Map(tree.nodes.map((node) => [node.path, btNodeSize(node, sizeOptions)]))
+		// A leaf's override (an Expanded Block, a hand-resized Port-view card)
+		// reports its own real box instead of the nodeFace formula, so d3's
+		// separation pass and the per-row flow extent both react to it.
+		const sizeByPath = new Map(tree.nodes.map((node) => {
+			const override = !isBtControlNode(node) ? options.nodeViewOverrides?.[node.path] : undefined
+			return [node.path, override ?? btNodeSize(node, sizeOptions)]
+		}))
 		const crossOfNode = (node: BtNode) => crossOf(sizeByPath.get(node.path)!)
 
 		// WHY: d3-hierarchy's tree() runs synchronously (no worker, no async
@@ -70,7 +88,7 @@ export function layoutTree(tree: BtTree, options: TreeLayoutOptions): BtScene {
 		const root = hierarchy(tree.root, (node) => node.children)
 		const layout = d3tree<BtNode>()
 			.nodeSize([1, 1])
-			.separation((a, b) => (crossOfNode(a.data) + crossOfNode(b.data)) / 2 + TREE_SIBLING_GAP)
+			.separation((a, b) => (crossOfNode(a.data) + crossOfNode(b.data)) / 2 + siblingGap)
 		const positioned = layout(root)
 		const nodeByPath = new Map(positioned.descendants().map((entry) => [entry.data.path, entry]))
 
@@ -87,7 +105,7 @@ export function layoutTree(tree: BtTree, options: TreeLayoutOptions): BtScene {
 		const rowStart: number[] = new Array(maxDepth + 1)
 		rowStart[0] = flowOf({ w: BT_START_W, h: BT_START_H }) + TREE_START_GAP
 		for (let depth = 1; depth <= maxDepth; depth += 1) {
-			rowStart[depth] = rowStart[depth - 1] + rowFlowExtent[depth - 1] + TREE_LEVEL_GAP
+			rowStart[depth] = rowStart[depth - 1] + rowFlowExtent[depth - 1] + levelGap
 		}
 
 		for (const node of tree.nodes) {

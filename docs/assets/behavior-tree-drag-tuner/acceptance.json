@@ -1,0 +1,328 @@
+{
+  "generatedAt": "2026-09-06T23:15:54.012Z",
+  "passed": 36,
+  "total": 36,
+  "results": [
+    {
+      "id": "open.panel",
+      "label": "the Dev button opens the tuner panel",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "open.overlay-forced-on",
+      "label": "opening the tuner turns the overlay master on",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "open.auto-layout-forced-on",
+      "label": "opening the tuner turns the subject region’s Auto layout on",
+      "observed": "tidy",
+      "desired": "tidy",
+      "ok": true
+    },
+    {
+      "id": "dock.hidden-while-tuner-open",
+      "label": "the Behavior Tree pill does not render while the tuner is open",
+      "observed": {
+        "present": false,
+        "bt": false,
+        "visible": null
+      },
+      "desired": {
+        "present": false,
+        "bt": false,
+        "visible": null
+      },
+      "ok": true
+    },
+    {
+      "id": "dock.returns-when-tuner-closes",
+      "label": "closing the tuner restores the pill for the same selection",
+      "observed": {
+        "present": true,
+        "bt": true,
+        "visible": "true"
+      },
+      "desired": {
+        "present": true,
+        "bt": true,
+        "visible": "true"
+      },
+      "ok": true
+    },
+    {
+      "id": "dock.hidden-again-on-reopen",
+      "label": "reopening the tuner suppresses it again — nothing is persisted",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "toggle.lives-in-the-tuner",
+      "label": "the tuner carries exactly one Auto layout switch, next to the region it names",
+      "observed": {
+        "toggles": 1,
+        "names": 1
+      },
+      "desired": {
+        "toggles": 1,
+        "names": 1
+      },
+      "ok": true
+    },
+    {
+      "id": "toggle.turns-auto-layout-off",
+      "label": "switching it off writes the region and withdraws the measured table",
+      "observed": {
+        "arrangement": "free",
+        "pressed": "false",
+        "tables": 0,
+        "empty": "Auto layout is off for this region — turn it on above to measure a swap."
+      },
+      "desired": {
+        "arrangement": "free",
+        "pressed": "false",
+        "tables": 0,
+        "empty": "Auto layout is off for this region — turn it on above to measure a swap."
+      },
+      "ok": true
+    },
+    {
+      "id": "toggle.turns-auto-layout-back-on",
+      "label": "switching it on restores the arrangement and the table",
+      "observed": {
+        "arrangement": "tidy",
+        "pressed": "true"
+      },
+      "desired": {
+        "arrangement": "tidy",
+        "pressed": "true"
+      },
+      "ok": true
+    },
+    {
+      "id": "measured.rows",
+      "label": "three scenarios are measured",
+      "observed": 3,
+      "desired": 3,
+      "ok": true
+    },
+    {
+      "id": "measured.orientation-finding",
+      "label": "top-down capture cost exceeds left-right in every scenario at defaults",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "layers.containers-off",
+      "label": "unchecking Containers removes zones while slots stay",
+      "observed": {
+        "zones": 0,
+        "slots": true
+      },
+      "desired": {
+        "zones": 0,
+        "slots": true
+      },
+      "ok": true
+    },
+    {
+      "id": "layers.containers-back",
+      "label": "rechecking restores the zones",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "thresholds.at-rest",
+      "label": "capture lines paint at rest",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "numbers.chips-carry-real-metrics",
+      "label": "every container plate prints its slot extent and column width",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "numbers.gap-is-dimensioned",
+      "label": "at least one real inter-member gap is drawn with its px on it",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "numbers.single-member-list-says-nothing-to-measure",
+      "label": "a one-member container reports an em dash, never a measured 0",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "labels.readable-at-fit",
+      "label": "a container plate reads at 10px or more on screen",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "labels.scale-invariant",
+      "label": "halving the canvas zoom does not shrink the label",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "surface.outside-every-shape",
+      "label": "the overlay has no shape ancestor and lives in the in-front layer",
+      "observed": {
+        "mounted": true,
+        "insideAShape": false,
+        "insideSurface": true,
+        "afterTheCanvas": true
+      },
+      "desired": {
+        "mounted": true,
+        "insideAShape": false,
+        "insideSurface": true,
+        "afterTheCanvas": true
+      },
+      "ok": true
+    },
+    {
+      "id": "fade.paints-a-scrim",
+      "label": "the fade knob paints one scrim per region and reports its percentage",
+      "observed": {
+        "scrims": 1,
+        "readout": "60%"
+      },
+      "desired": {
+        "scrims": 1,
+        "readout": "60%"
+      },
+      "ok": true
+    },
+    {
+      "id": "fade.zero-paints-nothing",
+      "label": "at 0 the scrim is not in the DOM at all",
+      "observed": 0,
+      "desired": 0,
+      "ok": true
+    },
+    {
+      "id": "focus.every-knob-lights-something",
+      "label": "pointing at any knob lights at least one mark and ghosts the rest",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "focus.preview-for-the-drag-only-knobs",
+      "label": "the three drag-only knobs synthesize a preview card at rest",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "focus.clears-on-leave",
+      "label": "moving off the knobs clears the focus",
+      "observed": "none",
+      "desired": "none",
+      "ok": true
+    },
+    {
+      "id": "thresholds.mid-drag",
+      "label": "mid-drag the active container shows a labeled release boundary and the climb ring",
+      "observed": {
+        "release": true,
+        "releaseLabel": true,
+        "climb": 1
+      },
+      "desired": {
+        "release": true,
+        "releaseLabel": true,
+        "climb": 1
+      },
+      "ok": true
+    },
+    {
+      "id": "ink.every-layer-is-painted",
+      "label": "every layer paints with an ink the browser can report",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "ink.hues-are-40-degrees-apart",
+      "label": "no two layers share a hue",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    },
+    {
+      "id": "knob.probe-found",
+      "label": "the subtree-head scenario is measured",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "knob.probe-clear",
+      "label": "the probed card sits clear of the tuner panel",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "knob.applied",
+      "label": "the deadband-padding slider reports its value",
+      "observed": "240",
+      "desired": "240",
+      "ok": true
+    },
+    {
+      "id": "knob.suppresses-capture",
+      "label": "with +240px deadband padding, travel past the default swap point commits nothing",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "knob.default-captures",
+      "label": "after Reset the exact same travel commits a reorder",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "copy.export",
+      "label": "the export carries the tuning JSON and the measured readouts",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "copy.feedback",
+      "label": "the button acknowledges the copy",
+      "observed": "Copied ✓",
+      "desired": "Copied ✓",
+      "ok": true
+    },
+    {
+      "id": "console",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ],
+  "aborted": null
+}

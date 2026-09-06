@@ -1,5 +1,6 @@
 import { type Box, type Editor, type TLShape, type TLShapeId, Vec } from 'tldraw'
 
+import { btDndDragState } from './behaviorTree/treeDndDragState'
 import { CONNECTION_SHAPE_TYPE } from './blocks/connections/connectionModel'
 import { getConnectionShapeGeometryPoints } from './blocks/connections/ConnectionShapeUtil'
 import {
@@ -80,6 +81,9 @@ export function installConnectorControlVisibility(editor: Editor): () => void {
 		// every selected connector while none of those controls can paint turns a
 		// large select-all drag into one route walk per cable per pointer frame.
 		// Pointer-up already schedules a fresh measurement after the tool settles.
+		// A claimed Behavior Tree reorder drag (dnd-kit, `treeDndDrag.tsx`)
+		// manipulates from `select.idle`; its atom is the equivalent signal.
+		if (btDndDragState.get(editor) !== null) return
 		if (CONNECTOR_MANIPULATION_STATES.some((path) => editor.isIn(path))) return
 		if (!lastPointer || !isWithinCanvasViewport(
 			container,

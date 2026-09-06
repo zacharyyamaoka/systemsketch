@@ -53,6 +53,27 @@
   white-space: nowrap;
 }
 
+/* Item 3's breadcrumb: shown only while this region is displaying a Sub
+   Tree's own definition (`treeStack.length > 0`). */
+.systemsketch-behavior-tree .BehaviorTree-stepOut {
+  margin: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--ss-border);
+  border-radius: 5px;
+  background: var(--ss-surface);
+  color: var(--ss-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.systemsketch-behavior-tree .BehaviorTree-stepOut:hover {
+  background: var(--ss-surface-active);
+}
+
 /* ---- the painted layer -------------------------------------------------- */
 
 .systemsketch-behavior-tree .BehaviorTree-layer {
@@ -99,6 +120,7 @@
    control and data never read as one kind of line. */
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='control'] .BehaviorTree-wire,
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='recovery'] .BehaviorTree-wire,
+.systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='retryLoop'] .BehaviorTree-wire,
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='merge'] .BehaviorTree-wire,
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-rail line {
   stroke: #6d5be6; /* ss-content: control rails turn purple under the Dataflow lens, as on the wireframes */
@@ -106,6 +128,7 @@
 
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='control'] .BehaviorTree-arrowHead,
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='recovery'] .BehaviorTree-arrowHead,
+.systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='retryLoop'] .BehaviorTree-arrowHead,
 .systemsketch-behavior-tree[data-lens='dataflow'] .BehaviorTree-edge[data-kind='merge'] .BehaviorTree-arrowHead {
   fill: #6d5be6; /* ss-content: the arrowheads follow the purple rails */
 }
@@ -144,6 +167,14 @@
 .systemsketch-behavior-tree .BehaviorTree-edge[data-kind='use'] .BehaviorTree-wire {
   stroke: var(--ss-text-faint);
   stroke-dasharray: 5 5;
+}
+
+/* RecoveryNode's loop-back: same ink as any other control wire (colour is
+   document content here, not a code), dashed as the one other differentiation
+   axis this view already uses — the backward geometry itself is what actually
+   marks it as the one edge in this app whose flow runs the wrong way. */
+.systemsketch-behavior-tree .BehaviorTree-edge[data-kind='retryLoop'] .BehaviorTree-wire {
+  stroke-dasharray: 7 4;
 }
 
 .systemsketch-behavior-tree .BehaviorTree-rail line {
@@ -222,9 +253,46 @@
 
 .systemsketch-behavior-tree .BehaviorTree-insert[data-persistent='true'],
 .systemsketch-behavior-tree[data-selected='true'] .BehaviorTree-insert,
-.systemsketch-behavior-tree:hover .BehaviorTree-insert,
 .systemsketch-behavior-tree .BehaviorTree-insert[data-active='true'] {
   opacity: 1;
+}
+
+/* Tree view: unchanged (Zach — "this was ok in behaviour tree, don't touch
+   that") — hovering anywhere in the region, or selecting it, reveals every
+   target at once. Process view's debug escape hatch (the inspector's "Show
+   all attachment points") keeps that same all-at-once behaviour explicitly,
+   rather than only through selection/region-hover. */
+.systemsketch-behavior-tree[data-projection='tree']:hover .BehaviorTree-insert,
+.systemsketch-behavior-tree[data-projection='process'][data-insert-visibility='all']:hover .BehaviorTree-insert {
+  opacity: 1;
+}
+
+/* Process view's default ("Show on hover"): only the persistent, sequence-
+   terminal targets show at rest (the rule above/below still light them all
+   up on select). An interior "+" fades in only when the pointer is near ITS
+   OWN target — see `.BehaviorTree-insertZone` below — never anywhere in the
+   region, which is the whole fix for "all the blue icons should not be
+   showing at the same time". */
+.systemsketch-behavior-tree .BehaviorTree-insertZone:hover .BehaviorTree-insert {
+  opacity: 1;
+}
+
+/* The padded, otherwise-invisible hover catcher around a non-persistent "+" —
+   Flowstate reveals these on approach, not only on a pixel-perfect hover of
+   the small square itself. No click handler and no stopPropagation live
+   here, so clicking its padding still reaches tldraw's own hit test exactly
+   as a plain background pixel would. */
+.systemsketch-behavior-tree .BehaviorTree-insertZone {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  pointer-events: all;
+}
+
+.systemsketch-behavior-tree .BehaviorTree-insertZone .BehaviorTree-insert {
+  left: 50%;
+  top: 50%;
 }
 
 .systemsketch-behavior-tree .BehaviorTree-insert:hover,
@@ -372,4 +440,167 @@
   color: var(--ss-text);
   font-size: 14px;
   pointer-events: none;
+}
+
+/* ------------------- drag-model debug overlay (Dev toggle) ------------------ */
+/* The invisible Kanban the auto-layout drag resolves against, made visible:
+   zone = a container's full tiled column, bound = its members' real union,
+   slot = each member's uniform virtual drag rect (padding shows where a
+   sibling — an Expanded leaf above all — widened the whole list's slots).
+   Debug ink on purpose: never product colors.
+
+   One hue and one line signature per layer, and they must stay distinguishable
+   where they overlap — see the WHY block in `BtDragModelOverlay.tsx` for the
+   review that set these rules:
+     CONTAINERS  violet   solid seams · dashed overhang · bracketed bound
+     SLOTS       orange   dotted
+     CAPTURE     teal     solid
+     RELEASE     crimson  dashed
+     CLIMB       magenta  long dash                                          */
+/* The surface: mounted through InFrontOfTheCanvas, so it outranks every shape
+   on the board. Never interactive — the tuner panel is the only control. */
+.BehaviorTree-dragModelSurface {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	z-index: 1;
+}
+.BehaviorTree-dragModelCamera { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.BehaviorTree-dragModelCanvas { position: absolute; top: 0; left: 0; overflow: visible; }
+/* Paper over the real tree, under every debug mark. Its alpha is the tuner's
+   "Fade the tree" knob; at 0 nothing paints at all. */
+.BehaviorTree-dragModelScrim { fill: var(--ss-debug-scrim); }
+.BehaviorTree-dragModelHatchBar { stroke: var(--ss-debug-hatch); stroke-width: 3; }
+
+.BehaviorTree-dragModel { pointer-events: none; }
+
+/* FOCUS VIEW. `data-lit="false"` is a mark the hovered knob does not control:
+   it keeps drawing, because the structure still has to be readable, but drops
+   out of the way. `"none"` means no knob is focused and everything is normal. */
+.BehaviorTree-dragModel [data-lit='false'] { opacity: 0.12; }
+.BehaviorTree-dragModel [data-lit='true'] { opacity: 1; }
+/* The number plates keep their own weight — they are still the readout — but
+   step back so the lit geometry, not the labels, is the loudest thing while a
+   knob is focused. */
+.BehaviorTree-dragModel:not([data-focus='none']) .BehaviorTree-dragModelChip { opacity: 0.4; }
+
+/* Zebra tint: tiled zones share edges, so alternating fills are the only thing
+   that stops a strip's columns reading as one continuous band. */
+.BehaviorTree-dragModelZone rect { fill: var(--ss-debug-column-fill); stroke: none; }
+.BehaviorTree-dragModelZone[data-parity='1'] rect { fill: var(--ss-debug-column-fill-alt); }
+.BehaviorTree-dragModelZone[data-active='true'] rect { fill: var(--ss-debug-column-fill-active); }
+
+/* A seam is a real handover between two containers; an overhang edge is only
+   how far the end column reaches (the Zone overhang knob). Different meanings,
+   different lines. */
+.BehaviorTree-dragModelEdge { stroke: var(--ss-debug-column-seam); stroke-width: 1.25; }
+.BehaviorTree-dragModelEdge[data-kind='overhang'] {
+	stroke: var(--ss-debug-column-overhang);
+	stroke-width: 1;
+	stroke-dasharray: var(--ss-debug-dash-overhang);
+}
+
+/* The members' real union, as corner brackets rather than a fifth full
+   rectangle over the same cards: same information, a third of the edge ink. */
+.BehaviorTree-dragModelBound {
+	fill: none;
+	stroke: var(--ss-debug-column-bound);
+	stroke-width: 1.4;
+	stroke-dasharray: var(--ss-debug-dash-bound);
+	stroke-linecap: round;
+}
+.BehaviorTree-dragModelBound[data-active='true'] { stroke-width: 2.2; stroke-dasharray: none; }
+
+.BehaviorTree-dragModelSlot rect {
+	fill: none;
+	stroke: var(--ss-debug-slot-stroke);
+	stroke-width: 1;
+	stroke-dasharray: var(--ss-debug-dash-slot);
+}
+.BehaviorTree-dragModelSlot[data-padded='true'] rect {
+	stroke: var(--ss-debug-slot-stroke-padded);
+	stroke-width: 1.8;
+}
+.BehaviorTree-dragModelSlot text {
+	font: 700 10px/1 var(--systemsketch-chrome-font, 'Inter', sans-serif);
+	fill: var(--ss-debug-slot-stroke-padded);
+	paint-order: stroke;
+	stroke: var(--ss-debug-plate);
+	stroke-width: 3;
+}
+/* At rest an UNPADDED slot is the card's own outline redrawn — pure noise. It
+   stays visible (the layer must show real content) but stops competing. */
+.BehaviorTree-dragModel[data-phase='rest'] .BehaviorTree-dragModelSlot[data-padded='false'] { opacity: 0.3; }
+
+/* Threshold lines: capture = where the leading edge takes a slot (teal),
+   release = where the trailing edge gives it back (crimson, labeled with its
+   px cost — the number the tuner exists to make visible). */
+.BehaviorTree-dragModelThreshold line { stroke-width: 1.25; }
+.BehaviorTree-dragModelThreshold[data-kind='capture'] line { stroke: var(--ss-debug-capture); }
+.BehaviorTree-dragModelThreshold[data-kind='release'] line {
+	stroke: var(--ss-debug-release);
+	stroke-width: 1.8;
+	stroke-dasharray: var(--ss-debug-dash-release);
+}
+/* Nothing is captured at rest, so every capture line is equally hypothetical;
+   mid-drag only the ACTIVE container's are being adjudicated against. */
+.BehaviorTree-dragModel[data-phase='rest'] .BehaviorTree-dragModelThreshold line { opacity: 0.7; }
+.BehaviorTree-dragModel[data-phase='drag'] .BehaviorTree-dragModelThreshold[data-active='false'] line { opacity: 0.3; }
+.BehaviorTree-dragModelThreshold text {
+	font: 700 11px/1 var(--systemsketch-chrome-font, 'Inter', sans-serif);
+	fill: var(--ss-debug-release);
+	paint-order: stroke;
+	stroke: var(--ss-debug-plate);
+	stroke-width: 3;
+}
+/* The ancestor-climb exit ring around the active container, mid-drag. */
+.BehaviorTree-dragModelClimb {
+	fill: none;
+	stroke: var(--ss-debug-climb);
+	stroke-width: 1.8;
+	stroke-dasharray: var(--ss-debug-dash-climb);
+}
+
+/* The things that carry NUMBERS, in Chrome DevTools' label idiom: an OPAQUE
+   plate in the layer's own colour with a 1px white keyline, and text picked
+   for contrast against it. Read out of the DevTools overlay source
+   (`inspector_overlay/highlight_grid_common.ts`), where that combination — not
+   a scrim, not a blend mode, not halo text — is the whole answer to staying
+   readable over content the overlay does not control. It also makes the label
+   self-identifying: a violet plate IS the Containers layer. */
+.BehaviorTree-dragModelChip rect {
+	fill: var(--ss-debug-column-plate);
+	stroke: var(--ss-debug-plate-keyline);
+	stroke-width: 1;
+}
+.BehaviorTree-dragModelChip[data-active='true'] rect { stroke-width: 2; }
+.BehaviorTree-dragModelChip text[data-role='path'] {
+	font: 700 13px/1 var(--systemsketch-chrome-font, 'Inter', sans-serif);
+	fill: var(--ss-debug-plate-ink);
+}
+.BehaviorTree-dragModelChip text[data-role='metrics'] {
+	font: 600 12px/1 var(--systemsketch-mono-font, ui-monospace, monospace);
+	fill: var(--ss-debug-plate-ink);
+}
+/* The claim radius: only ever drawn while its own knob is focused. */
+.BehaviorTree-dragModelClaim circle { fill: none; stroke: var(--ss-debug-claim); stroke-width: 1.6; stroke-dasharray: 3 3; }
+.BehaviorTree-dragModelClaim [data-role='origin'] { fill: var(--ss-debug-claim); stroke: none; }
+.BehaviorTree-dragModelClaim text {
+	font: 700 12px/1 var(--systemsketch-mono-font, ui-monospace, monospace);
+	fill: var(--ss-debug-plate-ink);
+	paint-order: stroke;
+	stroke: var(--ss-debug-claim);
+	stroke-width: 5;
+	stroke-linejoin: round;
+}
+.BehaviorTree-dragModelGap [data-role='hatch'] { fill: url(#bt-drag-model-hatch); stroke: none; }
+.BehaviorTree-dragModelGap line { stroke: var(--ss-debug-column-seam); stroke-width: 1.5; }
+.BehaviorTree-dragModelGap text {
+	font: 700 13px/1 var(--systemsketch-mono-font, ui-monospace, monospace);
+	fill: var(--ss-debug-plate-ink);
+	paint-order: stroke;
+	stroke: var(--ss-debug-column-plate);
+	stroke-width: 5;
+	stroke-linejoin: round;
 }
