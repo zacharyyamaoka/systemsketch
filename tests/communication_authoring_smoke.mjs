@@ -132,12 +132,11 @@ async function record(page) {
       // Every painted dot's edge, straight off the laid-out geometry.
       railDots: Array.from(document.querySelectorAll('[data-block-port-edge]'))
         .map((node) => node.getAttribute('data-block-port-edge')),
-      overlays: {
-        tags: document.querySelector('[data-testid="communication-overlay-tags"]')
-          ?.getAttribute('aria-pressed') ?? null,
-        relationships: document.querySelector('[data-testid="communication-overlay-relationships"]')
-          ?.getAttribute('aria-pressed') ?? null,
-      },
+      cables: ['data', 'split', 'summary'].find((style) => (
+        document.querySelector('[data-testid="communication-cables-' + style + '"]')
+          ?.getAttribute('aria-pressed') === 'true'
+      )) ?? null,
+      lens: document.querySelector('[data-projection-lens]')?.getAttribute('data-projection-lens') ?? null,
       // A leg revealed beside its collapsed arrow stamps "focus-member"; a leg
       // in the standalone Tag edges mode stamps "tagged".
       taggedLegs: Array.from(document.querySelectorAll(
@@ -187,7 +186,7 @@ async function main() {
     await delay(700)
 
     await waitFor(app.page, `document.querySelector('[data-testid="communication-prototype-controls"]')`, 'region lens')
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await delay(400)
     let observed = await record(app.page)
     assert.deepEqual(
@@ -247,10 +246,10 @@ async function main() {
     await shot(app.page, '03-service-and-action.png')
 
     // --- The round trip: Dataflow reads the generated ports back --------------
-    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(450)
     observed = await record(app.page)
-    assert.match(observed.status, /6 canonical wires/)
+    assert.match(observed.status, /6 canonical wire/)
     pass('flipping to Dataflow shows the six real cables the three drawn arrows created')
 
     // THE RULE: Dataflow is the signature and never puts a socket on a
@@ -267,23 +266,24 @@ async function main() {
     // The Dataflow communication overlay: relationship arrows over the real
     // routes, with the ports left exactly where the signature put them.
     const portsBeforeOverlay = JSON.stringify(observed.railDots)
-    await clickElement(app.page, '[data-testid="communication-overlay-relationships"]')
+    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
     await delay(500)
     observed = await record(app.page)
-    assert.equal(observed.overlays.relationships, 'true')
+    assert.equal(observed.cables, 'summary')
+    assert.equal(observed.lens, 'dataflow', 'the lens must not change when cable style does')
     assert.deepEqual(
       [...new Set(observed.collapsedArrows)].sort(),
       ['A1', 'S1', 'ST1'],
       JSON.stringify(observed.collapsedArrows),
     )
     assert.equal(JSON.stringify(observed.railDots), portsBeforeOverlay, 'ports must not move')
-    assert.match(observed.status, /ports stay put/)
-    pass('Dataflow + Communication paints the three relationship arrows over the real routes without moving a port')
+    assert.match(observed.status, /summary rides the initiating leg/)
+    pass('Dataflow + Summary paints the three relationship arrows over the real routes without moving a port')
     await shot(app.page, '06-dataflow-communication-overlay.png')
-    await clickElement(app.page, '[data-testid="communication-overlay-relationships"]')
+    await clickElement(app.page, '[data-testid="communication-cables-data"]')
     await delay(350)
 
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await delay(450)
     const ids = await relations(app.page)
     assert.deepEqual(
@@ -295,28 +295,32 @@ async function main() {
 
     // --- Tag edges INSIDE the communication view --------------------------
     observed = await record(app.page)
-    assert.equal(observed.overlays.tags, 'false')
+    assert.equal(observed.cables, 'summary')
     const collapsedOnly = observed.taggedLegs
-    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await delay(600)
     observed = await record(app.page)
-    assert.equal(observed.overlays.tags, 'true')
+    assert.equal(observed.cables, 'split')
+    assert.equal(observed.lens, 'communication', 'splitting cables must not leave the lens')
     assert.ok(
       observed.taggedLegs > collapsedOnly,
       `Tag edges should reveal the individual legs beside the collapsed arrows: ${collapsedOnly} → ${observed.taggedLegs}`,
     )
+    // The three cable styles are exclusive, not overlays: Split IS the drawn
+    // relationship, told leg by leg, so the summary arrow steps aside for it.
     assert.deepEqual(
-      [...new Set(observed.collapsedArrows)].sort(),
-      ['A1', 'S1', 'ST1'],
-      'the collapsed arrows stay while their legs are revealed beside them',
+      [...new Set(observed.collapsedArrows)],
+      [],
+      'Split replaces the summary arrow rather than stacking on it',
     )
-    pass('Tag edges inside the communication view reveals every leg beside the arrow it belongs to')
+    assert.equal(observed.taggedLegs, 6, 'every one of the six legs is painted and tagged')
+    pass('Split cables inside the communication lens paints every protocol leg separately')
     await shot(app.page, '07-components-with-tag-edges.png')
-    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
     await delay(350)
 
     // --- Press-and-hold a socket onto another edge ------------------------
-    await clickElement(app.page, '[data-testid="communication-components-view-port"]')
+    await clickElement(app.page, '[data-testid="communication-card-port"]')
     await delay(500)
     observed = await record(app.page)
     assert.ok(
@@ -366,7 +370,7 @@ async function main() {
     await shot(app.page, '08-port-dragged-to-edge.png')
 
     // The move is a COMMUNICATION-lens fact and must not touch the signature.
-    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(500)
     observed = await record(app.page)
     assert.equal(
@@ -375,9 +379,9 @@ async function main() {
       JSON.stringify(observed.railDots),
     )
     pass('the relocated socket leaves the Dataflow signature untouched')
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await delay(450)
-    await clickElement(app.page, '[data-testid="communication-components-view-simple"]')
+    await clickElement(app.page, '[data-testid="communication-card-simple"]')
     await delay(400)
 
     // --- Rename travels through the ports, which is where the name lives ------

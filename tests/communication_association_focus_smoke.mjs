@@ -234,7 +234,7 @@ async function main() {
     pass('adversarial board opens with 21 canonical data edges and no projection metadata')
     await shot(app.page, '01-adversarial-dataflow.png')
 
-    await clickElement(app.page, '[data-testid="communication-mode-tagged"]')
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await delay(500)
     let state = await projectionState(app.page)
     assert.equal(state.tagged, 19)
@@ -289,7 +289,8 @@ async function main() {
     pass('selecting a component clears communication focus while preserving the new selection')
     await shot(app.page, '03c-component-dismisses-focus.png')
 
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
+    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
     await delay(550)
     state = await projectionState(app.page)
     assert.equal(state.components, 9)
@@ -332,7 +333,7 @@ async function main() {
     await shot(app.page, '07-components-s4-focus-straight.png')
 
     await clickElement(app.page, '[data-testid="communication-focus-clear"]')
-    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(350)
     assert.equal(await storedGraph(app.page), before)
     pass('clearing focus and returning to Dataflow leaves the stored graph byte-identical')

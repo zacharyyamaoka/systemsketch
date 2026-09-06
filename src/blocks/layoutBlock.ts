@@ -18,6 +18,7 @@ import {
 	type PortLayout,
 } from './blockModel'
 import { stockBlockVisibleDescription } from './stockBlocks'
+import { inferCommunicationPlacements } from '../prototypes/communication/portPlacementInference'
 
 /** Donor pyblocks geometry constants. Keep rendering and connection anchors on this grid. */
 export const BLOCK_CORNER_RADIUS = 9
@@ -126,6 +127,38 @@ export interface BlockLayoutOptions {
  */
 export function portRailEdge(port: BlockPort): 'top' | 'bottom' | null {
 	return port.commEdge === 'top' || port.commEdge === 'bottom' ? port.commEdge : null
+}
+
+/** Which of the four walls a port occupies in the communication lens. */
+export function portCommunicationEdge(
+	port: BlockPort,
+	side?: 'input' | 'output',
+): 'left' | 'right' | 'top' | 'bottom' {
+	if (port.commEdge) return port.commEdge
+	return side === 'output' ? 'right' : 'left'
+}
+
+/**
+ * Fill in a communication placement for every port that has not been given one.
+ *
+ * Runs once, above the layout, so the inference is a presentation transform and
+ * never a write: a port a person actually dragged carries `commEdge` and is
+ * returned untouched. See `portPlacementInference.ts` for why legs of one
+ * interaction are kept together.
+ */
+export function withInferredCommunicationPlacements(props: BlockShapeProps): BlockShapeProps {
+	const unplaced = [...props.inputs, ...props.outputs].some((port) => port.commEdge === undefined)
+	if (!unplaced) return props
+	const inferred = inferCommunicationPlacements([
+		...props.inputs.map((port) => ({ port, side: 'input' as const })),
+		...props.outputs.map((port) => ({ port, side: 'output' as const })),
+	])
+	const fill = (ports: readonly BlockPort[]) => ports.map((port) => {
+		if (port.commEdge !== undefined) return port
+		const placement = inferred.get(port.id)
+		return placement ? { ...port, commEdge: placement.edge, commEdgeT: placement.edgeT } : port
+	})
+	return { ...props, inputs: fill(props.inputs), outputs: fill(props.outputs) }
 }
 
 /** Where along its edge a communication-lens port sits. Centred by default. */
@@ -355,7 +388,12 @@ function planBodySlots(
 ): BodySlotPlan {
 	// In Dataflow a rail port has no rail to sit on, so it keeps an ordinary
 	// body row — that IS the best-effort reposition back onto the two lanes.
-	const props = lens === 'communication' ? withoutRailPorts(rawProps) : rawProps
+	// In the communication lens EVERY socket is edge-placed, so the body plans
+	// no rows at all; in Dataflow a rail port has no rail to sit on and keeps its
+	// ordinary row, which IS the best-effort reposition back onto the two lanes.
+	const props = lens === 'communication'
+		? { ...rawProps, inputs: [], outputs: [] }
+		: rawProps
 	const sections = blockPortSections(props, { visibleOnly: true })
 	const portLayout = blockPortLayout(props)
 
@@ -695,12 +733,12 @@ function placeHorizontalRails(
 	band: { top: number; bottom: number },
 	placed: LaidOutBlockPort[],
 ): void {
-	for (const edge of ['top', 'bottom'] as const) {
+	for (const edge of ['top', 'bottom', 'left', 'right'] as const) {
 		const lane = ([
 			['input', props.inputs],
 			['output', props.outputs],
 		] as const).flatMap(([side, ports]) => ports
-			.filter((port) => port.visible && portRailEdge(port) === edge)
+			.filter((port) => port.visible && portCommunicationEdge(port) === edge)
 			.map((port) => ({ port, side })))
 			// Both rails read left→right, which is Simulink's ordering rule and
 			// what the prior-art study assumes. An authored fraction decides the
@@ -711,29 +749,45 @@ function placeHorizontalRails(
 		lane.forEach(({ port, side }, index) => {
 			const t = spread[index]
 			const point = edgePortPoint(edge, t, width, height)
-			const labelWidth = Math.max(0, Math.min(
-				width - PORT_LABEL_INSET_PX * 2,
-				width / Math.max(1, lane.length),
-			))
+			const vertical = edge === 'left' || edge === 'right'
+			const labelWidth = vertical
+				? Math.max(0, width / 2 - PORT_LABEL_INSET_PX - 8)
+				: Math.max(0, Math.min(
+					width - PORT_LABEL_INSET_PX * 2,
+					width / Math.max(1, lane.length),
+				))
 			// Inward by the study's 12px gap, then clamped into the body band: the
 			// header and footer own the strips the raw offset would land in, and
 			// the contract's answer to "it does not fit" is to move the text, not
 			// to distort it or drop the port.
-			const inward = edge === 'top'
-				? Math.max(RAIL_LABEL_GAP_PX, band.top)
-				: Math.min(
-					height - RAIL_LABEL_GAP_PX - PORT_LABEL_HEIGHT_PX,
-					band.bottom - PORT_LABEL_HEIGHT_PX,
-				)
-			const label: BlockRect = {
-				x: Math.max(
-					PORT_LABEL_INSET_PX,
-					Math.min(width - PORT_LABEL_INSET_PX - labelWidth, point.x - labelWidth / 2),
-				),
-				y: Math.max(0, Math.min(height - PORT_LABEL_HEIGHT_PX, inward)),
-				w: labelWidth,
-				h: PORT_LABEL_HEIGHT_PX,
-			}
+			const label: BlockRect = vertical
+				? {
+					// A side socket reads exactly like a signature row: the words
+					// run inward from the wall on the socket's own line.
+					x: edge === 'left'
+						? PORT_LABEL_INSET_PX
+						: width - PORT_LABEL_INSET_PX - labelWidth,
+					y: Math.max(0, Math.min(
+						height - PORT_LABEL_HEIGHT_PX,
+						point.y - PORT_LABEL_HEIGHT_PX / 2,
+					)),
+					w: labelWidth,
+					h: PORT_LABEL_HEIGHT_PX,
+				}
+				: {
+					x: Math.max(
+						PORT_LABEL_INSET_PX,
+						Math.min(width - PORT_LABEL_INSET_PX - labelWidth, point.x - labelWidth / 2),
+					),
+					y: Math.max(0, Math.min(height - PORT_LABEL_HEIGHT_PX, edge === 'top'
+						? Math.max(RAIL_LABEL_GAP_PX, band.top)
+						: Math.min(
+							height - RAIL_LABEL_GAP_PX - PORT_LABEL_HEIGHT_PX,
+							band.bottom - PORT_LABEL_HEIGHT_PX,
+						))),
+					w: labelWidth,
+					h: PORT_LABEL_HEIGHT_PX,
+				}
 			placed.push({
 				port,
 				side,
@@ -741,7 +795,9 @@ function placeHorizontalRails(
 				x: point.x,
 				y: point.y,
 				label,
-				labelContent: railLabelContentBox(port, side, label),
+				labelContent: vertical
+					? portLabelContentBox(port, side, label)
+					: railLabelContentBox(port, side, label),
 				subtle: false,
 				lifted: false,
 			})
@@ -931,9 +987,14 @@ export function layoutBlock(
 }
 
 function computeBlockLayout(
-	rawProps: BlockShapeProps,
+	inputProps: BlockShapeProps,
 	lens: BlockLayoutLens = 'dataflow',
 ): BlockLayout {
+	// Inference runs once, above everything, and only for the lens that needs
+	// it. It fills a placement in; it never overwrites one a person authored.
+	const rawProps = lens === 'communication'
+		? withInferredCommunicationPlacements(inputProps)
+		: inputProps
 	if (blockIsFolded(rawProps)) return foldedBlockLayout(rawProps)
 	// An effect port is an output that leaves by the *top* edge, because the call
 	// gave its value no name to leave by. Keep it out of the right-hand lane
@@ -1262,8 +1323,10 @@ function computeBlockLayout(
 			}
 		}
 
-		placeBody(props.inputs, 'input')
-		placeBody(props.outputs, 'output')
+		if (lens !== 'communication') {
+			placeBody(props.inputs, 'input')
+			placeBody(props.outputs, 'output')
+		}
 		// WHY guarded rather than trusted: "Dataflow never shows a top or bottom
 		// port" is enforced at the one place a rail can be created, so a stored
 		// `commEdge` cannot leak into the signature view.

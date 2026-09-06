@@ -169,7 +169,7 @@ async function main() {
     await clickAt(app.page, border.x, border.y)
     await waitFor(app.page, `document.querySelector('[data-testid="communication-prototype-controls"]')`, 'reopened region controls')
     assert.equal((await record(app.page)).wire.temporal, 'data')
-    await clickElement(app.page, '[data-testid="communication-mode-tagged"]')
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await delay(400)
     assert.equal(await evaluate(app.page, `document.querySelectorAll('[data-communication-mode="tagged"]').length`), 1)
     pass('reselecting the Frame reopens its scoped communication lens without reapplying the Async default')

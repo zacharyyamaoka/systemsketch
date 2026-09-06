@@ -5,33 +5,22 @@
  * a cable from here" everywhere in this app, and a component's port must keep
  * that. The existing answer to "move this port instead" is tldraw's own
  * `long_press` — the same gesture the Dataflow row reorder rides
- * (`portInteraction.ts`) — so there is one gesture to learn, not two, and
- * cancel / interrupt / tool switching all behave without special cases.
+ * (`portInteraction.ts`) — so there is one gesture to learn, not two.
  *
- * This is the sibling of that reorder rather than a branch inside it, because
- * only where the port may LAND differs: Dataflow moves it between rows of two
- * fixed lanes, communication moves it anywhere on four walls. The pattern is
- * lifted from `system/systemPortDrag.ts`, which does the same for a System's
- * declared boundary ports.
+ * The GESTURE itself belongs to dnd-kit (`CommunicationPortDnd.tsx`); this
+ * file is the model beneath it: what a wall is, where a pointer lands on one,
+ * whether this port may move at all, and the write that lands it. Keeping
+ * those pure is what lets a unit test exercise the rules without mounting a
+ * drag, and what would let the gesture owner change again without touching
+ * the meaning.
  *
  * Nothing is written until the release, so cables stay welded while the port
  * is in flight and the whole move lands as one undo step.
  */
-import {
-	StateNode,
-	atom,
-	type Atom,
-	type Editor,
-	type TLCancelEventInfo,
-	type TLCompleteEventInfo,
-	type TLInterruptEventInfo,
-	type TLShapeId,
-} from 'tldraw'
+import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 
 import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockPortSide, type BlockShape } from '../blockModel'
 import { blockLayoutLensFor } from './portLens'
-
-export const COMMUNICATION_PORT_DRAG_STATE_ID = 'dragging_communication_port'
 
 export type CommunicationPortEdge = 'left' | 'right' | 'top' | 'bottom'
 
@@ -139,68 +128,3 @@ export function moveCommunicationPort(
 	return true
 }
 
-export class DraggingCommunicationPort extends StateNode {
-	static override id = COMMUNICATION_PORT_DRAG_STATE_ID
-	private ref: CommunicationPortRef | null = null
-
-	override onEnter(info: CommunicationPortRef): void {
-		this.ref = info?.shapeId && canMoveCommunicationPort(this.editor, info) ? info : null
-		if (!this.ref) {
-			this.parent.transition('idle')
-			return
-		}
-		this.editor.setCursor({ type: 'grabbing', rotation: 0 })
-		this.track()
-	}
-
-	override onExit(): void {
-		this.editor.setCursor({ type: 'default', rotation: 0 })
-		setCommunicationPortDrag(this.editor, null)
-		this.ref = null
-	}
-
-	private track(): void {
-		const ref = this.ref
-		if (!ref) return
-		const shape = this.editor.getShape(ref.shapeId)
-		if (!isBlockShape(shape)) {
-			this.parent.transition('idle')
-			return
-		}
-		const local = this.editor.getPointInShapeSpace(
-			shape,
-			this.editor.inputs.getCurrentPagePoint(),
-		)
-		const hit = blockEdgeAt({ w: shape.props.w, h: shape.props.h }, local)
-		setCommunicationPortDrag(this.editor, { ...ref, edge: hit.edge, edgeT: hit.edgeT })
-	}
-
-	override onPointerMove(): void {
-		this.track()
-	}
-
-	override onPointerUp(): void {
-		this.commit()
-	}
-
-	override onComplete(_info: TLCompleteEventInfo): void {
-		this.commit()
-	}
-
-	override onCancel(_info: TLCancelEventInfo): void {
-		this.parent.transition('idle')
-	}
-
-	override onInterrupt(_info: TLInterruptEventInfo): void {
-		this.parent.transition('idle')
-	}
-
-	private commit(): void {
-		const ref = this.ref
-		const drag = getCommunicationPortDrag(this.editor)
-		if (ref && drag) {
-			moveCommunicationPort(this.editor, ref, { edge: drag.edge, edgeT: drag.edgeT })
-		}
-		this.parent.transition('idle')
-	}
-}

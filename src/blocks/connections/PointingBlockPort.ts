@@ -19,10 +19,7 @@ import {
 	canReorderBlockPort,
 	type BlockPortRef,
 } from '../ports/portInteraction'
-import {
-	COMMUNICATION_PORT_DRAG_STATE_ID,
-	canMoveCommunicationPort,
-} from '../ports/communicationPortDrag'
+import { beginCommunicationPortDnd } from '../ports/CommunicationPortDnd'
 import { clearPortDragState } from '../ports/portState'
 import { createOrUpdateConnectionBinding } from './ConnectionBindingUtil'
 import { forgetPickerCreationMark, rememberPickerCreationMark } from './blockPicker'
@@ -198,14 +195,13 @@ export class PointingBlockPort extends StateNode {
 			side: port.side === 'output' ? 'outputs' : 'inputs',
 			portId: this.info.portId,
 		}
-		// One hold, two destinations. In the communication lens a socket is
-		// somewhere on a wall, so it gets its own sibling state; asked first so
-		// the Dataflow reorder below never has to know the lens exists.
-		if (
-			this.editor.getStateDescendant(`select.${COMMUNICATION_PORT_DRAG_STATE_ID}`)
-			&& canMoveCommunicationPort(this.editor, ref)
-		) {
-			this.parent.transition(COMMUNICATION_PORT_DRAG_STATE_ID, { ...info, ...ref })
+		// One hold, two owners. In the communication lens a socket is somewhere on
+		// a wall, and dnd-kit owns that gesture — asked first so the Dataflow
+		// reorder below never has to know the lens exists. `long_press` only ever
+		// fires for a press that has NOT moved, so handing off here cannot race
+		// the cable drag it would otherwise have been.
+		if (beginCommunicationPortDnd(this.editor, ref)) {
+			this.parent.transition('idle', info)
 			return
 		}
 		if (!this.editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) return

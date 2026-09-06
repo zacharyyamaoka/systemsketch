@@ -1124,40 +1124,38 @@ function componentRelationshipGeometry(
 	}
 }
 
+/**
+ * The leg a summary cable rides. Fixed per family, so nothing here measures.
+ *
+ * `pathLength` survives on the candidate type because the chooser's signature
+ * is the semantic seam and a later policy could want it; it is reported as
+ * infinite rather than measured, because measuring a route the answer cannot
+ * depend on would re-run the elbow router on every repaint for nothing.
+ */
 function resolveCommunicationRepresentative(
 	editor: Editor,
 	relation: CommunicationRelation,
-	projection: CommunicationProjectionState,
 ): CommunicationDescriptor | null {
-	const policy = relation.family === 'action'
-		? projection.actionTrack
-		: relation.family === 'service'
-			? projection.serviceTrack
-			: 'shortest'
-	const candidates = relation.memberDescriptors.map((descriptor) => {
-		const member = editor.getShape<ConnectionShape>(descriptor.connectionId)
-		return {
+	void editor
+	return chooseCommunicationRepresentative(
+		relation.family,
+		relation.memberDescriptors.map((descriptor) => ({
 			descriptor,
-			pathLength: member?.type === CONNECTION_SHAPE_TYPE
-				? polylineLength(getConnectionRenderPoints(editor, member))
-				: Number.POSITIVE_INFINITY,
-		}
-	})
-	return chooseCommunicationRepresentative(relation.family, candidates, policy)
+			pathLength: Number.POSITIVE_INFINITY,
+		})),
+	)
 }
 
 function ComponentCommunicationConnection({
 	connection,
 	relation,
 	representative,
-	representativePolicy,
 	routeStyle,
 	focusedGroupKey,
 }: {
 	connection: ConnectionShape
 	relation: CommunicationRelation
 	representative: CommunicationDescriptor
-	representativePolicy: string
 	routeStyle: CommunicationRouteStyle
 	focusedGroupKey: string | null
 }) {
@@ -1191,7 +1189,6 @@ function ComponentCommunicationConnection({
 			data-communication-edges={relation.edgeCount}
 			data-communication-representative-phase={representative.phase}
 			data-communication-representative-id={representative.connectionId}
-			data-communication-representative-policy={representativePolicy}
 			data-communication-route={routeStyle}
 			data-communication-id={relation.displayId}
 			data-communication-member-ids={relation.memberIds.join(',')}
@@ -1259,21 +1256,21 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const relation = useValue(
 		'communication relationship',
 		() => {
-			// Dataflow needs the relationship too once its overlay is on: that is
-			// the "communication reading of a wired board" the carrier arrows paint.
-			const wantsRelations = projection.mode !== 'wiring' || projection.showRelationships
-			if (!inCommunicationScope || !wantsRelations || !descriptor) return null
+			// Cable style, not the lens, decides whether a relationship is needed:
+			// both Split and Summary are readable in either lens.
+			if (!inCommunicationScope || projection.cableStyle === 'data' || !descriptor) return null
 			return collectCommunicationRelations(editor).relations
 				.find((candidate) => candidate.groupKey === descriptor.groupKey) ?? null
 		},
-		[editor, descriptor, projection.mode, projection.showRelationships, inCommunicationScope],
+		[editor, descriptor, projection.cableStyle, inCommunicationScope],
 	)
 	const representativeDescriptor = useValue(
 		'communication representative edge',
-		() => relation ? resolveCommunicationRepresentative(editor, relation, projection) : null,
-		[editor, relation, projection.actionTrack, projection.serviceTrack],
+		() => relation ? resolveCommunicationRepresentative(editor, relation) : null,
+		[editor, relation],
 	)
-	if (inCommunicationScope && projection.mode === 'tagged' && descriptor && relation) {
+	// SPLIT — every protocol leg painted separately, tagged with its phase.
+	if (inCommunicationScope && projection.cableStyle === 'split' && descriptor && relation) {
 		return (
 			<TaggedCommunicationConnection
 				connection={connection}
@@ -1283,16 +1280,14 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			/>
 		)
 	}
-	if (inCommunicationScope && projection.mode === 'components') {
+	// SUMMARY — one cable per relationship, riding the initiating leg's route.
+	// The other legs stay hidden unless one relationship is focused, or unless
+	// Straight has collapsed every candidate onto the same centre line.
+	if (inCommunicationScope && projection.cableStyle === 'summary') {
 		if (!relation || !representativeDescriptor) return null
 		const representative = representativeDescriptor.connectionId === connection.id
 		const focusedMember = projection.focusedGroupKey === relation.groupKey
-		// Tag edges expands every relationship at once; focus expands exactly one.
-		// The representative's own route already carries the collapsed arrow, so
-		// its leg tag is redundant unless Straight has collapsed them all onto
-		// one centre line.
-		const expanded = projection.showTags || focusedMember
-		const showMember = expanded && (!representative || projection.routeStyle === 'straight')
+		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
 		return (
 			<>
 				{showMember && descriptor ? (
@@ -1300,7 +1295,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						connection={connection}
 						descriptor={descriptor}
 						relation={relation}
-						focusedGroupKey={projection.showTags ? null : projection.focusedGroupKey}
+						focusedGroupKey={projection.focusedGroupKey}
 						presentation="focus-member"
 					/>
 				) : null}
@@ -1309,9 +1304,6 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						connection={connection}
 						relation={relation}
 						representative={representativeDescriptor}
-						representativePolicy={relation.family === 'action'
-							? projection.actionTrack
-							: relation.family === 'service' ? projection.serviceTrack : 'data'}
 						routeStyle={projection.routeStyle}
 						focusedGroupKey={projection.focusedGroupKey}
 					/>
@@ -1319,43 +1311,16 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			</>
 		)
 	}
+	// DATA — the ordinary grey canonical cable.
 	const dimUnrelatedCanonical = inCommunicationScope
-		&& projection.mode === 'tagged'
+		&& projection.cableStyle === 'split'
 		&& projection.focusedGroupKey !== null
-	const canonical = (
+	return (
 		<CanonicalConnectionShapeComponent
 			connection={connection}
 			projectionOpacity={dimUnrelatedCanonical ? 0.12 : 1}
 		/>
 	)
-	// The Dataflow communication overlay: the real cable stays exactly where it
-	// is, and the collapsed arrow is painted along the route of the leg that
-	// represents it. Nothing about the signature moves.
-	if (
-		inCommunicationScope
-		&& projection.mode === 'wiring'
-		&& projection.showRelationships
-		&& relation
-		&& representativeDescriptor
-		&& representativeDescriptor.connectionId === connection.id
-	) {
-		return (
-			<>
-				{canonical}
-				<ComponentCommunicationConnection
-					connection={connection}
-					relation={relation}
-					representative={representativeDescriptor}
-					representativePolicy={relation.family === 'action'
-						? projection.actionTrack
-						: relation.family === 'service' ? projection.serviceTrack : 'data'}
-					routeStyle={projection.routeStyle}
-					focusedGroupKey={projection.focusedGroupKey}
-				/>
-			</>
-		)
-	}
-	return canonical
 }
 
 function CanonicalConnectionShapeComponent({

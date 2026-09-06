@@ -119,29 +119,43 @@ describe('communication representative edge policy', () => {
 		{ descriptor: result, pathLength: 90 },
 	]
 
-	it('uses the explicitly requested Action phase', () => {
-		expect(chooseCommunicationRepresentative('action', actionCandidates, 'feedback')).toBe(feedback)
-		expect(chooseCommunicationRepresentative('action', actionCandidates, 'result')).toBe(result)
+	it('always rides the goal for an Action, whatever the routes measure', () => {
+		// Zach, 2026-09-06: "for the action it is always the goal." The candidate
+		// list here deliberately makes feedback the SHORTEST route, so a
+		// reintroduced shortest-path heuristic fails this test rather than
+		// silently changing what a board means.
+		expect(chooseCommunicationRepresentative('action', actionCandidates)).toBe(goal)
 	})
 
-	it('uses the initiating leg when an optional requested phase is absent', () => {
-		expect(chooseCommunicationRepresentative(
-			'action',
-			actionCandidates.filter((candidate) => candidate.descriptor.phase !== 'feedback'),
-			'feedback',
-		)).toBe(goal)
-	})
-
-	it('measures shortest across work and outcome legs without letting Cancel win', () => {
-		expect(chooseCommunicationRepresentative('action', actionCandidates, 'shortest')).toBe(feedback)
-	})
-
-	it('can choose the shorter Service response route', () => {
+	it('always rides the request for a Service', () => {
 		const request = descriptor('request', 'service', 'request')
 		const response = descriptor('response', 'service', 'response')
 		expect(chooseCommunicationRepresentative('service', [
-			{ descriptor: request, pathLength: 80 },
 			{ descriptor: response, pathLength: 30 },
-		], 'shortest')).toBe(response)
+			{ descriptor: request, pathLength: 80 },
+		])).toBe(request)
 	})
+
+	it('falls back to the initiating leg that exists when goal is absent', () => {
+		expect(chooseCommunicationRepresentative(
+			'action',
+			actionCandidates.filter((candidate) => candidate.descriptor.phase !== 'goal'),
+		)).toBe(feedback)
+	})
+
+	it('never lets Cancel speak for an Action while any other leg exists', () => {
+		const cancel = descriptor('cancel', 'action', 'cancel')
+		expect(chooseCommunicationRepresentative('action', [
+			{ descriptor: cancel, pathLength: 1 },
+			{ descriptor: result, pathLength: 900 },
+		])).toBe(result)
+	})
+
+	it('lets Cancel carry only when it is the sole leg', () => {
+		const cancel = descriptor('cancel', 'action', 'cancel')
+		expect(chooseCommunicationRepresentative('action', [
+			{ descriptor: cancel, pathLength: 1 },
+		])).toBe(cancel)
+	})
+
 })

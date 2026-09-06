@@ -4,10 +4,6 @@ import { CONNECTION_SHAPE_TYPE } from './connectionModel'
 import { cleanupStaleConnections } from './ConnectionBindingUtil'
 import { PointingBlockPort, type PointingBlockPortInfo } from './PointingBlockPort'
 import { BLOCK_PORT_DRAG_STATE_ID, DraggingBlockPort } from '../ports/portInteraction'
-import {
-	COMMUNICATION_PORT_DRAG_STATE_ID,
-	DraggingCommunicationPort,
-} from '../ports/communicationPortDrag'
 import { installEffectPortFollow } from './installEffectPortFollow'
 import { keepConnectionsAtBottom } from './keepConnectionsAtBottom'
 
@@ -33,11 +29,6 @@ export function registerBlockConnectionToolStates(editor: Editor): boolean {
 	if (!editor.getStateDescendant('select.pointing_block_port')) select.addChild(PointingBlockPort)
 	// Registered here because the reorder is only ever entered from the port
 	// press this module installs; the two states share one gesture.
-	// A socket in the communication lens rides the same press-and-hold; only
-	// where it may land differs, so it is a sibling state, not a branch.
-	if (!editor.getStateDescendant(`select.${COMMUNICATION_PORT_DRAG_STATE_ID}`)) {
-		select.addChild(DraggingCommunicationPort)
-	}
 	if (!editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) {
 		select.addChild(DraggingBlockPort)
 	}

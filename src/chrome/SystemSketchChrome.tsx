@@ -99,6 +99,7 @@ import {
 import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
+import { CommunicationPortDndHost } from '../blocks/ports/CommunicationPortDnd'
 import './systemsketch-chrome.css'
 import './rich-text-toolbar.css'
 
@@ -744,6 +745,7 @@ export function SystemSketchSurfaceHost() {
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
       <CommunicationPrototypeControls />
+      <CommunicationPortDndHost />
       <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />

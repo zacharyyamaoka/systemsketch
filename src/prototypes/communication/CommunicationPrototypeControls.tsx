@@ -5,14 +5,11 @@ import {
 	COMMUNICATION_FAMILY_PAINT,
 	activeCommunicationRegionId,
 	applyActiveCommunicationRegion,
-	applyCommunicationActionTrack,
+	applyCommunicationCableStyle,
 	applyCommunicationComponentView,
 	applyCommunicationFocus,
-	applyCommunicationProjectionMode,
+	applyCommunicationLens,
 	applyCommunicationRouteStyle,
-	applyCommunicationServiceTrack,
-	applyCommunicationShowRelationships,
-	applyCommunicationShowTags,
 	collectCommunicationRelations,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
@@ -20,11 +17,10 @@ import {
 	isShapeInCommunicationScope,
 	phaseLabel,
 	selectedCommunicationGroupKey,
+	type CommunicationCableStyle,
 	type CommunicationComponentView,
-	type CommunicationProjectionMode,
+	type CommunicationLens,
 	type CommunicationRouteStyle,
-	type CommunicationActionTrack,
-	type CommunicationServiceTrack,
 } from './communicationProjection'
 import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
 import {
@@ -41,14 +37,21 @@ import {
 import { CommunicationLinkPreview } from './CommunicationLinkPreview'
 import './communication-prototype.css'
 
-const MODES: readonly {
-	id: CommunicationProjectionMode
-	label: string
-	hint: string
-}[] = [
-	{ id: 'wiring', label: 'Dataflow', hint: 'Canonical ports and values' },
-	{ id: 'tagged', label: 'Tag edges', hint: 'Parsed protocol legs' },
-	{ id: 'components', label: 'Components', hint: 'Collapsed relationships' },
+const LENSES: readonly { id: CommunicationLens; label: string; hint: string }[] = [
+	{ id: 'dataflow', label: 'Dataflow', hint: 'The signature: ports on the left and right lanes' },
+	{ id: 'communication', label: 'Communication', hint: 'The topology: ports on any of the four edges' },
+]
+
+const COMPONENT_VIEWS: readonly { id: CommunicationComponentView; label: string; hint: string }[] = [
+	{ id: 'simple', label: 'S', hint: 'Simple — the card and its name' },
+	{ id: 'port', label: 'P', hint: 'Port — the card and its ports' },
+	{ id: 'expanded', label: 'E', hint: 'Expanded — the card opened up' },
+]
+
+const CABLE_STYLES: readonly { id: CommunicationCableStyle; label: string; hint: string }[] = [
+	{ id: 'data', label: 'Data', hint: 'Every canonical cable, in grey' },
+	{ id: 'split', label: 'Split', hint: 'Each protocol leg painted separately and tagged' },
+	{ id: 'summary', label: 'Summary', hint: 'One cable per relationship, riding its initiating leg' },
 ]
 
 const ROUTES: readonly { id: CommunicationRouteStyle; label: string }[] = [
@@ -56,29 +59,15 @@ const ROUTES: readonly { id: CommunicationRouteStyle; label: string }[] = [
 	{ id: 'straight', label: 'Straight' },
 ]
 
-const COMPONENT_VIEWS: readonly { id: CommunicationComponentView; label: string }[] = [
-	{ id: 'simple', label: 'Simple' },
-	{ id: 'port', label: 'Port' },
-]
-
-const SERVICE_TRACKS: readonly { id: CommunicationServiceTrack; label: string }[] = [
-	{ id: 'request', label: 'Request' },
-	{ id: 'response', label: 'Response' },
-	{ id: 'shortest', label: 'Shortest' },
-]
-
-const ACTION_TRACKS: readonly { id: CommunicationActionTrack; label: string }[] = [
-	{ id: 'goal', label: 'Goal' },
-	{ id: 'feedback', label: 'Feedback' },
-	{ id: 'result', label: 'Result' },
-	{ id: 'shortest', label: 'Shortest' },
-]
-
 const DRAW_FAMILIES: readonly { id: CommunicationDrawFamily; label: string; hint: string }[] = [
 	{ id: 'stream', label: 'Stream', hint: 'Pub/sub: publisher → subscriber' },
 	{ id: 'service', label: 'Service', hint: 'Client → server; request and response' },
 	{ id: 'action', label: 'Action', hint: 'Client → server; goal, feedback and result' },
 ]
+
+function cardLabel(view: CommunicationComponentView): string {
+	return view === 'simple' ? 'Simple' : view === 'port' ? 'Port' : 'Expanded'
+}
 
 function titleCase(value: string): string {
 	return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
@@ -172,7 +161,7 @@ export function CommunicationPrototypeControls() {
 		if (!legacyPrototype) return
 		// Re-entering a retained review starts at the canonical evidence without
 		// touching the document: every projection choice lives in an EditorAtom.
-		applyCommunicationProjectionMode(editor, 'wiring')
+		applyCommunicationLens(editor, 'dataflow')
 	}, [editor, legacyPrototype])
 
 	useEffect(() => {
@@ -190,8 +179,8 @@ export function CommunicationPrototypeControls() {
 		// Leaving Components mode, or the region closing under it, would otherwise
 		// strand a cross-hair cursor that draws protocol legs on an ordinary board.
 		if (activeToolId !== COMMUNICATION_LINK_TOOL_ID) return
-		if (!enabled || state.mode !== 'components') stopCommunicationLinkDraw(editor)
-	}, [editor, activeToolId, enabled, state.mode])
+		if (!enabled || state.lens !== 'communication') stopCommunicationLinkDraw(editor)
+	}, [editor, activeToolId, enabled, state.lens])
 
 	useEffect(() => {
 		setRenameDraft(null)
@@ -215,7 +204,9 @@ export function CommunicationPrototypeControls() {
 				className="communication-prototype-bar"
 				aria-label={activeRegionId ? 'Async region communication controls' : 'Communication projection prototype'}
 				data-testid="communication-prototype-controls"
-				data-projection-mode={state.mode}
+				data-projection-lens={state.lens}
+				data-projection-cables={state.cableStyle}
+				data-projection-card={state.componentView}
 				data-active-region-id={activeRegionId ?? undefined}
 				data-systemsketch-chrome
 				onPointerDown={stopCanvasEvent}
@@ -225,136 +216,88 @@ export function CommunicationPrototypeControls() {
 					<span>{activeRegionId ? 'Async region' : 'Prototype'}</span>
 					<strong>{activeRegion?.type === 'frame' ? activeRegion.props.name || 'Communication' : 'Communication'}</strong>
 				</div>
-				<div className="communication-prototype-tabs" role="tablist" aria-label="Board projection">
-					{MODES.map((mode) => (
+				<div className="communication-prototype-tabs" role="tablist" aria-label="Region lens">
+					{LENSES.map((lens) => (
 						<button
-							key={mode.id}
+							key={lens.id}
 							type="button"
 							role="tab"
-							aria-selected={state.mode === mode.id}
-							data-testid={`communication-mode-${mode.id}`}
-							title={mode.hint}
-							onClick={() => applyCommunicationProjectionMode(editor, mode.id)}
+							aria-selected={state.lens === lens.id}
+							data-testid={`communication-lens-${lens.id}`}
+							title={lens.hint}
+							onClick={() => applyCommunicationLens(editor, lens.id)}
 						>
-							{mode.label}
+							{lens.label}
 						</button>
 					))}
 				</div>
-				{state.mode === 'wiring' ? (
-					<div className="communication-prototype-routes" aria-label="Overlays">
-						<span>Also</span>
+				<div className="communication-prototype-routes" aria-label="Component view">
+					<span>Card</span>
+					{COMPONENT_VIEWS.map((view) => (
 						<button
+							key={view.id}
 							type="button"
-							aria-pressed={state.showRelationships}
-							data-testid="communication-overlay-relationships"
-							title="Paint collapsed relationship arrows along the routes the real cables take"
-							onClick={() => applyCommunicationShowRelationships(editor, !state.showRelationships)}
+							aria-pressed={state.componentView === view.id}
+							data-testid={`communication-card-${view.id}`}
+							title={view.hint}
+							onClick={() => applyCommunicationComponentView(editor, view.id)}
 						>
-							Communication
+							{view.label}
 						</button>
-					</div>
-				) : null}
-				{state.mode === 'components' ? (
-					<>
-						<div className="communication-prototype-draw" aria-label="Draw a communication relationship">
-							<span>Draw</span>
-							{DRAW_FAMILIES.map((family) => {
-								const armed = drawingFamily === family.id
-								const paint = COMMUNICATION_FAMILY_PAINT[family.id]
-								return (
-									<button
-										key={family.id}
-										type="button"
-										aria-pressed={armed}
-										data-testid={`communication-draw-${family.id}`}
-										title={family.hint}
-										style={{ '--family-ink': paint.ink, '--family-soft': paint.soft } as React.CSSProperties}
-										onClick={() => (armed
-											? stopCommunicationLinkDraw(editor)
-											: startCommunicationLinkDraw(editor, family.id))}
-									>
-										<i aria-hidden="true">{paint.monogram}</i>{family.label}
-									</button>
-								)
-							})}
-						</div>
-						<div className="communication-prototype-routes" aria-label="Overlays">
-							<span>Also</span>
-							<button
-								type="button"
-								aria-pressed={state.showTags}
-								data-testid="communication-overlay-tags"
-								title="Paint each protocol leg beside its collapsed relationship arrow"
-								onClick={() => applyCommunicationShowTags(editor, !state.showTags)}
-							>
-								Tag edges
-							</button>
-						</div>
-						<div className="communication-prototype-routes" aria-label="Component presentation">
-							<span>Card</span>
-							{COMPONENT_VIEWS.map((view) => (
-								<button
-									key={view.id}
-									type="button"
-									aria-pressed={state.componentView === view.id}
-									data-testid={`communication-components-view-${view.id}`}
-									onClick={() => applyCommunicationComponentView(editor, view.id)}
-								>
-									{view.label}
-								</button>
-							))}
-						</div>
-						<div className="communication-prototype-routes" aria-label="Relationship routing">
-							<span>Arrow</span>
-							{ROUTES.map((route) => (
-								<button
-									key={route.id}
-									type="button"
-									aria-pressed={state.routeStyle === route.id}
-									data-testid={`communication-route-${route.id}`}
-									onClick={() => applyCommunicationRouteStyle(editor, route.id)}
-								>
-									{route.label}
-								</button>
-							))}
-						</div>
-						<div
-							className="communication-prototype-track-selectors"
-							aria-label="Representative protocol edges"
-							title={state.routeStyle === 'straight' ? 'Representative edges apply to Elbow routing' : undefined}
+					))}
+				</div>
+				<div className="communication-prototype-routes" aria-label="Cable style">
+					<span>Cables</span>
+					{CABLE_STYLES.map((style) => (
+						<button
+							key={style.id}
+							type="button"
+							aria-pressed={state.cableStyle === style.id}
+							data-testid={`communication-cables-${style.id}`}
+							title={style.hint}
+							onClick={() => applyCommunicationCableStyle(editor, style.id)}
 						>
-							<label>
-								<span>Service edge</span>
-								<select
-									aria-label="Service representative edge"
-									data-testid="communication-service-track"
-									value={state.serviceTrack}
-									disabled={state.routeStyle === 'straight'}
-									onChange={(event) => applyCommunicationServiceTrack(
-										editor,
-										event.target.value as CommunicationServiceTrack,
-									)}
+							{style.label}
+						</button>
+					))}
+				</div>
+				<div className="communication-prototype-routes" aria-label="Relationship routing">
+					<span>Arrow</span>
+					{ROUTES.map((route) => (
+						<button
+							key={route.id}
+							type="button"
+							aria-pressed={state.routeStyle === route.id}
+							data-testid={`communication-route-${route.id}`}
+							onClick={() => applyCommunicationRouteStyle(editor, route.id)}
+						>
+							{route.label}
+						</button>
+					))}
+				</div>
+				{state.lens === 'communication' ? (
+					<div className="communication-prototype-draw" aria-label="Draw a communication relationship">
+						<span>Draw</span>
+						{DRAW_FAMILIES.map((family) => {
+							const armed = drawingFamily === family.id
+							const paint = COMMUNICATION_FAMILY_PAINT[family.id]
+							return (
+								<button
+									key={family.id}
+									type="button"
+									aria-pressed={armed}
+									data-testid={`communication-draw-${family.id}`}
+									title={family.hint}
+									style={{ '--family-ink': paint.ink, '--family-soft': paint.soft } as React.CSSProperties}
+									onClick={() => (armed
+										? stopCommunicationLinkDraw(editor)
+										: startCommunicationLinkDraw(editor, family.id))}
 								>
-									{SERVICE_TRACKS.map((track) => <option key={track.id} value={track.id}>{track.label}</option>)}
-								</select>
-							</label>
-							<label>
-								<span>Action edge</span>
-								<select
-									aria-label="Action representative edge"
-									data-testid="communication-action-track"
-									value={state.actionTrack}
-									disabled={state.routeStyle === 'straight'}
-									onChange={(event) => applyCommunicationActionTrack(
-										editor,
-										event.target.value as CommunicationActionTrack,
-									)}
-								>
-									{ACTION_TRACKS.map((track) => <option key={track.id} value={track.id}>{track.label}</option>)}
-								</select>
-							</label>
-						</div>
-					</>
+									<i aria-hidden="true">{paint.monogram}</i>{family.label}
+								</button>
+							)
+						})}
+					</div>
 				) : null}
 			</section>
 
@@ -364,7 +307,7 @@ export function CommunicationPrototypeControls() {
 				data-systemsketch-chrome
 				onPointerDown={stopCanvasEvent}
 			>
-				{focusedRelation && state.mode !== 'wiring' ? (
+				{focusedRelation && state.cableStyle !== 'data' ? (
 					<>
 						<strong>{focusedRelation.displayId} focused · {focusedRelation.edgeCount} leg{focusedRelation.edgeCount === 1 ? '' : 's'}</strong>
 						<span>{focusedRelation.family} · {focusedRelation.name}; unrelated edges are dimmed.</span>
@@ -406,43 +349,33 @@ export function CommunicationPrototypeControls() {
 							Clear focus
 						</button>
 					</>
-				) : state.mode === 'wiring' ? (
-					<>
-						<strong>{summary.edgeCount} canonical wire{summary.edgeCount === 1 ? '' : 's'}</strong>
-						<span>
-							{state.showRelationships
-								? `${summary.relations.length} relationship${summary.relations.length === 1 ? '' : 's'} painted over the real routes; ports stay put.`
-								: activeRegionId
-									? 'New wires in this region default to Async.'
-									: 'Ports and value nodes are unchanged.'}
-						</span>
-					</>
-				) : state.mode === 'tagged' ? (
-					<>
-						<strong>{summary.taggedEdgeCount} protocol leg{summary.taggedEdgeCount === 1 ? '' : 's'} parsed</strong>
-						<span>
-							{summary.localValueEdgeCount} local value · {unresolvedEdgeCount} unresolved · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
-						</span>
-					</>
-				) : drawHint ? (
-					<>
-						<strong>Drawing {drawingFamily}</strong>
-						<span>Drag from the {drawHint.initiator} to the {drawHint.responder}. Escape to stop.</span>
-					</>
 				) : (
 					<>
-						<strong>{summary.relations.length} component relationships</strong>
+						<strong>
+							{state.cableStyle === 'data'
+								? `${summary.edgeCount} canonical wire${summary.edgeCount === 1 ? '' : 's'}`
+								: state.cableStyle === 'split'
+									? `${summary.taggedEdgeCount} protocol leg${summary.taggedEdgeCount === 1 ? '' : 's'} parsed`
+									: `${summary.relations.length} relationship${summary.relations.length === 1 ? '' : 's'}`}
+						</strong>
 						<span>
-							{state.showTags ? 'Legs shown beside each arrow' : state.componentView === 'simple' ? 'Same Port-sized Simple cards' : 'Port cards'} ·{' '}
-							{state.routeStyle === 'elbow'
-								? `${titleCase(state.serviceTrack)} service · ${titleCase(state.actionTrack)} action tracks`
-								: 'centre lines'} · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
+							{titleCase(state.lens)} · {cardLabel(state.componentView)} cards
+							{state.cableStyle === 'summary' ? ' · summary rides the initiating leg' : ''}
+							{state.cableStyle === 'data' && activeRegionId
+								? ' · new wires default to Async'
+								: ''}
 						</span>
+						{state.cableStyle !== 'data' ? (
+							<span>
+								{summary.localValueEdgeCount} local value · {unresolvedEdgeCount} unresolved ·{' '}
+								{summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
+							</span>
+						) : null}
 					</>
 				)}
 			</aside>
 
-			{state.mode !== 'wiring' ? (
+			{state.cableStyle !== 'data' ? (
 				<div
 					className="communication-prototype-legend"
 					aria-label="Communication family legend"
@@ -452,7 +385,7 @@ export function CommunicationPrototypeControls() {
 					{Object.entries(COMMUNICATION_FAMILY_PAINT).map(([family, paint]) => (
 						<span key={family} style={{ '--family-ink': paint.ink } as React.CSSProperties}>
 							<i>{paint.monogram}</i>{family}
-							{state.mode === 'tagged' ? (
+							{state.cableStyle === 'split' ? (
 								<small>{summary.relations.filter((relation) => relation.family === family)
 									.flatMap((relation) => phaseLabel(relation.phase)).length || relationCounts[family] || 0}</small>
 							) : null}

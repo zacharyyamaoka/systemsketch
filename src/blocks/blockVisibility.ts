@@ -42,7 +42,7 @@ export function getBlockShapeVisibility(
 	// graph merely to make component communication legible.
 	if (
 		isCommunicationPrototypeEnabled(editor)
-		&& communicationProjection.get(editor).mode === 'components'
+		&& communicationProjection.get(editor).lens === 'communication'
 		&& isBlockShape(shape)
 		&& shape.props.view === 'value'
 		&& isShapeInCommunicationScope(editor, shape.id)
