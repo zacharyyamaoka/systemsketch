@@ -12,6 +12,7 @@ import {
 import type { ConnectionShape } from '../../blocks/connections/ConnectionShapeUtil'
 import { EditorAtom } from '../../blocks/ports/portState'
 import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
+import { setCommunicationLensScope } from '../../blocks/ports/portLens'
 
 export const COMMUNICATION_PROTOTYPE_QUERY = 'communication'
 
@@ -47,6 +48,21 @@ export interface CommunicationProjectionState {
 	 * a tool, and writes nothing to the document until an arrow actually lands.
 	 */
 	drawFamily: 'stream' | 'service' | 'action'
+	/**
+	 * Components lens: also paint each protocol leg beside its collapsed arrow.
+	 *
+	 * The two lenses are not three exclusive modes — "show me the relationships
+	 * AND the legs that make them up" is a real question, and it was previously
+	 * only answerable one relationship at a time by focusing it.
+	 */
+	showTags: boolean
+	/**
+	 * Dataflow lens: also paint the collapsed relationship arrows, following the
+	 * routes the real cables already take. Ports stay exactly where the
+	 * signature put them — this is the communication reading OF a wired board,
+	 * not a relocation of it.
+	 */
+	showRelationships: boolean
 }
 
 export const communicationProjection = new EditorAtom<CommunicationProjectionState>(
@@ -60,6 +76,8 @@ export const communicationProjection = new EditorAtom<CommunicationProjectionSta
 		focusedGroupKey: null,
 		activeRegionId: null,
 		drawFamily: 'stream',
+		showTags: false,
+		showRelationships: false,
 	}),
 )
 
@@ -579,9 +597,33 @@ export function isCommunicationPrototypeEnabled(editor?: Editor): boolean {
 }
 
 /** Enter or leave the transient communication lens for one durable region. */
+/**
+ * The single write path for projection state.
+ *
+ * WHY funnelled: `portLens` mirrors the two facts the port layout needs, and a
+ * mirror with more than one writer drifts. Every `apply*` below goes through
+ * here, so the lens the geometry uses cannot disagree with the lens the chrome
+ * is showing.
+ */
+function updateProjection(
+	editor: Editor,
+	update: (state: CommunicationProjectionState) => CommunicationProjectionState,
+): void {
+	const next = communicationProjection.update(editor, update)
+	// Only the Components lens relocates a socket. Tag edges and Dataflow both
+	// read the signature geometry, so the whole board stays on the two lanes.
+	const inCommunicationLens = next.mode === 'components'
+	setCommunicationLensScope(editor, {
+		regionId: inCommunicationLens ? next.activeRegionId : null,
+		wholeBoard: inCommunicationLens
+			&& next.activeRegionId === null
+			&& isCommunicationPrototypeQueryEnabled(),
+	})
+}
+
 export function applyActiveCommunicationRegion(editor: Editor, regionId: TLShapeId | null): void {
 	const valid = regionId && isAsyncRegionShape(editor.getShape(regionId)) ? regionId : null
-	communicationProjection.update(editor, (state) => ({
+	updateProjection(editor, (state) => ({
 		...state,
 		activeRegionId: valid,
 		focusedGroupKey: valid === state.activeRegionId ? state.focusedGroupKey : null,
@@ -595,7 +637,7 @@ export function applyCommunicationProjectionMode(
 	// The projection changes paint only. In particular, Simple is rendered at
 	// the stored Port box rather than writing the Block's view or remembered
 	// dimensions, so switching lenses cannot dirty the document.
-	communicationProjection.update(editor, (state) => ({
+	updateProjection(editor, (state) => ({
 		...state,
 		mode,
 		focusedGroupKey: mode === 'wiring' ? null : state.focusedGroupKey,
@@ -606,30 +648,41 @@ export function applyCommunicationComponentView(
 	editor: Editor,
 	componentView: CommunicationComponentView,
 ): void {
-	communicationProjection.update(editor, (state) => ({ ...state, componentView }))
+	updateProjection(editor, (state) => ({ ...state, componentView }))
 }
 
 export function applyCommunicationRouteStyle(editor: Editor, routeStyle: CommunicationRouteStyle): void {
-	communicationProjection.update(editor, (state) => ({ ...state, routeStyle }))
+	updateProjection(editor, (state) => ({ ...state, routeStyle }))
 }
 
 export function applyCommunicationServiceTrack(editor: Editor, serviceTrack: CommunicationServiceTrack): void {
-	communicationProjection.update(editor, (state) => ({ ...state, serviceTrack }))
+	updateProjection(editor, (state) => ({ ...state, serviceTrack }))
 }
 
 export function applyCommunicationActionTrack(editor: Editor, actionTrack: CommunicationActionTrack): void {
-	communicationProjection.update(editor, (state) => ({ ...state, actionTrack }))
+	updateProjection(editor, (state) => ({ ...state, actionTrack }))
 }
 
 export function applyCommunicationDrawFamily(
 	editor: Editor,
 	drawFamily: CommunicationProjectionState['drawFamily'],
 ): void {
-	communicationProjection.update(editor, (state) => ({ ...state, drawFamily }))
+	updateProjection(editor, (state) => ({ ...state, drawFamily }))
+}
+
+export function applyCommunicationShowTags(editor: Editor, showTags: boolean): void {
+	updateProjection(editor, (state) => ({ ...state, showTags }))
+}
+
+export function applyCommunicationShowRelationships(
+	editor: Editor,
+	showRelationships: boolean,
+): void {
+	updateProjection(editor, (state) => ({ ...state, showRelationships }))
 }
 
 export function applyCommunicationFocus(editor: Editor, groupKey: string | null): void {
-	communicationProjection.update(editor, (state) => ({
+	updateProjection(editor, (state) => ({
 		...state,
 		focusedGroupKey: groupKey,
 	}))

@@ -1259,11 +1259,14 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const relation = useValue(
 		'communication relationship',
 		() => {
-			if (!inCommunicationScope || projection.mode === 'wiring' || !descriptor) return null
+			// Dataflow needs the relationship too once its overlay is on: that is
+			// the "communication reading of a wired board" the carrier arrows paint.
+			const wantsRelations = projection.mode !== 'wiring' || projection.showRelationships
+			if (!inCommunicationScope || !wantsRelations || !descriptor) return null
 			return collectCommunicationRelations(editor).relations
 				.find((candidate) => candidate.groupKey === descriptor.groupKey) ?? null
 		},
-		[editor, descriptor, projection.mode, inCommunicationScope],
+		[editor, descriptor, projection.mode, projection.showRelationships, inCommunicationScope],
 	)
 	const representativeDescriptor = useValue(
 		'communication representative edge',
@@ -1284,7 +1287,12 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		if (!relation || !representativeDescriptor) return null
 		const representative = representativeDescriptor.connectionId === connection.id
 		const focusedMember = projection.focusedGroupKey === relation.groupKey
-		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
+		// Tag edges expands every relationship at once; focus expands exactly one.
+		// The representative's own route already carries the collapsed arrow, so
+		// its leg tag is redundant unless Straight has collapsed them all onto
+		// one centre line.
+		const expanded = projection.showTags || focusedMember
+		const showMember = expanded && (!representative || projection.routeStyle === 'straight')
 		return (
 			<>
 				{showMember && descriptor ? (
@@ -1292,7 +1300,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						connection={connection}
 						descriptor={descriptor}
 						relation={relation}
-						focusedGroupKey={projection.focusedGroupKey}
+						focusedGroupKey={projection.showTags ? null : projection.focusedGroupKey}
 						presentation="focus-member"
 					/>
 				) : null}
@@ -1314,12 +1322,40 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const dimUnrelatedCanonical = inCommunicationScope
 		&& projection.mode === 'tagged'
 		&& projection.focusedGroupKey !== null
-	return (
+	const canonical = (
 		<CanonicalConnectionShapeComponent
 			connection={connection}
 			projectionOpacity={dimUnrelatedCanonical ? 0.12 : 1}
 		/>
 	)
+	// The Dataflow communication overlay: the real cable stays exactly where it
+	// is, and the collapsed arrow is painted along the route of the leg that
+	// represents it. Nothing about the signature moves.
+	if (
+		inCommunicationScope
+		&& projection.mode === 'wiring'
+		&& projection.showRelationships
+		&& relation
+		&& representativeDescriptor
+		&& representativeDescriptor.connectionId === connection.id
+	) {
+		return (
+			<>
+				{canonical}
+				<ComponentCommunicationConnection
+					connection={connection}
+					relation={relation}
+					representative={representativeDescriptor}
+					representativePolicy={relation.family === 'action'
+						? projection.actionTrack
+						: relation.family === 'service' ? projection.serviceTrack : 'data'}
+					routeStyle={projection.routeStyle}
+					focusedGroupKey={projection.focusedGroupKey}
+				/>
+			</>
+		)
+	}
+	return canonical
 }
 
 function CanonicalConnectionShapeComponent({

@@ -327,15 +327,17 @@ export function materializeCommunicationLink(
 		// Each end's socket goes on the face pointing at the other component.
 		const sourceRail = facingRail(editor, sourceShapeId, targetShapeId)
 		const targetRail = facingRail(editor, targetShapeId, sourceShapeId)
+		// The rail is a COMMUNICATION-lens placement. Dataflow is untouched: the
+		// port keeps its ordinary row and lands on the left or right lane there.
 		pending.push({
 			shapeId: sourceShapeId,
 			side: 'outputs',
-			port: sourceRail ? { ...base, edge: sourceRail } : base,
+			port: sourceRail ? { ...base, commEdge: sourceRail } : base,
 		})
 		pending.push({
 			shapeId: targetShapeId,
 			side: 'inputs',
-			port: targetRail ? { ...base, edge: targetRail } : base,
+			port: targetRail ? { ...base, commEdge: targetRail } : base,
 		})
 	}
 	if (!appendPorts(editor, pending)) {

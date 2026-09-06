@@ -7,9 +7,17 @@
 	left: 50%;
 	z-index: 560;
 	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
 	align-items: center;
 	gap: 10px;
+	row-gap: 6px;
 	min-height: 46px;
+	/* WHY the reserved gutter: the bar is centred and the status panel is pinned
+	   to the right edge of the same band. Two composable overlays made the bar
+	   wide enough to slide under that panel and clip its text, so it wraps
+	   inside a width that always leaves the panel its column. */
+	max-width: min(1240px, calc(100% - 520px));
 	padding: 5px 7px 5px 12px;
 	transform: translateX(-50%);
 	border: 1px solid color-mix(in srgb, var(--ss-border) 88%, transparent);

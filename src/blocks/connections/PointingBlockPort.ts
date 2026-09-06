@@ -19,6 +19,10 @@ import {
 	canReorderBlockPort,
 	type BlockPortRef,
 } from '../ports/portInteraction'
+import {
+	COMMUNICATION_PORT_DRAG_STATE_ID,
+	canMoveCommunicationPort,
+} from '../ports/communicationPortDrag'
 import { clearPortDragState } from '../ports/portState'
 import { createOrUpdateConnectionBinding } from './ConnectionBindingUtil'
 import { forgetPickerCreationMark, rememberPickerCreationMark } from './blockPicker'
@@ -186,7 +190,6 @@ export class PointingBlockPort extends StateNode {
 	 */
 	override onLongPress(info: TLPointerEventInfo): void {
 		if (!this.info) return
-		if (!this.editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) return
 		const port = getLiveBlockPorts(this.editor, this.info.shapeId)
 			.find((candidate) => candidate.id === this.info?.portId)
 		if (!port) return
@@ -195,6 +198,17 @@ export class PointingBlockPort extends StateNode {
 			side: port.side === 'output' ? 'outputs' : 'inputs',
 			portId: this.info.portId,
 		}
+		// One hold, two destinations. In the communication lens a socket is
+		// somewhere on a wall, so it gets its own sibling state; asked first so
+		// the Dataflow reorder below never has to know the lens exists.
+		if (
+			this.editor.getStateDescendant(`select.${COMMUNICATION_PORT_DRAG_STATE_ID}`)
+			&& canMoveCommunicationPort(this.editor, ref)
+		) {
+			this.parent.transition(COMMUNICATION_PORT_DRAG_STATE_ID, { ...info, ...ref })
+			return
+		}
+		if (!this.editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) return
 		if (!canReorderBlockPort(this.editor, ref)) return
 		this.parent.transition(BLOCK_PORT_DRAG_STATE_ID, { ...info, ...ref })
 	}

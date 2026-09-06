@@ -7,7 +7,9 @@ import {
 	type VecLike,
 } from 'tldraw'
 import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape, type BlockShapeProps, type SemanticPortRole } from '../blockModel'
-import { layoutBlock } from '../layoutBlock'
+import { layoutBlock, type BlockLayoutLens } from '../layoutBlock'
+import { blockLayoutLensFor } from '../ports/portLens'
+import { communicationPortDragPagePoint } from '../ports/communicationPortDragPoint'
 import { resolveBlockPortSemanticRole } from './semanticRoles'
 import { BRANCH_SHAPE_TYPE, branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
 import { branchFoldAttachPoint } from '../../branch/branchScope'
@@ -104,27 +106,31 @@ export function portElbowSideForFace(
  */
 export function getBlockConnectionPorts(
 	props: BlockShapeProps,
-	options: { includeHidden?: boolean } = {},
+	options: { includeHidden?: boolean; lens?: BlockLayoutLens } = {},
 ): BlockConnectionPort[] {
 	// Memoised on the props object, like the layout it projects: the binding
 	// side effects and the polarity reads ask for this table on every drag
 	// frame of every cable, and a moved Block keeps its props object.
-	let entry = connectionPortsMemo.get(props)
+	const lens = options.lens ?? 'dataflow'
+	const memo = lens === 'communication' ? communicationPortsMemo : connectionPortsMemo
+	let entry = memo.get(props)
 	if (!entry) {
-		const all = projectBlockConnectionPorts(props)
+		const all = projectBlockConnectionPorts(props, lens)
 		entry = { all, visible: all.filter((port) => !port.hidden) }
-		connectionPortsMemo.set(props, entry)
+		memo.set(props, entry)
 	}
 	return options.includeHidden ? entry.all : entry.visible
 }
 
-const connectionPortsMemo = new WeakMap<
-	BlockShapeProps,
-	{ all: BlockConnectionPort[]; visible: BlockConnectionPort[] }
->()
+type PortsMemoEntry = { all: BlockConnectionPort[]; visible: BlockConnectionPort[] }
+const connectionPortsMemo = new WeakMap<BlockShapeProps, PortsMemoEntry>()
+const communicationPortsMemo = new WeakMap<BlockShapeProps, PortsMemoEntry>()
 
-function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPort[] {
-	const layout = layoutBlock(props)
+function projectBlockConnectionPorts(
+	props: BlockShapeProps,
+	lens: BlockLayoutLens = 'dataflow',
+): BlockConnectionPort[] {
+	const layout = layoutBlock(props, { lens })
 	const placedById = new Map(layout.ports.map((placed) => [placed.port.id, placed]))
 
 	const ports = ([
@@ -265,11 +271,14 @@ export function getFloatingPortConnectionPorts(port: FloatingPortShape): BlockCo
 	}]
 }
 
-function projectHostPorts(host: PortHostShape): BlockConnectionPort[] {
+function projectHostPorts(
+	host: PortHostShape,
+	lens: BlockLayoutLens = 'dataflow',
+): BlockConnectionPort[] {
 	if (isBranchShape(host)) return getBranchConnectionPorts(host)
 	if (isLoopShape(host)) return getLoopConnectionPorts(host)
 	if (isFloatingPortShape(host)) return getFloatingPortConnectionPorts(host)
-	return getBlockConnectionPorts(host.props, { includeHidden: true })
+	return getBlockConnectionPorts(host.props, { includeHidden: true, lens })
 }
 
 /**
@@ -280,8 +289,13 @@ function projectHostPorts(host: PortHostShape): BlockConnectionPort[] {
  * position all resolve the same projection without recomputing the layout per
  * pointer move.
  */
-const blockPortsCache = createComputedCache('block ports', (_editor: Editor, host: PortHostShape) => (
-	projectHostPorts(host)
+const blockPortsCache = createComputedCache('block ports', (editor: Editor, host: PortHostShape) => (
+	// WHY the lens is read INSIDE the computed: every cable anchor, hit test and
+	// binding position resolves through this one table, so reading the atom here
+	// is what makes cables follow a port that moved to another edge — tldraw's
+	// signals track the read and re-evaluate the cache when the lens changes.
+	// Anything else would need every consumer to subscribe to the lens by hand.
+	projectHostPorts(host, blockLayoutLensFor(editor, host.id))
 ))
 
 /**
@@ -298,7 +312,7 @@ export function getLiveBlockPorts(
 ): BlockConnectionPort[] {
 	const host = typeof shape === 'string' ? editor.getShape(shape) : shape
 	if (!isPortHostShape(host)) return []
-	if (!editor.store) return projectHostPorts(host)
+	if (!editor.store) return projectHostPorts(host, blockLayoutLensFor(editor, host.id))
 	return blockPortsCache.get(editor, host.id) ?? []
 }
 
@@ -330,6 +344,16 @@ export function getBlockConnectionPortPagePoint(
 	if (!isPortHostShape(host)) return null
 	const port = getLiveBlockPorts(editor, host.id).find((candidate) => candidate.id === portId)
 	if (!port) return null
+	// WHY a rendering-time read rather than a write during the drag: the whole
+	// point of the press-and-hold is that nothing commits until release, so the
+	// move is one undo step and a cancel costs nothing. Reading the atom here is
+	// what makes the CABLE live too — the path is computed inside `useValue`, and
+	// tldraw's signals track every atom read, so the connection re-paints on each
+	// pointer move with nothing subscribing to the drag by hand. Writing the new
+	// placement every frame so cables followed "for free" is exactly what would
+	// shred one move into a history entry per frame.
+	const held = communicationPortDragPagePoint(editor, host.id, portId)
+	if (held) return held
 	// Inside a folded Branch arm the dot is not on screen; the cable attaches
 	// at that arm's header edge instead — left for an input, right for an output.
 	if (editor.store) {

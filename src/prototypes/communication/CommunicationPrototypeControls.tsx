@@ -11,6 +11,8 @@ import {
 	applyCommunicationProjectionMode,
 	applyCommunicationRouteStyle,
 	applyCommunicationServiceTrack,
+	applyCommunicationShowRelationships,
+	applyCommunicationShowTags,
 	collectCommunicationRelations,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
@@ -238,6 +240,20 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
+				{state.mode === 'wiring' ? (
+					<div className="communication-prototype-routes" aria-label="Overlays">
+						<span>Also</span>
+						<button
+							type="button"
+							aria-pressed={state.showRelationships}
+							data-testid="communication-overlay-relationships"
+							title="Paint collapsed relationship arrows along the routes the real cables take"
+							onClick={() => applyCommunicationShowRelationships(editor, !state.showRelationships)}
+						>
+							Communication
+						</button>
+					</div>
+				) : null}
 				{state.mode === 'components' ? (
 					<>
 						<div className="communication-prototype-draw" aria-label="Draw a communication relationship">
@@ -261,6 +277,18 @@ export function CommunicationPrototypeControls() {
 									</button>
 								)
 							})}
+						</div>
+						<div className="communication-prototype-routes" aria-label="Overlays">
+							<span>Also</span>
+							<button
+								type="button"
+								aria-pressed={state.showTags}
+								data-testid="communication-overlay-tags"
+								title="Paint each protocol leg beside its collapsed relationship arrow"
+								onClick={() => applyCommunicationShowTags(editor, !state.showTags)}
+							>
+								Tag edges
+							</button>
 						</div>
 						<div className="communication-prototype-routes" aria-label="Component presentation">
 							<span>Card</span>
@@ -381,7 +409,13 @@ export function CommunicationPrototypeControls() {
 				) : state.mode === 'wiring' ? (
 					<>
 						<strong>{summary.edgeCount} canonical wire{summary.edgeCount === 1 ? '' : 's'}</strong>
-						<span>{activeRegionId ? 'New wires in this region default to Async.' : 'Ports and value nodes are unchanged.'}</span>
+						<span>
+							{state.showRelationships
+								? `${summary.relations.length} relationship${summary.relations.length === 1 ? '' : 's'} painted over the real routes; ports stay put.`
+								: activeRegionId
+									? 'New wires in this region default to Async.'
+									: 'Ports and value nodes are unchanged.'}
+						</span>
 					</>
 				) : state.mode === 'tagged' ? (
 					<>
@@ -399,7 +433,7 @@ export function CommunicationPrototypeControls() {
 					<>
 						<strong>{summary.relations.length} component relationships</strong>
 						<span>
-							{state.componentView === 'simple' ? 'Same Port-sized Simple cards' : 'Port cards'} ·{' '}
+							{state.showTags ? 'Legs shown beside each arrow' : state.componentView === 'simple' ? 'Same Port-sized Simple cards' : 'Port cards'} ·{' '}
 							{state.routeStyle === 'elbow'
 								? `${titleCase(state.serviceTrack)} service · ${titleCase(state.actionTrack)} action tracks`
 								: 'centre lines'} · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}

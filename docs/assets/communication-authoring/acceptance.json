@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T21:01:22.716Z",
+  "generatedAt": "2026-09-06T21:37:39.615Z",
   "checks": [
     "Components mode offers exactly the three drawable patterns, none armed and nothing wired",
     "a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher",
@@ -7,8 +7,13 @@
     "a Service arrow generates request forward and response back, naming the client by the arrowhead",
     "an Action arrow generates goal, feedback and result — and deliberately no cancel leg",
     "flipping to Dataflow shows the six real cables the three drawn arrows created",
-    "the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention",
+    "Dataflow repositions every communication-placed socket back onto the left and right lanes",
+    "Dataflow + Communication paints the three relationship arrows over the real routes without moving a port",
     "the strict parser reads the generated dataflow back as exactly the three relationships that were drawn",
+    "Tag edges inside the communication view reveals every leg beside the arrow it belongs to",
+    "the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention",
+    "press-and-hold slides a socket onto another edge in the communication lens, keeping every cable",
+    "the relocated socket leaves the Dataflow signature untouched",
     "renaming a relationship rewrites its port names and keeps every cable bound",
     "the armed family toggles off, returning the canvas to ordinary selection",
     "leaving the region closes the lens, so an ordinary board has no communication drawing affordance",

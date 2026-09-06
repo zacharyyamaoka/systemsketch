@@ -102,11 +102,36 @@ export function edgePortPoint(
 export const RAIL_LABEL_GAP_PX = 12
 
 /**
- * The horizontal rail a port was authored onto, or null for the ordinary
- * side-derived vertical rails.
+ * Which question the layout is answering.
+ *
+ * `dataflow` is the signature: two vertical lanes, inputs left and outputs
+ * right, ordered by row. It NEVER puts a port on a horizontal edge — a
+ * signature that wraps around the corner stops reading as a signature.
+ * `communication` is the topology: a socket may sit on any of the four edges
+ * so it can face the component it talks to.
+ */
+export type BlockLayoutLens = 'dataflow' | 'communication'
+
+export interface BlockLayoutOptions {
+	lens?: BlockLayoutLens
+}
+
+/**
+ * The horizontal rail this port occupies in the communication lens, or null
+ * when it stays on a vertical one.
+ *
+ * Only ever consulted for `lens: 'communication'`; the dataflow layout does not
+ * call it, which is what makes "no top or bottom ports in Dataflow" a property
+ * of the code rather than a rule someone has to remember.
  */
 export function portRailEdge(port: BlockPort): 'top' | 'bottom' | null {
-	return port.edge === 'top' || port.edge === 'bottom' ? port.edge : null
+	return port.commEdge === 'top' || port.commEdge === 'bottom' ? port.commEdge : null
+}
+
+/** Where along its edge a communication-lens port sits. Centred by default. */
+export function portRailT(port: BlockPort): number {
+	const value = port.commEdgeT
+	return Number.isFinite(value) ? Math.min(1, Math.max(0, value as number)) : 0.5
 }
 
 /**
@@ -324,8 +349,13 @@ interface BodySlotPlan {
  * Resolve the Port view's burger grammar onto one 44px grid. Group and branch
  * dividers each consume a full slot, exactly as in the mature pyblocks face.
  */
-function planBodySlots(rawProps: BlockShapeProps): BodySlotPlan {
-	const props = withoutRailPorts(rawProps)
+function planBodySlots(
+	rawProps: BlockShapeProps,
+	lens: BlockLayoutLens = 'dataflow',
+): BodySlotPlan {
+	// In Dataflow a rail port has no rail to sit on, so it keeps an ordinary
+	// body row — that IS the best-effort reposition back onto the two lanes.
+	const props = lens === 'communication' ? withoutRailPorts(rawProps) : rawProps
 	const sections = blockPortSections(props, { visibleOnly: true })
 	const portLayout = blockPortLayout(props)
 
@@ -601,6 +631,42 @@ function portLabelContentBox(
 	}
 }
 
+/**
+ * Keep authored rail positions but never let two sockets collide.
+ *
+ * WHY nudge rather than redistribute evenly: a port dragged to a specific spot
+ * should stay where it was put. Sockets are only pushed apart when they would
+ * overlap, and only by as much as it takes, so an untouched rail with one port
+ * still centres it and a crowded rail degrades into an even spread on its own.
+ */
+export function spreadRailFractions(
+	fractions: readonly number[],
+	minimumGap = 0.14,
+): number[] {
+	const next = [...fractions]
+	for (let index = 1; index < next.length; index += 1) {
+		next[index] = Math.max(next[index], next[index - 1] + minimumGap)
+	}
+	const overflow = next.length > 0 ? next[next.length - 1] - 1 : 0
+	if (overflow > 0) {
+		// Ran off the end: shift the whole run back, then re-open any gap the
+		// shift closed at the start. With more ports than the rail can hold at
+		// the preferred gap this settles into an even spread.
+		for (let index = 0; index < next.length; index += 1) next[index] -= overflow
+		for (let index = 1; index < next.length; index += 1) {
+			next[index] = Math.max(next[index], next[index - 1] + minimumGap)
+		}
+	}
+	const span = next.length > 1 ? next[next.length - 1] - next[0] : 0
+	if (span > 1) {
+		for (let index = 0; index < next.length; index += 1) {
+			next[index] = next.length === 1 ? 0.5 : index / (next.length - 1)
+		}
+		return next
+	}
+	return next.map((value) => Math.min(1, Math.max(0, value)))
+}
+
 /** Centre the measured content inside a rail label instead of packing it to a lane edge. */
 function railLabelContentBox(port: BlockPort, side: 'input' | 'output', label: BlockRect): BlockRect {
 	const w = Math.max(0, Math.min(label.w, portLabelContentWidth(port, side)))
@@ -636,10 +702,14 @@ function placeHorizontalRails(
 		] as const).flatMap(([side, ports]) => ports
 			.filter((port) => port.visible && portRailEdge(port) === edge)
 			.map((port) => ({ port, side })))
+			// Both rails read left→right, which is Simulink's ordering rule and
+			// what the prior-art study assumes. An authored fraction decides the
+			// order; ties keep their order in the port list.
+			.sort((a, b) => portRailT(a.port) - portRailT(b.port))
 		if (lane.length === 0) continue
+		const spread = spreadRailFractions(lane.map(({ port }) => portRailT(port)))
 		lane.forEach(({ port, side }, index) => {
-			// Evenly spread, ordered left→right by position in the port list.
-			const t = (index + 0.5) / lane.length
+			const t = spread[index]
 			const point = edgePortPoint(edge, t, width, height)
 			const labelWidth = Math.max(0, Math.min(
 				width - PORT_LABEL_INSET_PX * 2,
@@ -831,10 +901,13 @@ function portDescriptionHeight(props: BlockShapeProps, width: number): number {
  * measured on a fallback face must not outlive the face it was measured for.
  */
 let layoutMemo = new WeakMap<BlockShapeProps, BlockLayout>()
+/** The same memo for the communication lens: same props, different geometry. */
+let communicationLayoutMemo = new WeakMap<BlockShapeProps, BlockLayout>()
 
 if (typeof document !== 'undefined' && 'fonts' in document) {
 	const forgetLayouts = () => {
 		layoutMemo = new WeakMap()
+		communicationLayoutMemo = new WeakMap()
 	}
 	document.fonts.ready.then(forgetLayouts, () => undefined)
 	document.fonts.addEventListener('loadingdone', forgetLayouts)
@@ -844,15 +917,23 @@ if (typeof document !== 'undefined' && 'fonts' in document) {
  * The one geometric projection for the Block. Rendering, selection geometry,
  * connection anchors and frame interaction all consume this immutable result.
  */
-export function layoutBlock(props: BlockShapeProps): BlockLayout {
-	const memoized = layoutMemo.get(props)
+export function layoutBlock(
+	props: BlockShapeProps,
+	options: BlockLayoutOptions = {},
+): BlockLayout {
+	const lens = options.lens ?? 'dataflow'
+	const memo = lens === 'communication' ? communicationLayoutMemo : layoutMemo
+	const memoized = memo.get(props)
 	if (memoized) return memoized
-	const layout = computeBlockLayout(props)
-	layoutMemo.set(props, layout)
+	const layout = computeBlockLayout(props, lens)
+	memo.set(props, layout)
 	return layout
 }
 
-function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
+function computeBlockLayout(
+	rawProps: BlockShapeProps,
+	lens: BlockLayoutLens = 'dataflow',
+): BlockLayout {
 	if (blockIsFolded(rawProps)) return foldedBlockLayout(rawProps)
 	// An effect port is an output that leaves by the *top* edge, because the call
 	// gave its value no name to leave by. Keep it out of the right-hand lane
@@ -1131,7 +1212,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		}
 		placeExpandedBody(props, width, bodyTop, bodyBottom, place, dividers, sections)
 	} else {
-		const plan = planBodySlots(props)
+		const plan = planBodySlots(props, lens)
 		const available = Math.max(
 			0,
 			footerTop - NODE_ROW_BOTTOM_PADDING_PX - bodyTop - descriptionReserve,
@@ -1183,7 +1264,12 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 
 		placeBody(props.inputs, 'input')
 		placeBody(props.outputs, 'output')
-		placeHorizontalRails(props, width, height, { top: bodyTop, bottom: footerTop }, placed)
+		// WHY guarded rather than trusted: "Dataflow never shows a top or bottom
+		// port" is enforced at the one place a rail can be created, so a stored
+		// `commEdge` cannot leak into the signature view.
+		if (lens === 'communication') {
+			placeHorizontalRails(props, width, height, { top: bodyTop, bottom: footerTop }, placed)
+		}
 		dividers.push(...plan.dividers.map(({ kind, slot }) => ({
 			kind,
 			x: kind === 'group' ? 0 : width / 2,

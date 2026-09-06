@@ -97,7 +97,7 @@ async function record(page) {
       const shape = editor.getShape(id)
       if (!shape) return null
       const read = (list, side) => list.map((port) => ({
-        id: port.id, name: port.name, side, edge: port.edge ?? null,
+        id: port.id, name: port.name, side, commEdge: port.commEdge ?? null,
       }))
       return [...read(shape.props.inputs, 'input'), ...read(shape.props.outputs, 'output')]
     }
@@ -129,6 +129,24 @@ async function record(page) {
       status: document.querySelector('[data-testid="communication-prototype-status"]')?.textContent ?? '',
       railLabels: Array.from(document.querySelectorAll('.BlockNode-portLabel--rail'))
         .map((node) => node.textContent.trim()),
+      // Every painted dot's edge, straight off the laid-out geometry.
+      railDots: Array.from(document.querySelectorAll('[data-block-port-edge]'))
+        .map((node) => node.getAttribute('data-block-port-edge')),
+      overlays: {
+        tags: document.querySelector('[data-testid="communication-overlay-tags"]')
+          ?.getAttribute('aria-pressed') ?? null,
+        relationships: document.querySelector('[data-testid="communication-overlay-relationships"]')
+          ?.getAttribute('aria-pressed') ?? null,
+      },
+      // A leg revealed beside its collapsed arrow stamps "focus-member"; a leg
+      // in the standalone Tag edges mode stamps "tagged".
+      taggedLegs: Array.from(document.querySelectorAll(
+        '[data-communication-mode="tagged"], [data-communication-mode="focus-member"]',
+      )).length,
+      collapsedArrows: Array.from(
+        document.querySelectorAll('[data-communication-mode="components"][data-communication-id]'),
+      ).map((node) => node.getAttribute('data-communication-id')),
+      cardView: document.querySelector('[data-communication-projected="true"]') ? 'projected' : 'raw',
     }
   })())`))
 }
@@ -199,8 +217,8 @@ async function main() {
     pass('a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher')
 
     // Four-sided ports: Camera sits BELOW Mission, so the sockets face.
-    assert.equal(cameraOut[0].edge, 'top', JSON.stringify(cameraOut))
-    assert.equal(missionIn[0].edge, 'bottom', JSON.stringify(missionIn))
+    assert.equal(cameraOut[0].commEdge, 'top', JSON.stringify(cameraOut))
+    assert.equal(missionIn[0].commEdge, 'bottom', JSON.stringify(missionIn))
     pass('a stacked pair puts each generated socket on the facing horizontal rail')
     await shot(app.page, '02-stream-four-sided-rails.png')
 
@@ -235,24 +253,35 @@ async function main() {
     assert.match(observed.status, /6 canonical wires/)
     pass('flipping to Dataflow shows the six real cables the three drawn arrows created')
 
-    // Components mode projects Simple cards whose anchors are deliberately
-    // quiet; the four-sided LABEL is a Port-view fact, so it is read here.
+    // THE RULE: Dataflow is the signature and never puts a socket on a
+    // horizontal edge, however the communication lens placed it.
+    assert.deepEqual(observed.railLabels, [], JSON.stringify(observed.railLabels))
     assert.equal(
-      observed.railLabels.some((label) => label.includes('camera.stream')),
+      observed.railDots.every((edge) => edge === 'left' || edge === 'right'),
       true,
-      JSON.stringify(observed.railLabels),
+      `Dataflow must keep every port on a vertical lane: ${JSON.stringify(observed.railDots)}`,
     )
-    const railGeometry = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
-      const node = Array.from(document.querySelectorAll('.BlockNode-portLabel--rail'))
-        .find((candidate) => candidate.textContent.includes('camera.stream'))
-      if (!node) return null
-      const style = window.getComputedStyle(node)
-      return { justify: style.justifyContent, align: style.textAlign, top: node.style.top }
-    })())`))
-    assert.equal(railGeometry.justify, 'center', JSON.stringify(railGeometry))
-    assert.equal(railGeometry.align, 'center', JSON.stringify(railGeometry))
-    pass('the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention')
+    pass('Dataflow repositions every communication-placed socket back onto the left and right lanes')
     await shot(app.page, '04-dataflow-generated-ports.png')
+
+    // The Dataflow communication overlay: relationship arrows over the real
+    // routes, with the ports left exactly where the signature put them.
+    const portsBeforeOverlay = JSON.stringify(observed.railDots)
+    await clickElement(app.page, '[data-testid="communication-overlay-relationships"]')
+    await delay(500)
+    observed = await record(app.page)
+    assert.equal(observed.overlays.relationships, 'true')
+    assert.deepEqual(
+      [...new Set(observed.collapsedArrows)].sort(),
+      ['A1', 'S1', 'ST1'],
+      JSON.stringify(observed.collapsedArrows),
+    )
+    assert.equal(JSON.stringify(observed.railDots), portsBeforeOverlay, 'ports must not move')
+    assert.match(observed.status, /ports stay put/)
+    pass('Dataflow + Communication paints the three relationship arrows over the real routes without moving a port')
+    await shot(app.page, '06-dataflow-communication-overlay.png')
+    await clickElement(app.page, '[data-testid="communication-overlay-relationships"]')
+    await delay(350)
 
     await clickElement(app.page, '[data-testid="communication-mode-components"]')
     await delay(450)
@@ -263,6 +292,93 @@ async function main() {
       `the parser should read the generated board back as one action, one service and one stream: ${JSON.stringify(ids)}`,
     )
     pass('the strict parser reads the generated dataflow back as exactly the three relationships that were drawn')
+
+    // --- Tag edges INSIDE the communication view --------------------------
+    observed = await record(app.page)
+    assert.equal(observed.overlays.tags, 'false')
+    const collapsedOnly = observed.taggedLegs
+    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await delay(600)
+    observed = await record(app.page)
+    assert.equal(observed.overlays.tags, 'true')
+    assert.ok(
+      observed.taggedLegs > collapsedOnly,
+      `Tag edges should reveal the individual legs beside the collapsed arrows: ${collapsedOnly} → ${observed.taggedLegs}`,
+    )
+    assert.deepEqual(
+      [...new Set(observed.collapsedArrows)].sort(),
+      ['A1', 'S1', 'ST1'],
+      'the collapsed arrows stay while their legs are revealed beside them',
+    )
+    pass('Tag edges inside the communication view reveals every leg beside the arrow it belongs to')
+    await shot(app.page, '07-components-with-tag-edges.png')
+    await clickElement(app.page, '[data-testid="communication-overlay-tags"]')
+    await delay(350)
+
+    // --- Press-and-hold a socket onto another edge ------------------------
+    await clickElement(app.page, '[data-testid="communication-components-view-port"]')
+    await delay(500)
+    observed = await record(app.page)
+    assert.ok(
+      observed.railLabels.some((label) => label.includes('camera.stream')),
+      `the communication lens with Port cards paints the rail label: ${JSON.stringify(observed.railLabels)}`,
+    )
+    const railGeometry = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const node = Array.from(document.querySelectorAll('.BlockNode-portLabel--rail'))
+        .find((candidate) => candidate.textContent.includes('camera.stream'))
+      if (!node) return null
+      const style = window.getComputedStyle(node)
+      return { justify: style.justifyContent, align: style.textAlign }
+    })())`))
+    assert.equal(railGeometry.justify, 'center', JSON.stringify(railGeometry))
+    assert.equal(railGeometry.align, 'center', JSON.stringify(railGeometry))
+    pass('the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention')
+
+    const cameraPort = await elementBox(
+      app.page,
+      '[data-shape-id="shape:camera"] .Port[data-block-port-id="comm:stream:camera:stream"]',
+    )
+    const cameraBounds = JSON.parse(await evaluate(app.page,
+      `JSON.stringify(window.__systemsketch.editor.getShapePageBounds('shape:camera'))`))
+    // Hold still first — tldraw cancels its own long-press the moment a press
+    // crosses the drag threshold, which is exactly what makes a cable instead.
+    const target = await pagePoint(app.page, {
+      x: cameraBounds.x + cameraBounds.w + 4,
+      y: cameraBounds.y + cameraBounds.h * 0.5,
+    })
+    await mouse(app.page, 'mouseMoved', cameraPort.cx, cameraPort.cy)
+    await mouse(app.page, 'mousePressed', cameraPort.cx, cameraPort.cy, { buttons: 1 })
+    await delay(900)
+    for (let step = 1; step <= 10; step += 1) {
+      await mouse(app.page, 'mouseMoved',
+        cameraPort.cx + ((target.x - cameraPort.cx) * step) / 10,
+        cameraPort.cy + ((target.y - cameraPort.cy) * step) / 10,
+        { buttons: 1 })
+      await delay(30)
+    }
+    await mouse(app.page, 'mouseReleased', target.x, target.y)
+    await delay(600)
+    observed = await record(app.page)
+    const movedPort = observed.ports.camera.find((port) => port.name === 'camera.stream')
+    assert.equal(movedPort?.commEdge, 'right', JSON.stringify(observed.ports.camera))
+    assert.equal(observed.wires.length, 6, 'moving a socket must not disturb a cable')
+    pass('press-and-hold slides a socket onto another edge in the communication lens, keeping every cable')
+    await shot(app.page, '08-port-dragged-to-edge.png')
+
+    // The move is a COMMUNICATION-lens fact and must not touch the signature.
+    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    await delay(500)
+    observed = await record(app.page)
+    assert.equal(
+      observed.railDots.every((edge) => edge === 'left' || edge === 'right'),
+      true,
+      JSON.stringify(observed.railDots),
+    )
+    pass('the relocated socket leaves the Dataflow signature untouched')
+    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await delay(450)
+    await clickElement(app.page, '[data-testid="communication-components-view-simple"]')
+    await delay(400)
 
     // --- Rename travels through the ports, which is where the name lives ------
     // Focus is a canvas gesture: press the collapsed A1 edge itself. Sampling

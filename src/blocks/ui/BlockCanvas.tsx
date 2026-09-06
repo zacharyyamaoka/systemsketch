@@ -1360,9 +1360,14 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
   const layoutOffset = autoFitPresentation
     ? { x: autoFitPresentation.x, y: autoFitPresentation.y }
     : { x: 0, y: 0 }
-  const layout = layoutBlock(autoFitPresentation
-    ? { ...shape.props, w: autoFitPresentation.w, h: autoFitPresentation.h }
-    : shape.props)
+  const layout = layoutBlock(
+    autoFitPresentation
+      ? { ...shape.props, w: autoFitPresentation.w, h: autoFitPresentation.h }
+      : shape.props,
+    // The communication lens is the only caller that may place a socket on a
+    // horizontal rail; every other render asks for the signature geometry.
+    { lens: communicationProjected ? 'communication' : 'dataflow' },
+  )
   const titleAppearance = blockTitleAppearance(editor, shape.props)
 	const insetBackground = blockInsetBackground(shape.props)
   const parentMemberLayout = useValue(
