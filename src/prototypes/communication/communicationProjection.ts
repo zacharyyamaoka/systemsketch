@@ -478,16 +478,19 @@ export function applyCommunicationLens(editor: Editor, lens: CommunicationLens):
 		// on the useful one rather than on whatever the other lens was showing:
 		// Dataflow means grey cables, Communication means one arrow per
 		// relationship. An explicit cable choice inside a lens still stands.
-		cableStyle: lens === 'dataflow'
-			? (state.cableStyle === 'summary' ? 'data' : state.cableStyle)
-			: (state.cableStyle === 'data' ? 'summary' : state.cableStyle),
-		// Same idea for the card: Dataflow exists to show the signature, so a
-		// Simple card there hides the very thing the lens is for; Communication
-		// is about who talks to whom, so it opens on the quiet card. Expanded is
-		// never overridden — it is only ever an explicit choice.
-		componentView: lens === 'dataflow'
-			? (state.componentView === 'simple' ? 'port' : state.componentView)
-			: (state.componentView === 'port' ? 'simple' : state.componentView),
+		// WHY the communication lens has no card or cable choice at all (Zach,
+		// 2026-09-06): "in the communication mode, blocks only are in simple
+		// view, and cables are only in summary view." Every other combination
+		// was reachable and none of them helped: Port cards there crowded four
+		// walls with sockets no arrow led to, and Split cables replaced the one
+		// arrow you drew with the legs it expands into, which is the Dataflow
+		// question asked in the wrong lens. Dataflow keeps both choices.
+		cableStyle: lens === 'communication'
+			? 'summary'
+			: (state.cableStyle === 'summary' ? 'data' : state.cableStyle),
+		componentView: lens === 'communication'
+			? 'simple'
+			: (state.componentView === 'simple' ? 'port' : state.componentView),
 		focusedGroupKey: null,
 	}))
 }

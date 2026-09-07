@@ -48,6 +48,42 @@ const PHASE_ORDER: Readonly<Record<CommunicationPhase, number>> = {
 	result: 3,
 }
 
+/**
+ * The phase whose leg a summary cable rides, per family.
+ *
+ * Fixed, and the same table the carrier chooser uses: a Service's request, an
+ * Action's goal, a Stream's single leg, a Topic's publish.
+ */
+const CARRIER_PHASE: Readonly<Record<string, CommunicationPhase>> = {
+	topic: 'publish',
+	stream: 'stream',
+	service: 'request',
+	action: 'goal',
+}
+
+/**
+ * Does a summary arrow actually attach to this port?
+ *
+ * WHY the communication lens shows nothing else (Zach, 2026-09-06): "do not
+ * create any other ports in the communication view apart from the ports that
+ * the summary arrows connect to." An Action's feedback and result sockets have
+ * no arrow touching them there — the one summary arrow rides the goal — so
+ * painting them added three dots and three labels per card that nothing led to,
+ * which is what made the view crowded and hard to read.
+ *
+ * Pure, and deliberately so: the carrier phase is fixed per family, so this
+ * needs only the port's own name. No editor, no relationship graph, and no
+ * import back into the projection.
+ *
+ * A port whose name says nothing about a protocol parses as a Topic publish and
+ * therefore stays — an ordinary data port is not hidden by this rule.
+ */
+export function isSummaryCarrierPort(port: BlockPort): boolean {
+	const parsed = inspectCommunicationChannel(port.name, port.name).parsed
+	if (!parsed) return true
+	return CARRIER_PHASE[parsed.family] === parsed.phase
+}
+
 /** The interaction a port belongs to, or null when its name says nothing. */
 export function portInteractionKey(port: BlockPort): string | null {
 	const parsed = inspectCommunicationChannel(port.name, port.name).parsed

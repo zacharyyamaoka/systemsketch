@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	dataflowOrderFromCommunication,
 	inferCommunicationPlacements,
+	isSummaryCarrierPort,
 	portInteractionKey,
 	type InferencePort,
 } from './portPlacementInference'
@@ -145,5 +146,40 @@ describe('the trip back to Dataflow', () => {
 	it('is stable for ports carrying no communication placement at all', () => {
 		const order = dataflowOrderFromCommunication([port('b', 'b'), port('a', 'a')])
 		expect(order).toEqual(['a', 'b'])
+	})
+})
+
+describe('only the sockets a summary arrow attaches to', () => {
+	// "do not create any other ports in the communication view apart from the
+	// ports that the summary arrows connect to."
+	it('keeps the leg each family\'s summary cable rides', () => {
+		expect(isSummaryCarrierPort(port('1', 'move.goal'))).toBe(true)
+		expect(isSummaryCarrierPort(port('2', 'health.request'))).toBe(true)
+		expect(isSummaryCarrierPort(port('3', 'camera.stream'))).toBe(true)
+	})
+
+	it('hides every leg no arrow touches', () => {
+		for (const name of ['move.feedback', 'move.result', 'move.cancel', 'health.response']) {
+			expect(isSummaryCarrierPort(port('x', name))).toBe(false)
+		}
+	})
+
+	it('keeps an ordinary data port, which no protocol claims', () => {
+		// It parses as a Topic publish, which IS its family's carrier phase, so
+		// the rule must not quietly hide a plain port nobody annotated.
+		expect(isSummaryCarrierPort(port('4', 'frame'))).toBe(true)
+		expect(isSummaryCarrierPort(port('5', ''))).toBe(true)
+	})
+
+	it('matches the phase the carrier chooser actually picks', () => {
+		// If these two ever disagree, the lens paints a socket the arrow does not
+		// use, or hides the one it does.
+		const cases: [string, boolean][] = [
+			['move.goal', true], ['move.result', false],
+			['health.request', true], ['health.response', false],
+		]
+		for (const [name, carrier] of cases) {
+			expect(isSummaryCarrierPort(port('p', name))).toBe(carrier)
+		}
 	})
 })

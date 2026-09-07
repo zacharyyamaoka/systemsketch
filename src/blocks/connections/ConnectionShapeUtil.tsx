@@ -32,6 +32,7 @@ import {
 	isPortHostShape,
 	portElbowSideForFace,
 } from './blockPorts'
+import { blockLayoutLensFor } from '../ports/portLens'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -2156,18 +2157,47 @@ export function getConnectionElbowRoute(
 		?? computeConnectionElbowRoute(editor, connection)
 }
 
+/**
+ * Is this cable being read through the communication lens?
+ *
+ * Asked of a bound endpoint, because a cable has no wall of its own — the lens
+ * is a property of the region its components sit in.
+ */
+function connectionIsInCommunicationLens(editor: Editor, connection: ConnectionShape): boolean {
+	const bindings = getConnectionBindings(editor, connection)
+	const anchor = bindings.start?.toId ?? bindings.end?.toId
+	return anchor ? blockLayoutLensFor(editor, anchor) === 'communication' : false
+}
+
 function computeConnectionElbowRoute(editor: Editor, connection: ConnectionShape): ElbowRoute {
 	const { source, sink } = getConnectionEndpoints(editor, connection)
-	// An authored route replaces the A*: the user owns the rails, and the
-	// normalize pass re-binds the end segments to the live ports.
-	if (connection.props.elbowRoute) {
+	// WHY the communication lens ignores every stored route (Zach, 2026-09-06):
+	// "dataflow and communication should have completely separate appearances in
+	// terms of placement of ports and placement of arrows. Completely separate.
+	// Changing one appearance will not change the other."
+	//
+	// `elbowRoute` and `pins` are frozen geometry — Tidy edges writes the first,
+	// dragging a bend writes the second — and both are computed against whatever
+	// walls the ports were on AT THE TIME. Tidying in Dataflow and switching to
+	// Communication therefore replayed a route built for the left/right lanes
+	// against sockets that had since moved to other walls, which is why the
+	// arrows stopped meeting the cards square on.
+	//
+	// The communication lens does not get a second copy of that state; it gets
+	// NO stored state. Its arrows are always re-derived from the sockets they
+	// currently join, which is exactly what makes the two appearances
+	// independent in both directions: Dataflow's tidy cannot reach it, and it
+	// stores nothing that could reach back.
+	if (connection.props.elbowRoute && !connectionIsInCommunicationLens(editor, connection)) {
+		// An authored route replaces the A*: the user owns the rails, and the
+		// normalize pass re-binds the end segments to the live ports.
 		return authoredElbowRoute(connection.props.elbowRoute, source, sink)
 	}
 	return getElbowConnectionRoute(
 		source,
 		sink,
 		getConnectionElbowBoxes(editor, connection),
-		connection.props.pins,
+		connectionIsInCommunicationLens(editor, connection) ? [] : connection.props.pins,
 	)
 }
 

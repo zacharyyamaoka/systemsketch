@@ -240,6 +240,10 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
+				{/* Card face and cable style are Dataflow's to choose. The
+				    communication lens is fixed at Simple + Summary. */}
+				{state.lens === 'dataflow' ? (
+				<>
 				<div className="communication-prototype-routes" aria-label="Component view">
 					<span>Card</span>
 					{COMPONENT_VIEWS.map((view) => (
@@ -270,6 +274,8 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
+				</>
+				) : null}
 				<div className="communication-prototype-routes" aria-label="Cable shape">
 					<span>Arrow</span>
 					{ROUTES.map((route) => (

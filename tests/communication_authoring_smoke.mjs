@@ -132,10 +132,10 @@ async function record(page) {
       // Every painted dot's edge, straight off the laid-out geometry.
       railDots: Array.from(document.querySelectorAll('[data-block-port-edge]'))
         .map((node) => node.getAttribute('data-block-port-edge')),
-      cables: ['data', 'split', 'summary'].find((style) => (
-        document.querySelector('[data-testid="communication-cables-' + style + '"]')
-          ?.getAttribute('aria-pressed') === 'true'
-      )) ?? null,
+      // Read the STATE, not the buttons: the communication lens offers no cable
+      // choice at all, so there is no pressed button to infer it from.
+      cables: document.querySelector('[data-projection-cables]')
+        ?.getAttribute('data-projection-cables') ?? null,
       lens: document.querySelector('[data-projection-lens]')?.getAttribute('data-projection-lens') ?? null,
       // A leg revealed beside its collapsed arrow stamps "focus-member"; a leg
       // in the standalone Tag edges mode stamps "tagged".
@@ -148,6 +148,15 @@ async function record(page) {
       cardView: document.querySelector('[data-communication-projected="true"]') ? 'projected' : 'raw',
     }
   })())`))
+}
+
+/** Every communication arrow's painted path, as a comparable string. */
+async function communicationRouteShape(page) {
+  return JSON.parse(await evaluate(page, `JSON.stringify(
+    Array.from(document.querySelectorAll('[data-communication-mode="components"] [data-communication-focus-hit]'))
+      .map((node) => node.getAttribute('d'))
+      .sort()
+  )`))
 }
 
 /** The relationships the projection reads back out of the generated dataflow. */
@@ -293,71 +302,85 @@ async function main() {
     )
     pass('the strict parser reads the generated dataflow back as exactly the three relationships that were drawn')
 
-    // --- Tag edges INSIDE the communication view --------------------------
+    // --- The communication lens is FIXED at Simple cards + Summary cables ---
     observed = await record(app.page)
-    assert.equal(observed.cables, 'summary')
-    const collapsedOnly = observed.taggedLegs
-    await clickElement(app.page, '[data-testid="communication-cables-split"]')
-    await delay(600)
-    observed = await record(app.page)
-    assert.equal(observed.cables, 'split')
-    assert.equal(observed.lens, 'communication', 'splitting cables must not leave the lens')
-    assert.ok(
-      observed.taggedLegs > collapsedOnly,
-      `Tag edges should reveal the individual legs beside the collapsed arrows: ${collapsedOnly} → ${observed.taggedLegs}`,
-    )
-    // The three cable styles are exclusive, not overlays: Split IS the drawn
-    // relationship, told leg by leg, so the summary arrow steps aside for it.
-    assert.deepEqual(
-      [...new Set(observed.collapsedArrows)],
-      [],
-      'Split replaces the summary arrow rather than stacking on it',
-    )
-    assert.equal(observed.taggedLegs, 6, 'every one of the six legs is painted and tagged')
-    pass('Split cables inside the communication lens paints every protocol leg separately')
-    await shot(app.page, '07-components-with-tag-edges.png')
-    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
-    await delay(350)
+    assert.equal(observed.lens, 'communication')
+    assert.equal(observed.cables, 'summary', 'communication is summary-only')
+    const fixedAxes = JSON.parse(await evaluate(app.page, `JSON.stringify({
+      card: document.querySelector('[data-projection-card]')?.getAttribute('data-projection-card') ?? null,
+      cardButtons: document.querySelectorAll('[data-testid^="communication-card-"]').length,
+      cableButtons: document.querySelectorAll('[data-testid^="communication-cables-"]').length,
+    })`))
+    assert.equal(fixedAxes.card, 'simple', 'communication is simple-only')
+    assert.equal(fixedAxes.cardButtons, 0, 'no card choice is offered in communication')
+    assert.equal(fixedAxes.cableButtons, 0, 'no cable choice is offered in communication')
+    pass('the communication lens offers no card or cable choice — it is Simple and Summary, always')
 
-    // --- Press-and-hold a socket onto another edge ------------------------
-    await clickElement(app.page, '[data-testid="communication-card-port"]')
-    await delay(500)
-    observed = await record(app.page)
-    assert.ok(
-      observed.railLabels.some((label) => label.includes('camera.stream')),
-      `the communication lens with Port cards paints the rail label: ${JSON.stringify(observed.railLabels)}`,
+    // --- ONLY the sockets a summary arrow attaches to ------------------------
+    // The Action's feedback and result have no arrow touching them here, so
+    // they must not paint a dot; they are still real ports in Dataflow.
+    const painted = JSON.parse(await evaluate(app.page, `JSON.stringify(
+      Array.from(document.querySelectorAll('[data-shape-id="shape:robot"] [data-block-port-id]'))
+        .map((node) => node.getAttribute('data-block-port-id'))
+    )`))
+    assert.ok(painted.length > 0, 'the summary carriers should paint')
+    assert.equal(
+      painted.some((id) => /feedback|result|response/.test(String(id))),
+      false,
+      `no arrow touches these, so they must not paint: ${JSON.stringify(painted)}`,
     )
-    const railGeometry = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
-      const node = Array.from(document.querySelectorAll('.BlockNode-portLabel--rail'))
-        .find((candidate) => candidate.textContent.includes('camera.stream'))
-      if (!node) return null
-      const style = window.getComputedStyle(node)
-      return { justify: style.justifyContent, align: style.textAlign }
-    })())`))
-    assert.equal(railGeometry.justify, 'center', JSON.stringify(railGeometry))
-    assert.equal(railGeometry.align, 'center', JSON.stringify(railGeometry))
-    pass('the four-sided port label is horizontal and centred on its socket, drawn inward per the Node Flow convention')
+    const stored = (await record(app.page)).ports.robot.map((port) => port.name)
+    assert.ok(
+      stored.some((name) => /feedback|result/.test(name)),
+      `the hidden legs must still EXIST as ports: ${JSON.stringify(stored)}`,
+    )
+    pass('only the sockets a summary arrow connects to are drawn; the other legs still exist for Dataflow')
+    await shot(app.page, '07-carriers-only.png')
 
-    // Ports with no authored fraction share the WHOLE edge, rather than piling
-    // up mid-wall and marching off one end as the spacer pushes them apart.
-    const spacing = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+    // --- Tidying in Dataflow must not change the communication appearance ----
+    // Capture the communication appearance FIRST, while it is on screen: in
+    // Dataflow the relationship arrows are not rendered at all, so a reading
+    // taken there compares nothing to something.
+    const beforeTidy = await communicationRouteShape(app.page)
+    assert.ok(beforeTidy.length > 0, 'the communication arrows must be on screen to compare')
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
+    await delay(450)
+    // No selectAll here: selecting outside the region closes its lens, and the
+    // controls this step needs go with it. Freezing the routes directly is the
+    // same document change Tidy makes, without the selection side effect.
+    await evaluate(app.page, `(() => {
       const editor = window.__systemsketch.editor
-      const bounds = editor.getShapePageBounds('shape:mission')
-      const dots = Array.from(document.querySelectorAll(
-        '[data-shape-id="shape:mission"] [data-block-port-edge="left"]'))
-      return { count: dots.length, h: bounds.h }
-    })())`))
-    if (spacing.count >= 2) {
-      const centres = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
-        const editor = window.__systemsketch.editor
-        const shape = editor.getShape('shape:mission')
-        return shape.props.inputs.concat(shape.props.outputs)
-          .filter((port) => (port.commEdge ?? 'left') === 'left')
-          .map((port) => port.commEdgeT ?? null)
-      })())`))
-      assert.ok(centres.length > 0, JSON.stringify(centres))
-    }
-    pass('an edge with no authored fractions distributes its sockets across the whole wall')
+      const wires = editor.getCurrentPageShapes().filter((s) => s.type === 'connection')
+      // Freeze a Dataflow-shaped route on every cable, exactly as Tidy does —
+      // a VALID elbowRoute model, deliberately different from the live one.
+      editor.updateShapes(wires.map((wire) => ({
+        id: wire.id, type: 'connection',
+        props: {
+          elbowRoute: {
+            startAxis: 'x',
+            corners: [{ tx: 0.5, ox: 40, ty: 0.5, oy: 40 }],
+          },
+          routeMode: 'authored',
+        },
+      })))
+      return true
+    })()`)
+    await delay(400)
+    const frozen = await evaluate(app.page, `window.__systemsketch.editor
+      .getCurrentPageShapes()
+      .filter((s) => s.type === 'connection' && s.props.elbowRoute !== null).length`)
+    assert.ok(Number(frozen) > 0, 'the freeze must actually land, or this proves nothing')
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.select('shape:region'); return true })()`)
+    await delay(300)
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
+    await delay(500)
+    const afterTidy = await communicationRouteShape(app.page)
+    assert.deepEqual(
+      afterTidy,
+      beforeTidy,
+      'a route frozen in Dataflow must not change how communication draws',
+    )
+    pass('freezing a Dataflow route leaves the communication appearance untouched')
 
     const cameraPort = await elementBox(
       app.page,
@@ -400,10 +423,10 @@ async function main() {
       JSON.stringify(observed.railDots),
     )
     pass('the relocated socket leaves the Dataflow signature untouched')
+    // The communication lens is Simple by construction now; there is no card
+    // control to click.
     await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await delay(450)
-    await clickElement(app.page, '[data-testid="communication-card-simple"]')
-    await delay(400)
 
     // --- Rename travels through the ports, which is where the name lives ------
     // Focus is a canvas gesture: press the collapsed A1 edge itself. Sampling

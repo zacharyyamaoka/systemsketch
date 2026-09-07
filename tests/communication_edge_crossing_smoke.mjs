@@ -204,11 +204,6 @@ async function main() {
     await delay(700)
     await waitFor(app.page, `document.querySelector('[data-testid="communication-lens-communication"]')`, 'region lens')
     await clickElement(app.page, '[data-testid="communication-lens-communication"]')
-    await delay(300)
-    // Port cards, so EVERY socket paints a dot. Simple cards render quiet
-    // anchors and only for connected ports, which is the right product
-    // behaviour and the wrong thing to count against.
-    await clickElement(app.page, '[data-testid="communication-card-port"]')
     await delay(400)
 
     for (const family of ['stream', 'service', 'action']) {
@@ -257,17 +252,21 @@ async function main() {
             return { edge: node.getAttribute('data-block-port-edge'), x: Math.round(box.x), y: Math.round(box.y) }
           })
         })())`))
+        // The communication lens paints ONLY the sockets a summary arrow
+        // attaches to — one per relationship — while every leg still exists in
+        // the store for Dataflow. So the dot count follows the carriers, not
+        // the port count.
         assert.equal(
           dots.length,
-          observed.hub.length,
-          `${family} ${placement.name}: painted ${dots.length} dots for ${observed.hub.length} ports`,
+          1,
+          `${family} ${placement.name}: expected one carrier dot, painted ${dots.length}`,
         )
-        const positions = dots.map((dot) => `${dot.x},${dot.y}`)
         assert.equal(
-          new Set(positions).size,
-          positions.length,
-          `${family} ${placement.name}: two sockets painted on top of each other — ${JSON.stringify(positions)}`,
+          dots[0].edge,
+          hubEdges[0],
+          `${family} ${placement.name}: the painted dot must be on the wall the arrow crossed`,
         )
+
       }
       pass(`a ${family} arrow puts its sockets on the walls it crosses, in all eight directions`)
     }

@@ -18,7 +18,10 @@ import {
 	type PortLayout,
 } from './blockModel'
 import { stockBlockVisibleDescription } from './stockBlocks'
-import { inferCommunicationPlacements } from '../prototypes/communication/portPlacementInference'
+import {
+	inferCommunicationPlacements,
+	isSummaryCarrierPort,
+} from '../prototypes/communication/portPlacementInference'
 
 /** Donor pyblocks geometry constants. Keep rendering and connection anchors on this grid. */
 export const BLOCK_CORNER_RADIUS = 9
@@ -170,7 +173,7 @@ export function withInferredCommunicationPlacements(props: BlockShapeProps): Blo
 	const inferred = inferCommunicationPlacements([
 		...props.inputs.map((port) => ({ port, side: 'input' as const, placedEdge: port.commEdge })),
 		...props.outputs.map((port) => ({ port, side: 'output' as const, placedEdge: port.commEdge })),
-	])
+	].filter((entry) => isSummaryCarrierPort(entry.port)))
 	const fill = (ports: readonly BlockPort[]) => ports.map((port) => {
 		if (port.commEdge !== undefined) return port
 		const placement = inferred.get(port.id)
@@ -765,7 +768,9 @@ function placeHorizontalRails(
 	// overprint — this is what turned a card's left column into
 	// "missiomissiomissio…" struck through by the bottom channel's name.
 	const occupies = (edge: 'top' | 'bottom') => [...props.inputs, ...props.outputs]
-		.some((port) => port.visible && portCommunicationEdge(port) === edge)
+		.some((port) => port.visible
+			&& isSummaryCarrierPort(port)
+			&& portCommunicationEdge(port) === edge)
 	const sideSpan = {
 		top: band.top + (occupies('top') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
 		bottom: band.bottom - (occupies('bottom') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
@@ -779,7 +784,12 @@ function placeHorizontalRails(
 			['input', props.inputs],
 			['output', props.outputs],
 		] as const).flatMap(([side, ports]) => ports
-			.filter((port) => port.visible && portCommunicationEdge(port) === edge)
+			// ONLY the sockets a summary arrow attaches to. An Action's feedback
+			// and result have no arrow touching them in this lens, so painting
+			// them added dots and labels that led nowhere.
+			.filter((port) => port.visible
+				&& isSummaryCarrierPort(port)
+				&& portCommunicationEdge(port) === edge)
 			.map((port) => ({ port, side })))
 		if (lane.length === 0) continue
 		// Every socket that has not been placed by hand gets an even share of the
@@ -1253,6 +1263,22 @@ function computeBlockLayout(
 		}
 
 		const midpoint = height / 2
+		// The communication lens is Simple-only now, so this is where its whole
+		// port story lives: only the sockets a summary arrow actually attaches
+		// to, each on the wall the arrow crossed, spread along it. Everywhere
+		// else Simple keeps its coincident midpoint anchors, which exist to
+		// retain identity rather than to be read.
+		if (lens === 'communication') {
+			placeHorizontalRails(
+				props,
+				width,
+				height,
+				{ top: 0, bottom: height },
+				null,
+				placed,
+			)
+			for (const entry of placed) entry.subtle = true
+		} else {
 		// SystemSketch's outward layout list doubles as the connection-anchor
 		// table, so retain every visible identity at the donor's coincident
 		// midpoint. BlockCanvas de-duplicates the painted affordance by point.
@@ -1281,6 +1307,7 @@ function computeBlockLayout(
 				subtle: true,
 				lifted: false,
 			})
+		}
 		}
 		for (const port of effectPorts.filter((candidate) => candidate.visible)) {
 			const point = edgePortPoint('top', portEdgeT(port), width, height)
