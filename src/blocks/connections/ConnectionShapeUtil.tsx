@@ -1,6 +1,9 @@
 import {
 	Box,
 	Mat,
+	WeakCache,
+	computed,
+	type Computed,
 	ShapeUtil,
 	SVGContainer,
 	T,
@@ -32,6 +35,7 @@ import {
 	isPortHostShape,
 	portElbowSideForFace,
 } from './blockPorts'
+import { blockLayoutLensFor, communicationLensRouting } from '../ports/portLens'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -71,7 +75,9 @@ import {
 	removeConnectionBinding,
 	type ConnectionBinding,
 } from './ConnectionBindingUtil'
+import { tidyEdges } from './tidyEdges'
 import {
+	CONNECTION_BINDING_TYPE,
 	CONNECTION_SHAPE_TYPE,
 	ConnectionRoutingStyle,
 	oppositeConnectionTerminal,
@@ -120,6 +126,8 @@ import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
 	getConnectionControlPoints,
+	type ConnectionExitSide,
+	type ConnectionExitSides,
 	getConnectionPath,
 	getElbowConnectionRoute,
 	getElbowRouteInput,
@@ -164,6 +172,8 @@ import {
 	chooseCommunicationRepresentative,
 	collectCommunicationRelations,
 	applyCommunicationFocus,
+	communicationLabelWidth,
+	communicationRelationLabel,
 	communicationProjection,
 	describeCommunicationConnection,
 	isConnectionInCommunicationScope,
@@ -172,7 +182,6 @@ import {
 	type CommunicationDescriptor,
 	type CommunicationProjectionState,
 	type CommunicationRelation,
-	type CommunicationRouteStyle,
 } from '../../prototypes/communication/communicationProjection'
 
 /** Complete one creation-time default after both semantic bindings exist. */
@@ -185,6 +194,39 @@ function applyNewConnectionRegionDefault(editor: Editor, connectionId: TLShapeId
 		bindings.start.toId,
 		bindings.end.toId,
 	)
+	tidyEdgesAfterNewCable(editor, connectionId)
+}
+
+/**
+ * Tidy the board the moment a new elbow cable lands.
+ *
+ * WHY only elbow, and only on creation: an elbow's shape is COMPUTED, so a new
+ * one routes straight through whatever is already there and the overlaps only
+ * become visible once it is drawn — which made Tidy edges a thing you had to
+ * know to run. Curved and straight cables have an authored shape that a tidy
+ * pass has no business rewriting, and re-tidying on every edit would fight the
+ * person moving a card.
+ *
+ * It runs inside the creation's own history entry, so undo removes the cable
+ * and its tidy together rather than leaving a re-routed board behind.
+ */
+function tidyEdgesAfterNewCable(editor: Editor, connectionId: TLShapeId): void {
+	const connection = editor.getShape<ConnectionShape>(connectionId)
+	if (connection?.type !== CONNECTION_SHAPE_TYPE || connection.props.routing !== 'elbow') return
+	const bindings = getConnectionBindings(editor, connectionId)
+	const cards = new Set([bindings.start?.toId, bindings.end?.toId].filter(Boolean) as TLShapeId[])
+	// The new cable plus every cable already touching either card it joins:
+	// those are the routes that can newly collide, and nothing further away has
+	// any reason to move.
+	const targets = editor.getCurrentPageShapes()
+		.filter((shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE)
+		.filter((candidate) => candidate.props.routing === 'elbow')
+		.filter((candidate) => candidate.id === connectionId
+			|| editor.getBindingsFromShape(candidate, CONNECTION_BINDING_TYPE)
+				.some((binding) => cards.has(binding.toId)))
+		.map((candidate) => candidate.id)
+	if (targets.length < 2) return
+	tidyEdges(editor, { targets })
 }
 
 declare module 'tldraw' {
@@ -473,7 +515,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// in the Excalidraw sense — so both bent cases share one geometry.
 		const [cp1, cp2] = curve
 			? getBentCurveCubicControlPoints(source, sink, curve)
-			: getConnectionControlPoints(source, sink)
+			: getConnectionControlPoints(source, sink, getConnectionExitSides(this.editor, connection))
 		return withCableHitPad(
 			new HitPaddedCubicBezier2d({
 				start: Vec.From(source),
@@ -952,7 +994,7 @@ function CommunicationLabel({
 	onPointerDown?: (event: React.PointerEvent<SVGGElement>) => void
 	communicationId?: string
 }) {
-	const width = Math.max(74, text.length * 7.1 + 22)
+	const width = communicationLabelWidth(text)
 	return (
 		<g
 			className="CommunicationEdge-label"
@@ -1082,90 +1124,265 @@ function boundaryPoint(bounds: Box, toward: PagePoint): PagePoint {
 	return { x: center.x + dx * scale, y: center.y + dy * scale }
 }
 
+/**
+ * The route a summary cable paints.
+ *
+ * WHY there is no centre-to-centre option any more (Zach, 2026-09-06): "Please
+ * no longer support the straight arrow that goes from the middle of the node to
+ * the middle of another node. All arrows should always travel between ports."
+ * A centre line says a relationship exists but not which sockets carry it, and
+ * two relationships between one pair of cards drew the identical line — which
+ * is why it needed staggered labels to stay clickable at all. Riding the
+ * representative leg's real port-to-port route removes that whole class of
+ * problem: the summary cable is literally one of the cables it summarises, so
+ * it starts and ends where the data does, and its shape is the ordinary
+ * `routing` style that cable already carries.
+ */
+/**
+ * How close a label pill may come to either END of its route.
+ *
+ * A pill sitting on a card's edge reads as belonging to the card, not the
+ * cable, so a packed run that overflows its corridor stops here rather than
+ * sliding under a component.
+ */
+const COMMUNICATION_LABEL_EDGE_MARGIN_PX = 46
+
+/** Half the height of a label pill, matching the rect `CommunicationLabel` draws. */
+const COMMUNICATION_LABEL_HALF_HEIGHT_PX = 13
+
+/** How often the label walk samples its route, in shape-space pixels. */
+const COMMUNICATION_LABEL_SAMPLE_PX = 6
+
+/** The endpoint cards a label must not slide under, in the cable's own space. */
+function communicationEndpointBoxes(editor: Editor, connection: ConnectionShape): Box[] {
+	const bindings = getConnectionBindings(editor, connection)
+	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
+	const boxes: Box[] = []
+	for (const binding of [bindings.start, bindings.end]) {
+		if (!binding) continue
+		const bounds = editor.getShapePageBounds(binding.toId)
+		if (!bounds) continue
+		boxes.push(Box.FromPoints([
+			Mat.applyToPoint(inverse, { x: bounds.minX, y: bounds.minY }),
+			Mat.applyToPoint(inverse, { x: bounds.maxX, y: bounds.maxY }),
+		]))
+	}
+	return boxes
+}
+
+/**
+ * Where every relationship's label pill goes, in PAGE space, decided together.
+ *
+ * Three rules, in order of who yields to whom:
+ *
+ *  1. The packed offset (`packCommunicationLabels`) says where a pill WANTS to
+ *     sit so the siblings of one component pair read as a row rather than a
+ *     stack. That is a model-level answer, computed from the real pill widths.
+ *  2. A pill must clear both endpoint CARDS. A card paints over a cable, so a
+ *     pill that lands under one is unreadable and unclickable —
+ *     `S1 · service · robot` came back from the packer rendering as
+ *     `S1 · service ·`, with its tail behind the Robot card.
+ *  3. A pill must clear every pill already placed, INCLUDING relationships
+ *     between other pairs, which the packer cannot see. `S2` and `S4` join
+ *     different pairs and still landed on top of each other.
+ *
+ * WHY this is one pass over all of them instead of per-shape geometry: rules 2
+ * and 3 need the routes, and rule 3 needs every other answer. A shape can only
+ * see itself, which is exactly how each of the three failures above got in.
+ * Placement is deterministic (relationships are visited in `displayId` order)
+ * so the board does not reshuffle between repaints, and every pill is measured
+ * at its UNFOCUSED width so focusing one cannot move any of them.
+ */
+interface CommunicationLabelPlacement {
+	page: { x: number; y: number }
+	halfWidth: number
+}
+
+/** How often the label walk samples its route, in page pixels. */
+const COMMUNICATION_LABEL_STEP_PX = 8
+
+function computeCommunicationLabelPlacements(
+	editor: Editor,
+): Map<string, CommunicationLabelPlacement> {
+	const placements = new Map<string, CommunicationLabelPlacement>()
+	const taken: Box[] = []
+	const relations = [...collectCommunicationRelations(editor).relations]
+		.sort((a, b) => a.displayId.localeCompare(b.displayId))
+	for (const relation of relations) {
+		const representative = resolveCommunicationRepresentative(editor, relation)
+		if (!representative) continue
+		const carrier = editor.getShape(representative.connectionId)
+		if (!carrier || carrier.type !== CONNECTION_SHAPE_TYPE) continue
+		const transform = editor.getShapePageTransform(carrier)
+		const points = getConnectionRenderPoints(editor, carrier as ConnectionShape)
+		const length = polylineLength(points)
+		const at = (distance: number) => Mat.applyToPoint(
+			transform,
+			pointAtFraction(points, length > 0 ? distance / length : 0.5),
+		)
+		const halfWidth = communicationLabelWidth(communicationRelationLabel(relation)) / 2
+		const pillAt = (distance: number) => {
+			const centre = at(distance)
+			return new Box(
+				centre.x - halfWidth,
+				centre.y - COMMUNICATION_LABEL_HALF_HEIGHT_PX,
+				halfWidth * 2,
+				COMMUNICATION_LABEL_HALF_HEIGHT_PX * 2,
+			)
+		}
+		const cards = communicationEndpointBoxes(editor, carrier as ConnectionShape)
+		const clear = (distance: number) => {
+			const pill = pillAt(distance)
+			return cards.every((card) => !card.collides(pill))
+				&& taken.every((other) => !other.collides(pill))
+		}
+		const margin = Math.min(COMMUNICATION_LABEL_EDGE_MARGIN_PX, length / 2)
+		const desired = Math.max(margin, Math.min(
+			length - margin,
+			length / 2 + relation.labelOffsetPx,
+		))
+		let chosen = desired
+		if (length > 0 && !clear(desired)) {
+			// Nearest clear spot, walking outwards from where the packer put it,
+			// so a crowded pair keeps its ORDER even when the corridor forces the
+			// pills to shuffle. Falling through means the whole route is covered,
+			// which is a cable shorter than its own label.
+			const steps = Math.ceil(length / COMMUNICATION_LABEL_STEP_PX)
+			for (let step = 1; step <= steps; step += 1) {
+				const delta = step * COMMUNICATION_LABEL_STEP_PX
+				const before = desired - delta
+				const after = desired + delta
+				if (before >= margin && clear(before)) { chosen = before; break }
+				if (after <= length - margin && clear(after)) { chosen = after; break }
+			}
+		}
+		taken.push(pillAt(chosen))
+		placements.set(relation.groupKey, { page: at(chosen), halfWidth })
+	}
+	return placements
+}
+
+const communicationLabelPlacementCache = new WeakCache<
+	Editor,
+	Computed<Map<string, CommunicationLabelPlacement>>
+>()
+
+function communicationLabelPlacements(editor: Editor): Map<string, CommunicationLabelPlacement> {
+	return communicationLabelPlacementCache
+		.get(editor, () => computed(
+			'communication label placements',
+			() => computeCommunicationLabelPlacements(editor),
+		))
+		.get()
+}
+
+/** The placed pill, back in one cable's own space, for the shape that draws it. */
+function communicationLabelPoint(
+	editor: Editor,
+	connection: ConnectionShape,
+	relation: CommunicationRelation,
+) {
+	const placement = communicationLabelPlacements(editor).get(relation.groupKey)
+	const points = getConnectionRenderPoints(editor, connection)
+	if (!placement) return pointAtFraction(points, 0.5)
+	return Mat.applyToPoint(
+		Mat.Inverse(editor.getShapePageTransform(connection)),
+		placement.page,
+	)
+}
+
+/**
+ * The relationship whose label pill covers a page point, if any.
+ *
+ * WHY this exists at all: several relationships between one pair of cards share
+ * a long corridor — in Simple view they leave the same edge midpoint — so their
+ * summary arrows overlap for most of their length and the LAST one painted wins
+ * every click along it. A pill is the one thing a person can actually aim at,
+ * and it was the one thing that did not work: clicking `A2` focused `A3`
+ * because A3's transparent hit stroke lay on top of A2's pill.
+ *
+ * The pills are packed so they never overlap (`packCommunicationLabels`), which
+ * is what makes this answer unambiguous. Measured with the UNFOCUSED width in
+ * both places, so a pill that shrinks while focused cannot open a gap that
+ * belongs to nobody.
+ */
+function communicationRelationshipLabelAt(
+	editor: Editor,
+	page: { x: number; y: number },
+): CommunicationRelation | null {
+	const placements = communicationLabelPlacements(editor)
+	for (const relation of collectCommunicationRelations(editor).relations) {
+		const placement = placements.get(relation.groupKey)
+		if (!placement) continue
+		if (
+			Math.abs(page.x - placement.page.x) <= placement.halfWidth
+			&& Math.abs(page.y - placement.page.y) <= COMMUNICATION_LABEL_HALF_HEIGHT_PX
+		) return relation
+	}
+	return null
+}
+
 function componentRelationshipGeometry(
 	editor: Editor,
 	connection: ConnectionShape,
 	relation: CommunicationRelation,
 	representative: CommunicationDescriptor,
-	routeStyle: CommunicationRouteStyle,
 ) {
-	if (routeStyle === 'elbow') {
-		const points = getConnectionRenderPoints(editor, connection)
-		return {
-			// WHY: the aggregate relationship must ride one authored cable verbatim.
-			// A selected phase or measured shortest route therefore remains visible
-			// proof of the semantic parse without inventing a second graph geometry.
-			path: getConnectionShapePath(editor, connection),
-			label: pointAtFraction(points, 0.5),
-		}
-	}
-	const sourceBounds = editor.getShapePageBounds(representative.sourceShapeId)
-	const targetBounds = editor.getShapePageBounds(representative.targetShapeId)
-	if (!sourceBounds || !targetBounds) return null
-	const sourceCenter = sourceBounds.center
-	const targetCenter = targetBounds.center
-	// The conceptual route is centre-to-centre. Clip its visible endpoints to the
-	// two card boundaries so arrowheads do not paint over component titles.
-	const pageStart = boundaryPoint(sourceBounds, targetCenter)
-	const pageEnd = boundaryPoint(targetBounds, sourceCenter)
-	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
-	const start = Mat.applyToPoint(inverse, pageStart)
-	const end = Mat.applyToPoint(inverse, pageEnd)
-	const labelFraction = Math.max(0.16, Math.min(0.84, 0.5 + relation.lane * 0.095))
+	void representative
+	const points = getConnectionRenderPoints(editor, connection)
+	// WHY the offset is in PIXELS and comes from the projection: several
+	// relationships between one pair of cards run as near-parallel channels, so
+	// their labels all want the same midpoint and pile up — badly enough that a
+	// pill covered its neighbour's and made it unclickable. The projection packs
+	// the whole sibling set with their real pill widths (see
+	// `packCommunicationLabels`); all this does is walk that many pixels along
+	// its own route. A fraction-based stagger could not do it: it has no idea
+	// how wide the pills are, and 0.13 of a short route is 23px.
+	void points
 	return {
-		path: `M ${start.x} ${start.y} L ${end.x} ${end.y}`,
-		// Multiple centre lines between one component pair are geometrically
-		// identical. Staggering their clickable labels keeps each exact straight
-		// relationship addressable without pretending the paths are different.
-		label: {
-			x: start.x + (end.x - start.x) * labelFraction,
-			y: start.y + (end.y - start.y) * labelFraction,
-		},
+		path: getConnectionShapePath(editor, connection),
+		label: communicationLabelPoint(editor, connection, relation),
 	}
 }
 
+/**
+ * The leg a summary cable rides. Fixed per family, so nothing here measures.
+ *
+ * `pathLength` survives on the candidate type because the chooser's signature
+ * is the semantic seam and a later policy could want it; it is reported as
+ * infinite rather than measured, because measuring a route the answer cannot
+ * depend on would re-run the elbow router on every repaint for nothing.
+ */
 function resolveCommunicationRepresentative(
 	editor: Editor,
 	relation: CommunicationRelation,
-	projection: CommunicationProjectionState,
 ): CommunicationDescriptor | null {
-	const policy = relation.family === 'action'
-		? projection.actionTrack
-		: relation.family === 'service'
-			? projection.serviceTrack
-			: 'shortest'
-	const candidates = relation.memberDescriptors.map((descriptor) => {
-		const member = editor.getShape<ConnectionShape>(descriptor.connectionId)
-		return {
+	void editor
+	return chooseCommunicationRepresentative(
+		relation.family,
+		relation.memberDescriptors.map((descriptor) => ({
 			descriptor,
-			pathLength: member?.type === CONNECTION_SHAPE_TYPE
-				? polylineLength(getConnectionRenderPoints(editor, member))
-				: Number.POSITIVE_INFINITY,
-		}
-	})
-	return chooseCommunicationRepresentative(relation.family, candidates, policy)
+			pathLength: Number.POSITIVE_INFINITY,
+		})),
+	)
 }
 
 function ComponentCommunicationConnection({
 	connection,
 	relation,
 	representative,
-	representativePolicy,
-	routeStyle,
 	focusedGroupKey,
 }: {
 	connection: ConnectionShape
 	relation: CommunicationRelation
 	representative: CommunicationDescriptor
-	representativePolicy: string
-	routeStyle: CommunicationRouteStyle
 	focusedGroupKey: string | null
 }) {
 	const editor = useEditor()
 	const geometry = useValue(
 		'component communication relationship geometry',
-		() => componentRelationshipGeometry(editor, connection, relation, representative, routeStyle),
-		[editor, connection, relation, representative, routeStyle],
+		() => componentRelationshipGeometry(editor, connection, relation, representative),
+		[editor, connection, relation, representative],
 	)
 	if (!geometry) return null
 	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
@@ -1177,12 +1394,19 @@ function ComponentCommunicationConnection({
 	// exact phase beside the other expanded phase labels.
 	const label = focusState === 'active'
 		? `${relation.displayId} · ${phaseLabel(representative.phase)}`
-		: `${relation.displayId} · ${relation.family} · ${relation.name}`
+		: communicationRelationLabel(relation)
 	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
 		if (event.button !== 0) return
 		event.stopPropagation()
-		editor.select(connection.id)
-		applyCommunicationFocus(editor, relation.groupKey)
+		// A pill outranks a route, including a route belonging to somebody else:
+		// the thing under the finger is what the click is about.
+		const page = editor.screenToPage({ x: event.clientX, y: event.clientY })
+		const owner = communicationRelationshipLabelAt(editor, page) ?? relation
+		const carrier = owner === relation
+			? connection.id
+			: resolveCommunicationRepresentative(editor, owner)?.connectionId ?? connection.id
+		editor.select(carrier)
+		applyCommunicationFocus(editor, owner.groupKey)
 	}
 	return (
 		<SVGContainer
@@ -1191,8 +1415,6 @@ function ComponentCommunicationConnection({
 			data-communication-edges={relation.edgeCount}
 			data-communication-representative-phase={representative.phase}
 			data-communication-representative-id={representative.connectionId}
-			data-communication-representative-policy={representativePolicy}
-			data-communication-route={routeStyle}
 			data-communication-id={relation.displayId}
 			data-communication-member-ids={relation.memberIds.join(',')}
 			data-communication-focus={focusState}
@@ -1221,6 +1443,11 @@ function ComponentCommunicationConnection({
 				strokeWidth={2.8}
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				// WHY: the transparent 18px stroke above IS the hit target. Left
+				// interactive, this 2.8px line also swallowed clicks — including
+				// clicks meant for a NEIGHBOUR relationship's pill lying under it,
+				// which focused the wrong interaction with no way to tell.
+				pointerEvents="none"
 				markerStart={relation.bidirectional ? `url(#${markerId(connection.id, 'start')})` : undefined}
 				markerEnd={`url(#${markerId(connection.id, 'end')})`}
 				vectorEffect="non-scaling-stroke"
@@ -1259,18 +1486,21 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const relation = useValue(
 		'communication relationship',
 		() => {
-			if (!inCommunicationScope || projection.mode === 'wiring' || !descriptor) return null
+			// Cable style, not the lens, decides whether a relationship is needed:
+			// both Split and Summary are readable in either lens.
+			if (!inCommunicationScope || projection.cableStyle === 'data' || !descriptor) return null
 			return collectCommunicationRelations(editor).relations
 				.find((candidate) => candidate.groupKey === descriptor.groupKey) ?? null
 		},
-		[editor, descriptor, projection.mode, inCommunicationScope],
+		[editor, descriptor, projection.cableStyle, inCommunicationScope],
 	)
 	const representativeDescriptor = useValue(
 		'communication representative edge',
-		() => relation ? resolveCommunicationRepresentative(editor, relation, projection) : null,
-		[editor, relation, projection.actionTrack, projection.serviceTrack],
+		() => relation ? resolveCommunicationRepresentative(editor, relation) : null,
+		[editor, relation],
 	)
-	if (inCommunicationScope && projection.mode === 'tagged' && descriptor && relation) {
+	// SPLIT — every protocol leg painted separately, tagged with its phase.
+	if (inCommunicationScope && projection.cableStyle === 'split' && descriptor && relation) {
 		return (
 			<TaggedCommunicationConnection
 				connection={connection}
@@ -1280,11 +1510,16 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			/>
 		)
 	}
-	if (inCommunicationScope && projection.mode === 'components') {
+	// SUMMARY — one cable per relationship, riding the initiating leg's route.
+	// The other legs stay hidden unless one relationship is focused, or unless
+	// Straight has collapsed every candidate onto the same centre line.
+	if (inCommunicationScope && projection.cableStyle === 'summary') {
 		if (!relation || !representativeDescriptor) return null
 		const representative = representativeDescriptor.connectionId === connection.id
 		const focusedMember = projection.focusedGroupKey === relation.groupKey
-		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
+		// The representative's own route already carries the collapsed arrow, so
+		// painting its leg tag as well would double the same line.
+		const showMember = focusedMember && !representative
 		return (
 			<>
 				{showMember && descriptor ? (
@@ -1301,18 +1536,15 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						connection={connection}
 						relation={relation}
 						representative={representativeDescriptor}
-						representativePolicy={relation.family === 'action'
-							? projection.actionTrack
-							: relation.family === 'service' ? projection.serviceTrack : 'data'}
-						routeStyle={projection.routeStyle}
 						focusedGroupKey={projection.focusedGroupKey}
 					/>
 				) : null}
 			</>
 		)
 	}
+	// DATA — the ordinary grey canonical cable.
 	const dimUnrelatedCanonical = inCommunicationScope
-		&& projection.mode === 'tagged'
+		&& projection.cableStyle === 'split'
 		&& projection.focusedGroupKey !== null
 	return (
 		<CanonicalConnectionShapeComponent
@@ -2127,18 +2359,47 @@ export function getConnectionElbowRoute(
 		?? computeConnectionElbowRoute(editor, connection)
 }
 
+/**
+ * Is this cable being read through the communication lens?
+ *
+ * Asked of a bound endpoint, because a cable has no wall of its own — the lens
+ * is a property of the region its components sit in.
+ */
+function connectionIsInCommunicationLens(editor: Editor, connection: ConnectionShape): boolean {
+	const bindings = getConnectionBindings(editor, connection)
+	const anchor = bindings.start?.toId ?? bindings.end?.toId
+	return anchor ? blockLayoutLensFor(editor, anchor) === 'communication' : false
+}
+
 function computeConnectionElbowRoute(editor: Editor, connection: ConnectionShape): ElbowRoute {
 	const { source, sink } = getConnectionEndpoints(editor, connection)
-	// An authored route replaces the A*: the user owns the rails, and the
-	// normalize pass re-binds the end segments to the live ports.
-	if (connection.props.elbowRoute) {
+	// WHY the communication lens ignores every stored route (Zach, 2026-09-06):
+	// "dataflow and communication should have completely separate appearances in
+	// terms of placement of ports and placement of arrows. Completely separate.
+	// Changing one appearance will not change the other."
+	//
+	// `elbowRoute` and `pins` are frozen geometry — Tidy edges writes the first,
+	// dragging a bend writes the second — and both are computed against whatever
+	// walls the ports were on AT THE TIME. Tidying in Dataflow and switching to
+	// Communication therefore replayed a route built for the left/right lanes
+	// against sockets that had since moved to other walls, which is why the
+	// arrows stopped meeting the cards square on.
+	//
+	// The communication lens does not get a second copy of that state; it gets
+	// NO stored state. Its arrows are always re-derived from the sockets they
+	// currently join, which is exactly what makes the two appearances
+	// independent in both directions: Dataflow's tidy cannot reach it, and it
+	// stores nothing that could reach back.
+	if (connection.props.elbowRoute && !connectionIsInCommunicationLens(editor, connection)) {
+		// An authored route replaces the A*: the user owns the rails, and the
+		// normalize pass re-binds the end segments to the live ports.
 		return authoredElbowRoute(connection.props.elbowRoute, source, sink)
 	}
 	return getElbowConnectionRoute(
 		source,
 		sink,
 		getConnectionElbowBoxes(editor, connection),
-		connection.props.pins,
+		connectionIsInCommunicationLens(editor, connection) ? [] : connection.props.pins,
 	)
 }
 
@@ -2294,14 +2555,51 @@ export function getConnectionEndpoints(editor: Editor, connection: ConnectionSha
 	}
 }
 
+/**
+ * Which wall each end of a settled cable leaves by, in source→sink order.
+ *
+ * Read from the same `portElbowSideForFace` the elbow router uses, so a curved
+ * cable and an elbow cable agree about which way a socket faces. Absent for an
+ * unbound end, which keeps the historical horizontal exit for a cable still in
+ * the air.
+ */
+export function getConnectionExitSides(
+	editor: Editor,
+	connection: ConnectionShape,
+): ConnectionExitSides {
+	const bindings = getConnectionBindings(editor, connection)
+	const direction = getConnectionDirection(editor, connection)
+	const sideFor = (terminal: 'start' | 'end'): ConnectionExitSide | undefined => {
+		const binding = bindings[terminal]
+		if (!binding) return undefined
+		const host = editor.getShape(binding.toId)
+		if (!host) return undefined
+		const port = getPortHostPort(editor, host, binding.props.portId)
+		return port ? portElbowSideForFace(port, binding.props.face) : undefined
+	}
+	return {
+		start: sideFor(direction.sourceTerminal),
+		end: sideFor(direction.sinkTerminal),
+	}
+}
+
 export function getConnectionShapePath(
 	editor: Editor,
 	connection: ConnectionShape,
 ): string {
 	const { source, sink } = getConnectionEndpoints(editor, connection)
-	return getConnectionPath(connection.props.routing, source, sink, {
-		curve: connection.props.curve,
-		route: connection.props.routing === 'elbow'
+	// WHY the lens picks the shape here: `routing` and `curve` are document
+	// state shared by both lenses, so a Curve chosen in Dataflow re-shaped the
+	// communication drawing and vice versa — an adversarial audit demonstrated
+	// the leak in both directions. Communication reads its shape from the
+	// projection and ignores the stored bend entirely, which is the same rule
+	// its routes already follow: it stores nothing and inherits nothing.
+	const inLens = connectionIsInCommunicationLens(editor, connection)
+	const routing = inLens ? communicationLensRouting(editor) : connection.props.routing
+	return getConnectionPath(routing, source, sink, {
+		curve: inLens ? null : connection.props.curve,
+		sides: getConnectionExitSides(editor, connection),
+		route: routing === 'elbow'
 			? getConnectionElbowRoute(editor, connection)
 			: undefined,
 	})

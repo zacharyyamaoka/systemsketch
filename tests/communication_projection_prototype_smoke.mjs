@@ -227,7 +227,7 @@ async function main() {
         .map(async (edge) => [edge, await visiblePath(app.page, edge)]),
     ))
 
-    await clickElement(app.page, '[data-testid="communication-mode-tagged"]')
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await delay(500)
     observed = await state(app.page)
     assert.equal(observed.mode, 'tagged')
@@ -239,7 +239,7 @@ async function main() {
     pass('Tag edges recolors and labels all 11 component protocol legs without changing ports or local values')
     await shot(app.page, '02-tagged-edges.png')
 
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await delay(600)
     observed = await state(app.page)
     assert.equal(observed.mode, 'components')
@@ -294,7 +294,7 @@ async function main() {
     assert.deepEqual(await componentBoxes(app.page), beforeBoxes)
     await shot(app.page, '06-components-port-straight.png')
 
-    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(500)
     observed = await state(app.page)
     assert.equal(observed.mode, 'wiring')

@@ -382,12 +382,29 @@ export function orderBundle(bundle: readonly Candidate[]): {
       if (i === j) continue
       const a = bundle[i]
       const b = bundle[j]
-      // b's arriving leg sits inside a's span -> b must come first (lower coord).
-      const arrivingInside = b.fromSpan > a.lo && b.fromSpan < a.hi
-      // b's leaving leg sits inside a's span -> b must come after.
-      const leavingInside = b.toSpan > a.lo && b.toSpan < a.hi
-      if (arrivingInside && b.prevChannel < a.channel) mustPrecede[i][j] = true
-      if (leavingInside && b.nextChannel > a.channel) mustPrecede[j][i] = true
+      // Each of b's two adjacent legs runs, in channel space, from b's own
+      // channel out to a neighbour's. If that leg crosses a's span, then it
+      // sweeps the channel interval between them, and it cuts a unless b ends
+      // up on the same side of a as the leg's far end already is.
+      //
+      // WHY the far end and not a fixed direction: this used to read "arriving
+      // from the left" and "leaving to the right", which is the whole truth
+      // only while every port lives on a left or right wall and every cable
+      // flows left to right. A port on a top or bottom wall — or an input on a
+      // card's RIGHT wall, which the communication lens produces routinely —
+      // reverses one or both legs, and the old form then dropped the constraint
+      // silently instead of reversing it. Half a constraint set is worse than
+      // none: it pins a crossing-free bundle into the one order that crosses,
+      // and it hides the genuine cycles from `forced`. Keying on the sign of
+      // (neighbour - a.channel) makes the rule reflection-equivariant, so a
+      // scene and its mirror image tidy to mirror-image boards.
+      const legs: number[] = []
+      if (b.fromSpan > a.lo && b.fromSpan < a.hi) legs.push(b.prevChannel)
+      if (b.toSpan > a.lo && b.toSpan < a.hi) legs.push(b.nextChannel)
+      for (const neighbourChannel of legs) {
+        if (neighbourChannel < a.channel) mustPrecede[i][j] = true
+        else if (neighbourChannel > a.channel) mustPrecede[j][i] = true
+      }
     }
   }
 

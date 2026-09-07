@@ -3,6 +3,9 @@ import { createShapeId } from 'tldraw'
 
 import {
 	chooseCommunicationRepresentative,
+	communicationLabelWidth,
+	communicationRelationLabel,
+	packCommunicationLabels,
 	inspectCommunicationChannel,
 	parseCommunicationChannel,
 	selectedCommunicationGroupKey,
@@ -119,29 +122,116 @@ describe('communication representative edge policy', () => {
 		{ descriptor: result, pathLength: 90 },
 	]
 
-	it('uses the explicitly requested Action phase', () => {
-		expect(chooseCommunicationRepresentative('action', actionCandidates, 'feedback')).toBe(feedback)
-		expect(chooseCommunicationRepresentative('action', actionCandidates, 'result')).toBe(result)
+	it('always rides the goal for an Action, whatever the routes measure', () => {
+		// Zach, 2026-09-06: "for the action it is always the goal." The candidate
+		// list here deliberately makes feedback the SHORTEST route, so a
+		// reintroduced shortest-path heuristic fails this test rather than
+		// silently changing what a board means.
+		expect(chooseCommunicationRepresentative('action', actionCandidates)).toBe(goal)
 	})
 
-	it('uses the initiating leg when an optional requested phase is absent', () => {
-		expect(chooseCommunicationRepresentative(
-			'action',
-			actionCandidates.filter((candidate) => candidate.descriptor.phase !== 'feedback'),
-			'feedback',
-		)).toBe(goal)
-	})
-
-	it('measures shortest across work and outcome legs without letting Cancel win', () => {
-		expect(chooseCommunicationRepresentative('action', actionCandidates, 'shortest')).toBe(feedback)
-	})
-
-	it('can choose the shorter Service response route', () => {
+	it('always rides the request for a Service', () => {
 		const request = descriptor('request', 'service', 'request')
 		const response = descriptor('response', 'service', 'response')
 		expect(chooseCommunicationRepresentative('service', [
-			{ descriptor: request, pathLength: 80 },
 			{ descriptor: response, pathLength: 30 },
-		], 'shortest')).toBe(response)
+			{ descriptor: request, pathLength: 80 },
+		])).toBe(request)
+	})
+
+	it('falls back to the initiating leg that exists when goal is absent', () => {
+		expect(chooseCommunicationRepresentative(
+			'action',
+			actionCandidates.filter((candidate) => candidate.descriptor.phase !== 'goal'),
+		)).toBe(feedback)
+	})
+
+	it('never lets Cancel speak for an Action while any other leg exists', () => {
+		const cancel = descriptor('cancel', 'action', 'cancel')
+		expect(chooseCommunicationRepresentative('action', [
+			{ descriptor: cancel, pathLength: 1 },
+			{ descriptor: result, pathLength: 900 },
+		])).toBe(result)
+	})
+
+	it('lets Cancel carry only when it is the sole leg', () => {
+		const cancel = descriptor('cancel', 'action', 'cancel')
+		expect(chooseCommunicationRepresentative('action', [
+			{ descriptor: cancel, pathLength: 1 },
+		])).toBe(cancel)
+	})
+
+})
+
+describe('label pills of one component pair tile instead of stacking', () => {
+	// The bug this replaces: an index-based stagger measured as a FRACTION of
+	// the route put `A2 · action · move` and `A3 · action · status` 101px apart
+	// while the pills were 164px wide, so one covered the other — and the
+	// covered one could not be clicked at all, because the neighbour's
+	// transparent hit stroke was on top of it.
+	function relation(
+		displayId: string,
+		family: CommunicationFamily,
+		name: string,
+		lane: number,
+		pairKey = 'mission:robot',
+	) {
+		return {
+			...descriptor(`edge_${displayId}`, family, 'goal'),
+			name,
+			groupKey: `${family}:${name}`,
+			pairKey,
+			representativeId: createShapeId(`edge_${displayId}`),
+			edgeCount: 1,
+			memberIds: [],
+			memberDescriptors: [],
+			displayId,
+			lane,
+			labelOffsetPx: 0,
+		}
+	}
+
+	const spans = (packed: ReturnType<typeof packCommunicationLabels>) =>
+		packed.map((entry) => {
+			const half = communicationLabelWidth(communicationRelationLabel(entry)) / 2
+			return { id: entry.displayId, from: entry.labelOffsetPx - half, to: entry.labelOffsetPx + half }
+		}).sort((a, b) => a.from - b.from)
+
+	it('leaves a real gap between every pair of neighbouring pills', () => {
+		const packed = packCommunicationLabels([
+			relation('A1', 'action', 'move', -1),
+			relation('A2', 'action', 'status', 0),
+			relation('A3', 'action', 'dock', 1),
+		])
+		const laid = spans(packed)
+		for (let index = 1; index < laid.length; index += 1) {
+			expect(laid[index].from).toBeGreaterThanOrEqual(laid[index - 1].to)
+		}
+	})
+
+	it('sizes the gap from the real pill widths, not from an index', () => {
+		// A very long name must push its neighbours further away, which a
+		// fraction-of-the-route stagger could never do.
+		const packed = packCommunicationLabels([
+			relation('S1', 'service', 'a', -0.5),
+			relation('S2', 'service', 'a-very-long-interaction-name-indeed', 0.5),
+		])
+		const laid = spans(packed)
+		expect(laid[1].from).toBeGreaterThanOrEqual(laid[0].to)
+		expect(Math.abs(packed[1].labelOffsetPx - packed[0].labelOffsetPx))
+			.toBeGreaterThan(communicationLabelWidth('S1 · service · a'))
+	})
+
+	it('centres the run, so a lone relationship keeps the route midpoint', () => {
+		const [only] = packCommunicationLabels([relation('T1', 'topic', 'telemetry', 0)])
+		expect(only.labelOffsetPx).toBeCloseTo(0, 5)
+	})
+
+	it('packs each component pair independently', () => {
+		const packed = packCommunicationLabels([
+			relation('A1', 'action', 'move', 0, 'mission:robot'),
+			relation('A2', 'action', 'dock', 0, 'mission:dashboard'),
+		])
+		for (const entry of packed) expect(entry.labelOffsetPx).toBeCloseTo(0, 5)
 	})
 })

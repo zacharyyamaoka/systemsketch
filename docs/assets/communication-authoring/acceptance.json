@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-09-07T05:40:17.943Z",
+  "checks": [
+    "Components mode offers exactly the three drawable patterns, none armed and nothing wired",
+    "a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher",
+    "a stacked pair puts each generated socket on the facing horizontal rail",
+    "a Service arrow generates request forward and response back, naming the client by the arrowhead",
+    "an Action arrow generates goal, feedback and result — and deliberately no cancel leg",
+    "flipping to Dataflow shows the six real cables the three drawn arrows created",
+    "Dataflow repositions every communication-placed socket back onto the left and right lanes",
+    "Dataflow + Summary paints the three relationship arrows over the real routes without moving a port",
+    "the strict parser reads the generated dataflow back as exactly the three relationships that were drawn",
+    "communication offers the card choice but is always Summary cables",
+    "only the sockets a summary arrow connects to are drawn; the other legs still exist for Dataflow",
+    "communication shows summary ports only, in both faces — no split legs, no undefined ports",
+    "cables the communication lens hides are gone from hit testing and cannot be selected",
+    "Dataflow shows every port, period — the split legs communication hides are all there",
+    "freezing a Dataflow route leaves the communication appearance untouched",
+    "choosing a cable shape in Dataflow leaves the communication appearance untouched",
+    "choosing a cable shape in communication writes nothing to the document",
+    "press-and-hold slides a socket onto another edge in the communication lens, keeping every cable",
+    "the relocated socket leaves the Dataflow signature untouched",
+    "renaming a relationship rewrites its port names and keeps every cable bound",
+    "the armed family toggles off, returning the canvas to ordinary selection",
+    "leaving the region closes the lens, so an ordinary board has no communication drawing affordance",
+    "the real browser journey emitted no local console errors"
+  ]
+}

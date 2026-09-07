@@ -8,50 +8,91 @@ import {
 import { getPortHostPort } from '../../blocks/connections/blockPorts'
 import {
 	CONNECTION_SHAPE_TYPE,
+	type ConnectionRoutingKind,
 } from '../../blocks/connections/connectionModel'
 import type { ConnectionShape } from '../../blocks/connections/ConnectionShapeUtil'
 import { EditorAtom } from '../../blocks/ports/portState'
 import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
+import {
+	inspectCommunicationChannel,
+	parseCommunicationChannel,
+	type CommunicationAssociationIssueKind,
+	type CommunicationFamily,
+	type CommunicationPhase,
+} from './channelParser'
+
+export {
+	inspectCommunicationChannel,
+	parseCommunicationChannel,
+	phaseLabel,
+	type CommunicationAssociationIssueKind,
+	type CommunicationChannelInspection,
+	type CommunicationFamily,
+	type CommunicationPhase,
+} from './channelParser'
+import { setCommunicationLensScope } from '../../blocks/ports/portLens'
 
 export const COMMUNICATION_PROTOTYPE_QUERY = 'communication'
 
-export type CommunicationProjectionMode = 'wiring' | 'tagged' | 'components'
-export type CommunicationComponentView = 'simple' | 'port'
-export type CommunicationRouteStyle = 'elbow' | 'straight'
-export type CommunicationServiceTrack = 'request' | 'response' | 'shortest'
-export type CommunicationActionTrack = 'goal' | 'feedback' | 'result' | 'shortest'
-export type CommunicationFamily = 'topic' | 'stream' | 'service' | 'action'
-export type CommunicationPhase =
-	| 'publish'
-	| 'stream'
-	| 'request'
-	| 'response'
-	| 'goal'
-	| 'cancel'
-	| 'feedback'
-	| 'result'
+/**
+ * The two ways to read an Async region.
+ *
+ * `dataflow` is the signature — ports on the left and right lanes, cables
+ * between them. `communication` is the topology — ports on any of the four
+ * edges, relationships between components. This is the ONLY axis that moves a
+ * port; card face and cable paint are independent of it.
+ */
+export type CommunicationLens = 'dataflow' | 'communication'
+export type CommunicationComponentView = 'simple' | 'port' | 'expanded'
+/**
+ * What the cables say, independent of which lens is reading them.
+ *
+ * `data` is every canonical cable in its ordinary grey. `split` paints each
+ * protocol leg separately, tagged with its phase. `summary` collapses each
+ * relationship onto one cable.
+ */
+export type CommunicationCableStyle = 'data' | 'split' | 'summary'
 
 export interface CommunicationProjectionState {
-	mode: CommunicationProjectionMode
+	lens: CommunicationLens
+	/**
+	 * The card face, remembered PER LENS.
+	 *
+	 * WHY two fields and not one (the stated rule: "dataflow and communication
+	 * should have completely separate appearances… changing one appearance will
+	 * not change the other"): with a single field, choosing Port in Dataflow
+	 * silently changed what Communication showed the next time you opened it.
+	 * `componentView` is Dataflow's; `communicationCard` is the other lens's.
+	 * Read them through `activeComponentView` rather than directly.
+	 */
 	componentView: CommunicationComponentView
-	routeStyle: CommunicationRouteStyle
-	serviceTrack: CommunicationServiceTrack
-	actionTrack: CommunicationActionTrack
+	communicationCard: CommunicationComponentView
+	cableStyle: CommunicationCableStyle
+	/** Communication's own cable shape. Never written to a connection. */
+	communicationRouting: ConnectionRoutingKind
 	focusedGroupKey: string | null
 	/** Null is the legacy query-gated whole-board prototype. */
 	activeRegionId: TLShapeId | null
+	/**
+	 * Which of the three drawable patterns the link tool is armed with.
+	 *
+	 * Presentation state, like every other field here: arming a family selects
+	 * a tool, and writes nothing to the document until an arrow actually lands.
+	 */
+	drawFamily: 'stream' | 'service' | 'action'
 }
 
 export const communicationProjection = new EditorAtom<CommunicationProjectionState>(
 	'communication projection prototype',
 	() => ({
-		mode: 'wiring',
-		componentView: 'simple',
-		routeStyle: 'elbow',
-		serviceTrack: 'request',
-		actionTrack: 'goal',
+		lens: 'dataflow',
+		componentView: 'port',
+		communicationCard: 'simple',
+		cableStyle: 'data',
+		communicationRouting: 'elbow',
 		focusedGroupKey: null,
 		activeRegionId: null,
+		drawFamily: 'stream',
 	}),
 )
 
@@ -89,6 +130,12 @@ export interface CommunicationRelation extends CommunicationDescriptor {
 	memberDescriptors: CommunicationDescriptor[]
 	displayId: string
 	lane: number
+	/**
+	 * How far along its own route this relationship's label pill sits, in page
+	 * pixels from the route's midpoint. Packed across the siblings of a
+	 * component pair, so two pills can never cover one another.
+	 */
+	labelOffsetPx: number
 }
 
 export interface CommunicationRepresentativeCandidate {
@@ -96,12 +143,6 @@ export interface CommunicationRepresentativeCandidate {
 	pathLength: number
 }
 
-export type CommunicationAssociationIssueKind =
-	| 'missing-interaction-name'
-	| 'conflicting-endpoint-claims'
-	| 'missing-required-phase'
-	| 'duplicate-phase'
-	| 'reversed-phase'
 
 export interface CommunicationAssociationIssue {
 	kind: CommunicationAssociationIssueKind
@@ -117,21 +158,6 @@ export interface CommunicationSummary {
 	neutralEdgeCount: number
 	relations: CommunicationRelation[]
 	issues: CommunicationAssociationIssue[]
-}
-
-const ACTION_PHASES: Readonly<Record<string, CommunicationPhase>> = {
-	goal: 'goal',
-	cancel: 'cancel',
-	feedback: 'feedback',
-	result: 'result',
-}
-
-const SERVICE_PHASES: Readonly<Record<string, CommunicationPhase>> = {
-	req: 'request',
-	request: 'request',
-	query: 'request',
-	reply: 'response',
-	response: 'response',
 }
 
 const REPRESENTATIVE_PHASE_PRIORITY: Readonly<Record<CommunicationPhase, number>> = {
@@ -155,169 +181,30 @@ function compareRepresentativeCandidates(
 }
 
 /**
- * Pick the real protocol leg whose existing geometry carries a collapsed edge.
+ * The one leg a summary cable rides. There is deliberately no choice.
  *
- * `pathLength` is supplied by the renderer because it owns the routed cable
- * geometry. Keeping the policy here leaves the communication model independent
- * of ConnectionShapeUtil and avoids a semantic↔presentation import cycle.
+ * WHY the selectors went away (Zach, 2026-09-06): "you do not get a choice.
+ * The summary cable for the stream is set as only 1 option, for the service it
+ * is always the request, for the action it is always the goal." A protocol's
+ * INITIATING leg is the honest stand-in for the whole interaction — it is the
+ * one that says who started it and in which direction — and offering Response
+ * or Result or a shortest-path heuristic made a board's meaning depend on a
+ * dropdown nobody could see in a screenshot. `REPRESENTATIVE_PHASE_PRIORITY`
+ * already ranks goal, request, publish and stream first, so the rule is simply
+ * the head of that order.
  */
 export function chooseCommunicationRepresentative(
 	family: CommunicationFamily,
 	candidates: readonly CommunicationRepresentativeCandidate[],
-	policy: CommunicationServiceTrack | CommunicationActionTrack,
 ): CommunicationDescriptor | null {
 	if (candidates.length === 0) return null
 	const ordered = [...candidates].sort(compareRepresentativeCandidates)
-	const fallback = ordered[0].descriptor
-	if (family === 'topic' || family === 'stream') return fallback
-	if (policy !== 'shortest') {
-		return ordered.find((candidate) => candidate.descriptor.phase === policy)?.descriptor ?? fallback
-	}
+	// Cancel is a coordination side-channel and never speaks for an Action, so
+	// it can only carry one when nothing else is there to.
 	const eligible = family === 'action'
 		? ordered.filter((candidate) => candidate.descriptor.phase !== 'cancel')
 		: ordered
-	// WHY: Cancel is a coordination side-channel, not the work or outcome a
-	// compact Action line normally stands for. It remains visible on expansion,
-	// but does not unexpectedly win merely because its ports happen to be close.
-	const measurable = (eligible.length > 0 ? eligible : ordered)
-		.filter((candidate) => Number.isFinite(candidate.pathLength))
-		.sort((a, b) => a.pathLength - b.pathLength || compareRepresentativeCandidates(a, b))
-	return measurable[0]?.descriptor ?? fallback
-}
-
-function finalToken(name: string): string {
-	return name.trim().toLowerCase().split(/[._:/-]+/).filter(Boolean).at(-1) ?? ''
-}
-
-function communicationName(name: string, phase: string): string {
-	const normalized = name.trim()
-	if (normalized === '') return phase
-	const tokens = normalized.split(/[._:/-]+/).filter(Boolean)
-	if (tokens.length > 1 && tokens.at(-1)?.toLowerCase() === phase) tokens.pop()
-	return tokens.join('.') || phase
-}
-
-/**
- * Parse Dora-style well-known channel names without changing the edge model.
- *
- * The prototype intentionally reads the port names already carried by the
- * canonical dataflow. It does not write a second service/action graph merely
- * to paint one: the derived family and phase can later be replaced by a richer
- * analyzer without changing either projection.
- */
-type ParsedCommunicationChannel = Pick<
-	CommunicationDescriptor,
-	'family' | 'phase' | 'name' | 'bidirectional' | 'provenance'
->
-
-export interface CommunicationChannelInspection {
-	parsed: ParsedCommunicationChannel | null
-	issue: Omit<CommunicationAssociationIssue, 'connectionId'> | null
-}
-
-interface MultiLegCandidate {
-	family: 'action' | 'service'
-	phase: CommunicationPhase
-	name: string | null
-}
-
-function multiLegCandidate(name: string): MultiLegCandidate | null {
-	const token = finalToken(name)
-	const family = token in ACTION_PHASES ? 'action' : token in SERVICE_PHASES ? 'service' : null
-	if (!family) return null
-	return {
-		family,
-		phase: family === 'action' ? ACTION_PHASES[token] : SERVICE_PHASES[token],
-		name: name.trim().split(/[._:/-]+/).filter(Boolean).length > 1
-			? communicationName(name, token)
-			: null,
-	}
-}
-
-/**
- * Strict V1 inference for a canonical data edge.
- *
- * Action and Service are multi-leg protocols, so a bare `goal` or `response`
- * cannot identify which interaction owns the leg. At least one endpoint must
- * provide `interaction.phase`; if both endpoints make claims, they must agree.
- * Topic and Stream remain single-edge classifications and need no grouping key.
- */
-export function inspectCommunicationChannel(
-	sourcePortName: string,
-	targetPortName: string,
-): CommunicationChannelInspection {
-	const sourceClaim = multiLegCandidate(sourcePortName)
-	const targetClaim = multiLegCandidate(targetPortName)
-	const claims = [sourceClaim, targetClaim].filter((claim): claim is MultiLegCandidate => Boolean(claim))
-	if (claims.length > 0) {
-		const namedClaims = claims.filter((claim) => claim.name !== null)
-		if (namedClaims.length === 0) {
-			return {
-				parsed: null,
-				issue: {
-					kind: 'missing-interaction-name',
-					message: `Reserved phase name needs an interaction prefix: ${sourcePortName} → ${targetPortName}`,
-				},
-			}
-		}
-		const canonical = namedClaims[0]
-		const conflict = namedClaims.find((claim) =>
-			claim.family !== canonical.family
-			|| claim.phase !== canonical.phase
-			|| claim.name?.toLowerCase() !== canonical.name?.toLowerCase())
-		if (conflict) {
-			return {
-				parsed: null,
-				issue: {
-					kind: 'conflicting-endpoint-claims',
-					message: `Endpoint protocol claims disagree: ${sourcePortName} → ${targetPortName}`,
-				},
-			}
-		}
-		return {
-			parsed: {
-				family: canonical.family,
-				phase: canonical.phase,
-				name: canonical.name!,
-				bidirectional: true,
-				provenance: 'strict-port-name',
-			},
-			issue: null,
-		}
-	}
-	const sourceToken = finalToken(sourcePortName)
-	const targetToken = finalToken(targetPortName)
-	const stream = [sourceToken, targetToken].some((candidate) =>
-		['stream', 'preview', 'chunk', 'chunks'].includes(candidate))
-	if (stream) {
-		return {
-			parsed: {
-				family: 'stream',
-				phase: 'stream',
-				name: communicationName(sourcePortName || targetPortName, sourceToken),
-				bidirectional: false,
-				provenance: 'strict-port-name',
-			},
-			issue: null,
-		}
-	}
-	return {
-		parsed: {
-			family: 'topic',
-			phase: 'publish',
-			name: sourcePortName.trim() || targetPortName.trim() || 'message',
-			bidirectional: false,
-			provenance: 'strict-port-name',
-		},
-		issue: null,
-	}
-}
-
-export function parseCommunicationChannel(
-	sourcePortName: string,
-	targetPortName: string,
-): ParsedCommunicationChannel | null {
-	return inspectCommunicationChannel(sourcePortName, targetPortName).parsed
+	return (eligible[0] ?? ordered[0]).descriptor
 }
 
 function orderedPair(a: TLShapeId, b: TLShapeId): [TLShapeId, TLShapeId] {
@@ -416,6 +303,7 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 			memberDescriptors: [...members],
 			displayId: '',
 			lane: 0,
+			labelOffsetPx: 0,
 		}
 	})
 	for (const relation of unslotted) {
@@ -497,6 +385,7 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 		counters[relation.family] = ordinal
 		return { ...relation, displayId: `${familyPrefix[relation.family]}${ordinal}` }
 	})
+	relations = packCommunicationLabels(relations)
 	return {
 		edgeCount: connections.length,
 		taggedEdgeCount: described.length,
@@ -505,6 +394,64 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 		relations,
 		issues,
 	}
+}
+
+/** Clear space kept between two label pills sharing one corridor. */
+export const COMMUNICATION_LABEL_GUTTER_PX = 16
+
+/**
+ * The pill a relationship's label is drawn in, measured rather than guessed.
+ *
+ * WHY it lives beside the packer instead of inside the renderer: the packer has
+ * to know exactly how wide each pill will be to guarantee they do not overlap,
+ * and a second copy of this formula would drift the moment either changed.
+ */
+export function communicationLabelWidth(text: string): number {
+	return Math.max(74, text.length * 7.1 + 22)
+}
+
+/** The text a relationship's carrier shows when nothing is focused. */
+export function communicationRelationLabel(relation: CommunicationRelation): string {
+	return `${relation.displayId} · ${relation.family} · ${relation.name}`
+}
+
+/**
+ * Slide each label along its OWN route so the pills of one component pair tile
+ * instead of stacking.
+ *
+ * WHY here and not in the shape: several relationships between one pair of
+ * cards run as near-parallel channels — more so since an interaction's ports
+ * bundle on a single edge — so every pill wants the same midpoint. A shape can
+ * only see itself, and an index-based stagger measured as a FRACTION of the
+ * route produced gaps of 23px between 160px pills; the real answer needs the
+ * widths of all the siblings at once, which is exactly what this pass has.
+ * Offsets are page pixels along the route, so equal-length parallel routes give
+ * pills that line up in a readable row.
+ */
+export function packCommunicationLabels(relations: CommunicationRelation[]): CommunicationRelation[] {
+	const byPair = new Map<string, CommunicationRelation[]>()
+	for (const relation of relations) {
+		const siblings = byPair.get(relation.pairKey)
+		if (siblings) siblings.push(relation)
+		else byPair.set(relation.pairKey, [relation])
+	}
+	const offsets = new Map<string, number>()
+	for (const siblings of byPair.values()) {
+		const ordered = [...siblings].sort((a, b) => a.lane - b.lane)
+		const widths = ordered.map((relation) => communicationLabelWidth(
+			communicationRelationLabel(relation)))
+		const run = widths.reduce((total, width) => total + width, 0)
+			+ COMMUNICATION_LABEL_GUTTER_PX * Math.max(0, ordered.length - 1)
+		let cursor = -run / 2
+		ordered.forEach((relation, index) => {
+			offsets.set(relation.groupKey, cursor + widths[index] / 2)
+			cursor += widths[index] + COMMUNICATION_LABEL_GUTTER_PX
+		})
+	}
+	return relations.map((relation) => ({
+		...relation,
+		labelOffsetPx: offsets.get(relation.groupKey) ?? 0,
+	}))
 }
 
 const communicationSummaryCache = new WeakCache<Editor, Computed<CommunicationSummary>>()
@@ -571,50 +518,152 @@ export function isCommunicationPrototypeEnabled(editor?: Editor): boolean {
 }
 
 /** Enter or leave the transient communication lens for one durable region. */
+/**
+ * The single write path for projection state.
+ *
+ * WHY funnelled: `portLens` mirrors the two facts the port layout needs, and a
+ * mirror with more than one writer drifts. Every `apply*` below goes through
+ * here, so the lens the geometry uses cannot disagree with the lens the chrome
+ * is showing.
+ */
+function updateProjection(
+	editor: Editor,
+	update: (state: CommunicationProjectionState) => CommunicationProjectionState,
+): void {
+	const next = communicationProjection.update(editor, update)
+	// Only the lens relocates a socket. Cable style is paint and never moves a
+	// port, which is what lets Split and Summary be read in either lens.
+	const inCommunicationLens = next.lens === 'communication'
+	setCommunicationLensScope(editor, {
+		regionId: inCommunicationLens ? next.activeRegionId : null,
+		wholeBoard: inCommunicationLens
+			&& next.activeRegionId === null
+			&& isCommunicationPrototypeQueryEnabled(),
+		routing: next.communicationRouting,
+	})
+}
+
 export function applyActiveCommunicationRegion(editor: Editor, regionId: TLShapeId | null): void {
 	const valid = regionId && isAsyncRegionShape(editor.getShape(regionId)) ? regionId : null
-	communicationProjection.update(editor, (state) => ({
+	updateProjection(editor, (state) => ({
 		...state,
 		activeRegionId: valid,
 		focusedGroupKey: valid === state.activeRegionId ? state.focusedGroupKey : null,
 	}))
 }
 
-export function applyCommunicationProjectionMode(
-	editor: Editor,
-	mode: CommunicationProjectionMode,
-): void {
-	// The projection changes paint only. In particular, Simple is rendered at
-	// the stored Port box rather than writing the Block's view or remembered
-	// dimensions, so switching lenses cannot dirty the document.
-	communicationProjection.update(editor, (state) => ({
+export function applyCommunicationLens(editor: Editor, lens: CommunicationLens): void {
+	updateProjection(editor, (state) => ({
 		...state,
-		mode,
-		focusedGroupKey: mode === 'wiring' ? null : state.focusedGroupKey,
+		lens,
+		// The two lenses have opposite honest defaults, and switching should land
+		// on the useful one rather than on whatever the other lens was showing:
+		// Dataflow means grey cables, Communication means one arrow per
+		// relationship. An explicit cable choice inside a lens still stands.
+		// WHY the communication lens keeps its CARD choice but not its CABLE one
+		// (Zach, 2026-09-06 and his correction the same day): "cables are only in
+		// summary view" stands — Split replaced the one arrow you drew with the
+		// legs it expands into, which is the Dataflow question asked in the wrong
+		// lens. But "earlier I said in communication view we don't want port
+		// view. I actually take that back": Simple tells the summary story, Port
+		// tells the full one, and both are worth having. Only the cable axis is
+		// fixed here; Dataflow keeps both.
+		cableStyle: lens === 'communication'
+			? 'summary'
+			: (state.cableStyle === 'summary' ? 'data' : state.cableStyle),
+		focusedGroupKey: null,
 	}))
+}
+
+export function applyCommunicationCableStyle(
+	editor: Editor,
+	cableStyle: CommunicationCableStyle,
+): void {
+	updateProjection(editor, (state) => ({
+		...state,
+		cableStyle,
+		focusedGroupKey: cableStyle === 'data' ? null : state.focusedGroupKey,
+	}))
+}
+
+/** The card face the ACTIVE lens is showing. */
+export function activeComponentView(
+	state: CommunicationProjectionState,
+): CommunicationComponentView {
+	return state.lens === 'communication' ? state.communicationCard : state.componentView
 }
 
 export function applyCommunicationComponentView(
 	editor: Editor,
 	componentView: CommunicationComponentView,
 ): void {
-	communicationProjection.update(editor, (state) => ({ ...state, componentView }))
+	// Writes to whichever lens is asking, so the other one keeps what it had.
+	updateProjection(editor, (state) => (state.lens === 'communication'
+		? { ...state, communicationCard: componentView }
+		: { ...state, componentView }))
 }
 
-export function applyCommunicationRouteStyle(editor: Editor, routeStyle: CommunicationRouteStyle): void {
-	communicationProjection.update(editor, (state) => ({ ...state, routeStyle }))
+export function applyCommunicationDrawFamily(
+	editor: Editor,
+	drawFamily: CommunicationProjectionState['drawFamily'],
+): void {
+	updateProjection(editor, (state) => ({ ...state, drawFamily }))
 }
 
-export function applyCommunicationServiceTrack(editor: Editor, serviceTrack: CommunicationServiceTrack): void {
-	communicationProjection.update(editor, (state) => ({ ...state, serviceTrack }))
+/**
+ * Set the shape of every cable inside the active region.
+ *
+ * WHY this writes the document rather than a projection field: cable shape is
+ * already a real per-cable style (`ConnectionRoutingStyle`), settable on one
+ * selected cable through the ordinary selection menu. A second presentation-only
+ * copy of the same idea would let the bar and the cable disagree about what
+ * shape a cable is. So the bar is a BULK EDIT of the thing that already exists —
+ * "you can change them individually, but that top thing just allows you to do it
+ * for all of them inside."
+ */
+export function applyCommunicationCableRouting(
+	editor: Editor,
+	routing: ConnectionRoutingKind,
+): number {
+	// In the communication lens this is a PROJECTION choice: writing `routing`
+	// onto the cables would re-shape Dataflow's drawing too, which is the leak
+	// this split exists to close.
+	if (communicationProjection.get(editor).lens === 'communication') {
+		updateProjection(editor, (state) => ({ ...state, communicationRouting: routing }))
+		return 0
+	}
+	const regionId = activeCommunicationRegionId(editor)
+	const targets = editor.getCurrentPageShapes().filter((shape): shape is ConnectionShape => {
+		if (shape.type !== CONNECTION_SHAPE_TYPE) return false
+		if (!regionId) return isCommunicationPrototypeQueryEnabled()
+		return isConnectionInCommunicationScope(editor, shape as ConnectionShape)
+	}).filter((connection) => connection.props.routing !== routing)
+	if (targets.length === 0) return 0
+	editor.markHistoryStoppingPoint(`use ${routing} cables in this region`)
+	editor.updateShapes(targets.map((connection) => ({
+		id: connection.id,
+		type: CONNECTION_SHAPE_TYPE,
+		props: { routing },
+	})))
+	return targets.length
 }
 
-export function applyCommunicationActionTrack(editor: Editor, actionTrack: CommunicationActionTrack): void {
-	communicationProjection.update(editor, (state) => ({ ...state, actionTrack }))
+/** What the bar should show: the one shape every cable agrees on, else null. */
+export function communicationCableRouting(editor: Editor): ConnectionRoutingKind | null {
+	const state = communicationProjection.get(editor)
+	if (state.lens === 'communication') return state.communicationRouting
+	const regionId = activeCommunicationRegionId(editor)
+	const routings = new Set(editor.getCurrentPageShapes()
+		.filter((shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE)
+		.filter((connection) => (regionId
+			? isConnectionInCommunicationScope(editor, connection)
+			: isCommunicationPrototypeQueryEnabled()))
+		.map((connection) => connection.props.routing))
+	return routings.size === 1 ? [...routings][0] : null
 }
 
 export function applyCommunicationFocus(editor: Editor, groupKey: string | null): void {
-	communicationProjection.update(editor, (state) => ({
+	updateProjection(editor, (state) => ({
 		...state,
 		focusedGroupKey: groupKey,
 	}))
@@ -629,6 +678,45 @@ export function selectedCommunicationGroupKey(
 	return summary.relations.find((relation) => relation.memberIds.includes(selectedId))?.groupKey ?? null
 }
 
-export function phaseLabel(phase: CommunicationPhase): string {
-	return phase === 'publish' ? 'topic' : phase
+/**
+ * The connection a relationship's summary cable actually rides, or null when
+ * this cable belongs to no communication relationship at all.
+ *
+ * One reader for "is this the cable the lens draws?", so the renderer and the
+ * visibility rule cannot disagree — and disagreeing is exactly what left
+ * hidden cables selectable on the canvas.
+ */
+export interface CommunicationSummaryCarrier {
+	/** The relationship this cable is one leg of. */
+	groupKey: string
+	/** The single leg the summary arrow rides, or null if none could be chosen. */
+	connectionId: TLShapeId | null
+}
+
+export function summaryCarrierFor(
+	editor: Editor,
+	connection: ConnectionShape,
+): CommunicationSummaryCarrier | null {
+	const descriptor = describeCommunicationConnection(editor, connection)
+	if (!descriptor) return null
+	const relation = collectCommunicationRelations(editor).relations
+		.find((candidate) => candidate.groupKey === descriptor.groupKey)
+	if (!relation) return null
+	return {
+		groupKey: relation.groupKey,
+		connectionId: chooseCommunicationRepresentative(
+			relation.family,
+			relation.memberDescriptors.map((member) => ({
+				descriptor: member,
+				pathLength: Number.POSITIVE_INFINITY,
+			})),
+		)?.connectionId ?? null,
+	}
+}
+
+export function summaryCarrierConnectionId(
+	editor: Editor,
+	connection: ConnectionShape,
+): TLShapeId | null {
+	return summaryCarrierFor(editor, connection)?.connectionId ?? null
 }

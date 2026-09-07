@@ -17,6 +17,7 @@ import {
 import { branchAncestry, outermostFoldedLevel } from '../../branch/branchScope'
 import { isBlockShape } from '../blockModel'
 import { layoutBlock, type BlockRect } from '../layoutBlock'
+import { blockLayoutLensFor } from '../ports/portLens'
 import type {
 	ElbowEndpoint,
 	ElbowRect,
@@ -216,7 +217,12 @@ export function collectConnectionRoutingTextObstacles(
 		if (!inCableScope) continue
 		// Folded descendants have remembered geometry but no painted labels.
 		if (branchAncestry(editor, shape.id).some((level) => level.arm && !level.arm.open)) continue
-		for (const placed of layoutBlock(shape.props).ports) {
+		// WHY the lens: a card's port LABELS are what a route has to dodge, and
+		// where they sit depends on which lens is reading the card. Laying the
+		// obstacles out in Dataflow while the canvas paints Communication would
+		// route every cable around labels that are not there and straight through
+		// the ones that are.
+		for (const placed of layoutBlock(shape.props, { lens: blockLayoutLensFor(editor, shape.id) }).ports) {
 			if (!placed.labelContent || placed.labelContent.w <= 0 || placed.labelContent.h <= 0) continue
 			obstacles.push({
 				...localRectInPage(editor, shape.id, placed.labelContent),

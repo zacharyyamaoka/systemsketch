@@ -25,6 +25,7 @@ import { withCalloutTool } from '../callout'
 import { withAsyncRegionTool } from '../asyncRegion'
 import { withCodeTool } from '../code'
 import { withFloatingPortTool } from '../floatingPort/floatingPortToolUi'
+import { withCommunicationDrawActions } from '../prototypes/communication/communicationDrawShortcuts'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
@@ -383,7 +384,10 @@ export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
       withFloatingPortTool(editor, withBehaviorTreeTool(editor, withLoopTool(editor,
         withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))))))))),
   actions: (editor, actions, helpers) =>
-    overrideGroupActionForBehaviorTrees(editor, overrideRegionExportActions(editor, actions, helpers)),
+    withCommunicationDrawActions(
+      editor,
+      overrideGroupActionForBehaviorTrees(editor, overrideRegionExportActions(editor, actions, helpers)),
+    ),
   translations: {
     en: {
       // Stock frame removal reparents children out before deleting the

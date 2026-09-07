@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T15:19:43.500Z",
+  "generatedAt": "2026-09-07T05:40:42.666Z",
   "checks": [
     "adversarial board opens with 21 canonical data edges and no projection metadata",
     "strict grouping assigns stable repeated IDs while two ambiguous legs remain neutral and diagnosed",
@@ -8,9 +8,11 @@
     "selecting another communication edge transfers focus to its relationship",
     "selecting a component clears communication focus while preserving the new selection",
     "Components collapses the same graph into nine enumerated relationships without namespace collisions",
+    "every relationship pill is fully readable: clear of both endpoint cards and of every other pill",
     "focused A2 aggregate reveals cancel, feedback, and result over the Simple cards while goal remains the aggregate track",
-    "Straight keeps the centreline aggregate and reveals all four canonical A2 tracks underneath",
-    "staggered labels make every overlapping centreline relationship independently focusable",
+    "the Arrow control redraws every cable in the region without writing a stored route",
+    "every relationship stays independently focusable by its own label",
+    "the projection choice is not a history step: undo has nothing of the lens to take back",
     "clearing focus and returning to Dataflow leaves the stored graph byte-identical",
     "the adversarial focus journey emitted no local console errors"
   ]

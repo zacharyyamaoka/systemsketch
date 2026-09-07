@@ -74,6 +74,7 @@ import {
 	type BranchArmShape,
 } from '../branch/BranchArmShapeUtil'
 import {
+	activeComponentView,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
 	isShapeInCommunicationScope,
@@ -89,21 +90,22 @@ function CommunicationProjectedBlockCanvas({ shape }: { shape: BlockShape }) {
 	)
 	if (
 		!enabled
-		|| projection.mode !== 'components'
 		|| shape.props.view === 'value'
 		|| !isShapeInCommunicationScope(editor, shape.id)
 	) {
 		return <BlockCanvas shape={shape} />
 	}
-	// WHY: Components is a lens over the dataflow, not a view mutation. Swapping
-	// only the props seen by the canvas renderer keeps the stored Port geometry,
-	// selection box, port anchors, x/y, and w/h byte-for-byte unchanged while a
-	// same-size Simple face hides the port details.
+	// WHY: the card face is a lens over the dataflow, not a view mutation.
+	// Swapping only the props seen by the canvas renderer keeps the stored Port
+	// geometry, selection box, port anchors, x/y and w/h byte-for-byte unchanged
+	// while a same-size face hides or reveals the port details. It applies in
+	// BOTH lenses because S/P/E is its own axis — "you can convert each
+	// component individually or you can do it for the entire card".
 	const rendered = {
 		...shape,
-		props: { ...shape.props, view: projection.componentView },
+		props: { ...shape.props, view: activeComponentView(projection) },
 	} as BlockShape
-	return <BlockCanvas shape={rendered} communicationProjected />
+	return <BlockCanvas shape={rendered} communicationProjected={projection.lens === 'communication'} />
 }
 
 function exportPortColor(type: string): string {
@@ -264,9 +266,15 @@ function BlockExportSvg({
 					{placed.label ? (
 						<>
 							<text
-								x={placed.side === 'input' ? placed.label.x : placed.label.x + placed.label.w}
-								y={placed.y}
-								textAnchor={placed.side === 'input' ? 'start' : 'end'}
+								x={placed.edge === 'top' || placed.edge === 'bottom'
+									? placed.label.x + placed.label.w / 2
+									: placed.side === 'input' ? placed.label.x : placed.label.x + placed.label.w}
+								y={placed.edge === 'top' || placed.edge === 'bottom'
+									? placed.label.y + placed.label.h / 2
+									: placed.y}
+								textAnchor={placed.edge === 'top' || placed.edge === 'bottom'
+									? 'middle'
+									: placed.side === 'input' ? 'start' : 'end'}
 								dominantBaseline="middle"
 								fill={ink}
 								fontFamily="ui-monospace, monospace"

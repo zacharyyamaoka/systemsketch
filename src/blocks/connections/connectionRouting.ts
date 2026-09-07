@@ -33,26 +33,71 @@ export interface ConnectionCurve {
 
 /* ------------------------- curved (kit default) ------------------------- */
 
+/** Which way a cable leaves the face it is welded to. */
+export type ConnectionExitSide = 'left' | 'right' | 'top' | 'bottom'
+
+export interface ConnectionExitSides {
+	start?: ConnectionExitSide
+	end?: ConnectionExitSide
+}
+
+const EXIT_NORMAL: Readonly<Record<ConnectionExitSide, { x: number; y: number }>> = {
+	left: { x: -1, y: 0 },
+	right: { x: 1, y: 0 },
+	top: { x: 0, y: -1 },
+	bottom: { x: 0, y: 1 },
+}
+
 /**
- * The kit's default cubic: leave outputs horizontally and approach inputs
- * horizontally, with enough separation to keep short edges legible.
+ * The kit's default cubic, leaving each end along its own face normal.
+ *
+ * WHY the sides matter: the original always offset horizontally, which is the
+ * whole truth only while every port lives on a left or right edge. Once a
+ * socket can sit on the top or bottom wall, a horizontal control point makes
+ * the curve leave the face TANGENTIALLY — it slides along the card's underside
+ * before turning, instead of departing perpendicular to the wall it is welded
+ * to. The elbow router already reads `elbowSide` for exactly this reason; this
+ * is the curved renderer catching up to the same fact.
+ *
+ * An absent side keeps the historical horizontal behaviour, so every cable
+ * between two ordinary left/right ports draws exactly as it always did.
  */
-export function getConnectionControlPoints(start: VecLike, end: VecLike): [Vec, Vec] {
+export function getConnectionControlPoints(
+	start: VecLike,
+	end: VecLike,
+	sides: ConnectionExitSides = {},
+): [Vec, Vec] {
 	const distance = end.x - start.x
-	const offset = Math.max(
+	const horizontalOffset = Math.max(
 		30,
 		distance > 0 ? distance / 3 : clamp(Math.abs(distance) + 30, 0, 100),
 	)
-	return [new Vec(start.x + offset, start.y), new Vec(end.x - offset, end.y)]
+	const verticalDistance = end.y - start.y
+	const verticalOffset = Math.max(
+		30,
+		Math.abs(verticalDistance) > 0
+			? Math.min(Math.abs(verticalDistance) / 3 + 30, 140)
+			: 30,
+	)
+	const control = (point: VecLike, side: ConnectionExitSide | undefined, fallbackX: number) => {
+		if (!side) return new Vec(point.x + fallbackX, point.y)
+		const normal = EXIT_NORMAL[side]
+		const reach = normal.x !== 0 ? horizontalOffset : verticalOffset
+		return new Vec(point.x + normal.x * reach, point.y + normal.y * reach)
+	}
+	return [
+		control(start, sides.start, horizontalOffset),
+		control(end, sides.end, -horizontalOffset),
+	]
 }
 
-function defaultCurvedPath(start: VecLike, end: VecLike): string {
-	const [cp1, cp2] = getConnectionControlPoints(start, end)
+function defaultCurvedPath(start: VecLike, end: VecLike, sides?: ConnectionExitSides): string {
+	const [cp1, cp2] = getConnectionControlPoints(start, end, sides)
 	return `M ${start.x} ${start.y} C ${cp1.x} ${cp1.y} ${cp2.x} ${cp2.y} ${end.x} ${end.y}`
 }
 
-function defaultCurvedMidpoint(start: VecLike, end: VecLike): Vec {
-	const [cp1, cp2] = getConnectionControlPoints(start, end)
+function defaultCurvedMidpoint(start: VecLike, end: VecLike, sides?: ConnectionExitSides): Vec {
+	const [cp1, cp2] = getConnectionControlPoints(start, end, sides)
 	// Cubic Bezier at t=.5: (P0 + 3P1 + 3P2 + P3) / 8.
 	return new Vec(
 		(start.x + 3 * cp1.x + 3 * cp2.x + end.x) / 8,
@@ -152,6 +197,8 @@ export interface ConnectionPathOptions {
 	curve?: ConnectionCurve | null
 	/** Required when routing is `elbow`. */
 	route?: ElbowRoute
+	/** Which wall each end leaves by; absent keeps the historical horizontal exit. */
+	sides?: ConnectionExitSides
 }
 
 export function getConnectionPath(
@@ -166,12 +213,12 @@ export function getConnectionPath(
 				? bentCurvedPath(start, end, options.curve)
 				: `M ${start.x} ${start.y} L ${end.x} ${end.y}`
 		case 'elbow':
-			return options.route ? elbowPath(options.route) : defaultCurvedPath(start, end)
+			return options.route ? elbowPath(options.route) : defaultCurvedPath(start, end, options.sides)
 		case 'curved':
 		default:
 			return options.curve
 				? bentCurvedPath(start, end, options.curve)
-				: defaultCurvedPath(start, end)
+				: defaultCurvedPath(start, end, options.sides)
 	}
 }
 
@@ -188,7 +235,7 @@ export function getConnectionCenterPoint(
 				? getCurveWaypoint(start, end, options.curve)
 				: new Vec((start.x + end.x) / 2, (start.y + end.y) / 2)
 		case 'elbow': {
-			if (!options.route) return defaultCurvedMidpoint(start, end)
+			if (!options.route) return defaultCurvedMidpoint(start, end, options.sides)
 			const center = elbowPointAt(options.route, 0.5)
 			return new Vec(center.x, center.y)
 		}
@@ -196,6 +243,6 @@ export function getConnectionCenterPoint(
 		default:
 			return options.curve
 				? getCurveWaypoint(start, end, options.curve)
-				: defaultCurvedMidpoint(start, end)
+				: defaultCurvedMidpoint(start, end, options.sides)
 	}
 }

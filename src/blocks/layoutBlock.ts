@@ -18,6 +18,12 @@ import {
 	type PortLayout,
 } from './blockModel'
 import { stockBlockVisibleDescription } from './stockBlocks'
+import {
+	inferCommunicationPlacements,
+	isSummaryCarrierPort,
+	phasesByInteraction,
+	siblingPhasesFor,
+} from '../prototypes/communication/portPlacementInference'
 
 /** Donor pyblocks geometry constants. Keep rendering and connection anchors on this grid. */
 export const BLOCK_CORNER_RADIUS = 9
@@ -98,6 +104,119 @@ export function edgePortPoint(
 	return { x: edge === 'left' ? 0 : width, y: clamped * height }
 }
 
+/** Clearance between a horizontal rail's socket and its inward label. */
+export const RAIL_LABEL_GAP_PX = 12
+/**
+ * Breathing room kept at each END of a wall, in pixels.
+ *
+ * Constant on purpose: a proportional margin grows with the card, which is what
+ * left a tall component's sockets huddled in the middle of its side walls.
+ */
+export const RAIL_END_MARGIN_PX = 18
+
+/** Clear space kept between two neighbouring labels on the same wall. */
+export const RAIL_LABEL_GUTTER_PX = 10
+/**
+ * How much of a bare face's width one side column may use.
+ *
+ * A third each for the two side columns leaves the middle third for the
+ * component's name and type, which is what keeps a long port name from running
+ * through the identity.
+ */
+export const SIDE_LABEL_SHARE = 0.33
+/** The bare face's identity type scale, matching `.BlockNode-bareTitle`. */
+export const BARE_TITLE_FONT_PX = 17
+/** Breathing room either side of the centred identity. */
+export const BARE_IDENTITY_PAD_PX = 16
+/** The identity never takes more than this much of the card's width. */
+export const BARE_IDENTITY_MAX_SHARE = 0.46
+
+/**
+ * Which question the layout is answering.
+ *
+ * `dataflow` is the signature: two vertical lanes, inputs left and outputs
+ * right, ordered by row. It NEVER puts a port on a horizontal edge — a
+ * signature that wraps around the corner stops reading as a signature.
+ * `communication` is the topology: a socket may sit on any of the four edges
+ * so it can face the component it talks to.
+ */
+export type BlockLayoutLens = 'dataflow' | 'communication'
+
+export interface BlockLayoutOptions {
+	lens?: BlockLayoutLens
+}
+
+/**
+ * The horizontal rail this port occupies in the communication lens, or null
+ * when it stays on a vertical one.
+ *
+ * Only ever consulted for `lens: 'communication'`; the dataflow layout does not
+ * call it, which is what makes "no top or bottom ports in Dataflow" a property
+ * of the code rather than a rule someone has to remember.
+ */
+export function portRailEdge(port: BlockPort): 'top' | 'bottom' | null {
+	return port.commEdge === 'top' || port.commEdge === 'bottom' ? port.commEdge : null
+}
+
+/** Which of the four walls a port occupies in the communication lens. */
+export function portCommunicationEdge(
+	port: BlockPort,
+	side?: 'input' | 'output',
+): 'left' | 'right' | 'top' | 'bottom' {
+	if (port.commEdge) return port.commEdge
+	return side === 'output' ? 'right' : 'left'
+}
+
+/**
+ * Fill in a communication placement for every port that has not been given one.
+ *
+ * Runs once, above the layout, so the inference is a presentation transform and
+ * never a write: a port a person actually dragged carries `commEdge` and is
+ * returned untouched. See `portPlacementInference.ts` for why legs of one
+ * interaction are kept together.
+ */
+export function withInferredCommunicationPlacements(props: BlockShapeProps): BlockShapeProps {
+	const unplaced = [...props.inputs, ...props.outputs].some((port) => port.commEdge === undefined)
+	if (!unplaced) return props
+	// `placedEdge` is what keeps an inferred sibling from contradicting a leg the
+	// generator already put on the wall facing its peer.
+	const inferred = inferCommunicationPlacements([
+		...props.inputs.map((port) => ({ port, side: 'input' as const, placedEdge: port.commEdge })),
+		...props.outputs.map((port) => ({ port, side: 'output' as const, placedEdge: port.commEdge })),
+	])
+	const fill = (ports: readonly BlockPort[]) => ports.map((port) => {
+		if (port.commEdge !== undefined) return port
+		const placement = inferred.get(port.id)
+		return placement ? { ...port, commEdge: placement.edge, commEdgeT: placement.edgeT } : port
+	})
+	return { ...props, inputs: fill(props.inputs), outputs: fill(props.outputs) }
+}
+
+/**
+ * Where along its edge a port was PUT, or null when nobody has put it anywhere.
+ *
+ * The difference matters: an authored fraction is a person's decision and is
+ * honoured exactly, while an absent one means the edge is free to distribute.
+ * Treating "absent" as 0.5 is what made four generated sockets pile up in the
+ * middle of a wall and then march rightwards off it as the spacer pushed them
+ * apart, instead of spreading evenly across the whole edge.
+ */
+export function portRailT(port: BlockPort): number | null {
+	const value = port.commEdgeT
+	return Number.isFinite(value) ? Math.min(1, Math.max(0, value as number)) : null
+}
+
+/**
+ * The body slot plan must not reserve a row for a port that left the vertical
+ * rails, or a Block would grow a blank row for every socket moved to an edge.
+ */
+function withoutRailPorts(props: BlockShapeProps): BlockShapeProps {
+	const inputs = props.inputs.filter((port) => portRailEdge(port) === null)
+	const outputs = props.outputs.filter((port) => portRailEdge(port) === null)
+	if (inputs.length === props.inputs.length && outputs.length === props.outputs.length) return props
+	return { ...props, inputs, outputs }
+}
+
 export interface BlockRect {
 	x: number
 	y: number
@@ -109,11 +228,11 @@ export interface LaidOutBlockPort {
 	port: BlockPort
 	side: 'input' | 'output'
 	/**
-	 * Which edge the dot sits on. Inputs are always `left` and named outputs
-	 * always `right`; an effect output is on `top`, which is the only edge the
-	 * grammar had not already spent.
+	 * Which edge the dot sits on. Inputs default to `left` and named outputs to
+	 * `right`; an effect output is on `top`. A port carrying an authored
+	 * `edge` overrides that onto the horizontal rail it names.
 	 */
-	edge: 'left' | 'right' | 'top'
+	edge: 'left' | 'right' | 'top' | 'bottom'
 	/** Dot centre in Block-local coordinates; always on the outside edge. */
 	x: number
 	y: number
@@ -302,7 +421,18 @@ interface BodySlotPlan {
  * Resolve the Port view's burger grammar onto one 44px grid. Group and branch
  * dividers each consume a full slot, exactly as in the mature pyblocks face.
  */
-function planBodySlots(props: BlockShapeProps): BodySlotPlan {
+function planBodySlots(
+	rawProps: BlockShapeProps,
+	lens: BlockLayoutLens = 'dataflow',
+): BodySlotPlan {
+	// In Dataflow a rail port has no rail to sit on, so it keeps an ordinary
+	// body row — that IS the best-effort reposition back onto the two lanes.
+	// In the communication lens EVERY socket is edge-placed, so the body plans
+	// no rows at all; in Dataflow a rail port has no rail to sit on and keeps its
+	// ordinary row, which IS the best-effort reposition back onto the two lanes.
+	const props = lens === 'communication'
+		? { ...rawProps, inputs: [], outputs: [] }
+		: rawProps
 	const sections = blockPortSections(props, { visibleOnly: true })
 	const portLayout = blockPortLayout(props)
 
@@ -578,6 +708,197 @@ function portLabelContentBox(
 	}
 }
 
+/** Centre the measured content inside a rail label instead of packing it to a lane edge. */
+function railLabelContentBox(port: BlockPort, side: 'input' | 'output', label: BlockRect): BlockRect {
+	const w = Math.max(0, Math.min(label.w, portLabelContentWidth(port, side)))
+	return { x: label.x + (label.w - w) / 2, y: label.y, w, h: label.h }
+}
+
+/**
+ * Place every port authored onto a horizontal rail.
+ *
+ * WHY this exact geometry — it is Vyuh Node Flow's convention, adopted from
+ * the prior-art study in `docs/four-sided-port-labels-prior-art-2026-09-06.html`
+ * (<https://flow.vyuh.tech/docs/theming/port-labels>): the text stays
+ * HORIZONTAL and is drawn INWARD from the socket, so a top port reads below
+ * its dot and a bottom port above it, and the outer face stays a clean cable
+ * corridor. Rotating or outdenting the label is what the study rejects, and
+ * both rails run left→right, which is also Simulink's ordering rule.
+ *
+ * It generalises a decision this app already made: the Loop's `item` outlet
+ * leaves the header's bottom edge and puts its type label above the dot so the
+ * first downward cable cannot strike through the words.
+ */
+function placeHorizontalRails(
+	props: BlockShapeProps,
+	width: number,
+	height: number,
+	band: { top: number; bottom: number },
+	bareSideLabelWidth: number | null,
+	/**
+	 * In the communication lens this is ALWAYS true: "only the summary edge
+	 * ports should exist."
+	 *
+	 * WHY Port view does not need the other legs after all — the ask it was
+	 * meant to serve was "show the ports for the detected communication ports
+	 * that haven't yet been wired together", and the carrier rule already does
+	 * that. `isSummaryCarrierPort` is purely name-based: it shows the carrier
+	 * leg of EVERY interaction declared on the card, wired or not. So an
+	 * un-wired `move.goal` is already visible to wire from, while `move.feedback`
+	 * and `move.result` — which no summary arrow ever touches — are not. The two
+	 * faces differ in chrome and labels, never in which sockets exist.
+	 */
+	carriersOnly: boolean,
+	placed: LaidOutBlockPort[],
+): void {
+	// A top or bottom socket draws its label INWARD, into the same strip a side
+	// socket's label would use. Reserve those strips first so the two never
+	// overprint — this is what turned a card's left column into
+	// "missiomissiomissio…" struck through by the bottom channel's name.
+	// Grouped once per card: whether a port carries its summary arrow depends on
+	// which OTHER legs of its interaction exist here, not on its name alone.
+	const grouped = carriersOnly
+		? phasesByInteraction([...props.inputs, ...props.outputs])
+		: null
+	const shown = (port: BlockPort) => port.visible
+		&& (!carriersOnly || isSummaryCarrierPort(port, siblingPhasesFor(port, grouped!)))
+	const occupies = (edge: 'top' | 'bottom') => [...props.inputs, ...props.outputs]
+		.some((port) => shown(port) && portCommunicationEdge(port) === edge)
+	const sideSpan = {
+		top: band.top + (occupies('top') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
+		bottom: band.bottom - (occupies('bottom') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
+	}
+	const usableSide = sideSpan.bottom - sideSpan.top > PORT_LABEL_HEIGHT_PX
+		? sideSpan
+		: { top: band.top, bottom: band.bottom }
+
+	for (const edge of ['top', 'bottom', 'left', 'right'] as const) {
+		const lane = ([
+			['input', props.inputs],
+			['output', props.outputs],
+		] as const).flatMap(([side, ports]) => ports
+			.filter((port) => shown(port) && portCommunicationEdge(port) === edge)
+			.map((port) => ({ port, side })))
+		if (lane.length === 0) continue
+		/**
+		 * The authored fraction decides ORDER along the wall; the wall itself
+		 * decides position.
+		 *
+		 * WHY not honour the fraction directly (Zach, 2026-09-07): "if there is
+		 * only 1 port it should be perfectly centered. I like how you place the
+		 * port where the line intersects, but then you need to apply the evenly
+		 * width port spacing also." Seeding at the crossing and keeping that
+		 * value left a lone socket wherever the arrow happened to hit — three
+		 * quarters along a wall with nothing else on it. Treating the seed as a
+		 * sort key gives both: the arrow still decides which socket goes where in
+		 * the sequence, and one port lands dead centre because 1/(1+1) is 0.5.
+		 *
+		 * This is also what makes the drag a Kanban reorder rather than a free
+		 * placement, which is the model this view was asked for.
+		 */
+		const withFraction = lane.map((entry, index) => ({
+			...entry,
+			t: portRailT(entry.port) ?? (index + 1) / (lane.length + 1),
+		}))
+		withFraction.sort((a, b) => a.t - b.t)
+		/**
+		 * Sockets run from one end of the wall to the other, keeping a CONSTANT
+		 * margin at each end rather than a proportional one.
+		 *
+		 * WHY (Zach, 2026-09-07): "there's too much padding between the top and
+		 * bottom port names and the first port on the edges… that space should
+		 * remain constant as you resize it vertically, and it should remain
+		 * fairly small. We definitely want to maximise the edge space." An even
+		 * i/(n+1) spread leaves a gap of one whole slot at each end, so the
+		 * padding GREW with the card and three sockets used barely half the wall.
+		 * A fixed margin keeps the same visual breathing room at any height and
+		 * hands the rest of the edge to the ports.
+		 *
+		 * One socket still lands dead centre; that rule came first and stands.
+		 */
+		const spread = withFraction.map((_entry, index) => {
+			if (withFraction.length === 1) return 0.5
+			const span = edge === 'left' || edge === 'right'
+				? Math.max(1, usableSide.bottom - usableSide.top)
+				: Math.max(1, width)
+			const margin = Math.min(RAIL_END_MARGIN_PX / span, 0.45)
+			return margin + (index / (withFraction.length - 1)) * (1 - margin * 2)
+		})
+		withFraction.forEach(({ port, side }, index) => {
+			const t = spread[index]
+			const vertical = edge === 'left' || edge === 'right'
+			// A side socket rides the strip left between the two horizontal label
+			// rows, so the dot and its words both stay clear of them.
+			const point = vertical
+				? {
+					x: edge === 'left' ? 0 : width,
+					y: usableSide.top + t * (usableSide.bottom - usableSide.top),
+				}
+				: edgePortPoint(edge, t, width, height)
+			// A horizontal label may be at most the gap between two adjacent
+			// sockets, or two names overprint — `mission.4.stmission.5.stre…`.
+			// Evenly spread sockets sit `width / (n + 1)` apart, so that, less a
+			// gutter, is the widest a label can honestly be.
+			// On the bare face the identity sits in the middle of the card, so a
+			// side label may only claim its own third — otherwise a long port
+			// name runs straight through the component's name.
+			const labelWidth = vertical
+				? bareSideLabelWidth !== null
+					? bareSideLabelWidth
+					: Math.max(0, width / 2 - PORT_LABEL_INSET_PX - 8)
+				: Math.max(0, Math.min(
+					width - PORT_LABEL_INSET_PX * 2,
+					width / (lane.length + 1) - RAIL_LABEL_GUTTER_PX,
+				))
+			// Inward by the study's 12px gap, then clamped into the body band: the
+			// header and footer own the strips the raw offset would land in, and
+			// the contract's answer to "it does not fit" is to move the text, not
+			// to distort it or drop the port.
+			const label: BlockRect = vertical
+				? {
+					// A side socket reads exactly like a signature row: the words
+					// run inward from the wall on the socket's own line.
+					x: edge === 'left'
+						? PORT_LABEL_INSET_PX
+						: width - PORT_LABEL_INSET_PX - labelWidth,
+					y: Math.max(0, Math.min(
+						height - PORT_LABEL_HEIGHT_PX,
+						point.y - PORT_LABEL_HEIGHT_PX / 2,
+					)),
+					w: labelWidth,
+					h: PORT_LABEL_HEIGHT_PX,
+				}
+				: {
+					x: Math.max(
+						PORT_LABEL_INSET_PX,
+						Math.min(width - PORT_LABEL_INSET_PX - labelWidth, point.x - labelWidth / 2),
+					),
+					y: Math.max(0, Math.min(height - PORT_LABEL_HEIGHT_PX, edge === 'top'
+						? Math.max(RAIL_LABEL_GAP_PX, band.top)
+						: Math.min(
+							height - RAIL_LABEL_GAP_PX - PORT_LABEL_HEIGHT_PX,
+							band.bottom - PORT_LABEL_HEIGHT_PX,
+						))),
+					w: labelWidth,
+					h: PORT_LABEL_HEIGHT_PX,
+				}
+			placed.push({
+				port,
+				side,
+				edge,
+				x: point.x,
+				y: point.y,
+				label,
+				labelContent: vertical
+					? portLabelContentBox(port, side, label)
+					: railLabelContentBox(port, side, label),
+				subtle: false,
+				lifted: false,
+			})
+		})
+	}
+}
+
 /**
  * The pointer target behind one Expanded port label. It joins the words to the
  * Block edge, but deliberately stops after the painted content so the middle
@@ -586,6 +907,9 @@ function portLabelContentBox(
 export function portLabelHitArea(placed: LaidOutBlockPort, width: number): BlockRect | null {
 	if (placed.subtle || !placed.labelContent) return null
 	const content = placed.labelContent
+	// A rail label is centred on its socket rather than packed against a lane
+	// edge, so joining it to the Block's side would claim the whole body width.
+	if (placed.edge === 'top' || placed.edge === 'bottom') return content
 	const near = placed.side === 'input' ? 0 : width
 	const far = placed.side === 'input'
 		? content.x + content.w + PORT_LABEL_HIT_PAD_PX
@@ -727,10 +1051,13 @@ function portDescriptionHeight(props: BlockShapeProps, width: number): number {
  * measured on a fallback face must not outlive the face it was measured for.
  */
 let layoutMemo = new WeakMap<BlockShapeProps, BlockLayout>()
+/** The same memo for the communication lens: same props, different geometry. */
+let communicationLayoutMemo = new WeakMap<BlockShapeProps, BlockLayout>()
 
 if (typeof document !== 'undefined' && 'fonts' in document) {
 	const forgetLayouts = () => {
 		layoutMemo = new WeakMap()
+		communicationLayoutMemo = new WeakMap()
 	}
 	document.fonts.ready.then(forgetLayouts, () => undefined)
 	document.fonts.addEventListener('loadingdone', forgetLayouts)
@@ -740,15 +1067,28 @@ if (typeof document !== 'undefined' && 'fonts' in document) {
  * The one geometric projection for the Block. Rendering, selection geometry,
  * connection anchors and frame interaction all consume this immutable result.
  */
-export function layoutBlock(props: BlockShapeProps): BlockLayout {
-	const memoized = layoutMemo.get(props)
+export function layoutBlock(
+	props: BlockShapeProps,
+	options: BlockLayoutOptions = {},
+): BlockLayout {
+	const lens = options.lens ?? 'dataflow'
+	const memo = lens === 'communication' ? communicationLayoutMemo : layoutMemo
+	const memoized = memo.get(props)
 	if (memoized) return memoized
-	const layout = computeBlockLayout(props)
-	layoutMemo.set(props, layout)
+	const layout = computeBlockLayout(props, lens)
+	memo.set(props, layout)
 	return layout
 }
 
-function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
+function computeBlockLayout(
+	inputProps: BlockShapeProps,
+	lens: BlockLayoutLens = 'dataflow',
+): BlockLayout {
+	// Inference runs once, above everything, and only for the lens that needs
+	// it. It fills a placement in; it never overwrites one a person authored.
+	const rawProps = lens === 'communication'
+		? withInferredCommunicationPlacements(inputProps)
+		: inputProps
 	if (blockIsFolded(rawProps)) return foldedBlockLayout(rawProps)
 	// An effect port is an output that leaves by the *top* edge, because the call
 	// gave its value no name to leave by. Keep it out of the right-hand lane
@@ -766,20 +1106,53 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 	const visibleHeaderInputs = view === 'simple'
 		? []
 		: props.inputs.filter((port) => port.visible && portInHeader(port))
-	const headerHeight = view === 'simple'
-		? Math.min(NODE_HEADER_HEIGHT_PX, height)
-		: Math.min(
-			height,
-			Math.max(BLOCK_HEADER_HEIGHT_PX, visibleHeaderInputs.length * HEADER_PORT_PITCH_PX + 8),
+	/**
+	 * The bare communication face: Communication lens + Port card, and nowhere
+	 * else in the app.
+	 *
+	 * WHY it exists (Zach, 2026-09-06): "get rid of the footer and header of the
+	 * component, and instead just show its name and type… This is a special view
+	 * not used anywhere else in the app." With sockets on all four walls, the
+	 * header and footer bands are two horizontal strips the ports cannot use, so
+	 * the whole card squeezes its labels into what is left and they overprint.
+	 * Dropping the chrome hands both strips back to the ports and leaves the
+	 * identity where a diagram wants it — centred, in the middle of the card.
+	 */
+	const bareCommunicationFace = lens === 'communication' && view === 'port'
+	/**
+	 * How wide the centred identity actually needs to be, so the side columns
+	 * can have everything else. A fixed third each was tidy arithmetic and bad
+	 * design: it ellipsised a seven-letter component name AND the port names
+	 * beside it on an ordinary 340px card.
+	 */
+	const bareIdentityWidth = bareCommunicationFace
+		? Math.min(
+			width * BARE_IDENTITY_MAX_SHARE,
+			Math.max(
+				measureBlockText(props.title, BARE_TITLE_FONT_PX, 600, 'mono'),
+				measureBlockText(props.blockType, SIMPLE_TEXT_FONT_PX, 400),
+			) + BARE_IDENTITY_PAD_PX,
 		)
+		: 0
+	const bareSideLabelWidth = bareCommunicationFace
+		? Math.max(0, (width - bareIdentityWidth) / 2 - PORT_LABEL_INSET_PX)
+		: 0
+	const headerHeight = bareCommunicationFace
+		? 0
+		: view === 'simple'
+			? Math.min(NODE_HEADER_HEIGHT_PX, height)
+			: Math.min(
+				height,
+				Math.max(BLOCK_HEADER_HEIGHT_PX, visibleHeaderInputs.length * HEADER_PORT_PITCH_PX + 8),
+			)
 	const bodyTop = headerHeight + NODE_ROW_HEADER_GAP_PX
 	// WHY: hiding a footer gives its room back to the authored face. Leaving a
 	// blank action-strip-sized dead zone would make the control cosmetic and
 	// would still compress Port rows or an Expanded child canvas for no reason.
 	// Simple reserves its pre-existing lower type strip; it has no footer chrome.
-	const reservesFooter = view === 'simple' || (
+	const reservesFooter = !bareCommunicationFace && (view === 'simple' || (
 		view !== 'value' && blockShowsFooter(props)
-	)
+	))
 	const footerTop = reservesFooter
 		? Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
 		: height
@@ -905,6 +1278,23 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		}
 
 		const midpoint = height / 2
+		// The communication lens is Simple-only now, so this is where its whole
+		// port story lives: only the sockets a summary arrow actually attaches
+		// to, each on the wall the arrow crossed, spread along it. Everywhere
+		// else Simple keeps its coincident midpoint anchors, which exist to
+		// retain identity rather than to be read.
+		if (lens === 'communication') {
+			placeHorizontalRails(
+				props,
+				width,
+				height,
+				{ top: 0, bottom: height },
+				null,
+				true,
+				placed,
+			)
+			for (const entry of placed) entry.subtle = true
+		} else {
 		// SystemSketch's outward layout list doubles as the connection-anchor
 		// table, so retain every visible identity at the donor's coincident
 		// midpoint. BlockCanvas de-duplicates the painted affordance by point.
@@ -933,6 +1323,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 				subtle: true,
 				lifted: false,
 			})
+		}
 		}
 		for (const port of effectPorts.filter((candidate) => candidate.visible)) {
 			const point = edgePortPoint('top', portEdgeT(port), width, height)
@@ -986,9 +1377,15 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		h: Math.max(0, height - headerHeight),
 	}
 
-	visibleHeaderInputs.forEach((port, index) => {
+	// WHY gated: in the communication lens EVERY socket is placed by
+	// `placeHorizontalRails`, which is the one path that applies the summary
+	// filter. A header input placed here bypassed it entirely and painted a
+	// column of dots down the left edge for ports the lens had decided not to
+	// show — visible, and worse, hit-testable.
+	const headerInputsToPlace = lens === 'communication' ? [] : visibleHeaderInputs
+	headerInputsToPlace.forEach((port, index) => {
 		const y = headerHeight / 2 + (
-			index - (visibleHeaderInputs.length - 1) / 2
+			index - (headerInputsToPlace.length - 1) / 2
 		) * HEADER_PORT_PITCH_PX
 		placed.push({
 			port,
@@ -1027,7 +1424,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		}
 		placeExpandedBody(props, width, bodyTop, bodyBottom, place, dividers, sections)
 	} else {
-		const plan = planBodySlots(props)
+		const plan = planBodySlots(props, lens)
 		const available = Math.max(
 			0,
 			footerTop - NODE_ROW_BOTTOM_PADDING_PX - bodyTop - descriptionReserve,
@@ -1077,8 +1474,24 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			}
 		}
 
-		placeBody(props.inputs, 'input')
-		placeBody(props.outputs, 'output')
+		if (lens !== 'communication') {
+			placeBody(props.inputs, 'input')
+			placeBody(props.outputs, 'output')
+		}
+		// WHY guarded rather than trusted: "Dataflow never shows a top or bottom
+		// port" is enforced at the one place a rail can be created, so a stored
+		// `commEdge` cannot leak into the signature view.
+		if (lens === 'communication') {
+			placeHorizontalRails(
+				props,
+				width,
+				height,
+				{ top: bodyTop, bottom: footerTop },
+				bareCommunicationFace ? bareSideLabelWidth : null,
+				true,
+				placed,
+			)
+		}
 		dividers.push(...plan.dividers.map(({ kind, slot }) => ({
 			kind,
 			x: kind === 'group' ? 0 : width / 2,
@@ -1148,6 +1561,30 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		h: headerHeight,
 	}
 
+	// The bare face's identity: name over type, centred, with no chrome band to
+	// belong to. Measured the same way the Simple face measures its own stack.
+	const bareIdentity = bareCommunicationFace
+		? (() => {
+			const innerWidth = Math.max(0, Math.min(width, bareIdentityWidth))
+			const titleHeight = SIMPLE_TEXT_LINE_PX
+			const typeHeight = props.blockType !== '' ? SIMPLE_TEXT_LINE_PX : 0
+			const stack = titleHeight + (typeHeight > 0 ? SIMPLE_STACK_GAP_PX + typeHeight : 0)
+			const top = Math.max(0, (height - stack) / 2)
+			const bandX = (width - innerWidth) / 2
+			return {
+				title: { x: bandX, y: top, w: innerWidth, h: titleHeight },
+				typeLabel: typeHeight > 0
+					? {
+						x: bandX,
+						y: top + titleHeight + SIMPLE_STACK_GAP_PX,
+						w: innerWidth,
+						h: typeHeight,
+					}
+					: null,
+			}
+		})()
+		: null
+
 	let description: BlockRect | null = null
 	if (showsDescription(props)) {
 		const lastTop = Math.max(bodyTop, footerTop - 4 - descriptionHeight)
@@ -1164,8 +1601,10 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 
 	// The top edge, last: the box is only now known, and an effect port is placed
 	// by its `edgeT` fraction along it — the port has no slot, so a cable dragged
-	// somewhere else moves the fraction and the dot follows.
-	for (const port of effectPorts) {
+	// somewhere else moves the fraction and the dot follows. Gated for the same
+	// reason the header inputs above are: the communication lens places through
+	// one filtered path or it does not place at all.
+	for (const port of lens === 'communication' ? [] : effectPorts) {
 		if (!port.visible) continue
 		const point = edgePortPoint('top', portEdgeT(port), width, height)
 		placed.push({
@@ -1200,14 +1639,14 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		bounds,
 		width,
 		height,
-		header,
+		header: bareCommunicationFace ? null : header,
 		headerHeight,
-		headerBand: { top: 0, bottom: headerHeight },
+		headerBand: bareCommunicationFace ? null : { top: 0, bottom: headerHeight },
 		sections,
 		body,
 		bodyTop,
 		footerTop,
-		footer: blockShowsFooter(props)
+		footer: !bareCommunicationFace && blockShowsFooter(props)
 			? { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) }
 			: null,
 		pitch,
@@ -1222,12 +1661,12 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			: null,
 		ports: placed,
 		hiddenPortSummaries: hiddenSummaries,
-		title: null,
-		typeLabel: null,
+		title: bareIdentity?.title ?? null,
+		typeLabel: bareIdentity?.typeLabel ?? null,
 		icon: null,
 		dividers,
-		headerIcon,
-		headerTitle,
-		headerType,
+		headerIcon: bareCommunicationFace ? null : headerIcon,
+		headerTitle: bareCommunicationFace ? null : headerTitle,
+		headerType: bareCommunicationFace ? null : headerType,
 	}
 }

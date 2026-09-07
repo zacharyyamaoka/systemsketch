@@ -143,7 +143,7 @@ async function main() {
     const border = await pagePoint(app.page, { x: regionBounds.x + 2, y: regionBounds.y + regionBounds.h * 0.56 })
     await clickAt(app.page, border.x, border.y)
     await waitFor(app.page, `document.querySelector('[data-testid="communication-prototype-controls"]')`, 'contextual communication controls')
-    await clickElement(app.page, '[data-testid="communication-mode-tagged"]')
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await waitFor(app.page, `document.querySelectorAll('[data-communication-mode="tagged"]').length === 18`, '18 tagged protocol legs')
 
     const expectedCounts = { A1: 3, A2: 4, A3: 2, S1: 2, S2: 2, S3: 2, T1: 1, T2: 1, ST1: 1 }
@@ -167,7 +167,7 @@ async function main() {
 
     await shot(app.page, '01-nine-groups-across-eighteen-legs.png')
 
-    await clickElement(app.page, '[data-testid="communication-mode-components"]')
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
     await waitFor(app.page, `document.querySelectorAll('[data-communication-mode="components"]').length === 9`, 'nine component relationships')
     const componentStatus = await evaluate(app.page, `document.querySelector('[data-testid="communication-prototype-status"]')?.textContent ?? ''`)
     assert.match(componentStatus, /9 component relationships/)
@@ -252,12 +252,12 @@ async function main() {
     pass('clicking A2 isolates only the four-leg move Action from eight unrelated relationships')
     await shot(app.page, '02-a2-focus-over-simple-components.png')
 
-    await clickElement(app.page, '[data-testid="communication-mode-tagged"]')
+    await clickElement(app.page, '[data-testid="communication-cables-split"]')
     await waitFor(app.page, `document.querySelectorAll('[data-communication-mode="tagged"][data-communication-focus="active"]').length === 4`, 'focused A2 protocol legs')
     assert.equal(await evaluate(app.page, `document.querySelectorAll('[data-communication-mode="tagged"][data-communication-focus="dim"]').length`), 14)
     pass('the A2 focus expands back to exactly goal, cancel, feedback, and result in Tagged view')
 
-    await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     const alertsOutput = await elementBox(app.page, '[data-shape-id="shape:camera"] .Port[data-block-port-id="alerts"]')
     const alertsInput = await elementBox(app.page, '[data-shape-id="shape:telemetry"] .Port[data-block-port-id="alerts"]')
     await dragBetween(app.page, alertsOutput, alertsInput)

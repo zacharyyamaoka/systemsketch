@@ -16,7 +16,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { type Editor, useValue } from 'tldraw'
+import { type Editor, useEditor, useValue } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
@@ -56,6 +56,10 @@ import {
 	blockFoldControlSide,
 } from '../blockModel'
 import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
+import {
+	communicationProjection,
+	isCommunicationPrototypeEnabled,
+} from '../../prototypes/communication/communicationProjection'
 import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
 import { useAppearancePreferences } from '../../settings/appearancePreferences'
@@ -960,6 +964,67 @@ function VariadicPortSettings({
 	)
 }
 
+/**
+ * Which wall a port sits on in the communication lens.
+ *
+ * The typed twin of the press-and-hold drag: same field, same rule, reachable
+ * without a pointer. Only offered in the lens that HAS four walls — in Dataflow
+ * it would write a position nothing reads, and the socket would appear to jump
+ * back the moment the lens changed.
+ *
+ * "Auto" is the absence of an authored placement, not a fifth edge: it is what
+ * lets the inference keep an interaction's legs together, and choosing it again
+ * genuinely hands the port back to that inference.
+ */
+const BLOCK_EDGES: readonly { id: 'left' | 'right' | 'top' | 'bottom'; label: string }[] = [
+	{ id: 'left', label: 'Left' },
+	{ id: 'right', label: 'Right' },
+	{ id: 'top', label: 'Top' },
+	{ id: 'bottom', label: 'Bottom' },
+]
+
+function BlockEdgeSetting({
+	side,
+	port,
+	actions,
+}: {
+	side: BlockPortSide
+	port: BlockPort
+	actions?: BlockInspectorActions
+}) {
+	const editor = useEditor()
+	const inCommunicationLens = useValue(
+		'port edge control visible',
+		() => communicationProjection.get(editor).lens === 'communication'
+			&& isCommunicationPrototypeEnabled(editor),
+		[editor],
+	)
+	if (!inCommunicationLens) return null
+	return (
+		<label className="block-inspector__semantic-role" data-testid={`inspector-block-edge-${port.id}`}>
+			<span>edge</span>
+			<select
+				value={port.commEdge ?? 'auto'}
+				disabled={!actions}
+				aria-label={`Block edge for ${side} ${port.name || port.id}`}
+				title="Which wall this port sits on in the communication lens"
+				onChange={(event) => {
+					const next = event.currentTarget.value
+					actions?.beginEdit?.('set port block edge')
+					actions?.updatePort(side, port.id, next === 'auto'
+						? { commEdge: undefined, commEdgeT: undefined }
+						: { commEdge: next as 'left' | 'right' | 'top' | 'bottom' })
+				}}
+			>
+				<option value="auto">auto</option>
+				{BLOCK_EDGES.map((edge) => (
+					<option key={edge.id} value={edge.id}>{edge.label}</option>
+				))}
+			</select>
+		</label>
+	)
+}
+
 /** Per-port role authoring: Blocks do not have one blanket semantic tag. */
 function SemanticRoleSettings({
 	side,
@@ -1474,6 +1539,7 @@ function PortSection({
 				{isEffectPort(port) ? <span className="block-inspector__semantic-tag-derived">derived effect</span> : null}
 			</div>
 			<SemanticRoleSettings side={side} port={port} actions={actions} readOnly={isEffectPort(port)} />
+			<BlockEdgeSetting side={side} port={port} actions={actions} />
 		</li>
 	))
 

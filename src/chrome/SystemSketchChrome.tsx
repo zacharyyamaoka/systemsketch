@@ -103,6 +103,7 @@ import {
 import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
+import { CommunicationPortDndHost } from '../blocks/ports/CommunicationPortDnd'
 import './systemsketch-chrome.css'
 import './rich-text-toolbar.css'
 
@@ -823,6 +824,7 @@ export function SystemSketchSurfaceHost() {
           costs — opened from Dev → Behavior Tree → Drag Model Tuner. */}
       <BtDragModelTunerPanel />
       <CommunicationPrototypeControls />
+      <CommunicationPortDndHost />
       <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />

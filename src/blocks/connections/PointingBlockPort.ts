@@ -19,6 +19,7 @@ import {
 	canReorderBlockPort,
 	type BlockPortRef,
 } from '../ports/portInteraction'
+import { beginCommunicationPortDnd } from '../ports/CommunicationPortDnd'
 import { clearPortDragState } from '../ports/portState'
 import { createOrUpdateConnectionBinding } from './ConnectionBindingUtil'
 import { forgetPickerCreationMark, rememberPickerCreationMark } from './blockPicker'
@@ -186,7 +187,6 @@ export class PointingBlockPort extends StateNode {
 	 */
 	override onLongPress(info: TLPointerEventInfo): void {
 		if (!this.info) return
-		if (!this.editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) return
 		const port = getLiveBlockPorts(this.editor, this.info.shapeId)
 			.find((candidate) => candidate.id === this.info?.portId)
 		if (!port) return
@@ -195,6 +195,16 @@ export class PointingBlockPort extends StateNode {
 			side: port.side === 'output' ? 'outputs' : 'inputs',
 			portId: this.info.portId,
 		}
+		// One hold, two owners. In the communication lens a socket is somewhere on
+		// a wall, and dnd-kit owns that gesture — asked first so the Dataflow
+		// reorder below never has to know the lens exists. `long_press` only ever
+		// fires for a press that has NOT moved, so handing off here cannot race
+		// the cable drag it would otherwise have been.
+		if (beginCommunicationPortDnd(this.editor, ref)) {
+			this.parent.transition('idle', info)
+			return
+		}
+		if (!this.editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) return
 		if (!canReorderBlockPort(this.editor, ref)) return
 		this.parent.transition(BLOCK_PORT_DRAG_STATE_ID, { ...info, ...ref })
 	}

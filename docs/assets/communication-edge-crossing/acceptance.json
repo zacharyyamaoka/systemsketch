@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-09-07T01:49:49.972Z",
+  "checks": [
+    "a stream arrow puts its sockets on the walls it crosses, in all eight directions",
+    "a service arrow puts its sockets on the walls it crosses, in all eight directions",
+    "a action arrow puts its sockets on the walls it crosses, in all eight directions",
+    "a drag that never leaves the card it began in wires nothing at all",
+    "the edge-crossing stress journey emitted no local console errors"
+  ]
+}

@@ -249,6 +249,32 @@ export const BlockPort = T.object({
 	 */
 	branch: T.number.optional(),
 	/**
+	 * Where this port sits in the COMMUNICATION lens, and only there.
+	 *
+	 * A port has two positions, because the two lenses answer different
+	 * questions. Dataflow asks "what is the signature?", and a signature reads
+	 * top-to-bottom down two lanes — so dataflow keeps inputs on the left edge
+	 * and outputs on the right, always, and stores its position as `row`.
+	 * Communication asks "who talks to whom?", and there the socket wants to
+	 * face the component it talks to, on any of the four edges.
+	 *
+	 * Storing both is what lets a board be rearranged in one lens without
+	 * disturbing the other: sliding a port onto the top edge to meet a
+	 * component above it must not reorder the signature.
+	 *
+	 * Absent — the whole existing corpus — derives the communication position
+	 * from the dataflow one, so nothing already drawn moves.
+	 *
+	 * The label convention is Vyuh Node Flow's, via the prior-art study in
+	 * `docs/four-sided-port-labels-prior-art-2026-09-06.html`: text stays
+	 * horizontal and is drawn INWARD from the socket — below a top port, above
+	 * a bottom one — so the outer face remains a clear cable corridor.
+	 * See <https://flow.vyuh.tech/docs/theming/port-labels>.
+	 */
+	commEdge: T.literalEnum('left', 'right', 'top', 'bottom').optional(),
+	/** How far along `commEdge` the socket sits, 0 at the left/top corner. */
+	commEdgeT: T.number.optional(),
+	/**
 	 * Inputs only: the call writes this argument in place, so the caller's own
 	 * object changes. Read off the signature, not off the wiring, which is why
 	 * the hook shows in Port view before any cable exists.
