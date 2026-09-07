@@ -5,9 +5,17 @@ import {
   useMemo,
   useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react'
+import {
+  DndContext,
+  PointerSensor,
+  useDraggable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
@@ -628,10 +636,10 @@ interface InspectorPortDrag {
   /**
    * Panel scroll offset at the press, and now.
    *
-   * WHY the held row tracks scroll as well as the pointer: holding near an edge
-   * scrolls the panel, and the row's resting place travels out from under it.
-   * Translating by the pointer delta alone would leave the row lagging the
-   * cursor by exactly the distance scrolled.
+   * WHY the held row tracks scroll as well as the pointer: dnd-kit auto-scrolls
+   * the panel when the pointer nears its edge, and the row's resting place
+   * scrolls away underneath it. Translating by the pointer delta alone would
+   * leave the row lagging the cursor by exactly the distance scrolled.
    */
   startScrollTop: number
   scrollTop: number
@@ -643,11 +651,11 @@ interface InspectorPortDrag {
 }
 
 /**
- * The scroller the port list lives in: the inspector body, not the list.
+ * The scroller dnd-kit will auto-scroll: the inspector body, not the list.
  *
- * WHY it is looked up rather than named: the inspector renders inside the
- * workspace panel, a dialog, and the embedded host, and only the nearest
- * scrolling ancestor is the one that actually moves.
+ * WHY this is looked up rather than hardcoded to `.block-inspector__body`: the
+ * inspector renders inside the workspace panel, a dialog, and the embedded
+ * host, and only the nearest scrolling ancestor is the one that actually moves.
  */
 function inspectorScroller(node: HTMLElement | null): HTMLElement | null {
   for (let element = node?.parentElement ?? null; element; element = element.parentElement) {
@@ -656,27 +664,56 @@ function inspectorScroller(node: HTMLElement | null): HTMLElement | null {
   return null
 }
 
-/** How near an edge the pointer must come before the panel starts moving. */
-export const DRAG_SCROLL_BAND_PX = 56
-/** Fastest travel, in px per frame, reached at the very edge of the band. */
-export const DRAG_SCROLL_MAX_SPEED_PX = 14
+const scrollTopOf = (node: HTMLElement | null): number => inspectorScroller(node)?.scrollTop ?? 0
+
+/** The id a grip answers to inside its section's `DndContext`. */
+const gripDragId = (side: BlockPortSide, portId: string) => `${side}:${portId}`
 
 /**
- * How far to scroll this frame for a pointer at `clientY`, negative for up.
+ * The drag handle for one port row.
  *
- * Speed ramps with depth into the band so a slow approach nudges and a firm
- * one travels — the same feel as dragging a file to the top of a long list.
+ * WHY a component rather than the inline button it replaced: `useDraggable` is
+ * a hook, so each grip needs its own render scope. The handle is all dnd-kit
+ * is given — no `SortableContext`, no droppables. See the `DndContext` in
+ * `PortSection` for why the sortable layer stays out of this panel.
  */
-export function dragScrollStep(scroller: HTMLElement, clientY: number): number {
-  const rect = scroller.getBoundingClientRect()
-  const intoTop = clientY - rect.top
-  const intoBottom = rect.bottom - clientY
-  const ramp = (depth: number) =>
-    Math.ceil(DRAG_SCROLL_MAX_SPEED_PX * Math.min(1, (DRAG_SCROLL_BAND_PX - depth) / DRAG_SCROLL_BAND_PX))
-  if (intoTop < DRAG_SCROLL_BAND_PX && scroller.scrollTop > 0) return -ramp(Math.max(0, intoTop))
-  const room = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
-  if (intoBottom < DRAG_SCROLL_BAND_PX && room > 0) return ramp(Math.max(0, intoBottom))
-  return 0
+function PortGrip({
+  side,
+  port,
+  disabled,
+  onStep,
+}: {
+  side: BlockPortSide
+  port: BlockPort
+  disabled: boolean
+  onStep: (delta: -1 | 1) => void
+}) {
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: gripDragId(side, port.id),
+    disabled,
+  })
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className="block-inspector__grip"
+      disabled={disabled}
+      aria-label={`Drag ${port.name || port.id} to another row`}
+      title="Drag to reorder or move between rows · ↑↓ to step"
+      data-testid={`inspector-port-grip-${side}-${port.id}`}
+      {...attributes}
+      {...listeners}
+      // WHY after the spread: dnd-kit's keyboard sensor is not mounted, so its
+      // own key handler would only swallow the arrows that step a port by one.
+      onKeyDown={(event) => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+        event.preventDefault()
+        onStep(event.key === 'ArrowUp' ? -1 : 1)
+      }}
+    >
+      <GripIcon />
+    </button>
+  )
 }
 
 interface ListSection {
@@ -975,6 +1012,8 @@ function PortSection({
 	const [rangeStart, setRangeStart] = useState<string | null>(null)
   const [rangeEnd, setRangeEnd] = useState<string | null>(null)
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
+  // 3px, so a click that merely focuses the grip is not a reorder gesture.
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 3 } }))
   const { punctuatedPortRow } = useAppearancePreferences()
   const dragRef = useRef<InspectorPortDrag | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
@@ -1025,125 +1064,98 @@ function PortSection({
 
   useEffect(() => endDrag, [])
 
-  const startDrag = (event: ReactPointerEvent<HTMLElement>, portId: string) => {
-    if (!actions || event.button !== 0) return
-    event.preventDefault()
-    event.stopPropagation()
-    const pointerId = event.pointerId
-    const scroller = inspectorScroller(listRef.current)
-    const startScrollTop = scroller?.scrollTop ?? 0
+  /**
+   * What a release would do right now, read from the raw pointer position.
+   *
+   * WHY the reducer is the oracle rather than the painted order: a place that
+   * would leave the order as it is offers nothing — no bar, no band, and
+   * releasing there is a no-op. Asking `moveBlockPortToSectionProps` makes the
+   * preview incapable of disagreeing with the commit, so hidden ports sitting
+   * between two shown ones cannot fool the geometry. dnd-kit owns the gesture;
+   * this stays the judge of where a port may land.
+   */
+  const refreshDragTarget = (clientY: number) => {
+    const active = dragRef.current
+    if (!active) return
+    const list = listRef.current
+    const offered = list ? listDropTarget(list, clientY, active.portId) : null
+    const moves = offered
+      ? moveBlockPortToSectionProps(props, side, active.portId, offered.target) !== props
+      : false
+    const updated: InspectorPortDrag = {
+      ...active,
+      pointerY: clientY,
+      scrollTop: scrollTopOf(list),
+      target: moves && offered ? offered.target : null,
+      barY: moves && offered ? offered.barY : null,
+      band: moves && offered ? offered.band : null,
+    }
+    dragRef.current = updated
+    setDrag(updated)
+  }
+
+  /**
+   * Raw pointer position, and the panel scrolling under it.
+   *
+   * dnd-kit reports a translation delta, not a client position, and its delta
+   * already folds in the distance auto-scrolled — which is exactly what the
+   * held row's transform wants and exactly what the drop geometry does not:
+   * `listDropTarget` measures live rects, so it needs where the pointer really
+   * is. The scroll listener matters on its own because auto-scroll moves the
+   * rows while the pointer holds still, and no pointermove would fire.
+   */
+  useEffect(() => {
+    if (!drag) return
+    const list = listRef.current
+    const scroller = inspectorScroller(list)
+    const doc = list?.ownerDocument ?? document
+    const onMove = (move: PointerEvent) => refreshDragTarget(move.clientY)
+    const onScroll = () => refreshDragTarget(dragRef.current?.pointerY ?? 0)
+    doc.addEventListener('pointermove', onMove)
+    scroller?.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      doc.removeEventListener('pointermove', onMove)
+      scroller?.removeEventListener('scroll', onScroll)
+    }
+    // Re-subscribing per port keeps the closure's `props` fresh for the oracle.
+  }, [drag?.portId])
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!actions) return
+    const portId = String(event.active.id).slice(`${side}:`.length)
+    const activator = event.activatorEvent as PointerEvent
+    const startY = activator?.clientY ?? 0
+    const scrollTop = scrollTopOf(listRef.current)
     const next: InspectorPortDrag = {
       portId,
-      startY: event.clientY,
-      pointerY: event.clientY,
-      startScrollTop,
-      scrollTop: startScrollTop,
+      startY,
+      pointerY: startY,
+      startScrollTop: scrollTop,
+      scrollTop,
       target: null,
       barY: null,
       band: null,
     }
     dragRef.current = next
     setDrag(next)
-    const doc = event.currentTarget.ownerDocument
+  }
 
-    /**
-     * Re-read what a release would do, from wherever the pointer now is.
-     *
-     * The reducer is the oracle: a place that would leave the order as it is
-     * offers nothing — no bar, no band, and releasing there is a no-op — so
-     * hidden ports between two shown ones cannot fool the geometry.
-     */
-    const offer = (clientY: number) => {
-      const active = dragRef.current
-      if (!active) return
-      const list = listRef.current
-      const offered = list ? listDropTarget(list, clientY, active.portId) : null
-      const moves = offered
-        ? moveBlockPortToSectionProps(props, side, active.portId, offered.target) !== props
-        : false
-      const updated: InspectorPortDrag = {
-        ...active,
-        pointerY: clientY,
-        scrollTop: scroller?.scrollTop ?? active.scrollTop,
-        target: moves && offered ? offered.target : null,
-        barY: moves && offered ? offered.barY : null,
-        band: moves && offered ? offered.band : null,
-      }
-      dragRef.current = updated
-      setDrag(updated)
-    }
-
-    // WHY a drag scrolls the panel at all: the inspector body scrolls and its
-    // port list routinely runs past the fold — with four inputs the last grip
-    // is already below a laptop viewport. Without this a port could only ever
-    // be dragged to a row that happened to be painted at the same moment as
-    // its own grip, which silently puts the heading out of reach on any long
-    // Block. The pointer holds still while the list travels under it, so each
-    // frame re-offers a target from the same live rects the drop will use.
-    let scrolling = 0
-    const stopScrolling = () => {
-      if (scrolling) cancelAnimationFrame(scrolling)
-      scrolling = 0
-    }
-    const scrollFrame = () => {
-      scrolling = 0
-      const active = dragRef.current
-      if (!active || !scroller) return
-      const step = dragScrollStep(scroller, active.pointerY)
-      if (step === 0) return
-      scroller.scrollTop += step
-      offer(active.pointerY)
-      scrolling = requestAnimationFrame(scrollFrame)
-    }
-
-    const onMove = (move: PointerEvent) => {
-      const active = dragRef.current
-      if (!active || move.pointerId !== pointerId) return
-      move.preventDefault()
-      offer(move.clientY)
-      if (scroller && dragScrollStep(scroller, move.clientY) !== 0) {
-        if (!scrolling) scrolling = requestAnimationFrame(scrollFrame)
-      } else stopScrolling()
-    }
-    const finish = (up: PointerEvent, cancelled: boolean) => {
-      if (up.pointerId !== pointerId) return
-      const active = dragRef.current
-      stopScrolling()
-      doc.removeEventListener('pointermove', onMove)
-      doc.removeEventListener('pointerup', onUp)
-      doc.removeEventListener('pointercancel', onCancel)
-      doc.removeEventListener('keydown', onKey)
-      endDrag()
-      if (!cancelled && active?.target) actions.movePortToSection(side, active.portId, active.target)
-    }
-    const onUp = (up: PointerEvent) => finish(up, false)
-    const onCancel = (up: PointerEvent) => finish(up, true)
-    const onKey = (key: KeyboardEvent) => {
-      if (key.key === 'Escape') finish({ pointerId } as PointerEvent, true)
-    }
-    doc.addEventListener('pointermove', onMove)
-    doc.addEventListener('pointerup', onUp)
-    doc.addEventListener('pointercancel', onCancel)
-    doc.addEventListener('keydown', onKey)
+  const onDragEnd = (event: DragEndEvent) => {
+    const active = dragRef.current
+    endDrag()
+    // A cancel (Escape, window blur) arrives here too, flagged by dnd-kit.
+    if (event.over === null && !active?.target) return
+    if (active?.target) actions?.movePortToSection(side, active.portId, active.target)
   }
 
   const grip = (port: BlockPort) => (
-    <button
-      type="button"
-      className="block-inspector__grip"
+    <PortGrip
+      key={`grip-${port.id}`}
+      side={side}
+      port={port}
       disabled={!actions}
-      aria-label={`Drag ${port.name || port.id} to another row`}
-      title="Drag to reorder or move between rows · ↑↓ to step"
-      data-testid={`inspector-port-grip-${side}-${port.id}`}
-      onPointerDown={(event) => startDrag(event, port.id)}
-      onKeyDown={(event) => {
-        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
-        event.preventDefault()
-        actions?.movePort(side, port.id, event.key === 'ArrowUp' ? -1 : 1)
-      }}
-    >
-      <GripIcon />
-    </button>
+      onStep={(delta) => actions?.movePort(side, port.id, delta)}
+    />
   )
 
   const portRow = (port: BlockPort, row: number, branch: number) => {
@@ -1412,7 +1424,37 @@ function PortSection({
 		</li>
 	))
 
+  /**
+   * dnd-kit owns the gesture here; it does NOT own the ordering.
+   *
+   * WHY `SortableContext`/`useSortable` are not mounted, even though this is a
+   * plain React panel where they would normally be the obvious fit: a port row
+   * does not live in a flat list. Its place is `{ row, branch, before }` — a
+   * body row, a conditional arm within it, and the heading band as row 0 — and
+   * `arrayMove` over painted DOM order cannot express that. Worse, the painted
+   * order is not the model order: the managed face shows hidden ports that the
+   * ordinary face filters out, so a DOM index would silently disagree with the
+   * lane. Resolution therefore stays in `listDropTarget` (live rects, halfway
+   * claim bands between sections) with `moveBlockPortToSectionProps` as the
+   * oracle, matching how the canvas resolves the same drop.
+   *
+   * What dnd-kit is actually here for is auto-scroll: the inspector body
+   * scrolls, its port list routinely runs past the fold, and the hand-rolled
+   * pointer loop this replaced could not reach a row that was off screen.
+   *
+   * WHY a panel may mount its own `DndContext` at all, when the canvas lane is
+   * held to exactly one: no tldraw canvas shares this pointer, so there is no
+   * gesture to arbitrate — the second permission is disjoint from 0007's, not
+   * a loosening of it — see docs/peps/0009-dndkit-for-plain-react-panels.md
+   */
   return (
+    <DndContext
+      sensors={sensors}
+      autoScroll={{ layoutShiftCompensation: false }}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragCancel={endDrag}
+    >
     <section className="block-inspector__section" aria-label={`${title} ports`} data-inspector-section={title}>
       <div className="block-inspector__section-title">
         <span>{title}</span>
@@ -1604,6 +1646,7 @@ function PortSection({
         <p className="block-inspector__port-help">Use the quiet seam between neighbouring body rows to join or split a run.</p>
       ) : null}
     </section>
+    </DndContext>
   )
 }
 

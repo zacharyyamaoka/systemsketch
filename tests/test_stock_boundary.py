@@ -1,11 +1,24 @@
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+
+def _without_comments(source: str) -> str:
+    """TypeScript source with block and line comments removed.
+
+    Only used for presence checks, so it does not need to be a parser: it must
+    merely stop a module's own explanation of what it refuses from counting as
+    the thing itself.
+    """
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.S)
+    return re.sub(r"(?m)^\s*//.*$", "", source)
 
 
 class StockBoundaryTests(unittest.TestCase):
@@ -191,15 +204,19 @@ class StockBoundaryTests(unittest.TestCase):
         # The decision is recorded where it lives, and in its merge-time PEP.
         self.assertIn("docs/peps/0007-conditional-dual-drag-owner.md", drag_lane)
 
-        # dnd-kit stays inside the one module that owns the exception; nothing
-        # else in the app may import it, mount a second DndContext, or build a
-        # sortable DOM mirror beside the canvas.
+        # dnd-kit reaches exactly two kinds of place, and nowhere else: the
+        # canvas lane above, and plain React panels that no tldraw canvas
+        # shares a pointer with (Zach's 2026-09-06 call — see
+        # docs/peps/0009-dndkit-for-plain-react-panels.md).
+        CANVAS_DND = {"treeDndDrag.tsx", "dragListReorder.ts", "processDragList.ts"}
+        PANEL_DND = {"BlockInspector.tsx"}
+
         offenders: list[tuple[str, str]] = []
         for path in sorted((PROJECT_ROOT / "src").rglob("*.ts*")):
-            # The one mounted context, and the two PURE resolution modules
-            # (Tree and its Process twin) that use dnd-kit's exported
-            # collision functions without mounting anything.
-            if path.name in {"treeDndDrag.tsx", "dragListReorder.ts", "processDragList.ts"}:
+            # The one mounted canvas context, the two PURE resolution modules
+            # (Tree and its Process twin) that use dnd-kit's exported collision
+            # functions without mounting anything, and the panel surfaces.
+            if path.name in CANVAS_DND | PANEL_DND:
                 continue
             source = path.read_text(encoding="utf-8")
             if "@dnd-kit" in source:
@@ -213,6 +230,44 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertEqual(offenders, [])
         self.assertNotIn("from '@dnd-kit/sortable'", drag_lane)
         self.assertNotIn("<SortableContext", drag_lane)
+
+        # A panel surface earns the permission by staying panel-shaped. These
+        # are properties, not a name on an allow-list: a later refactor that
+        # reaches for the sortable layer fails here rather than in review.
+        for name in sorted(PANEL_DND):
+            found = [p for p in (PROJECT_ROOT / "src").rglob(name)]
+            self.assertEqual(len(found), 1, f"{name} must name exactly one module")
+            # Judge the CODE, not the prose. These modules explain at length
+            # which dnd-kit layers they deliberately refuse, so a check run
+            # over raw text would read the refusal as the offence — and, worse,
+            # a required symbol could be "found" in a comment that promises it.
+            panel = _without_comments(found[0].read_text(encoding="utf-8"))
+
+            # 1. dnd-kit may own the GESTURE (sensor + draggable handle) and
+            #    nothing else. The sortable layer sorts a flat array of DOM
+            #    ids; a port row's place is {row, branch, before} — a body row,
+            #    a conditional arm inside it, and the heading band as row 0 —
+            #    so arrayMove cannot express a legal move, and on the managed
+            #    face (hidden ports shown) a DOM index disagrees with the lane
+            #    outright.
+            self.assertIn("useDraggable", panel)
+            self.assertIn("PointerSensor", panel)
+            self.assertNotIn("@dnd-kit/sortable", panel)
+            self.assertNotIn("useSortable", panel)
+            self.assertNotIn("SortableContext", panel.replace("`SortableContext`", ""))
+            self.assertNotIn("arrayMove", panel)
+
+            # 2. The REDUCER stays the oracle for what a release would do, so
+            #    the preview cannot disagree with the commit. This is the one
+            #    property the drag library must never be allowed to take over.
+            self.assertIn("moveBlockPortToSectionProps(props, side", panel)
+            self.assertIn("listDropTarget", panel)
+
+            # 3. No tldraw canvas shares the pointer with this panel, which is
+            #    the whole reason the canvas lane's claim/preempt/hand-off
+            #    machinery is absent here and must stay absent.
+            self.assertNotIn("markEventAsHandled", panel)
+            self.assertNotIn("getHitShapeOnCanvasPointerDown", panel)
 
         # Mounted once, through the InFrontOfTheCanvas seam the app already
         # owns (the embedded lane composes the same host).
