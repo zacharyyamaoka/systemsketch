@@ -1,8 +1,9 @@
 # 0009: dnd-kit may own the gesture in plain React panels, where no canvas shares the pointer
 
-- **Status:** Proposed <!-- Accepted once this lands on main; see README's status lifecycle -->
+- **Status:** Accepted
 - **Date:** 2026-09-06
-- **Merge:** not yet merged — branch `track/inspector-port-dnd-kit`
+- **Merge:** landed on `main` as merge `d84e238d` (implementation commit `a4b5ba41`, branch
+  `track/inspector-port-dnd-kit`)
 
 ## Context
 
@@ -61,7 +62,7 @@ the offence — nor can a promise in a comment satisfy a required symbol.
   call and it is what the reasoner recommended. It lost because Zach decided the panel should
   use the library rather than grow a parallel copy of it — a hand-rolled scroller beside a
   mounted dnd-kit is the second-system smell the stock-boundary rule exists to prevent, just
-  one level down. It is preserved in full as commit `9e626fa3` on this branch, so the
+  one level down. It is preserved in full as commit `9e626fa3` in this history, so the
   comparison is a `git show` away rather than a reconstruction.
 - **Adopt `SortableContext` for the port list, the way dnd-kit's own examples do.** Rejected
   on the model, not on taste: it cannot address an arm, and it resolves against painted order,
