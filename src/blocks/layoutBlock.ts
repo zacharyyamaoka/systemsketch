@@ -173,7 +173,7 @@ export function withInferredCommunicationPlacements(props: BlockShapeProps): Blo
 	const inferred = inferCommunicationPlacements([
 		...props.inputs.map((port) => ({ port, side: 'input' as const, placedEdge: port.commEdge })),
 		...props.outputs.map((port) => ({ port, side: 'output' as const, placedEdge: port.commEdge })),
-	].filter((entry) => isSummaryCarrierPort(entry.port)))
+	])
 	const fill = (ports: readonly BlockPort[]) => ports.map((port) => {
 		if (port.commEdge !== undefined) return port
 		const placement = inferred.get(port.id)
@@ -761,16 +761,24 @@ function placeHorizontalRails(
 	height: number,
 	band: { top: number; bottom: number },
 	bareSideLabelWidth: number | null,
+	/**
+	 * Simple shows ONLY the sockets a summary arrow attaches to — that is the
+	 * whole point of the quiet card. Port shows every port the component has,
+	 * including protocol legs no arrow rides and communication ports that have
+	 * been detected but never wired to anything, which is what makes Port the
+	 * face you wire FROM.
+	 */
+	carriersOnly: boolean,
 	placed: LaidOutBlockPort[],
 ): void {
 	// A top or bottom socket draws its label INWARD, into the same strip a side
 	// socket's label would use. Reserve those strips first so the two never
 	// overprint — this is what turned a card's left column into
 	// "missiomissiomissio…" struck through by the bottom channel's name.
+	const shown = (port: BlockPort) => port.visible
+		&& (!carriersOnly || isSummaryCarrierPort(port))
 	const occupies = (edge: 'top' | 'bottom') => [...props.inputs, ...props.outputs]
-		.some((port) => port.visible
-			&& isSummaryCarrierPort(port)
-			&& portCommunicationEdge(port) === edge)
+		.some((port) => shown(port) && portCommunicationEdge(port) === edge)
 	const sideSpan = {
 		top: band.top + (occupies('top') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
 		bottom: band.bottom - (occupies('bottom') ? PORT_LABEL_HEIGHT_PX + RAIL_LABEL_GAP_PX : 0),
@@ -784,12 +792,7 @@ function placeHorizontalRails(
 			['input', props.inputs],
 			['output', props.outputs],
 		] as const).flatMap(([side, ports]) => ports
-			// ONLY the sockets a summary arrow attaches to. An Action's feedback
-			// and result have no arrow touching them in this lens, so painting
-			// them added dots and labels that led nowhere.
-			.filter((port) => port.visible
-				&& isSummaryCarrierPort(port)
-				&& portCommunicationEdge(port) === edge)
+			.filter((port) => shown(port) && portCommunicationEdge(port) === edge)
 			.map((port) => ({ port, side })))
 		if (lane.length === 0) continue
 		// Every socket that has not been placed by hand gets an even share of the
@@ -1275,6 +1278,7 @@ function computeBlockLayout(
 				height,
 				{ top: 0, bottom: height },
 				null,
+				true,
 				placed,
 			)
 			for (const entry of placed) entry.subtle = true
@@ -1466,6 +1470,7 @@ function computeBlockLayout(
 				height,
 				{ top: bodyTop, bottom: footerTop },
 				bareCommunicationFace ? bareSideLabelWidth : null,
+				false,
 				placed,
 			)
 		}

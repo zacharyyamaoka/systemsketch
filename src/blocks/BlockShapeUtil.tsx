@@ -74,6 +74,7 @@ import {
 	type BranchArmShape,
 } from '../branch/BranchArmShapeUtil'
 import {
+	activeComponentView,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
 	isShapeInCommunicationScope,
@@ -102,7 +103,7 @@ function CommunicationProjectedBlockCanvas({ shape }: { shape: BlockShape }) {
 	// component individually or you can do it for the entire card".
 	const rendered = {
 		...shape,
-		props: { ...shape.props, view: projection.componentView },
+		props: { ...shape.props, view: activeComponentView(projection) },
 	} as BlockShape
 	return <BlockCanvas shape={rendered} communicationProjected={projection.lens === 'communication'} />
 }

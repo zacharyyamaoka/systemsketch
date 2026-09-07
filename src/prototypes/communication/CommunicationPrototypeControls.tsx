@@ -4,6 +4,7 @@ import { useEditor, useValue } from 'tldraw'
 import {
 	COMMUNICATION_FAMILY_PAINT,
 	activeCommunicationRegionId,
+	activeComponentView,
 	applyActiveCommunicationRegion,
 	applyCommunicationCableStyle,
 	applyCommunicationComponentView,
@@ -215,7 +216,7 @@ export function CommunicationPrototypeControls() {
 				data-testid="communication-prototype-controls"
 				data-projection-lens={state.lens}
 				data-projection-cables={state.cableStyle}
-				data-projection-card={state.componentView}
+				data-projection-card={activeComponentView(state)}
 				data-active-region-id={activeRegionId ?? undefined}
 				data-systemsketch-chrome
 				onPointerDown={stopCanvasEvent}
@@ -240,17 +241,16 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
-				{/* Card face and cable style are Dataflow's to choose. The
-				    communication lens is fixed at Simple + Summary. */}
-				{state.lens === 'dataflow' ? (
-				<>
+				{/* The card face is a choice in BOTH lenses: Simple tells the
+				    summary story, Port tells the full one. Cable style is
+				    Dataflow's alone — communication is always Summary. */}
 				<div className="communication-prototype-routes" aria-label="Component view">
 					<span>Card</span>
 					{COMPONENT_VIEWS.map((view) => (
 						<button
 							key={view.id}
 							type="button"
-							aria-pressed={state.componentView === view.id}
+							aria-pressed={activeComponentView(state) === view.id}
 							data-testid={`communication-card-${view.id}`}
 							title={view.hint}
 							onClick={() => applyCommunicationComponentView(editor, view.id)}
@@ -259,6 +259,7 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
+				{state.lens === 'dataflow' ? (
 				<div className="communication-prototype-routes" aria-label="Cable style">
 					<span>Cables</span>
 					{CABLE_STYLES.map((style) => (
@@ -274,7 +275,6 @@ export function CommunicationPrototypeControls() {
 						</button>
 					))}
 				</div>
-				</>
 				) : null}
 				<div className="communication-prototype-routes" aria-label="Cable shape">
 					<span>Arrow</span>
@@ -375,7 +375,7 @@ export function CommunicationPrototypeControls() {
 									: `${summary.relations.length} relationship${summary.relations.length === 1 ? '' : 's'}`}
 						</strong>
 						<span>
-							{titleCase(state.lens)} · {cardLabel(state.componentView)} cards
+							{titleCase(state.lens)} · {cardLabel(activeComponentView(state))} cards
 							{state.cableStyle === 'summary' ? ' · summary rides the initiating leg' : ''}
 							{state.cableStyle === 'data' && activeRegionId
 								? ' · new wires default to Async'

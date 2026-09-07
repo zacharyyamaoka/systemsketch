@@ -13,7 +13,12 @@ import { getPortHostPort } from '../../blocks/connections/blockPorts'
 import { pairBlockFaces } from '../../blocks/connections/connectionScope'
 import { CONNECTION_SHAPE_TYPE } from '../../blocks/connections/connectionModel'
 import { applyAsyncRegionConnectionDefault } from '../../asyncRegion/asyncRegionModel'
-import { arrowEntryEdge, arrowExitEdge, type CrossingRect } from './arrowEdgeCrossing'
+import {
+	arrowEntryEdge,
+	arrowExitEdge,
+	type CrossedEdge as PortWall,
+	type CrossingRect,
+} from './arrowEdgeCrossing'
 import type { CommunicationFamily, CommunicationPhase, CommunicationRelation } from './communicationProjection'
 
 /**
@@ -348,10 +353,27 @@ export function materializeCommunicationLink(
 			),
 		}
 		: { initiator: null, responder: null }
-	const initiatorEdge = crossings.initiator?.edge
-		?? facingRail(editor, initiatorId, responderId)
-	const responderEdge = crossings.responder?.edge
-		?? facingRail(editor, responderId, initiatorId)
+	/**
+	 * Where each socket is SEEDED on its wall.
+	 *
+	 * WHY the crossing fraction and not just the wall (Zach, 2026-09-06): "I
+	 * would like the port to be created as close as possible to the intersection
+	 * of the arrow and the edge. That should be kind of the seed location, and
+	 * then obviously it should auto space from there." Keeping only the wall put
+	 * every new socket wherever the even spread happened to land — routinely the
+	 * top of a side wall, nowhere near the line just drawn. The fraction is a
+	 * seed, not a lock: `spreadRailFractions` still pushes sockets apart when
+	 * they would collide, so the arrow decides where a port starts and the
+	 * layout decides where it ends up.
+	 */
+	const initiatorPlacement = crossings.initiator
+		?? (facingRail(editor, initiatorId, responderId)
+			? { edge: facingRail(editor, initiatorId, responderId)!, edgeT: undefined }
+			: null)
+	const responderPlacement = crossings.responder
+		?? (facingRail(editor, responderId, initiatorId)
+			? { edge: facingRail(editor, responderId, initiatorId)!, edgeT: undefined }
+			: null)
 
 	const name = communicationNameSlug(options.name ?? '')
 		|| defaultCommunicationName(editor, family, initiatorId, responderId)
@@ -369,20 +391,21 @@ export function materializeCommunicationLink(
 		// Every leg of one interaction lands on the same pair of walls, because
 		// the arrow crossed those walls once — the legs are that one arrow told
 		// in full, so they must not scatter around the card.
-		const sourceRail = sourceShapeId === initiatorId ? initiatorEdge : responderEdge
-		const targetRail = targetShapeId === initiatorId ? initiatorEdge : responderEdge
-		// The rail is a COMMUNICATION-lens placement. Dataflow is untouched: the
+		const sourcePlace = sourceShapeId === initiatorId ? initiatorPlacement : responderPlacement
+		const targetPlace = targetShapeId === initiatorId ? initiatorPlacement : responderPlacement
+		// The placement is a COMMUNICATION-lens fact. Dataflow is untouched: the
 		// port keeps its ordinary row and lands on the left or right lane there.
-		pending.push({
-			shapeId: sourceShapeId,
-			side: 'outputs',
-			port: sourceRail ? { ...base, commEdge: sourceRail } : base,
-		})
-		pending.push({
-			shapeId: targetShapeId,
-			side: 'inputs',
-			port: targetRail ? { ...base, commEdge: targetRail } : base,
-		})
+		const seeded = (place: { edge: PortWall; edgeT: number | undefined } | null) => (
+			place
+				? {
+					...base,
+					commEdge: place.edge,
+					...(place.edgeT === undefined ? {} : { commEdgeT: place.edgeT }),
+				}
+				: base
+		)
+		pending.push({ shapeId: sourceShapeId, side: 'outputs', port: seeded(sourcePlace) })
+		pending.push({ shapeId: targetShapeId, side: 'inputs', port: seeded(targetPlace) })
 	}
 	if (!appendPorts(editor, pending)) {
 		editor.bailToMark(markId)

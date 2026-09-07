@@ -266,6 +266,17 @@ async function main() {
           hubEdges[0],
           `${family} ${placement.name}: the painted dot must be on the wall the arrow crossed`,
         )
+        // The SEED: a socket is created as close as it can be to where the
+        // arrow actually crossed, not wherever an even spread would put it.
+        // Centre-to-centre drags cross at the middle of the wall, so a seeded
+        // fraction lands near 0.5; a discarded seed shows up as an exact
+        // even-spread value instead.
+        for (const port of observed.hub) {
+          assert.ok(
+            port.t !== null,
+            `${family} ${placement.name}: ${port.name} was created with no seed position`,
+          )
+        }
 
       }
       pass(`a ${family} arrow puts its sockets on the walls it crosses, in all eight directions`)

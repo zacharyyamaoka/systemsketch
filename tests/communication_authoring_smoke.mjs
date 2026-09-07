@@ -311,10 +311,12 @@ async function main() {
       cardButtons: document.querySelectorAll('[data-testid^="communication-card-"]').length,
       cableButtons: document.querySelectorAll('[data-testid^="communication-cables-"]').length,
     })`))
-    assert.equal(fixedAxes.card, 'simple', 'communication is simple-only')
-    assert.equal(fixedAxes.cardButtons, 0, 'no card choice is offered in communication')
+    // The CARD choice is real in both lenses; only the cable axis is fixed here.
+    assert.equal(fixedAxes.card, 'simple', 'communication opens on the quiet card')
+    assert.ok(fixedAxes.cardButtons > 0, 'the card choice is offered in communication')
     assert.equal(fixedAxes.cableButtons, 0, 'no cable choice is offered in communication')
-    pass('the communication lens offers no card or cable choice — it is Simple and Summary, always')
+    assert.equal(observed.cables, 'summary')
+    pass('communication offers the card choice but is always Summary cables')
 
     // --- ONLY the sockets a summary arrow attaches to ------------------------
     // The Action's feedback and result have no arrow touching them here, so
@@ -336,6 +338,27 @@ async function main() {
     )
     pass('only the sockets a summary arrow connects to are drawn; the other legs still exist for Dataflow')
     await shot(app.page, '07-carriers-only.png')
+
+    // --- Port view shows the full picture, including unwired legs -----------
+    await clickElement(app.page, '[data-testid="communication-card-port"]')
+    await delay(500)
+    const portFace = JSON.parse(await evaluate(app.page, `JSON.stringify(
+      Array.from(document.querySelectorAll('[data-shape-id="shape:robot"] [data-block-port-id]'))
+        .map((node) => node.getAttribute('data-block-port-id'))
+    )`))
+    assert.ok(
+      portFace.length > painted.length,
+      `Port view must show more than the carriers: ${JSON.stringify(portFace)}`,
+    )
+    assert.equal(
+      portFace.some((id) => /feedback|result|response/.test(String(id))),
+      true,
+      `Port view shows the detected legs no arrow rides: ${JSON.stringify(portFace)}`,
+    )
+    pass('Port view shows every detected communication port, including the legs no summary arrow rides')
+    await shot(app.page, '07b-port-face.png')
+    await clickElement(app.page, '[data-testid="communication-card-simple"]')
+    await delay(400)
 
     // --- Tidying in Dataflow must not change the communication appearance ----
     // Capture the communication appearance FIRST, while it is on screen: in

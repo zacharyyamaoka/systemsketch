@@ -55,7 +55,18 @@ export type CommunicationCableStyle = 'data' | 'split' | 'summary'
 
 export interface CommunicationProjectionState {
 	lens: CommunicationLens
+	/**
+	 * The card face, remembered PER LENS.
+	 *
+	 * WHY two fields and not one (the stated rule: "dataflow and communication
+	 * should have completely separate appearances… changing one appearance will
+	 * not change the other"): with a single field, choosing Port in Dataflow
+	 * silently changed what Communication showed the next time you opened it.
+	 * `componentView` is Dataflow's; `communicationCard` is the other lens's.
+	 * Read them through `activeComponentView` rather than directly.
+	 */
 	componentView: CommunicationComponentView
+	communicationCard: CommunicationComponentView
 	cableStyle: CommunicationCableStyle
 	focusedGroupKey: string | null
 	/** Null is the legacy query-gated whole-board prototype. */
@@ -73,7 +84,8 @@ export const communicationProjection = new EditorAtom<CommunicationProjectionSta
 	'communication projection prototype',
 	() => ({
 		lens: 'dataflow',
-		componentView: 'simple',
+		componentView: 'port',
+		communicationCard: 'simple',
 		cableStyle: 'data',
 		focusedGroupKey: null,
 		activeRegionId: null,
@@ -478,19 +490,17 @@ export function applyCommunicationLens(editor: Editor, lens: CommunicationLens):
 		// on the useful one rather than on whatever the other lens was showing:
 		// Dataflow means grey cables, Communication means one arrow per
 		// relationship. An explicit cable choice inside a lens still stands.
-		// WHY the communication lens has no card or cable choice at all (Zach,
-		// 2026-09-06): "in the communication mode, blocks only are in simple
-		// view, and cables are only in summary view." Every other combination
-		// was reachable and none of them helped: Port cards there crowded four
-		// walls with sockets no arrow led to, and Split cables replaced the one
-		// arrow you drew with the legs it expands into, which is the Dataflow
-		// question asked in the wrong lens. Dataflow keeps both choices.
+		// WHY the communication lens keeps its CARD choice but not its CABLE one
+		// (Zach, 2026-09-06 and his correction the same day): "cables are only in
+		// summary view" stands — Split replaced the one arrow you drew with the
+		// legs it expands into, which is the Dataflow question asked in the wrong
+		// lens. But "earlier I said in communication view we don't want port
+		// view. I actually take that back": Simple tells the summary story, Port
+		// tells the full one, and both are worth having. Only the cable axis is
+		// fixed here; Dataflow keeps both.
 		cableStyle: lens === 'communication'
 			? 'summary'
 			: (state.cableStyle === 'summary' ? 'data' : state.cableStyle),
-		componentView: lens === 'communication'
-			? 'simple'
-			: (state.componentView === 'simple' ? 'port' : state.componentView),
 		focusedGroupKey: null,
 	}))
 }
@@ -506,11 +516,21 @@ export function applyCommunicationCableStyle(
 	}))
 }
 
+/** The card face the ACTIVE lens is showing. */
+export function activeComponentView(
+	state: CommunicationProjectionState,
+): CommunicationComponentView {
+	return state.lens === 'communication' ? state.communicationCard : state.componentView
+}
+
 export function applyCommunicationComponentView(
 	editor: Editor,
 	componentView: CommunicationComponentView,
 ): void {
-	updateProjection(editor, (state) => ({ ...state, componentView }))
+	// Writes to whichever lens is asking, so the other one keeps what it had.
+	updateProjection(editor, (state) => (state.lens === 'communication'
+		? { ...state, communicationCard: componentView }
+		: { ...state, componentView }))
 }
 
 export function applyCommunicationDrawFamily(
