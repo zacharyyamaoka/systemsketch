@@ -1,6 +1,6 @@
 # 0007: tldraw stays the drag owner, except a scoped handoff to dnd-kit on auto-laid-out diagram nodes
 
-- **Status:** Accepted
+- **Status:** Accepted — extended by [0013](0013-two-scoped-canvas-drag-owners.md), which admits a SECOND scoped canvas drag owner. Read both: this record alone describes a one-owner canvas that is no longer current.
 - **Date:** 2026-09-06
 - **Merge:** landed on `main` with the 2026-09-06 Behavior Tree merge (drag-architecture commit `aefd9343`)
 
@@ -87,3 +87,5 @@ the drag's own frozen geometry, never a second derivation.
   measured 1.8–2.7× top-down vs left-right asymmetry behind the tuner)
 - Related: `docs/peps/0006-tree-drag-dndkit-pure-collision.md` (the resolution engine this
   exception mounts a sensor in front of)
+- Related: `docs/peps/0013-two-scoped-canvas-drag-owners.md` (admits the second canvas
+  drag owner, and records the state-not-timing constraint any third must prove)

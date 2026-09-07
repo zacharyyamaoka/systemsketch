@@ -91,8 +91,10 @@ export function canReorderBlockPort(editor: Editor, ref: BlockPortRef): boolean 
 
 /**
  * Reorder one lane by dragging a held port. Entered from the connection tool's
- * `pointing_block_port` on tldraw's `long_press`, which fires only while the
- * pointer has stayed put — a press that moves first is still a cable.
+ * `pointing_block_port` on tldraw's `long_press`, which fires while the press
+ * has not crossed tldraw's own drag threshold (4px) — a press that drags
+ * further than that is still a cable. Note "not past the threshold", not "has
+ * not moved": see docs/peps/0013-two-scoped-canvas-drag-owners.md.
  */
 export class DraggingBlockPort extends StateNode {
 	static override id = BLOCK_PORT_DRAG_STATE_ID

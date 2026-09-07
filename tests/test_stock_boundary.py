@@ -170,7 +170,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertNotIn("Loop region", context_menu)
 
     def test_the_behavior_tree_dual_drag_exception_is_scoped_and_mutually_exclusive(self) -> None:
-        """A second drag system exists — deliberately, conditionally, alone.
+        """Two dnd-kit canvas drag owners exist, deliberately and narrowly scoped.
 
         Zach's 2026-09-06 exception to the one-drag-engine rule: with Auto
         layout ON, a Tree region stops acting as a whiteboard and acts as a
@@ -197,10 +197,64 @@ class StockBoundaryTests(unittest.TestCase):
             what remains is single-writer discipline (skip the gesture
             owner's shapes, settle on release).
 
-        A future rewrite must not silently re-litigate this fork
-        (single-drag-owner vs conditional-dual-drag-owner): the WHY block in
-        treeDndDrag.tsx records the decision, and its durable record is
-        docs/peps/0007-conditional-dual-drag-owner.md.
+        The SECOND owner (Zach's 2026-09-06 call) is the Communication lens's
+        port drag: dnd-kit moves a socket around a card's four walls, entered
+        from `pointing_block_port` on tldraw's own `long_press`. It earns its
+        place the way the panel lane does — by property, not by name.
+
+        KNOWN GAP — these owners are NOT yet mutually exclusive.
+        This test asserts that each owner is narrowly scoped. It does NOT
+        assert that two owners cannot claim one press, because today they can.
+        The defect PREDATES this file's second owner and is live on `main`
+        independently of it; nothing below causes it.
+
+        There are THREE gesture owners riding tldraw's `long_press`, not two,
+        and only two of them are dnd-kit — so the dnd-kit-shaped rule above
+        structurally cannot see the third:
+          1. the tree lane (`treeDndDrag.tsx`, dnd-kit) — claims by preempting
+             below tldraw's drag threshold, armed in the CAPTURE phase of
+             pointerdown while the select tool is still `idle`;
+          2. the port lane (`CommunicationPortDnd.tsx`, dnd-kit) — claims on
+             `long_press`, under the Communication lens;
+          3. the Dataflow reorder lane (`portInteraction.ts`
+             `DraggingBlockPort`) — native tldraw `StateNode`, claims on the
+             same `long_press`, under the DEFAULT lens, and asserted below to
+             use no dnd-kit at all.
+
+        WHY they collide, and why the obvious defence does not work: timing
+        cannot separate them. `long_press` does not mean "has not moved" —
+        tldraw clears its long-press timer only once a press crosses its own
+        drag threshold (see tests/test_long_press_semantics.py), so a press
+        that moves a few pixels and dwells fires `long_press` AND satisfies the
+        tree lane's preempt distance. That distance is a live knob
+        (`btDragTuning.claimDistancePx`) explicitly allowed to exceed the
+        threshold, so no numeric relationship between the two is assertable
+        either. Both orderings reach two owners:
+          - move-then-dwell: the tree lane claims at its preempt distance
+            without re-checking state, and because the press never crossed the
+            threshold `long_press` still fires afterwards;
+          - dwell-then-move: a lane takes the press on `long_press`, and the
+            tree lane's armed shadow then claims the same gesture on the next
+            move, calling `editor.cancel()` underneath a live drag.
+        The tree/reorder pair (1 and 3) is the most reachable: it needs only
+        the default lens, and Behavior Tree nodes are real Blocks whose port
+        dots route into the port lane (`installConnections.ts` does not exclude
+        region children).
+
+        The property a fix must establish is select-tool STATE ownership,
+        re-checked at CLAIM time and covering every state a port press can
+        occupy (`pointing_block_port` AND `dragging_block_port`) — never
+        timing. That constraint is recorded in
+        docs/peps/0013-two-scoped-canvas-drag-owners.md; the fix itself is
+        deliberately not in this merge, because it spans all three lanes and
+        changes shipped Behavior Tree behaviour.
+
+        A future rewrite must not silently re-litigate the fork this DOES
+        settle (single-drag-owner vs two-scoped-canvas-owners): the WHY blocks
+        in treeDndDrag.tsx and CommunicationPortDnd.tsx record the decision,
+        and its durable records are
+        docs/peps/0007-conditional-dual-drag-owner.md and
+        docs/peps/0013-two-scoped-canvas-drag-owners.md.
         """
 
         drag_lane = (PROJECT_ROOT / "src" / "behaviorTree" / "treeDndDrag.tsx").read_text(
@@ -232,7 +286,16 @@ class StockBoundaryTests(unittest.TestCase):
         # canvas lane above, and plain React panels that no tldraw canvas
         # shares a pointer with (Zach's 2026-09-06 call — see
         # docs/peps/0009-dndkit-for-plain-react-panels.md).
-        CANVAS_DND = {"treeDndDrag.tsx", "dragListReorder.ts", "processDragList.ts"}
+        CANVAS_DND = {
+            "treeDndDrag.tsx",
+            "dragListReorder.ts",
+            "processDragList.ts",
+            # The second admitted canvas owner. It is a genuine CANVAS dnd
+            # owner, not a panel one — it calls markEventAsHandled,
+            # screenToPage and getPointInShapeSpace and mounts its own
+            # context — so it must never be filed under PANEL_DND.
+            "CommunicationPortDnd.tsx",
+        }
         PANEL_DND = {"BlockInspector.tsx"}
 
         offenders: list[tuple[str, str]] = []
@@ -249,11 +312,59 @@ class StockBoundaryTests(unittest.TestCase):
                 ".test." not in path.name
                 and "DndContext" in source
                 and "BehaviorTreeDndDragHost" not in source
+                and "CommunicationPortDndHost" not in source
             ):
                 offenders.append((str(path.relative_to(PROJECT_ROOT)), "second DndContext"))
         self.assertEqual(offenders, [])
         self.assertNotIn("from '@dnd-kit/sortable'", drag_lane)
         self.assertNotIn("<SortableContext", drag_lane)
+
+        # ---------------- the second canvas owner, by property ----------------
+        # Judge the CODE, not the prose: this module explains at length which
+        # dnd-kit layers it refuses, so a raw-text check would read the refusal
+        # as the offence.
+        port_lane_path = PROJECT_ROOT / "src" / "blocks" / "ports" / "CommunicationPortDnd.tsx"
+        port_lane = _without_comments(port_lane_path.read_text(encoding="utf-8"))
+        port_gate = _without_comments(
+            (PROJECT_ROOT / "src" / "blocks" / "ports" / "communicationPortDrag.ts").read_text(
+                encoding="utf-8"
+            )
+        )
+        pointing_port = _without_comments(
+            (PROJECT_ROOT / "src" / "blocks" / "connections" / "PointingBlockPort.ts").read_text(
+                encoding="utf-8"
+            )
+        )
+        # It is real and mounted — a sensor, not just math.
+        self.assertIn("<DndContext", port_lane)
+        self.assertIn("PointerSensor", port_lane)
+        # The gate: it claims only through canMoveCommunicationPort, which is
+        # the only place the lens is consulted, and only ever from long_press.
+        self.assertIn("if (!canMoveCommunicationPort(editor, ref)) return false", port_lane)
+        self.assertIn("blockLayoutLensFor(editor, ref.shapeId) !== 'communication'", port_gate)
+        self.assertIn("override onLongPress", pointing_port)
+        self.assertIn("beginCommunicationPortDnd(this.editor, ref)", pointing_port)
+        # It refuses the sortable layer for the same reason the tree lane does:
+        # a DOM mirror of a tldraw layout is a second, staler copy of it.
+        for refused in ("@dnd-kit/sortable", "useSortable", "SortableContext", "arrayMove"):
+            self.assertNotIn(refused, port_lane)
+        # Geometry stays in PAGE space, where the layout's truth lives, rather
+        # than in the screen-space DOM rects the sortable layer would measure.
+        self.assertIn("blockEdgeAt(", port_lane)
+
+        # ------- the third gesture owner the dnd-kit rule cannot see --------
+        # See KNOWN GAP in the docstring. The Dataflow reorder lane rides the
+        # same `long_press` but is native tldraw, so the offenders sweep above
+        # is blind to it by construction. Pin that it stays native: the day it
+        # reaches for dnd-kit it becomes a THIRD mounted context and must be
+        # admitted deliberately, like the two above.
+        reorder_lane = _without_comments(
+            (PROJECT_ROOT / "src" / "blocks" / "ports" / "portInteraction.ts").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertIn("class DraggingBlockPort extends StateNode", reorder_lane)
+        self.assertNotIn("@dnd-kit", reorder_lane)
 
         # A panel surface earns the permission by staying panel-shaped. These
         # are properties, not a name on an allow-list: a later refactor that

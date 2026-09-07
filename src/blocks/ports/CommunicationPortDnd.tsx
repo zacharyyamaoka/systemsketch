@@ -5,24 +5,38 @@
  * the Behavior Tree's exception, and it is Zach's explicit ask (2026-09-06):
  * "Please use drag and drop kit to implement this… basically we model each
  * edge of the board as a kanban column/row and each port as a kanban card."
- * A PEP is owed at merge recording the fork, and this file must be reconciled
- * with `behaviorTree/treeDndDrag.tsx` when that branch lands: the two share a
- * pattern deliberately and should end up sharing a host.
+ * The fork is recorded in docs/peps/0013-two-scoped-canvas-drag-owners.md.
+ * Still owed as follow-up, and deliberately NOT done there: this file and
+ * `behaviorTree/treeDndDrag.tsx` share a pattern on purpose and should end up
+ * sharing one host.
  *
  * THE BOUNDARY, precisely — dnd-kit may own a gesture only when ALL hold:
  *   - the press landed on a real port dot of a Block;
  *   - the region is being read through the COMMUNICATION lens, which is the
  *     only lens with four walls to move between;
- *   - the press stayed put long enough to be tldraw's own `long_press`.
+ *   - the press did not cross tldraw's drag threshold before its own
+ *     `long_press` fired (see the CORRECTION below: that is NOT the same as
+ *     "did not move").
  * Everything else — a plain drag from a dot (still a cable), any press in
  * Dataflow, any press on anything else — is byte-identical native tldraw with
  * no dnd-kit listener anywhere in its event path.
  *
- * WHY the handoff is so much simpler than the Behavior Tree's: that one had to
- * PREEMPT a translate that tldraw would otherwise have started, racing a 4px
- * threshold. Here the claim signal is `long_press`, which tldraw only fires for
- * a press that has NOT moved — so the two systems can never both think they
- * own the gesture, and no cancel-before-threshold dance is needed.
+ * WHY the handoff is simpler than the Behavior Tree's: that one had to PREEMPT
+ * a translate tldraw would otherwise have started, racing a 4px threshold.
+ * Here the claim signal is `long_press`, so no cancel-before-threshold dance is
+ * needed.
+ *
+ * CORRECTION, and the reason this file is not the whole story: `long_press`
+ * does NOT mean "has not moved". tldraw clears its long-press timer only once a
+ * press crosses its own drag threshold (`dragDistanceSquared: 16`, i.e. 4px;
+ * `Editor.ts` clears `_longPressTimeout` inside that branch alone — not in
+ * `cancel()`). A press that moves 1-3px and dwells 500ms therefore fires
+ * `long_press` AND satisfies the tree lane's preempt distance, so both can
+ * claim one press. Nothing separates them yet: see the KNOWN GAP in
+ * `tests/test_stock_boundary.py`, which documents all three gesture owners and
+ * both orderings. The property a fix must establish — select-tool state
+ * ownership re-checked at CLAIM time, never timing — is recorded in
+ * docs/peps/0013-two-scoped-canvas-drag-owners.md.
  *
  * WHY `SortableContext`/`useSortable` are NOT mounted, despite this being a
  * Kanban: dnd-kit's sortable layer measures DOM rects in SCREEN space, once

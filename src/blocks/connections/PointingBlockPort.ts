@@ -182,8 +182,10 @@ export class PointingBlockPort extends StateNode {
 	 * Held still on a port: the gesture is a reorder, not a cable.
 	 *
 	 * tldraw cancels its own long-press timer the moment a press crosses the drag
-	 * threshold, so this can only fire for a press that stayed put — which is
-	 * exactly the gesture a cable drag is not.
+	 * threshold, so this fires only for a press that has not crossed it — which a
+	 * cable drag has. Note the exact claim: NOT that the press is stationary. A
+	 * press may move a few pixels, stay under the 4px threshold, and still arrive
+	 * here. See tests/test_long_press_semantics.py.
 	 */
 	override onLongPress(info: TLPointerEventInfo): void {
 		if (!this.info) return
@@ -197,9 +199,14 @@ export class PointingBlockPort extends StateNode {
 		}
 		// One hold, two owners. In the communication lens a socket is somewhere on
 		// a wall, and dnd-kit owns that gesture — asked first so the Dataflow
-		// reorder below never has to know the lens exists. `long_press` only ever
-		// fires for a press that has NOT moved, so handing off here cannot race
-		// the cable drag it would otherwise have been.
+		// reorder below never has to know the lens exists.
+		//
+		// This hand-off does NOT establish sole ownership of the gesture: tldraw
+		// keeps its long-press timer alive until its own 4px drag threshold, so a
+		// press can arrive here having already moved far enough for the Behavior
+		// Tree lane's preempt to be armed on the same press. See the KNOWN GAP in
+		// tests/test_stock_boundary.py and
+		// docs/peps/0013-two-scoped-canvas-drag-owners.md.
 		if (beginCommunicationPortDnd(this.editor, ref)) {
 			this.parent.transition('idle', info)
 			return
