@@ -183,6 +183,19 @@ const ControlTrigger = forwardRef<HTMLButtonElement, ControlTriggerProps>(functi
     },
     [customSize],
   )
+  // The rung's own px, printed beside its name. WHY: "Extra large" is a type
+  // role in stock tldraw, not a size — the same words render 44px on a Text
+  // shape and 32px on a sticky note. Without the number the combobox reads
+  // identical for two visibly different sizes, which is exactly the report
+  // this answers. Null (mixed types, or a control that never bound one) simply
+  // omits it rather than guessing.
+  const currentValue = current?.value
+  const readRungPx = control.rungPx
+  const rungPx = useValue(
+    'systemsketch trigger rung px',
+    () => (currentValue !== undefined && readRungPx ? readRungPx(currentValue) : null),
+    [readRungPx, currentValue],
+  )
   return (
     <button
       {...buttonProps}
@@ -197,9 +210,16 @@ const ControlTrigger = forwardRef<HTMLButtonElement, ControlTriggerProps>(functi
       title={control.label}
     >
       {control.trigger === 'text' ? (
-        <span className="systemsketch-appearance__trigger-text">
-          {customPx ?? (current ? current.label : MIXED_LABEL)}
-        </span>
+        <>
+          <span className="systemsketch-appearance__trigger-text">
+            {customPx ?? (current ? current.label : MIXED_LABEL)}
+          </span>
+          {customPx === null && rungPx !== null ? (
+            <span className="systemsketch-appearance__trigger-px" data-testid="font-size-trigger-px">
+              {formatFontPx(rungPx)}
+            </span>
+          ) : null}
+        </>
       ) : isAutomaticContextualSelection(control) ? (
         <span className="systemsketch-appearance__automatic" aria-hidden="true">A</span>
       ) : (
@@ -333,6 +353,15 @@ function OptionButton({
   const list = control.layout === 'list'
   const rowSize = list && control.kind === 'size' ? FONT_SIZE_LADDER[option.value] : undefined
   const automatic = control.automaticOption?.value === option.value
+  // The px this named row actually renders at for the bound target — see the
+  // WHY on `rungPx` in `contextualControlRegistry.ts`. Read through `useValue`
+  // because on the appearance pill it is a live reading of the selection.
+  const readRungPx = control.rungPx
+  const rungPx = useValue(
+    'systemsketch option rung px',
+    () => (readRungPx ? readRungPx(option.value) : null),
+    [readRungPx, option.value],
+  )
   return (
     <button
       type="button"
@@ -360,6 +389,11 @@ function OptionButton({
             : undefined}
         >
           {option.label}
+        </span>
+      ) : null}
+      {withLabel && rungPx !== null ? (
+        <span className="systemsketch-appearance__label-px" data-testid={`size-row-px-${option.value}`}>
+          {formatFontPx(rungPx)}
         </span>
       ) : null}
     </button>

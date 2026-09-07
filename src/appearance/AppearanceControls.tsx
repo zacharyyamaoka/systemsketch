@@ -36,8 +36,10 @@ import {
 } from './strokeMeta'
 import {
   applyCustomFontPx,
+  isSizeRung,
   resetCustomFontScale,
   selectionOnPresetRungs,
+  selectionRungPx,
   sharedFontPx,
   CUSTOM_FONT_PX_MAX,
   CUSTOM_FONT_PX_MIN,
@@ -172,6 +174,9 @@ function bindAppearanceControl(editor: Editor, control: AppearanceControl): Cont
           minPx: CUSTOM_FONT_PX_MIN,
           maxPx: CUSTOM_FONT_PX_MAX,
         }
+      : undefined,
+    rungPx: control.kind === 'size'
+      ? (value) => (isSizeRung(value) ? selectionRungPx(editor, value) : null)
       : undefined,
     onSelect: (value, options) => {
       if (!value) return

@@ -9,7 +9,13 @@ import {
   type BlockTitleSize,
 } from '../blockModel'
 import { getBlockInlineField } from '../inlineBlockEditing'
-import { blockTitleAlign, blockTitleBold, blockTitleFont, blockTitleSize } from '../titleAppearance'
+import {
+  BLOCK_TITLE_FONT_PX,
+  blockTitleAlign,
+  blockTitleBold,
+  blockTitleFont,
+  blockTitleSize,
+} from '../titleAppearance'
 import {
   BLOCK_TITLE_CONTEXTUAL_RECIPE,
   bindContextualControl,
@@ -66,6 +72,11 @@ function titleControls(editor: Editor, shape: BlockShape): ContextualControl[] {
   ) => bindContextualControl(kind, {
     id,
     value: { type: 'shared', value },
+    // A Block title reads its rungs off its own table; printing the px keeps
+    // this menu's "Extra large" from claiming kinship with a sticky note's.
+    rungPx: kind === 'size'
+      ? (option) => BLOCK_TITLE_FONT_PX[option as BlockTitleSize] ?? null
+      : undefined,
     onSelect: (next) => {
       if (!next) return
       updateTitleFormatting(editor, shape.id, patch(next))

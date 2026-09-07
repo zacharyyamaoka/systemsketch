@@ -1,0 +1,54 @@
+{
+  "heading": [
+    18,
+    24,
+    36,
+    44
+  ],
+  "headingTrigger": "44",
+  "box_heading": [
+    407,
+    54,
+    735,
+    334
+  ],
+  "sticky": [
+    18,
+    22,
+    26,
+    32
+  ],
+  "stickyTrigger": "32",
+  "box_sticky": [
+    351,
+    202,
+    791,
+    482
+  ],
+  "snippet": [
+    12,
+    16,
+    20,
+    24
+  ],
+  "snippetTrigger": "24",
+  "box_snippet": [
+    680,
+    202,
+    1033,
+    482
+  ],
+  "mixedChecked": 0,
+  "mixedTrigger": "Mixed",
+  "box_mixed": [
+    308,
+    54,
+    748,
+    334
+  ],
+  "equalised": [
+    40,
+    40
+  ],
+  "triggerWidth": 144
+}
