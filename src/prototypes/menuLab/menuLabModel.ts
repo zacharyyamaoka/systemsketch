@@ -32,7 +32,10 @@
  * reproducible without a canvas selection.
  */
 import {
+  BLOCK_TITLE_CONTEXTUAL_RECIPE,
+  CONNECTOR_CONTEXTUAL_RECIPE,
   CONTEXTUAL_CONTROL_REGISTRY,
+  SHAPE_CONTEXTUAL_RECIPE,
   bindContextualControl,
   composeContextualControls,
   type ContextualControl,
@@ -166,12 +169,77 @@ export const LAB_PRESETS: readonly LabPreset[] = [
     },
   },
   {
+    id: 'code',
+    label: 'Code block',
+    detail: 'Language and the shared Font size ladder — a Code block has no painted edge',
+    state: withIncluded(['codeLanguage', 'size']),
+  },
+  {
     id: 'empty',
     label: 'Empty',
     detail: 'Start from nothing and add one control at a time',
     state: emptyLabState(),
   },
 ]
+
+/**
+ * Which product recipe each preset claims to reproduce.
+ *
+ * WHY this mapping exists rather than trusting the preset literals: a preset
+ * is hand-written, and the whole promise of the lab is "if a composition works
+ * here it works in the product". A preset that quietly kept the old grouping
+ * after someone moved a control in the real recipe would make the lab lie
+ * about the very thing it exists to demonstrate. `labPresetDrift` checks the
+ * claim, and `menuLabModel.test.ts` fails the build on a mismatch.
+ *
+ * The Code selection pill is the SHAPE recipe too: a Code block has no
+ * `color`, `dash`, `font` or align StyleProp, so the shared recipe narrows
+ * itself down to Language and Font size — see `contextualSurfaceRegistry.ts`
+ * for why its unique rows ride beside this pill instead of forking it.
+ */
+export const LAB_PRESET_RECIPES: Readonly<Record<string, ContextualControlRecipe>> = {
+  shape: SHAPE_CONTEXTUAL_RECIPE,
+  connector: CONNECTOR_CONTEXTUAL_RECIPE,
+  'block-title': BLOCK_TITLE_CONTEXTUAL_RECIPE,
+  code: SHAPE_CONTEXTUAL_RECIPE,
+}
+
+export interface LabPresetDrift {
+  /** Kinds the preset emits that its product recipe does not carry at all. */
+  absentFromRecipe: ContextualControlKind[]
+  /** Lab groups whose kinds the product recipe actually keeps apart. */
+  splitGroups: string[]
+}
+
+/**
+ * How far a preset has drifted from the product surface it names.
+ *
+ * Only controls the preset actually EMITS are checked — a stacked control is
+ * folded into its host and never reaches a recipe, which is why `strokeWidth`
+ * is legitimately absent from `SHAPE_CONTEXTUAL_RECIPE` while the Shape
+ * preset still composes it.
+ */
+export function labPresetDrift(preset: LabPreset): LabPresetDrift {
+  const recipe = LAB_PRESET_RECIPES[preset.id]
+  const drift: LabPresetDrift = { absentFromRecipe: [], splitGroups: [] }
+  if (!recipe) return drift
+  const homeOf = new Map<ContextualControlKind, string>()
+  for (const group of recipe.groups) {
+    for (const item of group.items) homeOf.set(item, group.id)
+  }
+  for (const group of labRecipe(preset.state).groups) {
+    const homes = new Set<string>()
+    for (const kind of group.items) {
+      const home = homeOf.get(kind)
+      if (home === undefined) drift.absentFromRecipe.push(kind)
+      else homes.add(home)
+    }
+    if (homes.size > 1) {
+      drift.splitGroups.push(`${group.id}: ${[...homes].sort().join(' + ')}`)
+    }
+  }
+  return drift
+}
 
 /** The recipe the current levers describe: group breaks become group ids. */
 export function labRecipe(state: LabState): ContextualControlRecipe {

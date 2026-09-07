@@ -211,6 +211,11 @@ function scaleOf(shape: ShapeLike): number {
  * an effect cable is thicker than a data cable on purpose — so the broad
  * predicate would offer a row whose paint the cable would silently ignore.
  * The row reads nothing on a cable and is dropped, rather than lying.
+ *
+ * The same reasoning keeps thickness off the Block-title and Code pills: a
+ * title is a run of text and a Code block's frame is chrome, so neither
+ * carries a user-painted edge to thicken. Audited through the lab's
+ * `block-title` and `code` presets — see `menuLabModel.test.ts`.
  */
 const STROKE_WIDTH_SHAPE_TYPES = new Set(['geo', 'draw', 'line', 'arrow'])
 
