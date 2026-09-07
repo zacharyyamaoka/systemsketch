@@ -4,7 +4,13 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps } from '../blockModel'
 import { createValueBlockProps } from '../valueBlock'
 import { createBundleProps, createClockTriggerProps, createSelectProps, createSetAttributesProps } from '../stockBlocks'
-import { BlockInspectorContent, type BlockInspectorActions } from './BlockInspector'
+import {
+	BlockInspectorContent,
+	DRAG_SCROLL_BAND_PX,
+	DRAG_SCROLL_MAX_SPEED_PX,
+	dragScrollStep,
+	type BlockInspectorActions,
+} from './BlockInspector'
 import { BlockSelectionMiniMenu } from './BlockSelectionMiniMenu'
 
 describe('Block inspector content', () => {
@@ -345,4 +351,42 @@ describe('the Pill section', () => {
     expect(fed).toContain('Connected from decode() · frame')
     expect(fed).toContain('Adopt cable type')
   })
+})
+
+/**
+ * The panel travels while a port is held near an edge. These are the clamps
+ * that keep it from travelling when there is nowhere to go — the failure that
+ * would otherwise show up only as a drag that fights the user at the ends.
+ */
+describe('inspector drag auto-scroll', () => {
+	const scroller = (over: Partial<Record<string, number>> = {}) => ({
+		getBoundingClientRect: () => ({ top: 100, bottom: 500 }),
+		scrollTop: 200,
+		scrollHeight: 2000,
+		clientHeight: 400,
+		...over,
+	}) as unknown as HTMLElement
+
+	it('stays still while the pointer is clear of both edges', () => {
+		expect(dragScrollStep(scroller(), 300)).toBe(0)
+	})
+
+	it('pulls up near the top edge and pushes down near the bottom', () => {
+		expect(dragScrollStep(scroller(), 110)).toBeLessThan(0)
+		expect(dragScrollStep(scroller(), 490)).toBeGreaterThan(0)
+	})
+
+	it('accelerates with depth into the band, capped at the maximum', () => {
+		const shallow = Math.abs(dragScrollStep(scroller(), 100 + DRAG_SCROLL_BAND_PX - 6))
+		const deep = Math.abs(dragScrollStep(scroller(), 101))
+		expect(deep).toBeGreaterThan(shallow)
+		expect(deep).toBeLessThanOrEqual(DRAG_SCROLL_MAX_SPEED_PX)
+		expect(shallow).toBeGreaterThan(0)
+	})
+
+	it('refuses to scroll past either end', () => {
+		expect(dragScrollStep(scroller({ scrollTop: 0 }), 110)).toBe(0)
+		// Already at the bottom: scrollTop + clientHeight === scrollHeight.
+		expect(dragScrollStep(scroller({ scrollTop: 1600 }), 490)).toBe(0)
+	})
 })

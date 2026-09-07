@@ -625,11 +625,58 @@ interface InspectorPortDrag {
   portId: string
   startY: number
   pointerY: number
+  /**
+   * Panel scroll offset at the press, and now.
+   *
+   * WHY the held row tracks scroll as well as the pointer: holding near an edge
+   * scrolls the panel, and the row's resting place travels out from under it.
+   * Translating by the pointer delta alone would leave the row lagging the
+   * cursor by exactly the distance scrolled.
+   */
+  startScrollTop: number
+  scrollTop: number
   /** Where a release would put the port; null while the pointer offers nothing new. */
   target: BlockPortSectionTarget | null
   /** List-local geometry of the offered place. */
   barY: number | null
   band: { top: number; bottom: number } | null
+}
+
+/**
+ * The scroller the port list lives in: the inspector body, not the list.
+ *
+ * WHY it is looked up rather than named: the inspector renders inside the
+ * workspace panel, a dialog, and the embedded host, and only the nearest
+ * scrolling ancestor is the one that actually moves.
+ */
+function inspectorScroller(node: HTMLElement | null): HTMLElement | null {
+  for (let element = node?.parentElement ?? null; element; element = element.parentElement) {
+    if (/(auto|scroll)/.test(getComputedStyle(element).overflowY)) return element
+  }
+  return null
+}
+
+/** How near an edge the pointer must come before the panel starts moving. */
+export const DRAG_SCROLL_BAND_PX = 56
+/** Fastest travel, in px per frame, reached at the very edge of the band. */
+export const DRAG_SCROLL_MAX_SPEED_PX = 14
+
+/**
+ * How far to scroll this frame for a pointer at `clientY`, negative for up.
+ *
+ * Speed ramps with depth into the band so a slow approach nudges and a firm
+ * one travels — the same feel as dragging a file to the top of a long list.
+ */
+export function dragScrollStep(scroller: HTMLElement, clientY: number): number {
+  const rect = scroller.getBoundingClientRect()
+  const intoTop = clientY - rect.top
+  const intoBottom = rect.bottom - clientY
+  const ramp = (depth: number) =>
+    Math.ceil(DRAG_SCROLL_MAX_SPEED_PX * Math.min(1, (DRAG_SCROLL_BAND_PX - depth) / DRAG_SCROLL_BAND_PX))
+  if (intoTop < DRAG_SCROLL_BAND_PX && scroller.scrollTop > 0) return -ramp(Math.max(0, intoTop))
+  const room = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
+  if (intoBottom < DRAG_SCROLL_BAND_PX && room > 0) return ramp(Math.max(0, intoBottom))
+  return 0
 }
 
 interface ListSection {
@@ -983,10 +1030,14 @@ function PortSection({
     event.preventDefault()
     event.stopPropagation()
     const pointerId = event.pointerId
+    const scroller = inspectorScroller(listRef.current)
+    const startScrollTop = scroller?.scrollTop ?? 0
     const next: InspectorPortDrag = {
       portId,
       startY: event.clientY,
       pointerY: event.clientY,
+      startScrollTop,
+      scrollTop: startScrollTop,
       target: null,
       barY: null,
       band: null,
@@ -995,21 +1046,25 @@ function PortSection({
     setDrag(next)
     const doc = event.currentTarget.ownerDocument
 
-    const onMove = (move: PointerEvent) => {
+    /**
+     * Re-read what a release would do, from wherever the pointer now is.
+     *
+     * The reducer is the oracle: a place that would leave the order as it is
+     * offers nothing — no bar, no band, and releasing there is a no-op — so
+     * hidden ports between two shown ones cannot fool the geometry.
+     */
+    const offer = (clientY: number) => {
       const active = dragRef.current
-      if (!active || move.pointerId !== pointerId) return
-      move.preventDefault()
+      if (!active) return
       const list = listRef.current
-      const offered = list ? listDropTarget(list, move.clientY, active.portId) : null
-      // A place that would leave the order as it is offers nothing: no bar,
-      // no band, and releasing there is a no-op. The reducer is the oracle,
-      // so hidden ports between two shown ones cannot fool the geometry.
+      const offered = list ? listDropTarget(list, clientY, active.portId) : null
       const moves = offered
         ? moveBlockPortToSectionProps(props, side, active.portId, offered.target) !== props
         : false
       const updated: InspectorPortDrag = {
         ...active,
-        pointerY: move.clientY,
+        pointerY: clientY,
+        scrollTop: scroller?.scrollTop ?? active.scrollTop,
         target: moves && offered ? offered.target : null,
         barY: moves && offered ? offered.barY : null,
         band: moves && offered ? offered.band : null,
@@ -1017,9 +1072,43 @@ function PortSection({
       dragRef.current = updated
       setDrag(updated)
     }
+
+    // WHY a drag scrolls the panel at all: the inspector body scrolls and its
+    // port list routinely runs past the fold — with four inputs the last grip
+    // is already below a laptop viewport. Without this a port could only ever
+    // be dragged to a row that happened to be painted at the same moment as
+    // its own grip, which silently puts the heading out of reach on any long
+    // Block. The pointer holds still while the list travels under it, so each
+    // frame re-offers a target from the same live rects the drop will use.
+    let scrolling = 0
+    const stopScrolling = () => {
+      if (scrolling) cancelAnimationFrame(scrolling)
+      scrolling = 0
+    }
+    const scrollFrame = () => {
+      scrolling = 0
+      const active = dragRef.current
+      if (!active || !scroller) return
+      const step = dragScrollStep(scroller, active.pointerY)
+      if (step === 0) return
+      scroller.scrollTop += step
+      offer(active.pointerY)
+      scrolling = requestAnimationFrame(scrollFrame)
+    }
+
+    const onMove = (move: PointerEvent) => {
+      const active = dragRef.current
+      if (!active || move.pointerId !== pointerId) return
+      move.preventDefault()
+      offer(move.clientY)
+      if (scroller && dragScrollStep(scroller, move.clientY) !== 0) {
+        if (!scrolling) scrolling = requestAnimationFrame(scrollFrame)
+      } else stopScrolling()
+    }
     const finish = (up: PointerEvent, cancelled: boolean) => {
       if (up.pointerId !== pointerId) return
       const active = dragRef.current
+      stopScrolling()
       doc.removeEventListener('pointermove', onMove)
       doc.removeEventListener('pointerup', onUp)
       doc.removeEventListener('pointercancel', onCancel)
@@ -1059,7 +1148,15 @@ function PortSection({
 
   const portRow = (port: BlockPort, row: number, branch: number) => {
     const held = drag?.portId === port.id
-    const style = held && drag ? { transform: `translateY(${drag.pointerY - drag.startY}px)` } : undefined
+    // The row follows the pointer AND the panel scrolling out from under it,
+    // so an auto-scrolled drag keeps the row under the cursor.
+    const style = held && drag
+      ? {
+        transform: `translateY(${
+          (drag.pointerY - drag.startY) + (drag.scrollTop - drag.startScrollTop)
+        }px)`,
+      }
+      : undefined
     const shared = {
       'data-section': sectionKey(row, branch),
       'data-row': row,
