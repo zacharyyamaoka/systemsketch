@@ -8,6 +8,13 @@
  * a per-tick end-state snapshot, used ONLY as the independent ground truth
  * the fold is verified against in tests; nothing in the app renders from it.
  *
+ * WHY: the log is canonical rather than a per-node status map because a tick
+ * is not atomic (a Reactive halt orders two transitions inside one) and a run
+ * has to be readable backwards — collapsing it to current status silently
+ * deletes scrub, step-back and the transitions table, and whichever backend
+ * transport wins still has to produce exactly this shape — see
+ * docs/peps/0011-runtime-state-is-a-transition-log.md
+ *
  * Sampling (Zach's "reasonable mock"): each leaf attempt draws its duration
  * uniformly in [0.7·d, 1.3·d] and its outcome Bernoulli(successChance) from a
  * seeded RNG — an 80% node succeeds in roughly 80% of runs, never always.

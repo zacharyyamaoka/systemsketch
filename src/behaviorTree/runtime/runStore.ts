@@ -13,6 +13,11 @@
  * run also remembers the XML string it was started from: if the region's XML
  * changes mid-run the run is stopped and marked stale rather than repainted
  * over a tree it no longer describes.
+ *
+ * WHY the cursor is an index into that log and not a status map: it makes
+ * "step one transition" and "scrub to tick N" the same operation, so the
+ * canvas and the inspector's table cannot disagree — see
+ * docs/peps/0011-runtime-state-is-a-transition-log.md
  */
 import { useSyncExternalStore } from 'react'
 import type { Editor, TLShapeId } from 'tldraw'
