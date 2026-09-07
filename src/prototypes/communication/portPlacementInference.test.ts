@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	dataflowOrderFromCommunication,
 	inferCommunicationPlacements,
+	classifyCommunicationPort,
 	isSummaryCarrierPort,
 	phasesByInteraction,
 	portInteractionKey,
@@ -166,11 +167,25 @@ describe('only the sockets a summary arrow attaches to', () => {
 		}
 	})
 
-	it('keeps an ordinary data port, which no protocol claims', () => {
-		// It parses as a Topic publish, which IS its family's carrier phase, so
-		// the rule must not quietly hide a plain port nobody annotated.
-		expect(isSummaryCarrierPort(port('4', 'frame'))).toBe(true)
-		expect(isSummaryCarrierPort(port('5', ''))).toBe(true)
+	it('calls an ordinary data port UNDEFINED, not summary', () => {
+		// The strict parser reads any name without a phase suffix as a Topic
+		// publish, so "it parsed" proves nothing — an explicit phase is what
+		// marks a port as belonging to a protocol. These are the ports the
+		// communication view has nothing to say about.
+		expect(classifyCommunicationPort(port('4', 'frame'))).toBe('undefined')
+		expect(classifyCommunicationPort(port('5', ''))).toBe('undefined')
+		expect(isSummaryCarrierPort(port('4', 'frame'))).toBe(false)
+	})
+
+	it('sorts every port into exactly one of the three kinds', () => {
+		expect(classifyCommunicationPort(port('a', 'move.goal'))).toBe('summary')
+		expect(classifyCommunicationPort(port('b', 'health.request'))).toBe('summary')
+		expect(classifyCommunicationPort(port('c', 'camera.stream'))).toBe('summary')
+		expect(classifyCommunicationPort(port('d', 'move.feedback'))).toBe('split')
+		expect(classifyCommunicationPort(port('e', 'move.result'))).toBe('split')
+		expect(classifyCommunicationPort(port('f', 'move.cancel'))).toBe('split')
+		expect(classifyCommunicationPort(port('g', 'health.response'))).toBe('split')
+		expect(classifyCommunicationPort(port('h', 'frame'))).toBe('undefined')
 	})
 
 	it('matches the phase the carrier chooser actually picks', () => {

@@ -764,11 +764,17 @@ function placeHorizontalRails(
 	band: { top: number; bottom: number },
 	bareSideLabelWidth: number | null,
 	/**
-	 * Simple shows ONLY the sockets a summary arrow attaches to — that is the
-	 * whole point of the quiet card. Port shows every port the component has,
-	 * including protocol legs no arrow rides and communication ports that have
-	 * been detected but never wired to anything, which is what makes Port the
-	 * face you wire FROM.
+	 * In the communication lens this is ALWAYS true: "only the summary edge
+	 * ports should exist."
+	 *
+	 * WHY Port view does not need the other legs after all — the ask it was
+	 * meant to serve was "show the ports for the detected communication ports
+	 * that haven't yet been wired together", and the carrier rule already does
+	 * that. `isSummaryCarrierPort` is purely name-based: it shows the carrier
+	 * leg of EVERY interaction declared on the card, wired or not. So an
+	 * un-wired `move.goal` is already visible to wire from, while `move.feedback`
+	 * and `move.result` — which no summary arrow ever touches — are not. The two
+	 * faces differ in chrome and labels, never in which sockets exist.
 	 */
 	carriersOnly: boolean,
 	placed: LaidOutBlockPort[],
@@ -1477,7 +1483,7 @@ function computeBlockLayout(
 				height,
 				{ top: bodyTop, bottom: footerTop },
 				bareCommunicationFace ? bareSideLabelWidth : null,
-				false,
+				true,
 				placed,
 			)
 		}

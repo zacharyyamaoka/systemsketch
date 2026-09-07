@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T00:41:08.888Z",
+  "generatedAt": "2026-09-07T00:52:37.512Z",
   "checks": [
     "Components mode offers exactly the three drawable patterns, none armed and nothing wired",
     "a Stream arrow drawn between two surfaces generates one canonical Async leg named for its publisher",
@@ -12,7 +12,8 @@
     "the strict parser reads the generated dataflow back as exactly the three relationships that were drawn",
     "communication offers the card choice but is always Summary cables",
     "only the sockets a summary arrow connects to are drawn; the other legs still exist for Dataflow",
-    "Port view shows every detected communication port, including the legs no summary arrow rides",
+    "communication shows summary ports only, in both faces — no split legs, no undefined ports",
+    "Dataflow shows every port, period — the split legs communication hides are all there",
     "freezing a Dataflow route leaves the communication appearance untouched",
     "choosing a cable shape in Dataflow leaves the communication appearance untouched",
     "choosing a cable shape in communication writes nothing to the document",

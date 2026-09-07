@@ -62,46 +62,55 @@ const CARRIER_PHASE: Readonly<Record<string, CommunicationPhase>> = {
 }
 
 /**
- * Does a summary arrow actually attach to this port?
+ * What kind of port this is, as far as communication is concerned.
  *
- * WHY the communication lens shows nothing else (Zach, 2026-09-06): "do not
- * create any other ports in the communication view apart from the ports that
- * the summary arrows connect to." An Action's feedback and result sockets have
- * no arrow touching them there — the one summary arrow rides the goal — so
- * painting them added three dots and three labels per card that nothing led to,
- * which is what made the view crowded and hard to read.
+ * THE VOCABULARY (Zach, 2026-09-07): "we can split all ports into undefined,
+ * split or summary. In communication view only and all wired and unwired
+ * summary ports should show."
  *
- * Pure, and deliberately so: the carrier phase is fixed per family, so this
- * needs only the port's own name. No editor, no relationship graph, and no
- * import back into the projection.
+ *   summary    the leg a summary arrow rides — the interaction's initiating
+ *              phase, or, when that leg is absent, the first one that IS here,
+ *              matching `chooseCommunicationRepresentative` exactly
+ *   split      a protocol leg no summary arrow touches: response, feedback,
+ *              result, cancel
+ *   undefined  not a communication port at all — an ordinary data port whose
+ *              name carries no protocol phase. The strict parser reads such a
+ *              name as a Topic publish, which is why this cannot simply ask the
+ *              parser whether it parsed: it always does.
  *
- * A port whose name says nothing about a protocol parses as a Topic publish and
- * therefore stays — an ordinary data port is not hidden by this rule.
+ * Wiring is deliberately NOT part of this. A summary port shows whether or not
+ * a cable has reached it yet — that is what makes an un-wired interaction
+ * something you can see and wire FROM.
  */
+export type CommunicationPortKind = 'undefined' | 'split' | 'summary'
+
+/** Phases that only ever appear when a name carries an explicit protocol suffix. */
+const EXPLICIT_PHASES: ReadonlySet<CommunicationPhase> = new Set<CommunicationPhase>([
+	'stream', 'request', 'response', 'goal', 'cancel', 'feedback', 'result',
+])
+
+export function classifyCommunicationPort(
+	port: BlockPort,
+	/** Every phase this port's interaction has on this card; see the fallback. */
+	siblingPhases?: ReadonlySet<CommunicationPhase>,
+): CommunicationPortKind {
+	const parsed = inspectCommunicationChannel(port.name, port.name).parsed
+	// The parser's Topic fallback fires for any name without a phase suffix, so
+	// "it parsed" proves nothing. An explicit phase is what marks a port as
+	// belonging to a protocol at all.
+	if (!parsed || !EXPLICIT_PHASES.has(parsed.phase)) return 'undefined'
+	const preferred = CARRIER_PHASE[parsed.family]
+	if (parsed.phase === preferred) return 'summary'
+	if (!siblingPhases || siblingPhases.has(preferred)) return 'split'
+	return firstPresentPhase(parsed.family, siblingPhases) === parsed.phase ? 'summary' : 'split'
+}
+
+/** Shorthand for the one question the layout asks. */
 export function isSummaryCarrierPort(
 	port: BlockPort,
-	/**
-	 * Every phase this port's interaction actually has on this card.
-	 *
-	 * WHY it must be passed in: the carrier is the initiating leg WHEN THERE IS
-	 * ONE. `chooseCommunicationRepresentative` falls back to whatever leg exists
-	 * — a response-only Service rides its response, a cancel-only Action its
-	 * cancel — and judging a port in isolation hid exactly those, so the lens
-	 * drew a summary arrow spanning two cards with no port dot at either end.
-	 * An adversarial audit found four such shapes. Omit it and the answer
-	 * degrades to the isolated reading, which is right only for complete
-	 * interactions.
-	 */
 	siblingPhases?: ReadonlySet<CommunicationPhase>,
 ): boolean {
-	const parsed = inspectCommunicationChannel(port.name, port.name).parsed
-	if (!parsed) return true
-	const preferred = CARRIER_PHASE[parsed.family]
-	if (parsed.phase === preferred) return true
-	if (!siblingPhases || siblingPhases.has(preferred)) return false
-	// The initiating leg is absent, so the summary arrow rides the first leg
-	// that IS here — the same order `chooseCommunicationRepresentative` uses.
-	return firstPresentPhase(parsed.family, siblingPhases) === parsed.phase
+	return classifyCommunicationPort(port, siblingPhases) === 'summary'
 }
 
 /** The order a summary cable falls back through when its initiator is missing. */

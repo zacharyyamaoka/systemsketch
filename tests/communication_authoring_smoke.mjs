@@ -346,16 +346,45 @@ async function main() {
       Array.from(document.querySelectorAll('[data-shape-id="shape:robot"] [data-block-port-id]'))
         .map((node) => node.getAttribute('data-block-port-id'))
     )`))
-    assert.ok(
-      portFace.length > painted.length,
-      `Port view must show more than the carriers: ${JSON.stringify(portFace)}`,
+    // Communication shows SUMMARY ports only — wired and unwired alike — in
+    // both faces. Split legs (response, feedback, result, cancel) and undefined
+    // ports (no protocol phase at all) are not there. The two faces differ in
+    // chrome and labels, never in which sockets exist.
+    assert.deepEqual(
+      [...portFace].sort(),
+      [...painted].sort(),
+      `Port view must show the same sockets as Simple: ${JSON.stringify(portFace)}`,
     )
     assert.equal(
-      portFace.some((id) => /feedback|result|response/.test(String(id))),
-      true,
-      `Port view shows the detected legs no arrow rides: ${JSON.stringify(portFace)}`,
+      portFace.some((id) => /feedback|result|response|cancel/.test(String(id))),
+      false,
+      `split legs must not exist in communication: ${JSON.stringify(portFace)}`,
     )
-    pass('Port view shows every detected communication port, including the legs no summary arrow rides')
+    pass('communication shows summary ports only, in both faces — no split legs, no undefined ports')
+
+    // --- ...and Dataflow shows ALL ports, period ----------------------------
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
+    await delay(500)
+    const dataflowPorts = JSON.parse(await evaluate(app.page, `JSON.stringify(
+      Array.from(document.querySelectorAll('[data-shape-id="shape:robot"] [data-block-port-id]'))
+        .map((node) => node.getAttribute('data-block-port-id'))
+    )`))
+    assert.ok(
+      dataflowPorts.length > portFace.length,
+      `Dataflow shows every port: ${JSON.stringify(dataflowPorts)}`,
+    )
+    for (const leg of ['response', 'feedback', 'result']) {
+      assert.equal(
+        dataflowPorts.some((id) => String(id).includes(leg)),
+        true,
+        `Dataflow must show the ${leg} leg: ${JSON.stringify(dataflowPorts)}`,
+      )
+    }
+    pass('Dataflow shows every port, period — the split legs communication hides are all there')
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.select('shape:region'); return true })()`)
+    await delay(250)
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
+    await delay(400)
     await shot(app.page, '07b-port-face.png')
     await clickElement(app.page, '[data-testid="communication-card-simple"]')
     await delay(400)

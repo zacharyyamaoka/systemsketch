@@ -29,11 +29,15 @@ function props(ports: readonly Partial<BlockPort>[]): BlockShapeProps {
 }
 
 describe('a port has one position per lens', () => {
+	// Protocol-shaped names throughout: the communication lens shows SUMMARY
+	// ports only, so a plain name like `config` is classified `undefined` and
+	// would not be placed there at all — which is the right behaviour and the
+	// wrong fixture for testing placement.
 	const stored = props([
 		{ id: 'in_rail', name: 'camera.stream', commEdge: 'top', commEdgeT: 0.3 },
-		{ id: 'in_lane', name: 'config' },
+		{ id: 'in_lane', name: 'config.stream' },
 		{ id: 'out_rail', name: 'telemetry.stream', commEdge: 'bottom', commEdgeT: 0.8 },
-		{ id: 'out_lane', name: 'result' },
+		{ id: 'out_lane', name: 'result.stream' },
 	])
 
 	it('Dataflow puts every port on the left or right lane', () => {
@@ -87,9 +91,9 @@ describe('a port has one position per lens', () => {
 
 	it('sorts a crowded rail left to right and keeps the sockets apart', () => {
 		const crowded = props([
-			{ id: 'out_c', name: 'c', commEdge: 'top', commEdgeT: 0.9 },
-			{ id: 'out_a', name: 'a', commEdge: 'top', commEdgeT: 0.1 },
-			{ id: 'out_b', name: 'b', commEdge: 'top', commEdgeT: 0.5 },
+			{ id: 'out_c', name: 'c.stream', commEdge: 'top', commEdgeT: 0.9 },
+			{ id: 'out_a', name: 'a.stream', commEdge: 'top', commEdgeT: 0.1 },
+			{ id: 'out_b', name: 'b.stream', commEdge: 'top', commEdgeT: 0.5 },
 		])
 		const rail = layoutBlock(crowded, { lens: 'communication' }).ports
 			.filter((placed) => placed.edge === 'top')
@@ -98,5 +102,38 @@ describe('a port has one position per lens', () => {
 		for (let index = 1; index < rail.length; index += 1) {
 			expect(rail[index].x).toBeGreaterThan(rail[index - 1].x)
 		}
+	})
+})
+
+describe('what each lens shows', () => {
+	// "In communication view only ... summary ports should show."
+	// "In the dataflow view, all ports should show, period."
+	const mixed = props([
+		{ id: 'in_summary', name: 'move.goal' },
+		{ id: 'in_split', name: 'move.result' },
+		{ id: 'in_undefined', name: 'config' },
+		{ id: 'out_summary', name: 'health.request' },
+		{ id: 'out_split', name: 'health.response' },
+		{ id: 'out_undefined', name: 'frame' },
+	])
+
+	it('Dataflow shows every port, period', () => {
+		const ids = layoutBlock(mixed, { lens: 'dataflow' }).ports.map((placed) => placed.port.id)
+		for (const id of ['in_summary', 'in_split', 'in_undefined', 'out_summary', 'out_split', 'out_undefined']) {
+			expect(ids).toContain(id)
+		}
+	})
+
+	it('communication shows the summary ports and nothing else', () => {
+		const ids = layoutBlock(mixed, { lens: 'communication' }).ports.map((placed) => placed.port.id)
+		expect([...ids].sort()).toEqual(['in_summary', 'out_summary'])
+	})
+
+	it('shows a summary port whether or not anything is wired to it', () => {
+		// Wiring is not part of the rule: an un-wired interaction stays visible,
+		// which is what makes it something you can see and wire FROM.
+		const unwired = props([{ id: 'out_summary', name: 'dock.goal' }])
+		const ids = layoutBlock(unwired, { lens: 'communication' }).ports.map((placed) => placed.port.id)
+		expect(ids).toEqual(['out_summary'])
 	})
 })
