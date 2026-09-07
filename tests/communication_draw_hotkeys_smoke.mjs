@@ -160,6 +160,15 @@ async function main() {
     }
     pass('each DRAW button paints its digit, announces it, and names it in the tooltip — left to right, 1 2 3')
     await shot(app.page, '01-draw-row-with-digits.png')
+    // The report crops these captures to the DRAW row. Record where the row
+    // actually is, so a layout change moves the crop instead of silently
+    // cutting the subject out of the report.
+    const drawRow = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const box = document.querySelector('.communication-prototype-draw').getBoundingClientRect()
+      return { x: box.x, y: box.y, width: box.width, height: box.height }
+    })())`))
+    await writeFile(join(ASSETS, 'geometry.json'),
+      `${JSON.stringify({ drawRow, viewport: { width: 1900, height: 1150 } }, null, 2)}\n`)
 
     // 2. Each digit arms its own family.
     for (const { family, digit, code } of SHORTCUTS) {
