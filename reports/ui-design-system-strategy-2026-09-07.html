@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SystemSketch · UI design system strategy</title>
+<style>
+  :root { color-scheme:light; --ink:#1c2027; --muted:#5c636e; --line:#d9dee6; --paper:#f2f4f8;
+    --card:#fff; --blue:#3061e6; --blue-soft:#e9f0fe; --green:#1f8a5a; --red:#c8453a; --amber:#c47b1b;
+    --violet:#7048c8; }
+  * { box-sizing:border-box }
+  body { margin:0; color:var(--ink); background:radial-gradient(circle at 82% -4%,#e5edfb 0,transparent 40%),var(--paper);
+    font:16px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif }
+  main { width:min(1120px,calc(100% - 32px)); margin:auto; padding:40px 0 72px }
+  code { font:0.86em ui-monospace,SFMono-Regular,Menlo,monospace; background:#eef1f6; padding:1px 5px; border-radius:5px }
+  a { color:var(--blue); text-decoration:none } a:hover { text-decoration:underline }
+  sup.c { font:600 10.5px/1 ui-monospace,monospace; color:var(--blue); letter-spacing:.02em }
+  sup.c a { color:inherit }
+  .hero { padding:42px; border:1px solid #d5dde8; border-radius:24px; background:#ffffffe8; box-shadow:0 22px 60px #22344c14 }
+  .eyebrow { color:var(--blue); font-size:12px; font-weight:800; letter-spacing:.13em; text-transform:uppercase }
+  h1 { margin:10px 0 14px; font-size:clamp(32px,5vw,52px); line-height:1.04; letter-spacing:-.045em; max-width:24ch }
+  .lead { max-width:72ch; margin:0; color:var(--muted); font-size:17.5px }
+  .lead b { color:var(--ink) }
+  .verdict { margin-top:22px; padding:18px 20px; border:1px solid #cfe6da; border-left:4px solid var(--green);
+    border-radius:12px; background:#f1faf5; font-size:15px; line-height:1.6 }
+  .verdict b { color:var(--green) }
+  .quiet { margin-top:12px; padding:14px 18px; border:1px solid var(--line); border-left:4px solid var(--muted);
+    border-radius:12px; background:#f7f8fb; font-size:13.5px; color:var(--muted) }
+  section { margin-top:22px; padding:30px; border:1px solid var(--line); border-radius:20px; background:#fffffff2;
+    box-shadow:0 12px 36px #22344c0d }
+  h2 { margin:0 0 6px; font-size:24px; letter-spacing:-.03em }
+  h3 { margin:22px 0 8px; font-size:16.5px; letter-spacing:-.01em }
+  section > p, .prose p { margin:0 0 14px; color:#3a404a; max-width:78ch }
+  table { width:100%; border-collapse:collapse; font-size:13.5px }
+  th, td { padding:10px 12px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line) }
+  thead th { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted) }
+  tbody th { font-weight:650; min-width:130px }
+  td small, th small { display:block; margin-top:3px; color:var(--muted); font-size:11.5px; line-height:1.45; font-weight:400 }
+  .tag { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; letter-spacing:.03em }
+  .tag.b1 { background:var(--blue-soft); color:var(--blue) }
+  .tag.b2 { background:#f0eafd; color:var(--violet) }
+  .tag.keep { background:#e9f7f0; color:var(--green) }
+  .tag.no { background:#fdeeec; color:var(--red) }
+  .tag.ref { background:#fdf3e4; color:var(--amber) }
+  .cand { margin-top:18px; padding:22px; border:1px solid var(--line); border-radius:14px; background:#fafbfd }
+  .cand h3 { margin:0 0 2px; font-size:18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+  .cand .what { margin:2px 0 12px; font-size:12.5px; color:var(--muted) }
+  .cand p { margin:0 0 10px; font-size:14px; color:#3a404a; max-width:80ch }
+  .cand ul { margin:0 0 10px; padding-left:20px; font-size:13.5px; color:#3a404a }
+  .cand li { margin:5px 0; max-width:78ch }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px }
+  @media (max-width:840px){ .cols { grid-template-columns:1fr } }
+  .box { padding:18px; border:1px solid var(--line); border-radius:13px; background:#fff }
+  .box h4 { margin:0 0 8px; font-size:13.5px }
+  .box.free h4 { color:var(--green) } .box.cost h4 { color:var(--red) }
+  .box ul { margin:0; padding-left:18px; color:#4a5057; font-size:13px }
+  .box li { margin:5px 0 }
+  .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0 6px }
+  @media (max-width:840px){ .metrics { grid-template-columns:repeat(2,1fr) } }
+  .metric { padding:15px; border:1px solid var(--line); border-radius:12px; background:#fafbfd }
+  .metric strong { display:block; font-size:24px; letter-spacing:-.04em }
+  .metric span { color:var(--muted); font-size:11px; line-height:1.4; display:block; margin-top:2px }
+  .axes-svg { width:100%; height:auto; display:block; margin:16px 0 4px }
+  ol.srcs { margin:8px 0 0; padding-left:26px; font-size:12.5px; color:var(--muted); columns:2; column-gap:28px }
+  ol.srcs li { margin:4px 0; break-inside:avoid }
+  footer { margin-top:26px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px }
+</style>
+</head>
+<body>
+<main>
+
+<div class="hero">
+  <div class="eyebrow">Decision doc · research, no code changed · 2026-09-07</div>
+  <h1>A real design system for the chrome — what to adopt, what you already have</h1>
+  <p class="lead">Your framing was one question — <i>"we're operating at way too low a level,
+  I don't want to reinvent the wheel"</i> — but it is <b>two separate problems wearing one
+  coat</b>, and every candidate you named solves at most one of them. This doc separates
+  them, measures where the app actually stands on each, and puts all six candidates against
+  the widgets you actually build: the property rail, the inspector, contextual menus,
+  tablists, dialogs.</p>
+  
+  <div class="verdict"><b>Recommendation, in one breath:</b> the two axes get two different
+  answers. <b>Axis 1 — converge app-authored chrome on Base UI</b>, component-by-component as
+  files are touched, never big-bang: it covers every primitive the app uses <i>plus</i> the
+  NumberField Radix lacks, and its outside-press dismissal is capture-phase — structurally
+  immune to the exact <code>stopPropagation</code>-starvation bug class in
+  <code>docs/bugs/0002</code><sup class="c"><a href="#s10">10</a>,<a href="#s33">33</a></sup>. <b>Axis 2 — adopt nothing.</b> The
+  <code>--ss-*</code> token layer already is the design system; the dark/light bugs were
+  palette-derivation math inside it, and none of the four candidates sells that fix without a
+  look that fights the canvas<sup class="c"><a href="#s36">36</a>,<a href="#s37">37</a></sup>. The reversible default if you do nothing: both
+  libraries stay exactly where they are, <b>new</b> chrome work reaches for Base UI first,
+  and nothing migrates until its file is being edited anyway.</div>
+  <div class="quiet">Two things this doc does <b>not</b> do: touch product code (research
+  only, per the brief), and re-litigate the 2026-09-07 six-domain library audit — it extends
+  that audit's method (adopt where a genuine gap exists: elkjs, dnd-kit, colorjs.io) to the
+  chrome layer.</div>
+
+</div>
+
+<section>
+  <h2>The two axes</h2>
+  <p><b>Axis 1 — headless behavior primitives.</b> Focus traps, dismiss-on-outside-press,
+  roving tabindex, keyboard navigation, ARIA wiring, popup positioning. This is what Radix
+  and Base UI <i>are</i> — behavior with zero pixels. SystemSketch already has real, partial
+  adoption of <b>both</b>. The open question on this axis is not "adopt a library" — it is
+  <b>standardize on one of the two you already ship, and write the rule down</b>.</p>
+  <p><b>Axis 2 — the visual system.</b> Semantic color roles, scheme invariance, spacing and
+  type scale. This is where every dark/light bug you cited actually lives — and it is a
+  CSS-token-and-palette-math problem, <b>orthogonal to which headless kit you use</b>. Radix
+  and Base UI are both unstyled; adopting either fixes no scheme-invariance bug. Material 3
+  is the one candidate that bundles an opinionated visual system with components — which is
+  exactly what makes it wrong here (argued in its section, not presupposed). Tailwind is a
+  styling <i>authoring</i> syntax on this axis, not a semantic system: it gives you
+  <code>dark:</code> as a mechanism and leaves the palette semantics — the part that broke —
+  entirely to you<sup class="c"><a href="#s20">20</a></sup>.</p>
+  
+<svg class="axes-svg" viewBox="0 0 980 380" role="img" aria-label="The two axes: behavior primitives versus visual system, and where each candidate sits">
+  <defs>
+    <style>
+      .lane { fill:#fafbfd; stroke:#d9dee6 }
+      .lane-title { font:700 14px Inter,sans-serif; fill:#1c2027 }
+      .lane-sub { font:400 11px Inter,sans-serif; fill:#5c636e }
+      .pill { rx:9 }
+      .pl { font:600 12px Inter,sans-serif; fill:#fff; text-anchor:middle }
+      .pn { font:400 10.5px Inter,sans-serif; fill:#5c636e; text-anchor:middle }
+      .here { font:700 10px Inter,sans-serif; fill:#1f8a5a; letter-spacing:.08em }
+    </style>
+  </defs>
+
+  <!-- Axis 1 lane -->
+  <rect class="lane" x="10" y="14" width="960" height="160" rx="14"/>
+  <text class="lane-title" x="30" y="44">Axis 1 — behavior primitives (headless)</text>
+  <text class="lane-sub" x="30" y="62">focus traps · outside-press dismissal · roving tabindex · ARIA wiring · positioning — no pixels, no opinion about looks</text>
+
+  <rect class="pill" x="30" y="86" width="150" height="30" fill="#3061e6"/>
+  <text class="pl" x="105" y="105">Radix (in use ×7)</text>
+  <rect class="pill" x="192" y="86" width="170" height="30" fill="#3061e6"/>
+  <text class="pl" x="277" y="105">Base UI (in use ×1, lab)</text>
+  <rect class="pill" x="374" y="86" width="188" height="30" fill="#8a93a3"/>
+  <text class="pl" x="468" y="105">shadcn/ui (wraps these)</text>
+  <rect class="pill" x="574" y="86" width="200" height="30" fill="#8a93a3"/>
+  <text class="pl" x="674" y="105">MUI (Foxglove's substrate)</text>
+  <text class="pn" x="105" y="132">already yours</text>
+  <text class="pn" x="277" y="132">already yours (worktree)</text>
+  <text class="pn" x="468" y="132">codegen, needs Tailwind</text>
+  <text class="pn" x="674" y="132">behavior + a whole look, fused</text>
+  <text class="here" x="30" y="160">TODAY: BOTH LIBRARIES, NO RULE SAYING WHICH — THAT IS THE ACTUAL GAP</text>
+
+  <!-- Axis 2 lane -->
+  <rect class="lane" x="10" y="196" width="960" height="160" rx="14"/>
+  <text class="lane-title" x="30" y="226">Axis 2 — visual system (tokens, palettes, dark/light)</text>
+  <text class="lane-sub" x="30" y="244">semantic color roles · scheme invariance · spacing/type scale — where every cited dark/light bug actually lives</text>
+
+  <rect class="pill" x="30" y="268" width="212" height="30" fill="#1f8a5a"/>
+  <text class="pl" x="136" y="287">--ss-* tokens (yours, shipped)</text>
+  <rect class="pill" x="254" y="268" width="176" height="30" fill="#8a93a3"/>
+  <text class="pl" x="342" y="287">Tailwind (authoring only)</text>
+  <rect class="pill" x="442" y="268" width="204" height="30" fill="#8a93a3"/>
+  <text class="pl" x="544" y="287">Material 3 (roles + a look)</text>
+  <rect class="pill" x="658" y="268" width="196" height="30" fill="#8a93a3"/>
+  <text class="pl" x="756" y="287">rerun/egui (not comparable)</text>
+  <text class="pn" x="136" y="314">derived live from --tl-* / host</text>
+  <text class="pn" x="342" y="314">no semantics, just syntax</text>
+  <text class="pn" x="544" y="314">steal the role vocabulary only</text>
+  <text class="pn" x="756" y="314">cite the discipline, not the stack</text>
+  <text class="here" x="30" y="342">TODAY: A REAL TOKEN LAYER WITH BUILD GATES — THE BUGS WERE DERIVATION MATH, NOT MISSING LIBRARY</text>
+</svg>
+
+  <p style="margin-top:10px"><small style="color:var(--muted)">Grey pills are candidates
+  researched and not recommended for adoption on that axis; blue are the two live headless
+  kits; green is the shipped token layer. Placement is what each thing <i>is</i>, not a
+  quality ranking.</small></p>
+</section>
+
+<section>
+  <h2>Current state — measured, not remembered</h2>
+  <p>Numbers below are computed at build time from the live tree at
+  <code>/home/bam/systemsketch</code> (main checkout), so this table cannot drift from the
+  code it describes. Branch/worktree facts are labeled as such.</p>
+
+  <div class="metrics">
+    <div class="metric"><strong>6</strong><span>files import Radix on main
+      (<code>radix-ui: 1.6.7</code>, MIT)</span></div>
+    <div class="metric"><strong>167</strong><span><code>--ss-*</code> declarations in
+      <code>src/theme/tokens.css</code> (447 lines, the only file allowed chrome color literals)</span></div>
+    <div class="metric"><strong>65</strong><span>files consume
+      <code>var(--ss-…)</code> — the token layer is load-bearing, not aspirational</span></div>
+    <div class="metric"><strong>56 / 19518</strong><span>hand-authored CSS
+      files / lines under <code>src/</code> (beside 125999 lines of TS/TSX)</span></div>
+  </div>
+
+  <h3>Axis 1 today — two headless kits, no rule</h3>
+  <table>
+    <thead><tr><th>Where</th><th>What</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><th>main</th>
+        <td><span class="tag b1">Radix</span> ContextMenu, Popover ×3, Dialog ×2</td>
+        <td><code>ReliableContextMenu.tsx:14</code>, <code>BtInsertMenu.tsx:23</code>,
+            <code>ContextualControls.tsx:1</code>, <code>DraftsControl.tsx:13</code>,
+            <code>CompareDialog.tsx:24</code>, <code>LocalWorkspace.tsx:23</code></td></tr>
+      <tr><th>branch <code>claude/tablist-keyboard</code></th>
+        <td><span class="tag b1">Radix</span> Tabs.Root over the eight hand-rolled tablists (unmerged)</td>
+        <td><code>BlockInspector.tsx:1761</code> and 7 siblings; the WHY comment at :1749
+            records why Tabs.Content couldn't be used (panels render their own
+            <code>role="tabpanel"</code>)</td></tr>
+      <tr><th>lab worktree <code>rail-widgets</code></th>
+        <td><span class="tag b1">Radix</span> Slider as the property rail's range widget</td>
+        <td><code>systemPrimitivesTab.tsx:41,450</code>; the rail's widget vocabulary is
+            toggle / select / range with a typed <code>mixed</code> wrapper
+            (<code>systemPrimitivesModel.ts:347–356,391</code>)</td></tr>
+      <tr><th>worktree <code>tldraw-inspector-panel-cf524c</code></th>
+        <td><span class="tag b2">Base UI</span> <code>@base-ui/react@1.8.0</code> NumberField —
+            the Figma drag-scrub field Radix cannot provide (no NumberField; discussion #3352
+            unanswered<sup class="c"><a href="#s3">3</a></sup>)</td>
+        <td><code>src/inspector/ScrubNumber.tsx</code>; the worktree carries its own
+            <code>node_modules</code> for it (work-order §5)</td></tr>
+      <tr><th>engine</th>
+        <td><span class="tag b1">Radix</span> tldraw ships Radix internally for its own menus —
+            one shared dismissable-layer stack whether you like it or not</td>
+        <td>toolbar-radix-spike report: "one shared <code>@radix-ui/react-dismissable-layer</code>
+            stack (tldraw ships Radix internally)"</td></tr>
+      <tr><th>still hand-rolled</th>
+        <td>DraftModeBar's one-item overflow menu (deliberate — WHY at
+            <code>DraftModeBar.tsx:56</code>), LibrarySearchModal, RecorderControls portal,
+            26 files with their own Escape handlers, 5 native <code>&lt;select&gt;</code>,
+            9 native checkboxes</td>
+        <td>grep census, 2026-09-07</td></tr>
+      <tr><th>the live bug on this axis</th>
+        <td><code>docs/bugs/0002</code>: panel <code>stopPropagation</code> guards starve Radix's
+            bubble-phase outside-press listener — <b>60 occurrences / 29 files</b>, dismissal
+            currently working through an accidental focus side-channel. This is an
+            integration-discipline bug (the fix realigns to tldraw's
+            <code>markEventAsHandled</code>), not a component-library gap.</td>
+        <td><code>docs/bugs/0002-panel-guards-starve-radix-dismissal.md</code>
+            (worktree <code>pep-evidence</code>)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Axis 2 today — you already have a design system; the bugs were in its math</h3>
+  <table>
+    <thead><tr><th>Piece</th><th>State</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><th>Token layer</th>
+        <td>One semantic vocabulary (167 <code>--ss-*</code> declarations), single-owner
+            rule ("the only file in src/ that may hold a chrome colour literal"), themes keyed on
+            <code>data-ss-theme</code> (systemsketch / vscode / obsidian) +
+            <code>data-ss-color-scheme</code>, default theme <b>derived live from tldraw's
+            <code>--tl-*</code></b> so the chrome cannot disagree with the board</td>
+        <td><code>src/theme/tokens.css:1–30,109,148,181</code></td></tr>
+      <tr><th>Gates</th>
+        <td>16 Python tests ban stray color literals and phantom
+            <code>--tl-*</code> reads; <code>npm run test:theme</code> probes ~25 surfaces ×
+            5 themes against WCAG ratios read off the live element</td>
+        <td><code>tests/test_theme_tokens.py</code>; <code>tests/theme_contrast_smoke.mjs</code></td></tr>
+      <tr><th>The actual dark/light bugs</th>
+        <td>(a) <code>colorFromSwatch</code> derived five light-mode frame-chrome values and wrote
+            them into the <b>dark</b> table — white card on a dark board; (b) accent-colored text
+            on accent-soft measures 2.6–4.3:1 in <i>every</i> palette — a role-semantics error
+            (copy on a tint must be ink, not accent); (c) phantom variables silently resolving to
+            fallbacks — now gated. <b>All three are palette-derivation and role-semantics bugs in
+            the app's own math. No headless library prevents any of them; a bundled visual system
+            would prevent (a) and (b) by construction — at the price of its look.</b></td>
+        <td>theme-appearance-lab <code>c51978ce</code>; contrast measurements 2026-09-01;
+            <code>tests/test_theme_tokens.py</code></td></tr>
+      <tr><th>The hard constraint</th>
+        <td>28 CSS rules across 11 files style tldraw's own DOM (<code>.tl-container</code>,
+            <code>.tl-text-shape-label</code>, <code>tlui-menu</code>…) — DOM the app does not
+            render. No utility framework or component library can ever reach these; they stay
+            hand-written CSS under any strategy<sup class="c"><a href="#s20">20</a></sup>.</td>
+        <td>measured 2026-09-07 (Tailwind leg, comment-filtered grep)</td></tr>
+      <tr><th>Multi-host requirement</th>
+        <td>The IDE plugins re-theme the same chrome from <b>host</b> variables (VS Code, Obsidian)
+            at runtime, via CSS custom properties. Any JS-time theme object (MUI's
+            <code>createTheme</code>, M3's token build steps) would have to rebuild on every host
+            theme change; the CSS-variable layer re-themes for free. This is a structural argument
+            for keeping tokens in CSS, independent of taste.</td>
+        <td><code>src/theme/tokens.css:148–210</code>; <code>vscode-systemsketch/</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Adoption precedent — the repo is not library-averse, and this ground was already swept</h3>
+  <p>elkjs + d3-hierarchy (layout, since 2026-09-02), dnd-kit (PEPs 0006–0013), lucide-react,
+  colorjs.io for contrast math (theme-appearance-lab <code>224798d6</code>), match-sorter and
+  jsdiff approved by the 2026-09-07 six-domain sweep. That sweep's own verdict: <i>"dnd-kit was
+  a specific miss, not a systemic pattern"</i> — five of six domains came back
+  <b>keep ours</b>, with the second-scene-graph objection and license as the recurring killers.
+  This doc extends that audit to the chrome; it does not re-litigate it.</p>
+</section>
+
+<section>
+  <h2>The candidates</h2>
+  <p>Each judged against this app's actual widgets — property rail, primitive inspector,
+  contextual menus, tablists, dialogs — from primary sources read on 2026-09-07, not landing
+  pages.</p>
+
+
+<div class="cand">
+  <h3>Base UI vs Radix — the real decision <span class="tag b2">axis 1</span> <span class="tag keep">converge on Base UI, gradually</span></h3>
+  <div class="what">@base-ui/react 1.8.0 · MIT · MUI's team incl. Radix co-creator Colm Tuite and Floating UI's authors<sup class="c"><a href="#s1">1</a>,<a href="#s5">5</a></sup> &nbsp;·&nbsp; radix-ui 1.6.7 · MIT · WorkOS<sup class="c"><a href="#s8">8</a></sup></div>
+  <p><b>Both are headless behavior kits — the thing you were worried about hand-rolling is
+  the thing the app already buys.</b> The question is only which of the two to standardize
+  on, and the evidence now points one way:</p>
+  <ul>
+    <li><b>Coverage is no longer the blocker.</b> Base UI 1.8.0 ships every primitive this
+      app uses — Popover, Dialog, <b>Context Menu</b> (verified live; blog posts claiming it's
+      missing are stale), Tabs, Slider, Toolbar, Menu, Toast — plus Number Field (the
+      drag-scrub already adopted in the inspector worktree), Combobox, Autocomplete, Select,
+      Scroll Area<sup class="c"><a href="#s4">4</a>,<a href="#s5">5</a></sup>. The reverse gap is one component this app doesn't use (Hover
+      Card)<sup class="c"><a href="#s4">4</a></sup>.</li>
+    <li><b>The dismissal architecture is the load-bearing difference.</b> Verified from
+      source, not docs: Radix's <code>DismissableLayer</code> decides outside-press on a
+      <b>bubble-phase</b> document <code>pointerdown</code> — the listener that
+      <code>docs/bugs/0002</code> proves this app starves at 60 call sites across 29
+      files<sup class="c"><a href="#s9">9</a>,<a href="#s33">33</a></sup>. Base UI's vendored <code>useDismiss</code> registers <i>every</i>
+      press listener on the document in <b>capture phase, unconditionally</b> — it fires
+      before any panel handler can call <code>stopPropagation</code><sup class="c"><a href="#s10">10</a></sup>. Standardizing on
+      Base UI structurally retires the app-side half of that bug class as call sites
+      migrate. (The sweep to <code>editor.markEventAsHandled</code> is still needed —
+      tldraw ships Radix internally for its own menus, forever<sup class="c"><a href="#s35">35</a></sup>.)</li>
+    <li><b>Radix is not dying — but the momentum is real and one-directional.</b> Radix
+      still releases (Jun–Jul 2026, including a controlled ContextMenu)<sup class="c"><a href="#s7">7</a></sup>; the
+      abandonment narrative traces to one speculative blog post<sup class="c"><a href="#s38">38</a></sup>. But Base UI has MUI's
+      staffed team, monthly releases, a repo pushed the day this was researched<sup class="c"><a href="#s2">2</a>,<a href="#s6">6</a></sup> —
+      and the ecosystem is voting: shadcn/ui made Base UI its <b>default</b> primitive layer
+      in July 2026 (new projects pick it ~2:1)<sup class="c"><a href="#s14">14</a></sup>, MUI names Base UI its "long-term
+      direction"<sup class="c"><a href="#s22">22</a></sup>, and <b>tldraw itself has an open spike evaluating a Radix→Base UI
+      migration</b> (tldraw/tldraw#7584) — the engine under this app may make the same move<sup class="c"><a href="#s12">12</a></sup>.</li>
+    <li><b>The migration is bounded but not a rename.</b> Core state props survive
+      (<code>open</code>/<code>onOpenChange</code>); what changes is composition:
+      <code>asChild</code> → <code>render</code> prop at every call site, a mandatory
+      <code>Positioner</code> layer on popup-family components,
+      <code>Overlay</code>→<code>Backdrop</code>, <code>Content</code>→<code>Popup</code>,
+      Tabs <code>Trigger</code>→<code>Tab</code><sup class="c"><a href="#s13">13</a></sup>. Seven files on main. Every
+      migration guide independently converges on strangler-fig, not big-bang<sup class="c"><a href="#s13">13</a>,<a href="#s14">14</a></sup>.</li>
+    <li><b>The one live hazard is the transition itself:</b> mui/base-ui#2854 — a Base UI
+      popup mounted <i>inside</i> a Radix Dialog renders but cannot be clicked; open,
+      unresolved<sup class="c"><a href="#s11">11</a></sup>. So the sequencing rule is absolute: <b>never nest one library's
+      popup inside the other's modal layer.</b> Standalone popovers
+      (<code>BtInsertMenu</code>, <code>DraftsControl</code>, <code>ContextualControls</code>)
+      migrate freely; anything hosted by <code>CompareDialog</code> or
+      <code>LocalWorkspace</code> migrates with or after its dialog; <code>ReliableContextMenu</code>
+      last (largest surface, and Radix just shipped the controlled API it leans on)<sup class="c"><a href="#s7">7</a></sup>.</li>
+  </ul>
+</div>
+
+
+
+<div class="cand">
+  <h3>shadcn/ui <span class="tag b1">axis 1 + styling</span> <span class="tag ref">crib from, never install</span></h3>
+  <div class="what">MIT · Vercel-sponsored (creator employed there since 2023) · a CLI that copies component source into your repo — not a component library<sup class="c"><a href="#s14">14</a>,<a href="#s16">16</a></sup></div>
+  <p><b>What it actually is in 2026:</b> codegen over headless primitives + Tailwind + CVA.
+  Two recent facts sharpen the picture: it made <b>Base UI the default primitive layer</b>
+  (July 2026)<sup class="c"><a href="#s14">14</a></sup>, and its Radix track moved to the same <code>radix-ui</code> umbrella
+  package this app already depends on<sup class="c"><a href="#s15">15</a></sup> — so the app is accidentally compatible with
+  both of shadcn's tracks. Neither helps, because:</p>
+  <ul>
+    <li><b>It cannot be used without Tailwind.</b> No official non-Tailwind path exists (the
+      2+-year-old discussion asking for one has no maintainer commitment)<sup class="c"><a href="#s16">16</a></sup>; every
+      variant, state and responsive rule in every component is a Tailwind utility string
+      inside a <code>cva()</code> map — including JIT-only constructs
+      (<code>has-[&gt;svg]:px-3</code>, arbitrary-value brackets) with no plain-CSS
+      equivalent to extract<sup class="c"><a href="#s17">17</a></sup>.</li>
+    <li><b>The pattern minus the stack is what the app already does.</b> "Own the source,
+      wrap a headless primitive, theme via CSS variables" — subtract Tailwind and that is
+      literally the existing practice: thin wrappers over radix-ui, styled by hand-authored
+      CSS against <code>--ss-*</code> tokens. shadcn's <code>:root</code>/<code>.dark</code>
+      variable convention is a less capable version of the multi-host token layer already
+      shipped<sup class="c"><a href="#s36">36</a></sup>.</li>
+    <li><b>What survives as value:</b> a rendered reference gallery of interaction shapes
+      (Combobox, Command, Sheet) built on the very primitives this app uses — worth reading
+      when designing a new widget, never worth <code>npx shadcn add</code>.</li>
+  </ul>
+</div>
+
+
+
+<div class="cand">
+  <h3>Tailwind CSS <span class="tag b1">axis 2 (authoring only)</span> <span class="tag no">no — argued from numbers</span></h3>
+  <div class="what">MIT · Tailwind Labs · a styling authoring syntax — explicitly not behavior (that's their separate Headless UI project) and not a semantic palette<sup class="c"><a href="#s19">19</a></sup></div>
+  <p><b>The real cost, measured against this tree:</b></p>
+  <ul>
+    <li><b>Migration surface:</b> 56 CSS files / 19,518 lines to port and 1,466
+      <code>className</code> call sites across 106 of 162 <code>.tsx</code> files to rewire —
+      against a codebase whose styling is already token-driven and class-organized (14:1
+      class-vs-inline ratio; this is not the inline-style sprawl Tailwind rescues)<sup class="c"><a href="#s20">20</a></sup>.</li>
+    <li><b>28 rules across 11 files are permanently unmigratable</b> — they style tldraw's
+      own DOM (<code>.tl-container</code>, <code>.tl-text-shape-label</code>,
+      <code>tlui-menu</code>…), markup the app does not render. Tailwind cannot reach the
+      part of the page that is the product<sup class="c"><a href="#s20">20</a></sup>.</li>
+    <li><b>Preflight is a documented, open hazard against exactly this app's shape.</b>
+      Tailwind's own docs warn the global base reset "is known to conflict with third-party
+      libraries"; the v4 disable mechanism is all-or-nothing, and there are open issues
+      (#17481, #17445, #19114) where disabling it still leaks resets — the precise failure
+      mode (base-style bleed into a mounted third-party canvas) this app cannot risk<sup class="c"><a href="#s19">19</a></sup>.</li>
+    <li><b>The one cheap true fact:</b> v4's <code>@theme inline</code> could expose the
+      existing <code>--ss-*</code> tokens as utilities without rewriting
+      <code>tokens.css</code><sup class="c"><a href="#s18">18</a></sup> — but that is a bridge to a second styling idiom the
+      repo would then carry forever, for marginal gain on greenfield lab panels. And on the
+      axis Zach actually cited: <code>dark:</code> is a selector mechanism, not palette
+      semantics — it would not have prevented any of the three recorded dark/light bugs<sup class="c"><a href="#s19">19</a>,<a href="#s37">37</a></sup>.</li>
+  </ul>
+  <p><b>Revisit only if</b> a fully canvas-detached surface someday needs one-off styling at
+  a scale where per-feature CSS is genuinely the bottleneck — and even then, the
+  <code>@theme inline</code> token bridge is the entire scope, not a foothold.</p>
+</div>
+
+
+
+<div class="cand">
+  <h3>Material Design 3 <span class="tag b1">axis 2 + components</span> <span class="tag no">no as a system — steal two ideas</span></h3>
+  <div class="what">Spec by Google (m3.material.io) · implementations are the problem: no maintained first-party React path exists<sup class="c"><a href="#s21">21</a>,<a href="#s22">22</a></sup></div>
+  <p><b>Three concrete, falsifiable grounds — not a taste dismissal:</b></p>
+  <ul>
+    <li><b>There is nothing to install.</b> Google's own <code>@material/web</code> is Lit
+      web components in official maintenance mode since June 2024 ("new features and
+      components are no longer planned" — engineers reassigned to the internal Wiz
+      framework)<sup class="c"><a href="#s21">21</a></sup>. MUI implements M2, has left the M3 request open since 2021, and its
+      2026 roadmap doesn't mention M3 — it names <i>Base UI</i> as the long-term
+      direction<sup class="c"><a href="#s22">22</a></sup>. Adopting M3 from React in 2026 means hand-implementing a spec, which
+      contradicts the premise of the exercise.</li>
+    <li><b>Its density and direction point away from tool chrome.</b> A 48dp touch-target
+      floor against the 24–28px rows of a Figma-shaped inspector; and the 2025 "M3
+      Expressive" revision moved the system <i>more</i> decorative — spring physics, shape
+      morphing, "personality"<sup class="c"><a href="#s23">23</a>,<a href="#s24">24</a></sup>. The chrome of a canvas tool must recede; M3's
+      trajectory is the opposite. (Honest caveats: M3 does ship a density system, its
+      canonical layouts explicitly name "a design tool with an inspector panel," and no
+      public evidence settles whether Google's own dense consoles run M3 — that claim is
+      unverified in both directions<sup class="c"><a href="#s23">23</a></sup>.)</li>
+    <li><b>Its token architecture is validation, not a purchase.</b>
+      <code>md.ref.*</code> → <code>md.sys.*</code> → <code>md.comp.*</code> is the same
+      raw-values → semantic-roles → component-bindings layering the <code>--ss-*</code>
+      system already has<sup class="c"><a href="#s23">23</a>,<a href="#s36">36</a></sup>.</li>
+  </ul>
+  <p><b>The two ideas worth taking, free of the look:</b> (1) the <b><code>on-*</code>
+  role-pair vocabulary</b> — every surface color carries a paired on-color, which is
+  precisely the rule whose absence produced the accent-on-accent-soft 2.6–4.3:1 bug; encode
+  it in <code>tokens.css</code> naming when that file is next touched<sup class="c"><a href="#s23">23</a>,<a href="#s37">37</a></sup>. (2) the
+  <b>HCT color science</b> — colorjs.io supports HCT/CAM16 natively, and the
+  theme-appearance-lab already adopted colorjs.io; deriving palette ramps in HCT is the
+  library-grade replacement for the hand-rolled <code>colorFromSwatch</code> math that
+  wrote light-mode chrome into the dark table<sup class="c"><a href="#s25">25</a>,<a href="#s37">37</a></sup>.</p>
+</div>
+
+
+
+<div class="cand">
+  <h3>Foxglove Studio → Lichtblick <span class="tag ref">reference app</span></h3>
+  <div class="what">MPL-2.0 fork by BMW (lichtblick-suite/lichtblick, v1.29.0) · Foxglove closed its open edition in 2024, repo archived<sup class="c"><a href="#s26">26</a>,<a href="#s28">28</a></sup></div>
+  <p><b>Verified from the actual manifests, not assumed:</b> MUI v7
+  (<code>@mui/material@7.2.0</code>) over Emotion via <code>tss-react</code>'s
+  <code>makeStyles</code>; <code>zustand</code> + <code>immer</code> for state;
+  <code>react-mosaic-component</code> for panel docking (not golden-layout); <b>no Radix, no
+  Floating UI</b> — MUI's own Popper/Popover throughout<sup class="c"><a href="#s26">26</a></sup>.</p>
+  <ul>
+    <li><b>The convergence finding:</b> its <code>SettingsTreeEditor</code> is a typed field
+      union (<code>autocomplete · boolean · rgb · rgba · gradient · messagepath · number ·
+      select · string · toggle · slider · vec2 · vec3 · legendcontrols</code>) rendered by
+      one <code>switch</code>, written back through one action dispatch — 23 files, 2,927
+      lines<sup class="c"><a href="#s27">27</a></sup>. SystemSketch's inspector arrived at the identical schema-driven shape
+      independently (51 <code>FieldSpec</code> entries with
+      <code>applies</code>/<code>read</code>/<code>write</code>)<sup class="c"><a href="#s34">34</a></sup>. Two mature tools
+      converging on the same architecture from different substrates is strong evidence the
+      <b>schema is the asset and the component substrate is fungible</b>.</li>
+    <li><b>What MUI buys them, quantified:</b> their entire theme package is ~1,468 lines
+      (two ~20-token palettes, 48 small per-component overrides) — MUI derives contrast
+      text, hover/disabled overlays and elevation from that<sup class="c"><a href="#s26">26</a></sup>. That derivation is
+      exactly where SystemSketch's <code>colorFromSwatch</code> bug lived<sup class="c"><a href="#s37">37</a></sup>. But the
+      price is MUI's JS-time <code>createTheme</code>: a theme object built in JavaScript,
+      which cannot follow live host CSS variables the way <code>--ss-*</code> follows a VS
+      Code or Obsidian theme change without a rebuild — a structural mismatch with this
+      app's multi-host requirement, on top of a second visual language fighting tldraw's<sup class="c"><a href="#s36">36</a></sup>.</li>
+  </ul>
+</div>
+
+
+
+<div class="cand">
+  <h3>rerun.io <span class="tag ref">reference app</span></h3>
+  <div class="what">Rust + egui 0.36 + wgpu 30 — egui is written by Rerun's own CTO; the whole viewer is egui-drawn pixels<sup class="c"><a href="#s29">29</a>,<a href="#s30">30</a></sup></div>
+  <p><b>Confirmed from Cargo.toml and their own docs:</b> every panel — timeline, selection
+  inspector, blueprint tree, context menus, all data views — is an egui-drawing Rust crate
+  under <code>crates/viewer/*</code>. The web viewer is the <i>same</i> binary compiled to
+  WASM executing inside a single <code>&lt;canvas&gt;</code>; the npm packages
+  (<code>@rerun-io/web-viewer-react</code>) are lifecycle shells around that canvas with
+  zero authored DOM chrome<sup class="c"><a href="#s29">29</a>,<a href="#s30">30</a>,<a href="#s31">31</a></sup>.</p>
+  <ul>
+    <li><b>Nothing library-shaped transfers</b> — no components, no CSS, no DOM
+      accessibility tree (AccessKit bolt-on, experimental). Comparing component patterns or
+      CSS architecture against it is a category error, and this doc doesn't force one<sup class="c"><a href="#s30">30</a></sup>.</li>
+    <li><b>What does transfer is the discipline:</b> one typed design-token source
+      (<code>re_ui</code>'s <code>design_tokens.ron</code> + color table) feeding one
+      styling layer that owns every pixel of chrome<sup class="c"><a href="#s32">32</a></sup> — the same one-owner principle as
+      <code>tokens.css</code>'s "only file that may hold a chrome colour literal" rule,
+      which egui gets by construction and this app holds with
+      <code>tests/test_theme_tokens.py</code><sup class="c"><a href="#s36">36</a></sup>. Cite it as precedent for the rule, not
+      as a stack to borrow from.</li>
+  </ul>
+</div>
+
+
+</section>
+
+
+<section>
+  <h2>Recommendation</h2>
+  <p><b>Axis 1 — standardize on Base UI for app-authored chrome, by strangler fig.</b>
+  Written as a standing rule: new chrome reaches for <code>@base-ui/react</code> first;
+  existing Radix call sites migrate when their file is already being edited, never as a
+  sweep; one library's popup never mounts inside the other's modal layer while both exist
+  (mui/base-ui#2854)<sup class="c"><a href="#s11">11</a></sup>. Sequencing that falls out of the nesting rule: standalone
+  popovers first (<code>ContextualControls</code>, <code>BtInsertMenu</code>,
+  <code>DraftsControl</code>), the two Dialogs (<code>CompareDialog</code>,
+  <code>LocalWorkspace</code>) as units, <code>ReliableContextMenu</code> last. The
+  inspector worktree's NumberField is already on the right side of this rule.</p>
+  <p><b>Axis 2 — keep the token layer; harden its two weak seams instead of replacing it.</b>
+  (1) Adopt the <code>on-*</code> role-pair naming from M3's vocabulary next time
+  <code>tokens.css</code> is touched, so "copy on a tint is ink" becomes a name the
+  vocabulary enforces rather than a comment<sup class="c"><a href="#s23">23</a>,<a href="#s37">37</a></sup>. (2) Move palette <i>derivation</i>
+  (the <code>colorFromSwatch</code> family) onto colorjs.io's HCT, already adopted in the
+  theme-appearance-lab — that is the library-grade wheel for the one part of theming that
+  was genuinely hand-rolled and genuinely broke<sup class="c"><a href="#s25">25</a>,<a href="#s37">37</a></sup>.</p>
+  <p><b>Independent of both:</b> land the <code>docs/bugs/0002</code> sweep
+  (<code>stopPropagation</code> → <code>editor.markEventAsHandled</code>, 60 sites) with its
+  regression test regardless of library choice — tldraw ships Radix internally, so its
+  bubble-phase dismissal stays on the page even after full app-side convergence<sup class="c"><a href="#s33">33</a>,<a href="#s35">35</a></sup>.</p>
+
+  <h3>The reversible default (what happens if you say nothing)</h3>
+  <p>Both libraries stay in <code>package.json</code>. Nothing migrates. The only change is
+  the rule of thumb for <b>new</b> work — Base UI first — which any single future decision
+  can reverse at the cost of zero migrated files. Each component migration, when it happens,
+  is one file and one commit, individually revertable; <code>radix-ui</code> leaves the
+  manifest only when its last importer does, if ever.</p>
+
+  <h3>The concrete next step (if you want to act)</h3>
+  <p>Spike <code>ContextualControls.tsx</code> — the property-rail popover — from
+  <code>@radix-ui/react-popover</code> to Base UI Popover. It is the sharpest possible test:
+  it lives against the canvas, it sits in the middle of the panel-guards bug class, and it
+  already has a journey (<code>npm run test:contextual-composition</code>). Acceptance is
+  the mechanism, not the symptom: with a <code>stopPropagation</code> guard deliberately in
+  place, assert the document-level <b>capture</b> listener still dismisses — the check
+  <code>docs/bugs/0002</code> says no journey makes today<sup class="c"><a href="#s10">10</a>,<a href="#s33">33</a></sup>. If the spike holds, the
+  standing rule above is validated end to end; if it doesn't, one file reverts and the rule
+  flips back to Radix-first at zero cost.</p>
+</section>
+
+
+
+<section>
+  <h2>Explicitly not recommended, and why</h2>
+  <table>
+    <thead><tr><th>Ruled out</th><th>Why — from the evidence, not presupposed</th></tr></thead>
+    <tbody>
+      <tr><th>Tailwind as a repo migration</th>
+        <td>19,518 lines / 1,466 call sites of rewrite for a codebase already token-driven;
+        28 rules it can never reach because tldraw renders that DOM; Preflight's disable
+        path has open bugs in exactly the bleed-into-third-party-widget failure mode this
+        app cannot absorb<sup class="c"><a href="#s19">19</a>,<a href="#s20">20</a></sup>.</td></tr>
+      <tr><th>Material Design 3 as a system</th>
+        <td>No maintained React implementation exists to adopt (Google's own is Lit, in
+        maintenance mode; MUI is M2 and pointing at Base UI); its density floor and 2025
+        "Expressive" trajectory run opposite to recede-behind-the-canvas chrome. Its two
+        good ideas — <code>on-*</code> role pairs, HCT — are taken above without the
+        look<sup class="c"><a href="#s21">21</a>,<a href="#s22">22</a>,<a href="#s23">23</a>,<a href="#s24">24</a>,<a href="#s25">25</a></sup>.</td></tr>
+      <tr><th>shadcn/ui in any installed form</th>
+        <td>Foreclosed without Tailwind (no official path; utility strings with no CSS
+        behind them); the pattern minus the stack reduces to what the app already does.
+        Keep as a reference gallery<sup class="c"><a href="#s16">16</a>,<a href="#s17">17</a></sup>.</td></tr>
+      <tr><th>MUI (Foxglove's substrate)</th>
+        <td>A second visual language and a second token system fighting tldraw's, plus
+        JS-time theming that cannot follow live host CSS variables in the IDE webviews. The
+        thing worth having from Foxglove — the schema-driven settings tree — the app
+        already independently built<sup class="c"><a href="#s26">26</a>,<a href="#s27">27</a>,<a href="#s34">34</a>,<a href="#s36">36</a></sup>.</td></tr>
+      <tr><th>A big-bang Radix→Base UI sweep</th>
+        <td>The transition is the risky part, not the endpoints: the one open cross-library
+        bug lives exactly at mixed nesting (#2854), and the <code>asChild</code>→<code>render</code>
+        rewrite deserves per-file review, not a batch diff. Strangler fig gets the same
+        destination without the exposure<sup class="c"><a href="#s11">11</a>,<a href="#s13">13</a></sup>.</td></tr>
+      <tr><th>Porting tldraw-owned chrome to either library</th>
+        <td>The toolbar spike already priced this: near-parity costs 970 lines and loses the
+        digit keys and responsive overflow that tldraw's <code>OverflowingToolbar</code>
+        owns; every overlay then pays the <code>editor.menus</code> registration tax
+        forever. The stock boundary stays where it is<sup class="c"><a href="#s35">35</a></sup>.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section>
+  <h2>Source index</h2>
+  <ol class="srcs">
+    <li id="s1">base-ui.com/react/overview/about — Base UI team: "from the creators of Radix, Material UI, and Floating UI" (Colm Tuite et al.)</li>
+    <li id="s2">base-ui.com/react/overview/releases — 1.0.0 stable 2025-12-11; monthly releases to 1.8.0 (2026-09-04)</li>
+    <li id="s3">github.com/radix-ui/primitives — discussion #3352, NumberField request, open and unanswered</li>
+    <li id="s4">base-ui.com/react/components/* — component inventory verified live 2026-09-07: Context Menu, Toast, Number Field all 200; Hover Card 404</li>
+    <li id="s5">registry.npmjs.org/@base-ui/react — MIT, 1.8.0</li>
+    <li id="s6">github.com/mui/base-ui — active, pushed 2026-09-07, 10,845 stars, not archived</li>
+    <li id="s7">radix-ui.com/primitives/docs/overview/releases — releases through Jul 2026, incl. controlled ContextMenu (Jun 2026)</li>
+    <li id="s8">registry.npmjs.org/radix-ui — 1.6.7 (2026-07-31), MIT; 1.7.0-rc published same day</li>
+    <li id="s9">radix-ui/primitives dismissable-layer.tsx (raw source) — outside-press decided by bubble-phase document pointerdown listener</li>
+    <li id="s10">mui/base-ui packages/react/src/floating-ui-react/hooks/useDismiss.ts lines 720–736 (raw source) — all press listeners registered capture-phase on document, unconditionally (hardened vendored fork; public @floating-ui/react defaults to bubble)</li>
+    <li id="s11">github.com/mui/base-ui/issues/2854 — Base UI popup inside Radix Dialog renders but cannot be clicked; open, labeled 'external dependency'</li>
+    <li id="s12">github.com/tldraw/tldraw/issues/7584 — tldraw's own open spike investigating a Radix→Base UI migration (Jan 2026)</li>
+    <li id="s13">basecn.dev/docs/get-started/migrating-from-radix-ui — asChild→render, Positioner layer, part renames; strangler-fig guidance</li>
+    <li id="s14">ui.shadcn.com/docs/changelog/2026-07-base-ui-default + github.com/shadcn-ui/ui/discussions/9562 — Base UI default since July 2026; ~2:1 pick rate; Radix track continues</li>
+    <li id="s15">ui.shadcn.com/docs/changelog/2026-02-radix-ui — Radix track moved to the unified radix-ui package</li>
+    <li id="s16">github.com/shadcn-ui/ui/discussions/2832 — no non-Tailwind path, no maintainer commitment in 2+ years</li>
+    <li id="s17">shadcn-ui/ui apps/v4/registry/new-york-v4/ui/button.tsx (raw source) — variants are Tailwind utility strings in cva(), incl. JIT-only constructs</li>
+    <li id="s18">tailwindcss.com/docs/theme — @theme inline can wrap pre-existing CSS custom properties</li>
+    <li id="s19">tailwindcss.com/docs/preflight + tailwindlabs/tailwindcss#17481, #17445, #19114 — preflight 'known to conflict with third-party libraries'; disable is all-or-nothing with open leak bugs</li>
+    <li id="s20">local measurement 2026-09-07 (comment-filtered grep) — 28 CSS rules across 11 files under src/ target tldraw's own DOM classes; 1,466 className sites in 106 of 162 .tsx files</li>
+    <li id="s21">github.com/material-components/material-web discussion #5642 + releases — maintenance mode since June 2024, engineers reassigned to Wiz; volunteer releases since</li>
+    <li id="s22">mui/material-ui#29345 (M3 request, open since 2021) + mui.com/blog/2026-and-beyond — no M3 on the roadmap; Base UI named the long-term direction</li>
+    <li id="s23">m3.material.io — design-tokens (md.ref/md.sys/md.comp), density, elevation, canonical layouts; 48dp touch-target floor</li>
+    <li id="s24">android-developers.googleblog.com — Material 3 Expressive (2025): spring motion system, shape morphing</li>
+    <li id="s25">colorjs.io/docs/spaces — native HCT and CAM16-JMh support</li>
+    <li id="s26">lichtblick-suite/lichtblick package.json, packages/suite-base, packages/theme — @mui/material@7.2.0, emotion + tss-react, zustand@4.5.7, react-mosaic-component@6.2.0; theme package ~1,468 lines</li>
+    <li id="s27">lichtblick packages/suite/src/index.ts + SettingsTreeEditor/ — 14-variant field union, single action dispatch; FieldEditor.tsx 506 / NodeEditor.tsx 553 lines; 23 files, 2,927 lines</li>
+    <li id="s28">foxglove.dev/blog/foxglove-2-0-unifying-robotics-observability — open edition discontinued 2024; github.com/foxglove/studio archived, last push 2024-07-18</li>
+    <li id="s29">rerun-io/rerun Cargo.toml — egui/eframe 0.36.1, wgpu 30.0; crates/viewer/* (re_ui, re_time_panel, re_selection_panel, …)</li>
+    <li id="s30">rerun.io/docs — "uses egui (written by Rerun's CTO)"; embed-web: the viewer executes inside a single &lt;canvas&gt;</li>
+    <li id="s31">registry.npmjs.org/@rerun-io/web-viewer(-react) — WASM bundle + React lifecycle shell; zero authored DOM chrome</li>
+    <li id="s32">docs.rs/re_ui design_tokens.rs — RON token files (design_tokens.ron, color_table.ron) applied to egui Style</li>
+    <li id="s33">docs/bugs/0002-panel-guards-starve-radix-dismissal.md (worktree pep-evidence) — stopPropagation starves Radix's bubble-phase listener; 60 occurrences / 29 files; dismissal survives via an accidental focus side-channel</li>
+    <li id="s34">docs/work-order-primitive-inspector.md §5 (worktree tldraw-inspector-panel-cf524c) — the prior scrub-field survey: Radix #3352, react-aria/Blueprint/Mantine/Tweakpane no drag-scrub, Ark UI ~70 zag machines, Excalidraw DragInput.tsx pattern, Webstudio/Theatre.js AGPL read-never-copy</li>
+    <li id="s35">reports/toolbar-radix-spike-2026-09-07.html (main, 8a25f263) — toolbar rebuilt on Radix: 52/52 checks, 12/12 tokens both schemes; digit keys 1–9 and responsive overflow lost; editor.menus registration is the permanent tax</li>
+    <li id="s36">src/theme/tokens.css + tests/test_theme_tokens.py + tests/theme_contrast_smoke.mjs — single-owner token layer, literal ban, phantom-variable gate, 5-theme × ~25-probe WCAG journey</li>
+    <li id="s37">theme-appearance-lab worktree — c51978ce (colorFromSwatch wrote five light-mode frame-chrome values into the dark table) and 224798d6 (contrast math moved onto colorjs.io); accent-on-accent-soft measured 2.60–4.29:1 across all palettes (2026-09-01)</li>
+    <li id="s38">pkgpulse.com/guides/shadcn-ui-vs-base-ui-vs-radix-components-2026 — Radix 'relatively slowed' next to Base UI's staffed team, not stopped</li>
+  </ol>
+</section>
+
+<footer>
+  <div>Built by <code>docs/build_ui_design_system_strategy.py</code> · current-state numbers
+    measured from the live tree at build time</div>
+  <div>Research: Claude Code scribe (Fable 5, <code>claude-fable-5</code>) + six Sonnet 5
+    research legs · 2026-09-07</div>
+</footer>
+
+</main>
+</body>
+</html>
