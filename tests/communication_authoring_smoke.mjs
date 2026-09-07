@@ -362,6 +362,42 @@ async function main() {
     )
     pass('communication shows summary ports only, in both faces — no split legs, no undefined ports')
 
+    // --- A cable the lens does not draw must not be selectable either --------
+    // The bug: hidden legs kept their geometry, so a stray click could select
+    // an invisible cable and put selection chrome on the board.
+    const hiddenPick = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const wires = editor.getCurrentPageShapes().filter((s) => s.type === 'connection')
+      const drawn = new Set(Array.from(document.querySelectorAll(
+        '[data-communication-mode="components"] [data-communication-focus-hit]',
+      )).map((node) => node.closest('[data-shape-id]')?.getAttribute('data-shape-id')))
+      const hidden = wires.filter((wire) => !drawn.has(wire.id))
+      return {
+        total: wires.length,
+        hidden: hidden.length,
+        // Ask tldraw itself: a hidden shape must be gone from hit testing.
+        stillHittable: hidden.filter((wire) => !editor.isShapeHidden(wire)).map((w) => w.id),
+      }
+    })())`))
+    assert.ok(hiddenPick.hidden > 0, 'the fixture must have legs the lens does not draw')
+    assert.deepEqual(
+      hiddenPick.stillHittable,
+      [],
+      `a cable the lens hides must leave hit testing too: ${JSON.stringify(hiddenPick)}`,
+    )
+    // And selecting everything must not pick one up.
+    const selectedHidden = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      editor.selectAll()
+      const picked = editor.getSelectedShapes().filter((s) => s.type === 'connection' && editor.isShapeHidden(s))
+      editor.selectNone()
+      return picked.map((s) => s.id)
+    })())`))
+    assert.deepEqual(selectedHidden, [], 'select-all must not pick up an invisible cable')
+    pass('cables the communication lens hides are gone from hit testing and cannot be selected')
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.select('shape:region'); return true })()`)
+    await delay(300)
+
     // --- ...and Dataflow shows ALL ports, period ----------------------------
     await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
     await delay(500)

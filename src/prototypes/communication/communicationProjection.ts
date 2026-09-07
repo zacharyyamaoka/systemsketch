@@ -612,3 +612,28 @@ export function selectedCommunicationGroupKey(
 	return summary.relations.find((relation) => relation.memberIds.includes(selectedId))?.groupKey ?? null
 }
 
+/**
+ * The connection a relationship's summary cable actually rides, or null when
+ * this cable belongs to no communication relationship at all.
+ *
+ * One reader for "is this the cable the lens draws?", so the renderer and the
+ * visibility rule cannot disagree — and disagreeing is exactly what left
+ * hidden cables selectable on the canvas.
+ */
+export function summaryCarrierConnectionId(
+	editor: Editor,
+	connection: ConnectionShape,
+): TLShapeId | null {
+	const descriptor = describeCommunicationConnection(editor, connection)
+	if (!descriptor) return null
+	const relation = collectCommunicationRelations(editor).relations
+		.find((candidate) => candidate.groupKey === descriptor.groupKey)
+	if (!relation) return null
+	return chooseCommunicationRepresentative(
+		relation.family,
+		relation.memberDescriptors.map((member) => ({
+			descriptor: member,
+			pathLength: Number.POSITIVE_INFINITY,
+		})),
+	)?.connectionId ?? null
+}

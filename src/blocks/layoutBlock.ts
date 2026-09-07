@@ -700,42 +700,6 @@ function portLabelContentBox(
 	}
 }
 
-/**
- * Keep authored rail positions but never let two sockets collide.
- *
- * WHY nudge rather than redistribute evenly: a port dragged to a specific spot
- * should stay where it was put. Sockets are only pushed apart when they would
- * overlap, and only by as much as it takes, so an untouched rail with one port
- * still centres it and a crowded rail degrades into an even spread on its own.
- */
-export function spreadRailFractions(
-	fractions: readonly number[],
-	minimumGap = 0.14,
-): number[] {
-	const next = [...fractions]
-	for (let index = 1; index < next.length; index += 1) {
-		next[index] = Math.max(next[index], next[index - 1] + minimumGap)
-	}
-	const overflow = next.length > 0 ? next[next.length - 1] - 1 : 0
-	if (overflow > 0) {
-		// Ran off the end: shift the whole run back, then re-open any gap the
-		// shift closed at the start. With more ports than the rail can hold at
-		// the preferred gap this settles into an even spread.
-		for (let index = 0; index < next.length; index += 1) next[index] -= overflow
-		for (let index = 1; index < next.length; index += 1) {
-			next[index] = Math.max(next[index], next[index - 1] + minimumGap)
-		}
-	}
-	const span = next.length > 1 ? next[next.length - 1] - next[0] : 0
-	if (span > 1) {
-		for (let index = 0; index < next.length; index += 1) {
-			next[index] = next.length === 1 ? 0.5 : index / (next.length - 1)
-		}
-		return next
-	}
-	return next.map((value) => Math.min(1, Math.max(0, value)))
-}
-
 /** Centre the measured content inside a rail label instead of packing it to a lane edge. */
 function railLabelContentBox(port: BlockPort, side: 'input' | 'output', label: BlockRect): BlockRect {
 	const w = Math.max(0, Math.min(label.w, portLabelContentWidth(port, side)))
@@ -808,23 +772,28 @@ function placeHorizontalRails(
 			.filter((port) => shown(port) && portCommunicationEdge(port) === edge)
 			.map((port) => ({ port, side })))
 		if (lane.length === 0) continue
-		// Every socket that has not been placed by hand gets an even share of the
-		// WHOLE edge; the ones that have keep exactly where they were put. Sorting
-		// after that assignment is what makes both rails read left→right, which is
-		// Simulink's ordering rule and what the prior-art study assumes.
-		const even = (index: number) => (index + 1) / (lane.length + 1)
+		/**
+		 * The authored fraction decides ORDER along the wall; the wall itself
+		 * decides position.
+		 *
+		 * WHY not honour the fraction directly (Zach, 2026-09-07): "if there is
+		 * only 1 port it should be perfectly centered. I like how you place the
+		 * port where the line intersects, but then you need to apply the evenly
+		 * width port spacing also." Seeding at the crossing and keeping that
+		 * value left a lone socket wherever the arrow happened to hit — three
+		 * quarters along a wall with nothing else on it. Treating the seed as a
+		 * sort key gives both: the arrow still decides which socket goes where in
+		 * the sequence, and one port lands dead centre because 1/(1+1) is 0.5.
+		 *
+		 * This is also what makes the drag a Kanban reorder rather than a free
+		 * placement, which is the model this view was asked for.
+		 */
 		const withFraction = lane.map((entry, index) => ({
 			...entry,
-			t: portRailT(entry.port) ?? even(index),
+			t: portRailT(entry.port) ?? (index + 1) / (lane.length + 1),
 		}))
 		withFraction.sort((a, b) => a.t - b.t)
-		// The collision gap can never exceed what an even spread would give, or a
-		// crowded edge would be pushed wider than the edge itself and march off
-		// the end — the exact failure the even distribution above just fixed.
-		const spread = spreadRailFractions(
-			withFraction.map((entry) => entry.t),
-			Math.min(0.14, 1 / (lane.length + 1)),
-		)
+		const spread = withFraction.map((_entry, index) => (index + 1) / (lane.length + 1))
 		withFraction.forEach(({ port, side }, index) => {
 			const t = spread[index]
 			const vertical = edge === 'left' || edge === 'right'

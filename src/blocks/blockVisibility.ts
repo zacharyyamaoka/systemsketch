@@ -14,7 +14,9 @@ import {
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
 	isShapeInCommunicationScope,
+	summaryCarrierConnectionId,
 } from '../prototypes/communication/communicationProjection'
+import type { ConnectionShape } from './connections/ConnectionShapeUtil'
 
 /**
  * A Block is an opaque leaf unless its active view is Expanded, and a Branch
@@ -63,12 +65,30 @@ export function getBlockShapeVisibility(
 		}
 	}
 	if (shape.type === CONNECTION_SHAPE_TYPE) {
+		// WHY hidden and not merely unpainted: the communication lens draws one
+		// summary cable per relationship, and the legs it stands for used to keep
+		// their geometry — so a cable nobody could see was still hit-testable and
+		// could be selected by a stray click, chrome and all. tldraw's own
+		// visibility seam removes it from rendering AND hit testing without
+		// touching the document, which is what Dataflow still needs it for.
+		if (hiddenByCommunicationSummary(editor, shape)) return 'hidden'
 		return connectionHiddenByBranch(editor, shape) ? 'hidden' : 'inherit'
 	}
 	if (!isShapeId(shape.parentId)) return 'inherit'
 	const parent = editor.getShape(shape.parentId)
 	if (isBranchShape(parent) && isHiddenByFoldedArm(editor, shape)) return 'hidden'
 	return 'inherit'
+}
+
+/** A cable the communication lens does not draw: every leg but the carrier. */
+function hiddenByCommunicationSummary(editor: Editor, shape: TLShape): boolean {
+	if (!isCommunicationPrototypeEnabled(editor)) return false
+	if (communicationProjection.get(editor).lens !== 'communication') return false
+	if (!isShapeInCommunicationScope(editor, shape.id)) return false
+	const carrier = summaryCarrierConnectionId(editor, shape as ConnectionShape)
+	// A cable in no relationship at all (an ordinary data edge) keeps its
+	// ordinary visibility; only a relationship's non-carrier legs go.
+	return carrier !== null && carrier !== shape.id
 }
 
 export function connectionHiddenByBranch(editor: Editor, connection: TLShape): boolean {

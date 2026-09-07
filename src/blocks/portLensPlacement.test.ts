@@ -137,3 +137,33 @@ describe('what each lens shows', () => {
 		expect(ids).toEqual(['out_summary'])
 	})
 })
+
+describe('spacing along a wall', () => {
+	it('centres a lone socket, wherever the arrow seeded it', () => {
+		// "if there is only 1 port it should be perfectly centered."
+		for (const seed of [0.05, 0.5, 0.95]) {
+			const one = props([{ id: 'out_only', name: 'camera.goal', commEdge: 'bottom', commEdgeT: seed }])
+			const placed = layoutBlock(one, { lens: 'communication' }).ports
+				.find((entry) => entry.port.id === 'out_only')
+			expect(placed?.edge).toBe('bottom')
+			expect(placed!.x).toBeCloseTo(one.w / 2, 5)
+		}
+	})
+
+	it('spreads several sockets evenly, using the seed only to order them', () => {
+		const three = props([
+			{ id: 'out_c', name: 'c.goal', commEdge: 'top', commEdgeT: 0.97 },
+			{ id: 'out_a', name: 'a.goal', commEdge: 'top', commEdgeT: 0.02 },
+			{ id: 'out_b', name: 'b.goal', commEdge: 'top', commEdgeT: 0.51 },
+		])
+		const rail = layoutBlock(three, { lens: 'communication' }).ports
+			.filter((entry) => entry.edge === 'top')
+			.sort((a, b) => a.x - b.x)
+		expect(rail.map((entry) => entry.port.id)).toEqual(['out_a', 'out_b', 'out_c'])
+		// Evenly, not at 0.02 / 0.51 / 0.97: the seed ordered them, the wall
+		// placed them, so the gaps are equal and nothing clusters at an end.
+		const gaps = rail.slice(1).map((entry, index) => entry.x - rail[index].x)
+		for (const gap of gaps) expect(gap).toBeCloseTo(gaps[0], 5)
+		expect(rail[0].x).toBeCloseTo(three.w / 4, 5)
+	})
+})
