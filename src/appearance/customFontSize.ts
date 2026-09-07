@@ -58,7 +58,8 @@ function baseTableFor(shape: TLShape): Record<SizeRung, number> | null {
 	}
 }
 
-function isRung(value: unknown): value is SizeRung {
+/** Narrow a menu option's raw string to one of the four stock size rungs. */
+export function isSizeRung(value: unknown): value is SizeRung {
 	return typeof value === 'string' && (RUNGS as readonly string[]).includes(value)
 }
 
@@ -99,7 +100,7 @@ export function effectiveFontPx(shape: TLShape): number | null {
 	const table = baseTableFor(shape)
 	if (!table) return null
 	const props = shape.props as FontProps
-	if (!isRung(props.size)) return null
+	if (!isSizeRung(props.size)) return null
 	return table[props.size] * fontScaleOf(shape)
 }
 
@@ -131,10 +132,45 @@ export function sharedFontPx(editor: Editor): number | 'mixed' | null {
 	return shared.type === 'shared' ? shared.value : 'mixed'
 }
 
-/** True when every participant sits exactly on its rung (scale 1), so the
- * preset rows' check marks tell the truth. */
+/**
+ * The pixels one preset rung actually produces for this selection, or null
+ * when the participants do not agree on a single base table.
+ *
+ * WHY this is not a constant: stock tldraw has THREE type scales behind the
+ * one set of rung names — a Text shape's `xl` is 44px, a geo or note label's
+ * is 32px, and the Code block's is 24px — because `size` is a type ROLE
+ * (heading / label / code), not a pixel size. tldraw is right to keep them
+ * apart (a sticky's box and a geo's stroke are sized off the same rung), but
+ * a menu that prints only "Extra large" then lies by omission: two shapes
+ * read as the same setting and render 12px apart. So the rows carry their own
+ * px, measured from the shapes actually selected. FigJam can show names alone
+ * because ITS named sizes are absolute; ours are not, so the number comes too.
+ */
+export function selectionRungPx(editor: Editor, rung: SizeRung): number | null {
+	const table = sharedBaseTable(editor)
+	return table ? table[rung] : null
+}
+
+/** The one base table behind the whole selection, or null when it is mixed. */
+function sharedBaseTable(editor: Editor): Record<SizeRung, number> | null {
+	const tables = fontSizeTargets(editor).map(baseTableFor)
+	const first = tables[0]
+	if (!first) return null
+	return tables.every((table) => table === first) ? first : null
+}
+
+/**
+ * True when the preset rows tell the truth about what is on screen: every
+ * participant sits exactly on its rung (scale 1) AND every participant reads
+ * that rung off the same base table. A Text shape and a sticky note both at
+ * `xl` are both "on their rung" and still render 44px against 32px — checking
+ * `Extra large` for that pair would claim a shared size the canvas does not
+ * have, so the rows withhold the mark and the trigger falls back to `Mixed`.
+ */
 export function selectionOnPresetRungs(editor: Editor): boolean {
-	return fontSizeTargets(editor).every((shape) => fontScaleOf(shape) === 1)
+	const shapes = fontSizeTargets(editor)
+	if (shapes.length === 0) return true
+	return shapes.every((shape) => fontScaleOf(shape) === 1) && sharedBaseTable(editor) !== null
 }
 
 /**

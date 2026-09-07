@@ -49,6 +49,20 @@
   white-space: nowrap;
 }
 
+/* The rung's pixel size, printed after its name. FigJam shows names alone
+ * because ITS named sizes are absolute; stock tldraw's are a type role, so the
+ * same word is 44px of Text and 32px of sticky note -- the numeral is what
+ * keeps the combobox honest. Muted so the name still reads first. */
+.systemsketch-appearance__trigger-px {
+  flex: 0 0 auto;
+  padding-right: 6px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  line-height: 16px;
+}
+
 /* FigJam separates control groups with a 1px hairline the full height of the
  * pill, with 4px clear on each side. */
 .systemsketch-appearance__separator {
@@ -438,6 +452,17 @@
 .systemsketch-appearance__label {
   flex: 1;
   text-align: left;
+}
+
+/* The same numeral on each list row (see `__trigger-px`), right-aligned so the
+ * four sizes read as a column of numbers. */
+.systemsketch-appearance__label-px {
+  flex: 0 0 auto;
+  padding-left: 16px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
 }
 
 /* A traced icon that is much wider than tall — FigJam's typeface names are the

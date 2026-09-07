@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { Editor, TLShape } from 'tldraw'
 
 import { CODE_FONT_SIZES } from '../code/codeModel'
 import {
@@ -9,7 +10,21 @@ import {
 	clampCustomFontPx,
 	formatFontPx,
 	nearestRungForPx,
+	selectionOnPresetRungs,
+	selectionRungPx,
+	sharedFontPx,
 } from './customFontSize'
+
+/** Only the two readers the selection helpers actually call. */
+function editorSelecting(...shapes: { type: string; props: Record<string, unknown> }[]): Editor {
+	return {
+		getSelectedShapes: () => shapes as unknown as TLShape[],
+		getSortedChildIdsForParent: () => [],
+	} as unknown as Editor
+}
+
+const text = (size: string, scale = 1) => ({ type: 'text', props: { size, scale } })
+const note = (size: string, scale = 1) => ({ type: 'note', props: { size, scale } })
 
 describe('custom font size math', () => {
 	it('mirrors the capability report base rungs: text s=18, m=24', () => {
@@ -53,5 +68,36 @@ describe('custom font size math', () => {
 	it('formats whole px without a decimal and others with one', () => {
 		expect(formatFontPx(24)).toBe('24')
 		expect(formatFontPx(16.666)).toBe('16.7')
+	})
+})
+
+describe('the named rungs are a type role, not a size', () => {
+	it('reads xl off a different table for a Text shape and a sticky note', () => {
+		expect(selectionRungPx(editorSelecting(text('xl')), 'xl')).toBe(44)
+		expect(selectionRungPx(editorSelecting(note('xl')), 'xl')).toBe(32)
+	})
+
+	it('prints no px where the selection spans two tables', () => {
+		const mixed = editorSelecting(text('xl'), note('xl'))
+		expect(selectionRungPx(mixed, 'xl')).toBeNull()
+		// ...and the same pair carries no single effective size either, which
+		// is precisely why the row must not be checked.
+		expect(sharedFontPx(mixed)).toBe('mixed')
+		expect(selectionOnPresetRungs(mixed)).toBe(false)
+	})
+
+	it('still checks a row when one table backs the whole selection', () => {
+		expect(selectionOnPresetRungs(editorSelecting(text('xl'), text('xl')))).toBe(true)
+		expect(selectionRungPx(editorSelecting(note('m'), note('l')), 'm')).toBe(22)
+	})
+
+	it('withholds the check once any participant carries a custom scale', () => {
+		expect(selectionOnPresetRungs(editorSelecting(text('xl', 2)))).toBe(false)
+	})
+
+	it('says nothing at all when no shape has a font size', () => {
+		const drawing = editorSelecting({ type: 'draw', props: { scale: 1 } })
+		expect(selectionRungPx(drawing, 'xl')).toBeNull()
+		expect(sharedFontPx(drawing)).toBeNull()
 	})
 })

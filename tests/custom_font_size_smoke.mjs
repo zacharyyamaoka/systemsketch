@@ -45,6 +45,12 @@ async function renderedFontPx(page, selector) {
   })()`)
 }
 
+/** The px numeral printed on each preset row, top to bottom. */
+async function readSizeLadder(page) {
+  const raw = await evaluate(page, `JSON.stringify([...document.querySelectorAll('[data-testid="systemsketch-appearance-panel-size"] .systemsketch-appearance__label-px')].map((node) => Number.parseFloat(node.textContent)))`)
+  return JSON.parse(raw)
+}
+
 async function openSizePopover(page) {
   await clickElement(page, '[data-control="size"][data-trigger="text"]')
   await waitFor(page, `Boolean(document.querySelector('[data-testid="font-size-custom"]'))`, 'size popover with custom field')
@@ -144,6 +150,71 @@ try {
   // The authored column count survives, so width re-derives rather than drifts.
   checks.push(['CODE-4', 'characterWidth preserved through the scale change', codeProps.characterWidth, 48])
   assert.equal(codeProps.characterWidth, 48)
+
+  // --- The named rungs are a type ROLE, not a size ---
+  // Stock tldraw reads `xl` off three different tables (Text 44, geo/note
+  // label 32, Code 24). The menu therefore prints the px each named row
+  // actually renders at, and refuses to check a row for a selection whose
+  // participants disagree — the reported symptom was two shapes both reading
+  // "Extra large" at visibly different sizes.
+  await key(page, 'Escape')
+  await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const rt = (t) => ({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: t }] }] })
+    editor.createShape({ id: 'shape:fsNote', type: 'note', x: 620, y: 160, props: { richText: rt('Sticky'), size: 'xl' } })
+    editor.updateShape({ id: 'shape:fsText', type: 'text', props: { size: 'xl', scale: 1 } })
+    editor.setSelectedShapes(['shape:fsText'])
+    return true
+  })()`)
+  await delay(300)
+  await openSizePopover(page)
+  const textLadder = await readSizeLadder(page)
+  checks.push(['ROLE-1', 'Text rows print tldraw FONT_SIZES', textLadder.join('/'), '18/24/36/44'])
+  assert.deepEqual(textLadder, [18, 24, 36, 44])
+  const textTriggerPx = await evaluate(page, `document.querySelector('[data-testid="font-size-trigger-px"]')?.textContent`)
+  checks.push(['ROLE-2', 'the combobox itself carries the px', textTriggerPx, '44'])
+  assert.equal(textTriggerPx, '44')
+
+  await key(page, 'Escape')
+  await evaluate(page, `(() => { window.__systemsketch.editor.setSelectedShapes(['shape:fsNote']); return true })()`)
+  await delay(300)
+  await openSizePopover(page)
+  const noteLadder = await readSizeLadder(page)
+  checks.push(['ROLE-3', 'sticky rows print tldraw LABEL_FONT_SIZES', noteLadder.join('/'), '18/22/26/32'])
+  assert.deepEqual(noteLadder, [18, 22, 26, 32])
+  const noteRendered = await renderedFontPx(page, '.tl-note__container .tl-rich-text')
+  checks.push(['ROLE-4', 'the sticky really renders that 32, not the Text 44', Math.round(noteRendered), 32])
+  assert.ok(Math.abs(noteRendered - 32) < 0.5, `rendered ${noteRendered}`)
+
+  // Both shapes are on rung `xl` and render 12px apart: no row may claim it.
+  await key(page, 'Escape')
+  await evaluate(page, `(() => { window.__systemsketch.editor.setSelectedShapes(['shape:fsText', 'shape:fsNote']); return true })()`)
+  await delay(300)
+  await openSizePopover(page)
+  const mixedChecked = await evaluate(page, `document.querySelectorAll('[data-testid="systemsketch-appearance-panel-size"] [role="menuitemradio"][aria-checked="true"]').length`)
+  checks.push(['ROLE-5', 'no row claims a shared size for Text xl + note xl', mixedChecked, 0])
+  assert.equal(mixedChecked, 0)
+  const mixedTrigger = await evaluate(page, `document.querySelector('[data-control="size"] .systemsketch-appearance__trigger-text')?.textContent`)
+  checks.push(['ROLE-6', 'the combobox reads Mixed rather than "Extra large"', mixedTrigger, 'Mixed'])
+  assert.equal(mixedTrigger, 'Mixed')
+  const mixedLadder = await readSizeLadder(page)
+  checks.push(['ROLE-7', 'no px is printed where the types disagree', mixedLadder.length, 0])
+  assert.equal(mixedLadder.length, 0)
+
+  // The Custom field is the way to actually make them equal.
+  await typeCustomPx(page, 40)
+  const bothPx = JSON.parse(await evaluate(page, `(() => {
+    const px = (id) => {
+      const node = document.querySelector('[data-shape-id="' + id + '"] .tl-rich-text')
+      if (!node) return null
+      const font = Number.parseFloat(getComputedStyle(node).fontSize)
+      const rect = node.getBoundingClientRect()
+      return Math.round(font * (node.offsetWidth > 0 ? rect.width / node.offsetWidth : 1))
+    }
+    return JSON.stringify([px('shape:fsText'), px('shape:fsNote')])
+  })()`))
+  checks.push(['ROLE-8', 'one typed px lands on BOTH types', bothPx.join('/'), '40/40'])
+  assert.deepEqual(bothPx, [40, 40])
 
   const shot = await page.send('Page.captureScreenshot', { format: 'png' })
   await writeFile(SHOT, Buffer.from(shot.data, 'base64'))

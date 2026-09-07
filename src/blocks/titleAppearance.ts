@@ -17,12 +17,20 @@ import {
 import { customColorHex } from '../appearance/customColors'
 import { FIGJAM_COLOR_HEX } from '../appearance/figjamPalette'
 
-const FONT_SIZES: Readonly<Record<BlockTitleSize, number>> = {
+/**
+ * The Block title's own type scale, mirroring stock tldraw's Text shape
+ * (`FONT_SIZES` x 16). Exported because the size menu prints these pixels
+ * beside each named rung: "Extra large" is a type role, not a size, and the
+ * same words mean 32px on a sticky note -- see `selectionRungPx` in
+ * `appearance/customFontSize.ts`.
+ */
+export const BLOCK_TITLE_FONT_PX: Readonly<Record<BlockTitleSize, number>> = {
   s: 18,
   m: 24,
   l: 36,
   xl: 44,
 }
+const FONT_SIZES = BLOCK_TITLE_FONT_PX
 
 const FONT_FAMILIES: Readonly<Record<BlockTitleFont, string>> = {
   sans: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

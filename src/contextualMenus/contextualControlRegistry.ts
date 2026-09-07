@@ -101,6 +101,15 @@ export interface ContextualControl extends ContextualControlDefinition {
   /** Whether this target maps custom-colour alpha onto its own document model. */
   customColorOpacity?: boolean
   customSize?: ContextualCustomSize
+  /**
+   * The pixels one named size option actually renders at for this control's
+   * target, or null when the target has no single answer. Bound separately
+   * from `customSize` because a surface can owe the reader the number without
+   * owning a continuous channel: the Block-title menu has no Custom cell and
+   * still must not print "Extra large" where a sticky note prints the same
+   * words 12px smaller. See `selectionRungPx` in `appearance/customFontSize.ts`.
+   */
+  rungPx?(value: string): number | null
   modeControl?: ContextualControl
   modePlacement?: 'above' | 'beside'
 }
@@ -321,7 +330,8 @@ export function bindContextualControl(
   binding: Pick<ContextualControl, 'id' | 'value' | 'onSelect'>
     & Partial<Pick<
       ContextualControl,
-      'automaticOption' | 'customColorOpacity' | 'customSize' | 'modeControl' | 'modePlacement'
+      'automaticOption' | 'customColorOpacity' | 'customSize' | 'rungPx'
+      | 'modeControl' | 'modePlacement'
     >>,
 ): ContextualControl {
   return { ...CONTEXTUAL_CONTROL_REGISTRY[kind], ...binding, kind }
