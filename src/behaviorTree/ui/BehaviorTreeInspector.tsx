@@ -16,12 +16,14 @@ import { BLOCK_PRESENTATION_VIEWS, isBlockShape, type BlockPresentationView } fr
 import { setBlockView } from '../../blocks/commands/blockCommands'
 import {
 	addBehaviorTreeFailureRecovery,
+	applyBehaviorTreeMockPreset,
 	applyBehaviorTreeXml,
 	deleteBehaviorTreeOccurrence,
 	getSelectedBehaviorTree,
 	insertBehaviorTreeChild,
 	insertBehaviorTreeSiblingOf,
 	nudgeBehaviorTreeOccurrence,
+	setBehaviorTreeMockParams,
 	setBehaviorTreeNodeDisabled,
 	setBehaviorTreeNodeName,
 	setBehaviorTreePortValue,
@@ -32,6 +34,25 @@ import {
 	type BtCommandResult,
 	type BtSelection,
 } from '../behaviorTreeCommands'
+import {
+	clampDurationMs,
+	clampSuccessChance,
+	readMockParamsById,
+	resolveMockParams,
+	BT_MOCK_PRESETS,
+	type BtMockPreset,
+} from '../runtime/mockParams'
+import {
+	fmtRunTime,
+	getBtRun,
+	scrubBtRunToTransition,
+	startBtRun,
+	stepBtRunTransition,
+	stopBtRun,
+	useBtRunVersion,
+	setBtRunSpeed,
+	type BtRunState,
+} from '../runtime/runStore'
 import {
 	BT_BLACKBOARD_LAYOUTS,
 	isBtControlNode,
@@ -169,7 +190,63 @@ function ViewSection({ props, set, onTidy }: {
 	)
 }
 
-function NodeSection({ editor, selection, node }: { editor: Editor; selection: BtSelection; node: BtNode }) {
+/**
+ * Zach's "just a button": success chance + expected duration for one skill,
+ * edited from any occurrence of it. The write goes to the SKILL's declaration
+ * (`_mock_success` / `_mock_duration_ms` on the TreeNodesModel entry), so
+ * every tree in the document that uses the node reads the same profile — the
+ * caption says "skill-wide" so it is never mistaken for a per-occurrence knob.
+ */
+function MockRows({ editor, selection, node, document }: { editor: Editor; selection: BtSelection; node: BtNode; document: BtDocument }) {
+	const params = useMemo(() => resolveMockParams(readMockParamsById(document), node), [document, node])
+	const [draftSuccess, setDraftSuccess] = useState<number | null>(null)
+	useEffect(() => setDraftSuccess(null), [node.id, selection.region.props.xml])
+	const success = draftSuccess ?? params.successChance
+	const commitSuccess = (value: number) => {
+		setDraftSuccess(null)
+		if (clampSuccessChance(value) === params.successChance) return
+		setBehaviorTreeMockParams(editor, selection.region.id, node.id, node.kind, { successChance: clampSuccessChance(value) })
+	}
+	return (
+		<>
+			<div className="bt-inspector__subtitle">Mock <span className="bt-inspector__hintInline">skill-wide</span></div>
+			<div className="bt-inspector__mockRow" data-testid="bt-mock-success">
+				<span className="bt-inspector__rowLabel">Success</span>
+				<input
+					type="range"
+					min={0}
+					max={100}
+					value={Math.round(success * 100)}
+					aria-label="Mock success chance"
+					onChange={(event) => setDraftSuccess(Number(event.target.value) / 100)}
+					onPointerUp={(event) => commitSuccess(Number((event.target as HTMLInputElement).value) / 100)}
+					onKeyUp={(event) => {
+						if (event.key.startsWith('Arrow')) commitSuccess(Number((event.target as HTMLInputElement).value) / 100)
+					}}
+					onBlur={(event) => commitSuccess(Number(event.target.value) / 100)}
+				/>
+				<span className="bt-inspector__mockValue" data-testid="bt-mock-success-value">{Math.round(success * 100)}%</span>
+			</div>
+			<div className="bt-inspector__mockRow" data-testid="bt-mock-duration">
+				<span className="bt-inspector__rowLabel">Duration</span>
+				<LiveTextInput
+					className="bt-inspector__mockDuration"
+					value={String(params.durationMs)}
+					ariaLabel="Mock expected duration in milliseconds"
+					beginEdit={() => editor.markHistoryStoppingPoint('edit mock duration')}
+					onWrite={(value) => {
+						const parsed = Number(value)
+						if (!Number.isFinite(parsed)) return
+						setBehaviorTreeMockParams(editor, selection.region.id, node.id, node.kind, { durationMs: clampDurationMs(parsed) })
+					}}
+				/>
+				<span className="bt-inspector__mockValue">ms</span>
+			</div>
+		</>
+	)
+}
+
+function NodeSection({ editor, selection, node, document }: { editor: Editor; selection: BtSelection; node: BtNode; document: BtDocument }) {
 	const regionId = selection.region.id
 	const [notice, setNotice] = useState<string | null>(null)
 	useEffect(() => setNotice(null), [node.path, selection.region.props.xml])
@@ -219,6 +296,9 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 					onWrite={(name) => report(setBehaviorTreeNodeName(editor, regionId, node.path, name))}
 				/>
 			</label>
+			{(node.kind === 'action' || node.kind === 'condition') && !node.model?.builtin ? (
+				<MockRows editor={editor} selection={selection} node={node} document={document} />
+			) : null}
 			{node.ports.length > 0 ? (
 				<>
 					<div className="bt-inspector__subtitle">Ports</div>
@@ -283,6 +363,144 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 			</div>
 			{notice ? <p className="bt-inspector__notice" role="status" data-testid="bt-node-notice">{notice}</p> : null}
 		</section>
+	)
+}
+
+/**
+ * The Run section: configuration at rest (mock presets are bulk AUTHORED
+ * writes, seed and speed are run options), and — while a run exists — the
+ * scrubber's detail view: Groot2's real Transitions table (Time · Node ·
+ * Status, filter by node name, current scrub row highlighted, click to jump,
+ * «/» stepping one transition, inside a tick when several share one).
+ */
+function RunSection({ editor, selection, document, tree }: { editor: Editor; selection: BtSelection; document: BtDocument; tree: BtTree | null }) {
+	useBtRunVersion()
+	const run = getBtRun(selection.region.id)
+	const [seedDraft, setSeedDraft] = useState('')
+	const [filter, setFilter] = useState('')
+	const labelFor = (treeId: string, path: string): string => {
+		const inTree = document.trees.find((candidate) => candidate.id === treeId)
+		const node = inTree?.nodes.find((candidate) => candidate.path === path)
+		const label = node?.label ?? path
+		return treeId === (selection.region.props.treeId || document.mainTreeId) ? label : `${treeId} · ${label}`
+	}
+	const rows = run?.log ?? []
+	const needle = filter.trim().toLowerCase()
+	return (
+		<section className="block-inspector__section" data-inspector-section="Run">
+			<div className="block-inspector__section-title">Run</div>
+			{!run ? (
+				<>
+					<div className="bt-inspector__actions">
+						<button
+							type="button"
+							className="bt-inspector__action bt-inspector__action--primary"
+							data-testid="bt-run-start"
+							disabled={!tree?.root}
+							onClick={() => startBtRun(selection.region, { seed: seedDraft.trim() === '' ? undefined : Number(seedDraft) || undefined })}
+						>
+							▶ Run mock
+						</button>
+					</div>
+					<Segmented
+						label="Preset"
+						value={'' as BtMockPreset | ''}
+						testId="bt-run-preset"
+						onChange={(preset) => {
+							if (preset) applyBehaviorTreeMockPreset(editor, selection.region.id, preset)
+						}}
+						options={BT_MOCK_PRESETS.map((value) => ({ value, label: value[0].toUpperCase() + value.slice(1), title: 'Writes every used skill’s authored success chance — one undo step' }))}
+					/>
+					<label className="bt-inspector__mockRow">
+						<span className="bt-inspector__rowLabel">Seed</span>
+						<input
+							className="bt-inspector__seed"
+							value={seedDraft}
+							placeholder="random"
+							inputMode="numeric"
+							aria-label="Run seed"
+							data-testid="bt-run-seed"
+							onChange={(event) => setSeedDraft(event.target.value)}
+						/>
+					</label>
+					<p className="block-inspector__hint">A mock run samples each node&#8217;s authored success chance and
+					duration (±30%). The document is never written by a run.</p>
+				</>
+			) : (
+				<RunDetail run={run} labelFor={labelFor} needle={needle} filter={filter} setFilter={setFilter} rows={rows} />
+			)}
+		</section>
+	)
+}
+
+function RunDetail({ run, labelFor, needle, filter, setFilter, rows }: {
+	run: BtRunState
+	labelFor(treeId: string, path: string): string
+	needle: string
+	filter: string
+	setFilter(value: string): void
+	rows: BtRunState['log']
+}) {
+	return (
+		<>
+			<div className="bt-inspector__runStatus" data-phase={run.phase} data-testid="bt-run-phase">
+				<span>{run.phase === 'running' ? 'Running' : run.phase === 'paused' ? 'Paused' : run.phase === 'finished' ? `Finished · ${run.outcome?.toUpperCase()}` : run.phase === 'stale' ? 'Stale — tree changed' : 'Refused'}</span>
+				<span className="bt-inspector__runMeta">seed {run.seed} · tick {run.cursor.tick}/{run.latestTick}</span>
+			</div>
+			{run.phase === 'refused' ? (
+				<ul className="bt-inspector__diagnostics" data-testid="bt-run-refusals">
+					{run.refusedReasons.map((reason, index) => <li key={index} data-severity="error">{reason}</li>)}
+				</ul>
+			) : null}
+			<Segmented
+				label="Speed"
+				value={String(run.speed)}
+				testId="bt-run-speed"
+				onChange={(value) => setBtRunSpeed(run.regionId, Number(value))}
+				options={[{ value: '0.5', label: '0.5×' }, { value: '1', label: '1×' }, { value: '2', label: '2×' }, { value: '4', label: '4×' }]}
+			/>
+			<div className="bt-inspector__subtitle">Transitions
+				<span className="bt-inspector__hintInline">{rows.length} · {fmtRunTime(rows.at(-1)?.at ?? 0)}</span>
+			</div>
+			<input
+				className="bt-inspector__search"
+				placeholder="filter by node name"
+				value={filter}
+				aria-label="Filter transitions by node name"
+				data-testid="bt-run-filter"
+				onChange={(event) => setFilter(event.target.value)}
+			/>
+			<div className="bt-inspector__transScroll" data-testid="bt-run-transitions">
+				<table className="bt-inspector__trans">
+					<thead><tr><th>Time</th><th>Node</th><th>Status</th></tr></thead>
+					<tbody>
+						{rows.map((entry, index) => {
+							const label = labelFor(entry.treeId, entry.path)
+							if (needle && !label.toLowerCase().includes(needle)) return null
+							const current = index === run.cursor.index
+							return (
+								<tr
+									key={entry.seq}
+									data-current={current || undefined}
+									data-index={index}
+									ref={current ? (row) => row?.scrollIntoView({ block: 'nearest' }) : undefined}
+									onClick={() => scrubBtRunToTransition(run.regionId, index)}
+								>
+									<td className="bt-inspector__transTime">{fmtRunTime(entry.at)}</td>
+									<td className="bt-inspector__transNode" title={`${label} · ${entry.path} · tick ${entry.tick}`}>{label}</td>
+									<td className="bt-inspector__transStatus" data-s={entry.to}>{entry.to.toUpperCase()}</td>
+								</tr>
+							)
+						})}
+					</tbody>
+				</table>
+			</div>
+			<div className="bt-inspector__actions">
+				<button type="button" className="bt-inspector__action" data-testid="bt-run-trans-prev" onClick={() => stepBtRunTransition(run.regionId, -1)}>« transition</button>
+				<button type="button" className="bt-inspector__action" data-testid="bt-run-trans-next" onClick={() => stepBtRunTransition(run.regionId, 1)}>transition »</button>
+				<button type="button" className="bt-inspector__action bt-inspector__action--danger" data-testid="bt-run-stop" onClick={() => stopBtRun(run.regionId)}>Stop</button>
+			</div>
+		</>
 	)
 }
 
@@ -392,8 +610,9 @@ export function BehaviorTreeInspectorContent({ editor, selection }: { editor: Ed
 	const set = (patch: Partial<BehaviorTreeShapeProps>) => void setBehaviorTreeView(editor, selection.region.id, patch)
 	return (
 		<div className="block-inspector__body" role="tabpanel" aria-label="Behavior Tree details">
-			{node ? <NodeSection editor={editor} selection={selection} node={node} /> : null}
+			{node ? <NodeSection editor={editor} selection={selection} node={node} document={projection.document} /> : null}
 			<ViewSection props={selection.region.props} set={set} onTidy={() => void tidyBehaviorTree(editor, selection.region.id)} />
+			<RunSection editor={editor} selection={selection} document={projection.document} tree={projection.tree} />
 			<LibrarySection editor={editor} selection={selection} node={node} document={projection.document} tree={projection.tree} />
 			<SourceSection editor={editor} selection={selection} document={projection.document} />
 		</div>

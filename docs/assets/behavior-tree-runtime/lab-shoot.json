@@ -1,0 +1,29 @@
+{
+  "seed": 34,
+  "chosen": {
+    "seed": 34,
+    "ticks": 9,
+    "outcome": "success",
+    "gripperFailures": 1,
+    "firstGripperFailTick": 7
+  },
+  "finished": {
+    "frames": 10,
+    "transitions": 40,
+    "cursorIndex": 39,
+    "cursorTick": 9,
+    "outcome": "success",
+    "running": []
+  },
+  "deepSeed": 5,
+  "deepTick": 6,
+  "deepRunning": [
+    "0",
+    "0.0",
+    "0.0.0",
+    "0.0.0.0",
+    "0.0.0.0.2",
+    "0.0.0.0.2.1",
+    "0.0.0.0.2.1.0"
+  ]
+}

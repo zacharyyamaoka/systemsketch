@@ -631,3 +631,73 @@
 	stroke-width: 5;
 	stroke-linejoin: round;
 }
+
+/* ------------------------------- run mode ---------------------------------
+ * The connective tissue's share of the decided runtime language (the node
+ * cards themselves are painted by runtime/BtRunOverlay.tsx, above the child
+ * shapes). Wires wear the status of the node they lead to; the RUNNING chain
+ * is Zach's marching dash — animated, which is exactly what separates it from
+ * the app's STATIC async/delayed cable dashes and survives beside the ambient
+ * 5px data-cable march (this one is saturated purple, wider, and slower).
+ */
+.systemsketch-behavior-tree .BehaviorTree-statusWire {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.systemsketch-behavior-tree .BehaviorTree-statusWire[data-s='running'] {
+  stroke: var(--ss-run-running-edge);
+  stroke-dasharray: 10 7;
+  animation: btRunMarch 0.7s linear infinite;
+}
+.systemsketch-behavior-tree .BehaviorTree-statusWire[data-s='success'] {
+  stroke: var(--ss-run-success);
+  opacity: 0.85;
+}
+.systemsketch-behavior-tree .BehaviorTree-statusWire[data-s='failure'] {
+  stroke: var(--ss-run-failure);
+  opacity: 0.9;
+}
+@keyframes btRunMarch {
+  to { stroke-dashoffset: -17; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-behavior-tree .BehaviorTree-statusWire[data-s='running'] { animation: none; }
+}
+
+/* Flowstate group aggregation, verbatim: running tints the HEADER lavender
+ * (plus the spinner — Zach's addition on top of Flowstate); success turns the
+ * header mint AND washes the whole surface pale green; the wash is
+ * success-only. The failure header tint is derived (Flowstate never shows a
+ * public failure state). */
+.systemsketch-behavior-tree .BehaviorTree-group .BehaviorTree-groupHeader { transition: fill 0.3s ease; }
+.systemsketch-behavior-tree .BehaviorTree-group .BehaviorTree-groupFrame { transition: fill 0.35s ease, stroke 0.35s ease; }
+.systemsketch-behavior-tree .BehaviorTree-group[data-run-status='running'] .BehaviorTree-groupHeader { fill: var(--ss-run-running); }
+.systemsketch-behavior-tree .BehaviorTree-group[data-run-status='success'] .BehaviorTree-groupHeader { fill: var(--ss-run-done); }
+.systemsketch-behavior-tree .BehaviorTree-group[data-run-status='success'] .BehaviorTree-groupFrame {
+  fill: var(--ss-run-done);
+  fill-opacity: 0.38;
+  stroke: color-mix(in srgb, var(--ss-run-success) 55%, transparent);
+}
+.systemsketch-behavior-tree .BehaviorTree-group[data-run-status='failure'] .BehaviorTree-groupHeader { fill: var(--ss-run-failure-head); }
+.systemsketch-behavior-tree .BehaviorTree-groupSpin { visibility: hidden; }
+.systemsketch-behavior-tree .BehaviorTree-group[data-run-status='running'] .BehaviorTree-groupSpin { visibility: visible; }
+.systemsketch-behavior-tree .BehaviorTree-groupSpin { transform-box: fill-box; transform-origin: center; animation: btRunSpinTissue 1.1s linear infinite; }
+.systemsketch-behavior-tree .BehaviorTree-groupSpin circle {
+  fill: none;
+  stroke: var(--ss-run-running-edge);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-dasharray: 0.1 6.19;
+}
+@keyframes btRunSpinTissue {
+  to { transform: rotate(360deg); }
+}
+
+.systemsketch-behavior-tree .BehaviorTree-start rect { transition: stroke 0.3s ease; }
+.systemsketch-behavior-tree .BehaviorTree-start[data-hot] rect {
+  stroke: var(--ss-run-running-edge);
+  stroke-width: 3;
+}

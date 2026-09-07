@@ -424,3 +424,24 @@
   --ss-debug-dash-release: 7 4;
   --ss-debug-dash-climb: 12 7;
 }
+
+/* Behavior Tree run-mode status vocabulary — sampled constants (Flowstate's
+ * keynote fills, Groot2's outcome hues), deliberately theme-invariant: a mock
+ * run's status language is evidence and must read identically in every host,
+ * so these do not join the per-theme vocabulary above. The -veil variants are
+ * solved so that over a white card they composite to the exact swatch
+ * (see runtime/bt-run-overlay.css). */
+[data-ss-theme] {
+  --ss-run-running: #e2d9fc;
+  --ss-run-running-edge: #8b5cf6;
+  --ss-run-done: #cafcd0;
+  --ss-run-pending: #dedede;
+  --ss-run-success: #16a34a;
+  --ss-run-failure: #dc2626;
+  --ss-run-halted: #9ca3af;
+  --ss-run-failure-head: #f2cfcf;
+  --ss-run-running-veil: rgba(74, 18, 236, 0.16);
+  --ss-run-done-veil: rgba(14, 241, 41, 0.22);
+  --ss-run-pending-veil: rgba(1, 1, 1, 0.13);
+  --ss-run-failure-veil: rgba(190, 30, 30, 0.2);
+}

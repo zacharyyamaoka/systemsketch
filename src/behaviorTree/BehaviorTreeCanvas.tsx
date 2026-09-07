@@ -24,6 +24,7 @@ import { insertBehaviorTreeChild, insertBehaviorTreeSiblingOf, stepOutOfBehavior
 import type { BtDocument, BtInsertTemplate } from './btcppXml'
 import { BtInsertMenu } from './ui/BtInsertMenu'
 import { arrowHeadPath, edgeEndAngle, edgePathData } from './sceneSvg'
+import { foldedStateAtCursor, getBtRun, paintForTree, useBtRunVersion, type BtNodePaint } from './runtime/runStore'
 import './behavior-tree.css'
 
 /** The id `editor.menus` tracks this insert's popover under — shared between
@@ -231,6 +232,21 @@ export function BehaviorTreeCanvas({ shape }: { shape: BehaviorTreeShape }) {
 	const inserts = useMemo(() => projection.scene.inserts.map((insert) => ({ ...insert, at: sceneToRegion(projection, insert.at) })), [projection])
 	const wireOpacity = shape.props.dataLens === 'none' ? 1 : shape.props.controlWireOpacity
 
+	// Run-mode paint on the connective tissue this component owns: wires wear
+	// the status of the node they lead to (Groot2's rule — the RUNNING chain
+	// marches from Start to the ticking node), group headers aggregate their
+	// own node's status (Flowstate: lavender header while running, mint header
+	// + pale-green surface wash on success), Start goes hot while the root
+	// runs. Node-card fills live in `runtime/BtRunOverlay.tsx` because child
+	// shapes render above this layer.
+	useBtRunVersion()
+	const run = getBtRun(shape.id)
+	const runPaint: Map<string, BtNodePaint> | null = useMemo(() => {
+		if (!run || run.cursor.index < 0) return null
+		return paintForTree(run, foldedStateAtCursor(run), shape.props.treeId || run.treeId)
+	}, [run, run?.cursor.index, run?.cursor.tick, run?.log.length, run?.phase, shape.props.treeId])
+	const statusOf = (path: string | undefined | null) => (path ? runPaint?.get(path)?.status ?? null : null)
+
 	const choose = useCallback((template: BtInsertTemplate) => {
 		if (!openInsert) return
 		// A recovery-lane terminus carries `afterPath`, and the gap above a
@@ -259,6 +275,7 @@ export function BehaviorTreeCanvas({ shape }: { shape: BehaviorTreeShape }) {
 				data-lens={shape.props.dataLens}
 				data-selected={selected}
 				data-insert-visibility={shape.props.insertVisibility}
+				data-run-phase={run?.phase ?? undefined}
 				data-testid={`bt-region-${shape.id}`}
 				style={{ width: shape.props.w, height: shape.props.h }}
 			>
@@ -293,11 +310,13 @@ export function BehaviorTreeCanvas({ shape }: { shape: BehaviorTreeShape }) {
 				<svg className="BehaviorTree-layer" width={shape.props.w} height={shape.props.h} aria-hidden="true">
 					{projection.scene.groups.map((group) => {
 						const rect = rectToRegion(projection, group.rect)
+						const status = statusOf(group.path)
 						return (
-							<g key={group.path} className="BehaviorTree-group">
+							<g key={group.path} className="BehaviorTree-group" data-run-status={status ?? undefined}>
 								<rect x={rect.x} y={rect.y} width={rect.w} height={rect.h} rx={6} className="BehaviorTree-groupFrame" />
 								<rect x={rect.x} y={rect.y} width={rect.w} height={48} rx={6} className="BehaviorTree-groupHeader" />
 								<rect x={rect.x + 14} y={rect.y + 15} width={18} height={18} rx={2} className="BehaviorTree-groupGlyph" />
+								<g className="BehaviorTree-groupSpin"><circle cx={rect.x + 23} cy={rect.y + 24} r={8} /></g>
 								<text x={rect.x + 44} y={rect.y + 30} className="BehaviorTree-groupTitle">{group.title}</text>
 								<path d={`M ${rect.x + rect.w - 26} ${rect.y + 21} l 5 6 l 5 -6`} className="BehaviorTree-groupChevron" />
 							</g>
@@ -305,9 +324,12 @@ export function BehaviorTreeCanvas({ shape }: { shape: BehaviorTreeShape }) {
 					})}
 					{edges.map((edge) => {
 						const structural = edge.kind === 'control' || edge.kind === 'recovery' || edge.kind === 'retryLoop' || edge.kind === 'merge'
+						const status = structural ? statusOf(edge.to) : null
+						const painted = status === 'running' || status === 'success' || status === 'failure' ? status : null
 						return (
 							<g key={edge.id} className="BehaviorTree-edge" data-kind={edge.kind} style={{ opacity: structural ? wireOpacity : 1 }}>
 								<path d={edgePathData(edge)} className="BehaviorTree-wire" />
+								{painted ? <path d={edgePathData(edge)} className="BehaviorTree-statusWire" data-s={painted} /> : null}
 								{edge.arrowEnd ? <path d={arrowHeadPath(edge.points[edge.points.length - 1], edgeEndAngle(edge))} className="BehaviorTree-arrowHead" /> : null}
 							</g>
 						)
@@ -335,8 +357,9 @@ export function BehaviorTreeCanvas({ shape }: { shape: BehaviorTreeShape }) {
 					})}
 					{projection.scene.start ? (() => {
 						const rect = rectToRegion(projection, projection.scene.start)
+						const rootRunning = projection.tree?.root ? statusOf(projection.tree.root.path) === 'running' : false
 						return (
-							<g className="BehaviorTree-start" data-testid="bt-start">
+							<g className="BehaviorTree-start" data-hot={rootRunning || undefined} data-testid="bt-start">
 								<rect x={rect.x} y={rect.y} width={rect.w} height={rect.h} rx={rect.h / 2} />
 								<text x={rect.x + rect.w / 2} y={rect.y + rect.h / 2 + 1}>Start</text>
 							</g>

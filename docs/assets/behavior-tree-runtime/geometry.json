@@ -1,0 +1,761 @@
+{
+  "generatedAt": "2026-09-05T19:55:14.639Z",
+  "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"RigidBodyAssembly\">\n  <BehaviorTree ID=\"RigidBodyAssembly\">\n    <Sequence name=\"Rigid Body Assembly\">\n      <Sequence name=\"Initialize Workcell\">\n        <Parallel success_count=\"-1\" failure_count=\"1\">\n          <Sequence>\n            <enable_motion robot=\"robot2\"/>\n            <planned_move robot=\"robot2\"/>\n            <Fallback>\n              <command_multi_axis_gripper gripper=\"multi_axis_gripper\"/>\n              <Sequence>\n                <command_multi_axis_gripper gripper=\"multi_axis_gripper\"/>\n                <command_multi_axis_gripper gripper=\"multi_axis_gripper\"/>\n                <AlwaysFailure/>\n              </Sequence>\n            </Fallback>\n          </Sequence>\n          <Sequence>\n            <enable_motion robot=\"robot1\"/>\n            <planned_move robot=\"robot1\"/>\n          </Sequence>\n          <Sequence>\n            <command_trommel trommel=\"trommel\"/>\n            <command_trommel trommel=\"trommel\"/>\n          </Sequence>\n        </Parallel>\n      </Sequence>\n      <Sequence name=\"Pull Part Kit\">\n        <Fallback>\n          <command_multi_axis_gripper gripper=\"multi_axis_gripper\"/>\n          <Sequence>\n            <command_multi_axis_gripper gripper=\"multi_axis_gripper\"/>\n            <command_multi_axis_gripper gripper=\"multi_axis_gripper\"/>\n          </Sequence>\n        </Fallback>\n      </Sequence>\n    </Sequence>\n  </BehaviorTree>\n  <TreeNodesModel>\n    <Action ID=\"enable_motion\"><input_port name=\"robot\"/></Action>\n    <Action ID=\"planned_move\"><input_port name=\"robot\"/></Action>\n    <Action ID=\"command_multi_axis_gripper\"><input_port name=\"gripper\"/></Action>\n    <Action ID=\"command_trommel\"><input_port name=\"trommel\"/></Action>\n  </TreeNodesModel>\n</root>",
+  "views": [
+    {
+      "name": "tree",
+      "region": {
+        "w": 4646,
+        "h": 1600,
+        "projection": "tree",
+        "orientation": "down"
+      },
+      "children": [
+        {
+          "id": "shape:JWzm5GPEqShlAlRqREMf_",
+          "type": "behaviorTreeControl",
+          "x": 2544.1875,
+          "y": 196,
+          "role": "node",
+          "path": "0",
+          "title": "Rigid Body Assembly",
+          "glyph": "sequence",
+          "w": 311,
+          "h": 64
+        },
+        {
+          "id": "shape:xtRqNUjHEZRDpDMWwxTY3",
+          "type": "behaviorTreeControl",
+          "x": 1542.875,
+          "y": 344,
+          "role": "node",
+          "path": "0.0",
+          "title": "Initialize Workcell",
+          "glyph": "sequence",
+          "w": 311,
+          "h": 64
+        },
+        {
+          "id": "shape:MvHML3kMUqS9SFRofU-19",
+          "type": "behaviorTreeControl",
+          "x": 1608.375,
+          "y": 492,
+          "role": "node",
+          "path": "0.0.0",
+          "title": "Parallel",
+          "glyph": "parallel",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:XjaNhKn3WaMpYbNF9mwOF",
+          "type": "behaviorTreeControl",
+          "x": 602.75,
+          "y": 640,
+          "role": "node",
+          "path": "0.0.0.0",
+          "title": "Sequence",
+          "glyph": "sequence",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:bptBJrI9xmJNOIKxu-nFF",
+          "type": "block",
+          "x": 60,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.0.0",
+          "title": "enable_motion",
+          "glyph": null,
+          "w": 449,
+          "h": 112
+        },
+        {
+          "id": "shape:lCrATtthbvnKHYmc7MsxW",
+          "type": "block",
+          "x": 549,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.0.1",
+          "title": "planned_move",
+          "glyph": null,
+          "w": 422,
+          "h": 112
+        },
+        {
+          "id": "shape:-JJDWVRZBERftC9ul-ux7",
+          "type": "behaviorTreeControl",
+          "x": 1011,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.0.2",
+          "title": "Fallback",
+          "glyph": "fallback",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:TaHl6OTBbyfCgEkrLcUbo",
+          "type": "block",
+          "x": 556,
+          "y": 1132,
+          "role": "node",
+          "path": "0.0.0.0.2.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:8fsIyqK-U8PTn4Bjk9_Ae",
+          "type": "behaviorTreeControl",
+          "x": 1236,
+          "y": 1132,
+          "role": "node",
+          "path": "0.0.0.0.2.1",
+          "title": "Sequence",
+          "glyph": "sequence",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:RXBFI9eAJxz4TJQYzA9Su",
+          "type": "block",
+          "x": 373.75,
+          "y": 1378,
+          "role": "node",
+          "path": "0.0.0.0.2.1.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:M60dF53m6oT6jF18uYF1H",
+          "type": "block",
+          "x": 1053.75,
+          "y": 1378,
+          "role": "node",
+          "path": "0.0.0.0.2.1.1",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:4Lew57jFoqOkjosXyYkkG",
+          "type": "block",
+          "x": 1733.75,
+          "y": 1378,
+          "role": "node",
+          "path": "0.0.0.0.2.1.2",
+          "title": "AlwaysFailure",
+          "glyph": null,
+          "w": 449,
+          "h": 112
+        },
+        {
+          "id": "shape:PnYQ5lYA7nt7uI1rRqGpd",
+          "type": "behaviorTreeControl",
+          "x": 1603.25,
+          "y": 640,
+          "role": "node",
+          "path": "0.0.0.1",
+          "title": "Sequence",
+          "glyph": "sequence",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:qTzUPJzBQhjq6MstSuN5h",
+          "type": "block",
+          "x": 1231,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.1.0",
+          "title": "enable_motion",
+          "glyph": null,
+          "w": 449,
+          "h": 112
+        },
+        {
+          "id": "shape:qxCPCGFPDwQo1ALAePsZm",
+          "type": "block",
+          "x": 1720,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.1.1",
+          "title": "planned_move",
+          "glyph": null,
+          "w": 422,
+          "h": 112
+        },
+        {
+          "id": "shape:zjUym6XBr0B7Spc1aBfFq",
+          "type": "behaviorTreeControl",
+          "x": 2614,
+          "y": 640,
+          "role": "node",
+          "path": "0.0.0.2",
+          "title": "Sequence",
+          "glyph": "sequence",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:IMODY31XWvUB73XAHOpid",
+          "type": "block",
+          "x": 2182,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.2.0",
+          "title": "command_trommel",
+          "glyph": null,
+          "w": 502,
+          "h": 112
+        },
+        {
+          "id": "shape:_JyL8JE6SRyLzfEpTzn0B",
+          "type": "block",
+          "x": 2724,
+          "y": 886,
+          "role": "node",
+          "path": "0.0.0.2.1",
+          "title": "command_trommel",
+          "glyph": null,
+          "w": 502,
+          "h": 112
+        },
+        {
+          "id": "shape:dcJkmI-nV4iwS1WH_uU0H",
+          "type": "behaviorTreeControl",
+          "x": 3584.5,
+          "y": 344,
+          "role": "node",
+          "path": "0.1",
+          "title": "Pull Part Kit",
+          "glyph": "sequence",
+          "w": 233,
+          "h": 64
+        },
+        {
+          "id": "shape:cuh-YDlI5S_9bxUpBRPam",
+          "type": "behaviorTreeControl",
+          "x": 3611,
+          "y": 492,
+          "role": "node",
+          "path": "0.1.0",
+          "title": "Fallback",
+          "glyph": "fallback",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:kqoCtW1JmFptEOPMgI-04",
+          "type": "block",
+          "x": 3156,
+          "y": 640,
+          "role": "node",
+          "path": "0.1.0.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:xBlhJRn3RotI5qwtLIjcM",
+          "type": "behaviorTreeControl",
+          "x": 3836,
+          "y": 640,
+          "role": "node",
+          "path": "0.1.0.1",
+          "title": "Sequence",
+          "glyph": "sequence",
+          "w": 180,
+          "h": 64
+        },
+        {
+          "id": "shape:1N_-YMPszFLBjaficWk5k",
+          "type": "block",
+          "x": 3266,
+          "y": 886,
+          "role": "node",
+          "path": "0.1.0.1.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:u6fGwB1J-we4E4QohEhpU",
+          "type": "block",
+          "x": 3946,
+          "y": 886,
+          "role": "node",
+          "path": "0.1.0.1.1",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        }
+      ],
+      "layer": {
+        "edges": [
+          {
+            "kind": "control",
+            "d": "M 2699.6875 156 L 2699.6875 196"
+          },
+          {
+            "kind": "control",
+            "d": "M 2699.6875 260 L 1698.375 344"
+          },
+          {
+            "kind": "control",
+            "d": "M 1698.375 408 L 1698.375 492"
+          },
+          {
+            "kind": "control",
+            "d": "M 1698.375 556 L 692.75 640"
+          },
+          {
+            "kind": "control",
+            "d": "M 692.75 704 L 284.5 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 692.75 704 L 760 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 692.75 704 L 1101 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 1101 950 L 876 1132"
+          },
+          {
+            "kind": "control",
+            "d": "M 1101 950 L 1326 1132"
+          },
+          {
+            "kind": "control",
+            "d": "M 1326 1196 L 693.75 1378"
+          },
+          {
+            "kind": "control",
+            "d": "M 1326 1196 L 1373.75 1378"
+          },
+          {
+            "kind": "control",
+            "d": "M 1326 1196 L 1958.25 1378"
+          },
+          {
+            "kind": "control",
+            "d": "M 1698.375 556 L 1693.25 640"
+          },
+          {
+            "kind": "control",
+            "d": "M 1693.25 704 L 1455.5 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 1693.25 704 L 1931 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 1698.375 556 L 2704 640"
+          },
+          {
+            "kind": "control",
+            "d": "M 2704 704 L 2433 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 2704 704 L 2975 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 2699.6875 260 L 3701 344"
+          },
+          {
+            "kind": "control",
+            "d": "M 3701 408 L 3701 492"
+          },
+          {
+            "kind": "control",
+            "d": "M 3701 556 L 3476 640"
+          },
+          {
+            "kind": "control",
+            "d": "M 3701 556 L 3926 640"
+          },
+          {
+            "kind": "control",
+            "d": "M 3926 704 L 3586 886"
+          },
+          {
+            "kind": "control",
+            "d": "M 3926 704 L 4266 886"
+          }
+        ],
+        "rails": [],
+        "chips": [],
+        "start": {
+          "x": 2624.6875,
+          "y": 104,
+          "w": 150,
+          "h": 52
+        },
+        "groups": []
+      }
+    },
+    {
+      "name": "process",
+      "region": {
+        "w": 2781,
+        "h": 2206,
+        "projection": "process",
+        "orientation": "down"
+      },
+      "children": [
+        {
+          "id": "shape:bptBJrI9xmJNOIKxu-nFF",
+          "type": "block",
+          "x": 199.5,
+          "y": 368,
+          "role": "node",
+          "path": "0.0.0.0.0",
+          "title": "enable_motion",
+          "glyph": null,
+          "w": 449,
+          "h": 112
+        },
+        {
+          "id": "shape:lCrATtthbvnKHYmc7MsxW",
+          "type": "block",
+          "x": 213,
+          "y": 540,
+          "role": "node",
+          "path": "0.0.0.0.1",
+          "title": "planned_move",
+          "glyph": null,
+          "w": 422,
+          "h": 112
+        },
+        {
+          "id": "shape:TaHl6OTBbyfCgEkrLcUbo",
+          "type": "block",
+          "x": 104,
+          "y": 712,
+          "role": "node",
+          "path": "0.0.0.0.2.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:RXBFI9eAJxz4TJQYzA9Su",
+          "type": "block",
+          "x": 894,
+          "y": 764,
+          "role": "node",
+          "path": "0.0.0.0.2.1.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:M60dF53m6oT6jF18uYF1H",
+          "type": "block",
+          "x": 894,
+          "y": 986,
+          "role": "node",
+          "path": "0.0.0.0.2.1.1",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:qTzUPJzBQhjq6MstSuN5h",
+          "type": "block",
+          "x": 1630,
+          "y": 368,
+          "role": "node",
+          "path": "0.0.0.1.0",
+          "title": "enable_motion",
+          "glyph": null,
+          "w": 449,
+          "h": 112
+        },
+        {
+          "id": "shape:qxCPCGFPDwQo1ALAePsZm",
+          "type": "block",
+          "x": 1643.5,
+          "y": 540,
+          "role": "node",
+          "path": "0.0.0.1.1",
+          "title": "planned_move",
+          "glyph": null,
+          "w": 422,
+          "h": 112
+        },
+        {
+          "id": "shape:IMODY31XWvUB73XAHOpid",
+          "type": "block",
+          "x": 2175,
+          "y": 368,
+          "role": "node",
+          "path": "0.0.0.2.0",
+          "title": "command_trommel",
+          "glyph": null,
+          "w": 502,
+          "h": 112
+        },
+        {
+          "id": "shape:_JyL8JE6SRyLzfEpTzn0B",
+          "type": "block",
+          "x": 2175,
+          "y": 540,
+          "role": "node",
+          "path": "0.0.0.2.1",
+          "title": "command_trommel",
+          "glyph": null,
+          "w": 502,
+          "h": 112
+        },
+        {
+          "id": "shape:kqoCtW1JmFptEOPMgI-04",
+          "type": "block",
+          "x": 1105,
+          "y": 1556,
+          "role": "node",
+          "path": "0.1.0.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:1N_-YMPszFLBjaficWk5k",
+          "type": "block",
+          "x": 1895,
+          "y": 1608,
+          "role": "node",
+          "path": "0.1.0.1.0",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        },
+        {
+          "id": "shape:u6fGwB1J-we4E4QohEhpU",
+          "type": "block",
+          "x": 1895,
+          "y": 1830,
+          "role": "node",
+          "path": "0.1.0.1.1",
+          "title": "command_multi_axis_gripper",
+          "glyph": null,
+          "w": 640,
+          "h": 162
+        }
+      ],
+      "layer": {
+        "edges": [
+          {
+            "kind": "control",
+            "d": "M 424 480 L 424 540"
+          },
+          {
+            "kind": "control",
+            "d": "M 1214 926 L 1214 986"
+          },
+          {
+            "kind": "control",
+            "d": "M 1214 1148 L 1214 1208"
+          },
+          {
+            "kind": "recovery",
+            "d": "M 744 764 L 894 764"
+          },
+          {
+            "kind": "merge",
+            "d": "M 1214 1264 L 1214 1304 L 424 1304"
+          },
+          {
+            "kind": "merge",
+            "d": "M 424 874 L 424 1304"
+          },
+          {
+            "kind": "control",
+            "d": "M 424 652 L 424 712"
+          },
+          {
+            "kind": "control",
+            "d": "M 424 312 L 424 368"
+          },
+          {
+            "kind": "control",
+            "d": "M 424 1304 L 424 1360"
+          },
+          {
+            "kind": "control",
+            "d": "M 1854.5 480 L 1854.5 540"
+          },
+          {
+            "kind": "control",
+            "d": "M 1854.5 312 L 1854.5 368"
+          },
+          {
+            "kind": "control",
+            "d": "M 1854.5 652 L 1854.5 1360"
+          },
+          {
+            "kind": "control",
+            "d": "M 2426 480 L 2426 540"
+          },
+          {
+            "kind": "control",
+            "d": "M 2426 312 L 2426 368"
+          },
+          {
+            "kind": "control",
+            "d": "M 2426 652 L 2426 1360"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 268 L 1425 312"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 1360 L 1425 1404"
+          },
+          {
+            "kind": "control",
+            "d": "M 2215 1770 L 2215 1830"
+          },
+          {
+            "kind": "recovery",
+            "d": "M 1745 1608 L 1895 1608"
+          },
+          {
+            "kind": "merge",
+            "d": "M 2215 1992 L 2215 2032 L 1425 2032"
+          },
+          {
+            "kind": "merge",
+            "d": "M 1425 1718 L 1425 2032"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 1512 L 1425 1556"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 2032 L 1425 2076"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 1404 L 1425 1464"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 156 L 1425 220"
+          },
+          {
+            "kind": "control",
+            "d": "M 1425 2076 L 1425 2118"
+          }
+        ],
+        "rails": [
+          {
+            "kind": "fork",
+            "lines": [
+              [
+                424,
+                309,
+                2426,
+                309
+              ],
+              [
+                424,
+                315,
+                2426,
+                315
+              ]
+            ]
+          },
+          {
+            "kind": "join",
+            "lines": [
+              [
+                424,
+                1357,
+                2426,
+                1357
+              ],
+              [
+                424,
+                1363,
+                2426,
+                1363
+              ]
+            ]
+          }
+        ],
+        "chips": [
+          {
+            "kind": "fail",
+            "text": "Fail",
+            "x": 1154,
+            "y": 1208,
+            "w": 120,
+            "h": 56
+          },
+          {
+            "kind": "failure",
+            "text": "Failure",
+            "x": 767,
+            "y": 747,
+            "w": 104,
+            "h": 34
+          },
+          {
+            "kind": "failure",
+            "text": "Failure",
+            "x": 1768,
+            "y": 1591,
+            "w": 104,
+            "h": 34
+          }
+        ],
+        "start": {
+          "x": 1350,
+          "y": 104,
+          "w": 150,
+          "h": 52
+        },
+        "groups": [
+          {
+            "title": "Initialize Workcell",
+            "x": 60,
+            "y": 220,
+            "w": 2661,
+            "h": 1184
+          },
+          {
+            "title": "Pull Part Kit",
+            "x": 1061,
+            "y": 1464,
+            "w": 1518,
+            "h": 612
+          }
+        ]
+      }
+    }
+  ]
+}

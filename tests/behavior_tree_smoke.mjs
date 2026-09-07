@@ -775,6 +775,13 @@ async function main() {
     // Library section both says AND does "adds the root node."
     await selectPath(page, '0')
     await delay(200)
+    // Same one-column scroll caveat as the Library row above, in the other
+    // direction: the click before this one scrolled Library into centre, and
+    // the Run section now sits between Node and Library, so Node's Delete is
+    // carried off the top of the column (measured at top:-160 in a 1050px
+    // viewport). Scroll it back the way a person would before clicking.
+    await evaluate(page, `document.querySelector('[data-testid="bt-action-delete"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(150)
     await clickElement(page, '[data-testid="bt-action-delete"]')
     await delay(300)
     check('library.tree-now-empty', 'deleting the root leaves the tree with no occurrences', (await children(page)).length, 0)

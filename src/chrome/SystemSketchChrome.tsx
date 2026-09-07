@@ -55,7 +55,7 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
-import { BehaviorTreeDndDragHost, EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree, treeDragRefusalState } from '../behaviorTree'
+import { BehaviorTreeDndDragHost, BtRunOverlays, EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree, treeDragRefusalState } from '../behaviorTree'
 import { BtDragModelSurface } from '../behaviorTree/BtDragModelSurface'
 import { BtDragModelTunerPanel, dragModelTunerOpen } from '../behaviorTree/ui/BtDragModelTunerPanel'
 import {
@@ -925,6 +925,7 @@ export function SystemSketchSurfaceHost() {
 
       <EditingBlockTitleMenu />
       <SelectionMiniMenu />
+      <BtRunOverlays />
       <CodeResizeIndicator />
     </div>
   )

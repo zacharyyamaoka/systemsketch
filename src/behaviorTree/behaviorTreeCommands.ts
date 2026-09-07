@@ -18,6 +18,7 @@ import {
 	type BehaviorTreeShapeProps,
 } from './behaviorTreeModel'
 import { reconcileBehaviorTree } from './installBehaviorTreeRegions'
+import { applyMockPresetToXml, setMockParamsInXml, type BtMockPreset } from './runtime/mockParams'
 import {
 	BT_DISABLED_ATTR,
 	deleteBehaviorTreeNode,
@@ -437,4 +438,43 @@ export function createBehaviorTreeRegion(editor: Editor, xml: string, at: { x: n
 /** Whether a Block on the page is one of a region's projected leaves. */
 export function isProjectedBehaviorTreeBlock(editor: Editor, shape: TLShape): boolean {
 	return isBlockShape(shape) && regionOfChild(editor, shape) !== null
+}
+
+/* ------------------------------- mock params -------------------------------- */
+
+/**
+ * Authored mock-profile edits. These change the XML but never the tree's
+ * structure, so no child is re-stamped and free offsets stay put — they are
+ * ordinary one-step-undo document writes, exactly like a port value.
+ */
+export function setBehaviorTreeMockParams(
+	editor: Editor,
+	regionId: TLShapeId,
+	skillId: string,
+	kind: BtNode['kind'],
+	params: { successChance?: number | null; durationMs?: number | null },
+): BtCommandResult {
+	const region = regionOrFail(editor, regionId)
+	if (!region) return { ok: false, reason: 'No Behavior Tree' }
+	const result = setMockParamsInXml(region.props.xml, skillId, kind, params)
+	if (!result.ok) return { ok: false, reason: result.reason }
+	editor.run(() => {
+		editor.markHistoryStoppingPoint('edit mock params')
+		editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, xml: result.xml } })
+	})
+	return { ok: true, path: '', shapeId: null }
+}
+
+/** Apply a preset: one bulk authored write over every leaf the tree uses. */
+export function applyBehaviorTreeMockPreset(editor: Editor, regionId: TLShapeId, preset: BtMockPreset): BtCommandResult {
+	const region = regionOrFail(editor, regionId)
+	if (!region) return { ok: false, reason: 'No Behavior Tree' }
+	const document = parseBehaviorTreeXml(region.props.xml)
+	const result = applyMockPresetToXml(region.props.xml, document, region.props.treeId || document.mainTreeId, preset)
+	if (!result.ok) return { ok: false, reason: result.reason }
+	editor.run(() => {
+		editor.markHistoryStoppingPoint(`mock preset ${preset}`)
+		editor.updateShape<BehaviorTreeShape>({ id: region.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...region.props, xml: result.xml } })
+	})
+	return { ok: true, path: '', shapeId: null }
 }

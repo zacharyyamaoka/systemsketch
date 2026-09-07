@@ -33,6 +33,7 @@ import {
 	type BtControlShape,
 } from './behaviorTreeModel'
 import { BT_IN_PORT, projectBehaviorTree, type BtDesiredChild } from './behaviorTreeProjection'
+import { installBtRunStore } from './runtime/runStore'
 import { deleteBehaviorTreeNode, setBehaviorTreeNodeAttribute } from './btcppXml'
 import { btDndDragState } from './treeDndDragState'
 
@@ -559,6 +560,10 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		}
 	})
 
+	// Run-mode lifecycle rides the same install: XML drift under a live mock
+	// run stops it (stale), and a deleted region tears its run down.
+	const stopRunStore = installBtRunStore(editor)
+
 	return () => {
 		disposed = true
 		stopCreate()
@@ -566,6 +571,7 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		stopDelete()
 		stopComplete()
 		stopSettle()
+		stopRunStore()
 	}
 }
 
