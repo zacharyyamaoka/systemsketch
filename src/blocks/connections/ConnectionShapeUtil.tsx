@@ -32,7 +32,7 @@ import {
 	isPortHostShape,
 	portElbowSideForFace,
 } from './blockPorts'
-import { blockLayoutLensFor } from '../ports/portLens'
+import { blockLayoutLensFor, communicationLensRouting } from '../ports/portLens'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -2386,10 +2386,18 @@ export function getConnectionShapePath(
 	connection: ConnectionShape,
 ): string {
 	const { source, sink } = getConnectionEndpoints(editor, connection)
-	return getConnectionPath(connection.props.routing, source, sink, {
-		curve: connection.props.curve,
+	// WHY the lens picks the shape here: `routing` and `curve` are document
+	// state shared by both lenses, so a Curve chosen in Dataflow re-shaped the
+	// communication drawing and vice versa — an adversarial audit demonstrated
+	// the leak in both directions. Communication reads its shape from the
+	// projection and ignores the stored bend entirely, which is the same rule
+	// its routes already follow: it stores nothing and inherits nothing.
+	const inLens = connectionIsInCommunicationLens(editor, connection)
+	const routing = inLens ? communicationLensRouting(editor) : connection.props.routing
+	return getConnectionPath(routing, source, sink, {
+		curve: inLens ? null : connection.props.curve,
 		sides: getConnectionExitSides(editor, connection),
-		route: connection.props.routing === 'elbow'
+		route: routing === 'elbow'
 			? getConnectionElbowRoute(editor, connection)
 			: undefined,
 	})

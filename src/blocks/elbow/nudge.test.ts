@@ -315,15 +315,21 @@ describe('bundle ordering when a leg runs the other way', () => {
    * one order that crosses, and hides the genuine cycles.
    */
   it('constrains a segment whose ARRIVING leg comes from the far side', () => {
+    // WHY the ids are 1 and 0 rather than 0 and 1: with an EMPTY constraint
+    // matrix the sort falls through to a cable-id tie-break, and the first
+    // version of this test happened to assert the answer that tie-break gives
+    // — so it passed against the very bug it claims to catch. An adversarial
+    // audit caught that. Choosing ids the tie-break would order the OTHER way
+    // is what makes the assertion discriminate between the two rules.
     const { order } = orderBundle([
-      segment({ cable: 0 }),
+      segment({ cable: 1 }),
       // Arrives inside the first segment's span, from the right.
-      segment({ cable: 1, fromSpan: 100, toSpan: 300, prevChannel: 180, nextChannel: 180 }),
+      segment({ cable: 0, fromSpan: 100, toSpan: 300, prevChannel: 180, nextChannel: 180 }),
     ])
     expect(order).toHaveLength(2)
-    // The reversed leg must place cable 1 on the far side of cable 0, not be
-    // ignored: ignoring it is what let the two cross.
-    expect(order[0]).toBe(0)
+    // The reversed leg must place the second segment on the far side of the
+    // first. Dropping it leaves the tie-break to answer [1, 0] instead.
+    expect(order).toEqual([0, 1])
   })
 
   it('constrains the mirror image the mirrored way', () => {

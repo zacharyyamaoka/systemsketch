@@ -20,9 +20,20 @@ export interface CommunicationLensScope {
 	regionId: TLShapeId | null
 	/** The legacy query-gated prototype puts the whole board in the lens. */
 	wholeBoard: boolean
+	/**
+	 * The shape communication draws its cables with.
+	 *
+	 * WHY it lives here and not on the connection: a cable's `routing` and
+	 * `curve` are document state shared by both lenses, so choosing Curve in
+	 * Dataflow silently re-shaped the communication drawing and vice versa — an
+	 * adversarial audit demonstrated the leak in both directions. Communication
+	 * stores NO cable state, exactly like its routes; this is a projection
+	 * field, and Dataflow's document values are left alone.
+	 */
+	routing: 'curved' | 'straight' | 'elbow'
 }
 
-const IDLE: CommunicationLensScope = { regionId: null, wholeBoard: false }
+const IDLE: CommunicationLensScope = { regionId: null, wholeBoard: false, routing: 'elbow' }
 
 const scopes = new WeakMap<Editor, Atom<CommunicationLensScope>>()
 
@@ -38,7 +49,11 @@ function scopeAtom(editor: Editor): Atom<CommunicationLensScope> {
 /** The projection's single writer. */
 export function setCommunicationLensScope(editor: Editor, scope: CommunicationLensScope): void {
 	const current = scopeAtom(editor).get()
-	if (current.regionId === scope.regionId && current.wholeBoard === scope.wholeBoard) return
+	if (
+		current.regionId === scope.regionId
+		&& current.wholeBoard === scope.wholeBoard
+		&& current.routing === scope.routing
+	) return
 	scopeAtom(editor).set(scope)
 }
 
@@ -71,4 +86,9 @@ export function blockLayoutLensFor(editor: Editor, shapeId: TLShapeId): BlockLay
 	if (scope.wholeBoard) return 'communication'
 	if (!scope.regionId) return 'dataflow'
 	return shapeIsInRegion(editor, shapeId, scope.regionId) ? 'communication' : 'dataflow'
+}
+
+/** The shape a cable takes in the communication lens. */
+export function communicationLensRouting(editor: Editor): 'curved' | 'straight' | 'elbow' {
+	return scopeAtom(editor).get().routing
 }

@@ -68,6 +68,8 @@ export interface CommunicationProjectionState {
 	componentView: CommunicationComponentView
 	communicationCard: CommunicationComponentView
 	cableStyle: CommunicationCableStyle
+	/** Communication's own cable shape. Never written to a connection. */
+	communicationRouting: ConnectionRoutingKind
 	focusedGroupKey: string | null
 	/** Null is the legacy query-gated whole-board prototype. */
 	activeRegionId: TLShapeId | null
@@ -87,6 +89,7 @@ export const communicationProjection = new EditorAtom<CommunicationProjectionSta
 		componentView: 'port',
 		communicationCard: 'simple',
 		cableStyle: 'data',
+		communicationRouting: 'elbow',
 		focusedGroupKey: null,
 		activeRegionId: null,
 		drawFamily: 'stream',
@@ -470,6 +473,7 @@ function updateProjection(
 		wholeBoard: inCommunicationLens
 			&& next.activeRegionId === null
 			&& isCommunicationPrototypeQueryEnabled(),
+		routing: next.communicationRouting,
 	})
 }
 
@@ -555,6 +559,13 @@ export function applyCommunicationCableRouting(
 	editor: Editor,
 	routing: ConnectionRoutingKind,
 ): number {
+	// In the communication lens this is a PROJECTION choice: writing `routing`
+	// onto the cables would re-shape Dataflow's drawing too, which is the leak
+	// this split exists to close.
+	if (communicationProjection.get(editor).lens === 'communication') {
+		updateProjection(editor, (state) => ({ ...state, communicationRouting: routing }))
+		return 0
+	}
 	const regionId = activeCommunicationRegionId(editor)
 	const targets = editor.getCurrentPageShapes().filter((shape): shape is ConnectionShape => {
 		if (shape.type !== CONNECTION_SHAPE_TYPE) return false
@@ -573,6 +584,8 @@ export function applyCommunicationCableRouting(
 
 /** What the bar should show: the one shape every cable agrees on, else null. */
 export function communicationCableRouting(editor: Editor): ConnectionRoutingKind | null {
+	const state = communicationProjection.get(editor)
+	if (state.lens === 'communication') return state.communicationRouting
 	const regionId = activeCommunicationRegionId(editor)
 	const routings = new Set(editor.getCurrentPageShapes()
 		.filter((shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE)

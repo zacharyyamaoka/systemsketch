@@ -78,10 +78,72 @@ const CARRIER_PHASE: Readonly<Record<string, CommunicationPhase>> = {
  * A port whose name says nothing about a protocol parses as a Topic publish and
  * therefore stays — an ordinary data port is not hidden by this rule.
  */
-export function isSummaryCarrierPort(port: BlockPort): boolean {
+export function isSummaryCarrierPort(
+	port: BlockPort,
+	/**
+	 * Every phase this port's interaction actually has on this card.
+	 *
+	 * WHY it must be passed in: the carrier is the initiating leg WHEN THERE IS
+	 * ONE. `chooseCommunicationRepresentative` falls back to whatever leg exists
+	 * — a response-only Service rides its response, a cancel-only Action its
+	 * cancel — and judging a port in isolation hid exactly those, so the lens
+	 * drew a summary arrow spanning two cards with no port dot at either end.
+	 * An adversarial audit found four such shapes. Omit it and the answer
+	 * degrades to the isolated reading, which is right only for complete
+	 * interactions.
+	 */
+	siblingPhases?: ReadonlySet<CommunicationPhase>,
+): boolean {
 	const parsed = inspectCommunicationChannel(port.name, port.name).parsed
 	if (!parsed) return true
-	return CARRIER_PHASE[parsed.family] === parsed.phase
+	const preferred = CARRIER_PHASE[parsed.family]
+	if (parsed.phase === preferred) return true
+	if (!siblingPhases || siblingPhases.has(preferred)) return false
+	// The initiating leg is absent, so the summary arrow rides the first leg
+	// that IS here — the same order `chooseCommunicationRepresentative` uses.
+	return firstPresentPhase(parsed.family, siblingPhases) === parsed.phase
+}
+
+/** The order a summary cable falls back through when its initiator is missing. */
+const FALLBACK_ORDER: readonly CommunicationPhase[] = [
+	'publish', 'stream', 'request', 'goal', 'feedback', 'response', 'result', 'cancel',
+]
+
+function firstPresentPhase(
+	family: string,
+	present: ReadonlySet<CommunicationPhase>,
+): CommunicationPhase | null {
+	// Cancel never speaks for an Action while any other leg exists, matching
+	// `chooseCommunicationRepresentative` exactly.
+	const eligible = family === 'action' && [...present].some((phase) => phase !== 'cancel')
+		? FALLBACK_ORDER.filter((phase) => phase !== 'cancel')
+		: FALLBACK_ORDER
+	return eligible.find((phase) => present.has(phase)) ?? null
+}
+
+/** Every communication phase present on this card, grouped by interaction. */
+export function phasesByInteraction(
+	ports: readonly BlockPort[],
+): Map<string, Set<CommunicationPhase>> {
+	const grouped = new Map<string, Set<CommunicationPhase>>()
+	for (const port of ports) {
+		const parsed = inspectCommunicationChannel(port.name, port.name).parsed
+		if (!parsed) continue
+		const key = `${parsed.family}:${parsed.name.toLowerCase()}`
+		const set = grouped.get(key) ?? new Set<CommunicationPhase>()
+		set.add(parsed.phase)
+		grouped.set(key, set)
+	}
+	return grouped
+}
+
+/** The phases of THIS port's interaction, ready to pass to the carrier test. */
+export function siblingPhasesFor(
+	port: BlockPort,
+	grouped: Map<string, Set<CommunicationPhase>>,
+): ReadonlySet<CommunicationPhase> | undefined {
+	const key = portInteractionKey(port)
+	return key ? grouped.get(key) : undefined
 }
 
 /** The interaction a port belongs to, or null when its name says nothing. */

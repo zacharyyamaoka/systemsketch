@@ -405,6 +405,53 @@ async function main() {
     )
     pass('freezing a Dataflow route leaves the communication appearance untouched')
 
+    // --- ...and neither does choosing a different cable SHAPE there ----------
+    // An adversarial audit found `routing` and `curve` leaking both ways: the
+    // Arrow control wrote them onto the cables, which both lenses read.
+    const commBefore = await communicationRouteShape(app.page)
+    await clickElement(app.page, '[data-testid="communication-lens-dataflow"]')
+    await delay(400)
+    await clickElement(app.page, '[data-testid="communication-route-curved"]')
+    await delay(450)
+    const dataflowRouting = JSON.parse(await evaluate(app.page, `JSON.stringify(
+      [...new Set(window.__systemsketch.editor.getCurrentPageShapes()
+        .filter((s) => s.type === 'connection').map((s) => s.props.routing))]
+    )`))
+    assert.deepEqual(dataflowRouting, ['curved'], 'Dataflow really did change its own cables')
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.select('shape:region'); return true })()`)
+    await delay(300)
+    await clickElement(app.page, '[data-testid="communication-lens-communication"]')
+    await delay(500)
+    assert.deepEqual(
+      await communicationRouteShape(app.page),
+      commBefore,
+      'a cable shape chosen in Dataflow must not reshape the communication drawing',
+    )
+    pass('choosing a cable shape in Dataflow leaves the communication appearance untouched')
+
+    // --- and the reverse: communication must not write the document ---------
+    const documentBefore = JSON.parse(await evaluate(app.page, `JSON.stringify(
+      window.__systemsketch.editor.getCurrentPageShapes()
+        .filter((s) => s.type === 'connection')
+        .map((s) => s.props.routing + '|' + JSON.stringify(s.props.curve))
+        .sort()
+    )`))
+    await clickElement(app.page, '[data-testid="communication-route-straight"]')
+    await delay(450)
+    assert.deepEqual(
+      JSON.parse(await evaluate(app.page, `JSON.stringify(
+        window.__systemsketch.editor.getCurrentPageShapes()
+          .filter((s) => s.type === 'connection')
+          .map((s) => s.props.routing + '|' + JSON.stringify(s.props.curve))
+          .sort()
+      )`)),
+      documentBefore,
+      'choosing a cable shape in communication must not touch a single connection record',
+    )
+    pass('choosing a cable shape in communication writes nothing to the document')
+    await clickElement(app.page, '[data-testid="communication-route-elbow"]')
+    await delay(350)
+
     const cameraPort = await elementBox(
       app.page,
       '[data-shape-id="shape:camera"] .Port[data-block-port-id="comm:stream:camera:stream"]',

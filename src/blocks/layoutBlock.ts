@@ -21,6 +21,8 @@ import { stockBlockVisibleDescription } from './stockBlocks'
 import {
 	inferCommunicationPlacements,
 	isSummaryCarrierPort,
+	phasesByInteraction,
+	siblingPhasesFor,
 } from '../prototypes/communication/portPlacementInference'
 
 /** Donor pyblocks geometry constants. Keep rendering and connection anchors on this grid. */
@@ -775,8 +777,13 @@ function placeHorizontalRails(
 	// socket's label would use. Reserve those strips first so the two never
 	// overprint — this is what turned a card's left column into
 	// "missiomissiomissio…" struck through by the bottom channel's name.
+	// Grouped once per card: whether a port carries its summary arrow depends on
+	// which OTHER legs of its interaction exist here, not on its name alone.
+	const grouped = carriersOnly
+		? phasesByInteraction([...props.inputs, ...props.outputs])
+		: null
 	const shown = (port: BlockPort) => port.visible
-		&& (!carriersOnly || isSummaryCarrierPort(port))
+		&& (!carriersOnly || isSummaryCarrierPort(port, siblingPhasesFor(port, grouped!)))
 	const occupies = (edge: 'top' | 'bottom') => [...props.inputs, ...props.outputs]
 		.some((port) => shown(port) && portCommunicationEdge(port) === edge)
 	const sideSpan = {

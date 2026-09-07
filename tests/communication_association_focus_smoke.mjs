@@ -318,8 +318,10 @@ async function main() {
     pass('selecting a component clears communication focus while preserving the new selection')
     await shot(app.page, '03c-component-dismisses-focus.png')
 
+    // The communication lens is always Summary now and offers no cable control,
+    // so entering the lens IS the summary choice. (Leaving this click in was a
+    // deterministic break an adversarial audit caught.)
     await clickElement(app.page, '[data-testid="communication-lens-communication"]')
-    await clickElement(app.page, '[data-testid="communication-cables-summary"]')
     await delay(550)
     state = await projectionState(app.page)
     assert.equal(state.components, 9)

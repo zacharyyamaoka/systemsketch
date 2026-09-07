@@ -4,7 +4,9 @@ import {
 	dataflowOrderFromCommunication,
 	inferCommunicationPlacements,
 	isSummaryCarrierPort,
+	phasesByInteraction,
 	portInteractionKey,
+	siblingPhasesFor,
 	type InferencePort,
 } from './portPlacementInference'
 import type { BlockPort } from '../../blocks/blockModel'
@@ -181,5 +183,53 @@ describe('only the sockets a summary arrow attaches to', () => {
 		for (const [name, carrier] of cases) {
 			expect(isSummaryCarrierPort(port('p', name))).toBe(carrier)
 		}
+	})
+})
+
+
+describe('an interaction missing its initiating leg', () => {
+	// Found by an adversarial audit: `chooseCommunicationRepresentative` falls
+	// back to whatever leg exists, but judging a port in isolation hid exactly
+	// those — so the lens drew a summary arrow between two cards with NO port
+	// dot at either end. These four shapes are that bug.
+	const carriers = (names: readonly string[]) => {
+		const ports = names.map((name, index) => port(String(index), name))
+		const grouped = phasesByInteraction(ports)
+		return ports
+			.filter((entry) => isSummaryCarrierPort(entry, siblingPhasesFor(entry, grouped)))
+			.map((entry) => entry.name)
+	}
+
+	it('draws a response-only Service on its response', () => {
+		expect(carriers(['ping.response'])).toEqual(['ping.response'])
+	})
+
+	it('draws a cancel-only Action on its cancel', () => {
+		expect(carriers(['move.cancel'])).toEqual(['move.cancel'])
+	})
+
+	it('draws a result-only Action on its result', () => {
+		expect(carriers(['move.result'])).toEqual(['move.result'])
+	})
+
+	it('prefers feedback over result when an Action has no goal', () => {
+		// The same order the representative chooser uses.
+		expect(carriers(['move.feedback', 'move.result'])).toEqual(['move.feedback'])
+	})
+
+	it('never lets cancel carry while another leg is present', () => {
+		expect(carriers(['move.cancel', 'move.result'])).toEqual(['move.result'])
+	})
+
+	it('still hides the other legs once the initiator IS present', () => {
+		expect(carriers(['move.goal', 'move.feedback', 'move.result'])).toEqual(['move.goal'])
+		expect(carriers(['ping.request', 'ping.response'])).toEqual(['ping.request'])
+	})
+
+	it('leaves two interactions on one card independent', () => {
+		// `move` is complete, `ping` is missing its request: each is judged on
+		// its own legs, not on the card's.
+		expect(carriers(['move.goal', 'move.result', 'ping.response']))
+			.toEqual(['move.goal', 'ping.response'])
 	})
 })
