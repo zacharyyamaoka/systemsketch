@@ -42,6 +42,7 @@
     "test:arrows": "node tests/arrow_drawing_smoke.mjs",
     "test:slanted-arrow": "node tests/slanted_arrow_smoke.mjs",
     "test:edges": "node tests/block_edges_acceptance.mjs",
+    "test:edge-policy": "node tests/edge_policy_smoke.mjs",
     "test:edge-editor": "node tests/block_edge_editor_smoke.mjs",
     "test:scale": "node tests/interface_scale_anchoring_smoke.mjs",
     "test:connector-controls": "node tests/edge_reveal_area_smoke.mjs",

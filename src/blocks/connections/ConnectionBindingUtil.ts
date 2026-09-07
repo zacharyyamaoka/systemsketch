@@ -32,6 +32,10 @@ import {
 } from './connectionModel'
 import { cableCompositingParent, pairBlockFaces } from './connectionScope'
 import type { ConnectionShape } from './ConnectionShapeUtil'
+import { edgePolicyPreset, getEdgePolicy, type EdgePolicy } from '../../settings/edgePolicy'
+
+/** Every rule stood down — what a board being LOADED is judged against. */
+const PERMISSIVE_EDGE_POLICY: EdgePolicy = edgePolicyPreset('whiteboard').policy
 
 /**
  * A binding welds one handle of a cable to one FACE of one port.
@@ -102,22 +106,42 @@ export function connectionBindingIsValid(editor: Editor, binding: ConnectionBind
  * boundary's inlet to a child that has just been dragged out of the frame no
  * longer joins two faces of one scope, and a wire across a boundary is not a
  * thing this model can draw.
+ *
+ * The rules it applies come from the edge policy, defaulting to the live one so
+ * that what survives an edit is what the person could have drawn. The checks
+ * that remain under even the most permissive policy are structural rather than
+ * rules: the stored face stamps must still match the tree, and both ports must
+ * still exist.
+ *
+ * WHY the default is the LIVE policy and `cleanupStaleConnections` overrides it
+ * with `PERMISSIVE_EDGE_POLICY`: this function deletes the cables it rejects,
+ * and load-time cleanup runs over a file nobody has touched yet. If loading
+ * enforced the live policy, opening a board authored on a whiteboard while
+ * Strict happened to be selected would silently destroy every cable in it. That
+ * one call site is the only place the distinction can cost you data, so it is
+ * the one that says so out loud — a future caller inheriting the default gets
+ * the policy-consistent answer, not the dangerous one.
  */
 export function connectionEndpointsAreValid(
 	editor: Editor,
 	connection: ConnectionShape | TLShapeId,
+	policy: EdgePolicy = getEdgePolicy(),
 ): boolean {
 	const bindings = getConnectionBindings(editor, connection)
 	if (!bindings.start || !bindings.end) return true
 	const startBlock = editor.getShape(bindings.start.toId)
 	const endBlock = editor.getShape(bindings.end.toId)
 	if (!isPortHostShape(startBlock) || !isPortHostShape(endBlock)) return false
-	const faces = pairBlockFaces(editor, startBlock, endBlock, { requireLive: false })
+	const faces = pairBlockFaces(editor, startBlock, endBlock, {
+		requireLive: false,
+		crossBoundary: policy.allowCrossBoundary,
+	})
 	if (!faces) return false
 	if (faces.a !== bindings.start.props.face || faces.b !== bindings.end.props.face) return false
 	const startPort = getPortHostPort(editor, startBlock, bindings.start.props.portId)
 	const endPort = getPortHostPort(editor, endBlock, bindings.end.props.portId)
 	if (!startPort || !endPort) return false
+	if (policy.allowSamePolarity) return true
 	return portPolarity(startPort.side, faces.a) !== portPolarity(endPort.side, faces.b)
 }
 
@@ -468,7 +492,15 @@ export function reparentConnectionToScope(editor: Editor, connectionId: TLShapeI
 	const startBlock = bindings.start ? editor.getShape(bindings.start.toId) : undefined
 	const endBlock = bindings.end ? editor.getShape(bindings.end.toId) : undefined
 	if (!isPortHostShape(startBlock) || !isPortHostShape(endBlock)) return
-	const faces = pairBlockFaces(editor, startBlock, endBlock, { requireLive: false })
+	// `crossBoundary` unconditionally, and NOT from the policy: where a cable
+	// paints is a placement question, never a rule. A cable that exists has to
+	// live somewhere holding both of its ends, whatever policy drew it — asking
+	// the live policy here would leave a boundary-crossing cable parented to the
+	// frame containing only ONE end, which clips the other half out of sight.
+	const faces = pairBlockFaces(editor, startBlock, endBlock, {
+		requireLive: false,
+		crossBoundary: true,
+	})
 	if (!faces) return
 	const parentId = cableCompositingParent(editor, startBlock, endBlock, faces.scopeId)
 	if (parentId !== connection.parentId) {
@@ -478,6 +510,9 @@ export function reparentConnectionToScope(editor: Editor, connectionId: TLShapeI
 
 /** The binding side effect: a legal cable settles into its scope. */
 function settleConnection(editor: Editor, connectionId: TLShapeId): void {
+	// The live policy, by the default above: a cable settling at the end of a
+	// gesture answers to the policy the person is drawing under, so what
+	// survives a settle is exactly what `judgeConnection` would have allowed.
 	if (!connectionEndpointsAreValid(editor, connectionId)) {
 		editor.deleteShapes([connectionId])
 		return
@@ -542,7 +577,11 @@ export function cleanupStaleConnections(editor: Editor): ConnectionCleanupResult
 
 		if (
 			!connectionHasBothTerminals(editor, connection.id)
-			|| !connectionEndpointsAreValid(editor, connection.id)
+			// Deliberately NOT the live policy: this runs over a file the moment
+			// it opens, and a rule the reader happens to have switched on must
+			// never delete cables the author drew under a looser one. Only
+			// structurally broken records are pruned here.
+			|| !connectionEndpointsAreValid(editor, connection.id, PERMISSIVE_EDGE_POLICY)
 		) {
 			editor.deleteShapes([connection.id])
 			connectionsRemoved += 1

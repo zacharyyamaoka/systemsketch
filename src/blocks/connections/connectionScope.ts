@@ -73,7 +73,7 @@ export function pairBlockFaces(
 	editor: ScopeReader,
 	a: ScopeHost,
 	b: ScopeHost,
-	options: { requireLive?: boolean } = {},
+	options: { requireLive?: boolean; crossBoundary?: boolean } = {},
 ): FacePair | null {
 	const live = (host: ScopeHost) => (
 		!(options.requireLive ?? true) ? isBlockShape(host) : hostIsLiveScope(host)
@@ -84,7 +84,56 @@ export function pairBlockFaces(
 	if (scopeA === scopeB) return { a: 'outer', b: 'outer', scopeId: scopeA }
 	if (scopeB === a.id) return live(a) ? { a: 'inner', b: 'outer', scopeId: a.id } : null
 	if (scopeA === b.id) return live(b) ? { a: 'outer', b: 'inner', scopeId: b.id } : null
-	return null
+	return options.crossBoundary ? pairAcrossBoundaries(editor, a, b) : null
+}
+
+/**
+ * The face pair for two Blocks that share NO scope — a grandchild and a cousin
+ * three frames away — once the black-box rule has been switched off in the edge
+ * policy.
+ *
+ * Both ends take their `outer` face, because from a Block's own point of view
+ * the cable leaves its card and goes somewhere; the boundaries it crosses on
+ * the way are exactly what the policy just said not to care about. The cable
+ * still needs a real parent that CONTAINS both ends, or tldraw would clip half
+ * of it inside a frame, so the scope becomes their nearest common ancestor
+ * rather than either end's own scope.
+ *
+ * WHY there is a fallback at all rather than simply skipping the check: the
+ * verdict's `scopeId` is load-bearing downstream (it is the cable's parent, and
+ * `cableCompositingParent` walks up to it), so "no shared scope" cannot be
+ * waved through — it has to be answered with something true.
+ */
+function pairAcrossBoundaries(editor: ScopeReader, a: ScopeHost, b: ScopeHost): FacePair | null {
+	const shared = nearestCommonParent(editor, a, b)
+	return shared ? { a: 'outer', b: 'outer', scopeId: shared } : null
+}
+
+/** Every parent above a shape, nearest first, ending at its page. */
+function parentChain(editor: ScopeReader, shape: ScopeHost): TLParentId[] {
+	const chain: TLParentId[] = []
+	let node: TLShape | undefined = editor.getShapeParent(shape.id)
+	while (node) {
+		chain.push(node.id)
+		node = editor.getShapeParent(node)
+	}
+	const page = editor.getAncestorPageId(shape.id)
+	if (page) chain.push(page)
+	return chain
+}
+
+/**
+ * The innermost container holding both shapes, or null when they are on
+ * different pages — which stays a refusal under every policy, because no parent
+ * exists that could hold the cable.
+ */
+export function nearestCommonParent(
+	editor: ScopeReader,
+	a: ScopeHost,
+	b: ScopeHost,
+): TLParentId | null {
+	const above = new Set<TLParentId>(parentChain(editor, a))
+	return parentChain(editor, b).find((id) => above.has(id)) ?? null
 }
 
 /**
