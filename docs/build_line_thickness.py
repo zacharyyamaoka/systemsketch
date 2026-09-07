@@ -11,7 +11,10 @@ import base64
 import html
 import json
 import re
+import subprocess
 from pathlib import Path
+
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +31,41 @@ JOURNEY = ROOT / "tests/line_thickness_smoke.mjs"
 RESULTS = ASSETS / "line-thickness-results-2026-09-06.json"
 FIXTURE = ROOT / "sketches/review/line-thickness.systemsketch"
 OUTPUT = DOCS / "line-thickness-2026-09-06.html"
+
+
+PRE_AUDIT_REV = "47d44537"
+PRESET_CROP = (8, 108, 492, 348)
+
+
+def preset_crops() -> tuple[str, str]:
+    """The preset cards before and after the contrast fix, cropped at build time.
+
+    The "before" frame is read straight out of git rather than kept as a second
+    committed PNG: the bug is a property of a commit, so the commit is the
+    honest source for it. Crops are gitignored build output.
+    """
+    before_raw = ASSETS / "crop-presets-before-raw.png"
+    before_raw.write_bytes(subprocess.run(
+        ["git", "show", f"{PRE_AUDIT_REV}:docs/assets/menu-lab-1-shape-2026-09-06.png"],
+        cwd=ROOT, check=True, capture_output=True,
+    ).stdout)
+    out = []
+    for name, source in (("before", before_raw),
+                         ("after", ASSETS / "menu-lab-1-shape-2026-09-06.png")):
+        crop = Image.open(source).convert("RGB").crop(PRESET_CROP)
+        crop = crop.resize((crop.width * 2, crop.height * 2), Image.LANCZOS)
+        path = ASSETS / f"crop-presets-{name}.png"
+        crop.save(path)
+        out.append(data_uri(path, "image/png"))
+    before_raw.unlink()
+    return out[0], out[1]
+
+
+def lab_presets() -> list[str]:
+    """The preset ids the lab actually ships, read from its own model."""
+    source = (ROOT / "src/prototypes/menuLab/menuLabModel.ts").read_text(encoding="utf-8")
+    block = source.split("export const LAB_PRESETS", 1)[1].split("\n]", 1)[0]
+    return re.findall(r"^\s{4}id: '([^']+)'", block, re.M)
 
 
 def data_uri(path: Path, mime: str) -> str:
@@ -104,6 +142,13 @@ def main() -> None:
     lab_connector = data_uri(ASSETS / "menu-lab-2-connector-2026-09-06.png", "image/png")
     lab_settings = data_uri(ASSETS / "menu-lab-4-settings-2026-09-06.png", "image/png")
     fixture_png = data_uri(ROOT / "sketches/review/line-thickness.png", "image/png")
+    lab_code = data_uri(ASSETS / "menu-lab-5-code-2026-09-06.png", "image/png")
+    presets_before, presets_after = preset_crops()
+    preset_ids = lab_presets()
+    preset_count = len(preset_ids)
+    preset_list = " \u00b7 ".join(preset_ids)
+    code_order = " \u00b7 ".join(results["lab"]["codeTriggers"])
+    pre_audit_rev = PRE_AUDIT_REV
 
     font = results["fontSize"]
     checks = "".join(f"<li>{html.escape(check)}</li>" for check in results["checks"])
@@ -242,6 +287,25 @@ footer{{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);color:
 <li><b>Tweakpane / leva / dat.GUI.</b> A control panel generated from a schema of levers: the shape of the lab itself.</li>
 <li><b>Zach's own <code>C - Semantic Type Registry</code></b> — “resolve semantics once, then project them many times”, and “give plugins a constrained contribution point rather than an unbounded new visual language”.</li>
 </ul>
+</section>
+
+<section class="panel">
+<h2>The audit the work order asked for</h2>
+<p>The handoff left two surfaces unexamined — <code>BLOCK_TITLE_CONTEXTUAL_RECIPE</code> and the Code selection pill — with the guess that neither should carry a thickness row, to be “verified in the lab”. Verifying it needed a Code preset, because the pill had never been composable in the lab at all. The lab now ships {preset_count} presets: <code>{preset_list}</code>.</p>
+<figure><img src="{lab_code}" alt="The menu lab composing the Code selection pill: Language and Font size, no thickness row"><figcaption><b>Code block preset.</b> The composed pill is <code>{code_order}</code> — the <em>shared</em> shape recipe narrowing itself, not a Code-only menu. A Code block declares no <code>color</code>, <code>dash</code>, <code>font</code> or align StyleProp, so the same recipe every other shape uses resolves to Language plus the one Font size ladder.</figcaption></figure>
+<p><b>Verdict: both surfaces are right to have no thickness row.</b> A Block title is a run of text and a Code block's frame is chrome, so neither carries a user-painted edge; <code>hasAdjustableStrokeWidth</code> paints one only on <code>geo</code>, <code>draw</code>, <code>line</code> and <code>arrow</code>. A row on either would be a control that silently does nothing — the exact class of contextual-menu bug this work set out to end. That verdict now lives at the seam and is pinned by test, instead of remaining a guess in a document.</p>
+<h3>Two bugs the audit found by looking at it</h3>
+<p>The lab is meant to be where a menu bug shows up first. It was carrying two of its own.</p>
+<figure><div class="grid">
+<figure style="margin:0"><img src="{presets_before}" alt="The preset cards before the fix: only the grey description lines are readable, the bold names are near-white on near-white"><figcaption><b>Before.</b> Every preset's <em>name</em> — the word you click — painted near-white on a near-white surface. Only the description read.</figcaption></figure>
+<figure style="margin:0"><img src="{presets_after}" alt="The preset cards after the fix, with every name legible"><figcaption><b>After.</b> <code>--ss-text</code> on the surface, set once for every form control in the shell.</figcaption></figure>
+</div><figcaption>Cropped at build time from the journey's own frames — “before” read straight out of commit <code>{pre_audit_rev}</code>, because the bug is a property of a commit.</figcaption></figure>
+<ol>
+<li><b>A <code>button</code> does not inherit <code>color</code>.</b> The UA paints it with its own <code>buttontext</code>. <code>select</code> and the <code>↑ ↓</code> move buttons had each been given a colour locally; the preset cards were simply missed. Now set once for every form control in <code>.menu-lab__shell</code> rather than per widget.</li>
+<li><b>Half the lab's chrome never applied in Settings.</b> <code>.menu-lab select</code> was scoped to <code>.menu-lab</code> — the <em>standalone</em> route's own fixed-position wrapper. Settings renders the shell directly, with no such ancestor, so every select in Settings &rsaquo; Menu lab was a bare native control while the same board at <code>?menu-lab</code> looked designed. Re-scoped to <code>.menu-lab__shell</code>, which both entry points share.</li>
+</ol>
+<h3>And a preset can no longer lie about the product</h3>
+<p>The presets are hand-written, so nothing stopped one from keeping a grouping the real recipe had moved on from — which would make the lab misrepresent the very thing it exists to demonstrate. <code>labPresetDrift</code> now checks each preset against the product recipe it names: every control it emits must exist in that recipe, and controls it draws in one group must not be ones the recipe keeps apart. Stacked controls are exempt by construction, since they fold into a host and never reach a recipe — which is why <code>strokeWidth</code> is legitimately absent from <code>SHAPE_CONTEXTUAL_RECIPE</code> while the Shape preset still composes it. <code>menuLabModel.test.ts</code> fails the build on a mismatch.</p>
 </section>
 
 <section class="panel">
