@@ -643,13 +643,19 @@ def show(review: Review) -> str:
     # review scannable without turning the terminal back into a dashboard.
     lines = [f"Review · {review.name}"]
     if url := report_url(review):
-        lines.append("Read")
-        lines.append(f"📄 Standard HTML Rich Report  {terminal_link('view', url)}")
+        lines.extend([
+            "",
+            "Read",
+            f"📄 Standard HTML Rich Report  {terminal_link('view', url)}",
+        ])
     if url := board_url(review):
-        lines.append("Explore")
-        lines.append(f"🖱 Guided Review Board  {terminal_link('launch', url)}")
+        lines.extend([
+            "",
+            "Explore",
+            f"🖱 Guided Review Board  {terminal_link('launch', url)}",
+        ])
     # A review is a small visual island in otherwise noisy terminal output.
-    # Keep one blank line around it without reintroducing diagnostic ceremony.
+    # Keep a blank line around the card and before every purpose lane.
     return f"\n{'\n'.join(lines)}\n"
 
 
