@@ -1,0 +1,181 @@
+{
+  "feature": "Inspector port drag auto-scroll",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 620,
+      "y": 260,
+      "props": {
+        "title": "ingest_frame()",
+        "description": "Long port list \u2014 the Inputs list runs past the panel fold",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 470,
+        "inputs": [
+          {
+            "id": "in_h",
+            "name": "clock",
+            "type": "Trigger",
+            "visible": true,
+            "row": 0
+          },
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "exposure",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "gain",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_4",
+            "name": "white_balance",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_5",
+            "name": "gamma",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_6",
+            "name": "crop",
+            "type": "Rect",
+            "visible": true
+          },
+          {
+            "id": "in_7",
+            "name": "rotation",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_8",
+            "name": "denoise",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_9",
+            "name": "sharpen",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_10",
+            "name": "calibration",
+            "type": "Matrix",
+            "visible": true
+          },
+          {
+            "id": "in_11",
+            "name": "roi_mask",
+            "type": "Mask",
+            "visible": true
+          },
+          {
+            "id": "in_12",
+            "name": "timestamp",
+            "type": "float",
+            "visible": true
+          },
+          {
+            "id": "in_13",
+            "name": "camera_id",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_14",
+            "name": "sequence",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "meta",
+            "type": "Meta",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Click this Block. The Details panel on the right lists all 15 inputs \u2014 more rows than the panel can show at once.",
+      "x": 120,
+      "y": 300,
+      "w": 420,
+      "h": 130,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 In the panel, scroll DOWN to the bottom of INPUTS until the last row (sequence) is visible. The HEADER line is now off screen above.",
+      "x": 1120,
+      "y": 300,
+      "w": 430,
+      "h": 160,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "right"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Press the grip handle on the sequence row, drag UP to the top edge of the panel, and HOLD still there.",
+      "x": 620,
+      "y": 800,
+      "w": 460,
+      "h": 120,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "bottom"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 Holding at the edge scrolls the panel on its own, the tinted drop band keeps following the row under the cursor, and you can release on the HEADER line to move the port there. Before this change the panel never moved, so the HEADER row could not be reached at all.",
+      "x": 120,
+      "y": 520,
+      "w": 420,
+      "h": 260
+    }
+  ]
+}

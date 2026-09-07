@@ -364,6 +364,14 @@ async function main() {
     assert.deepEqual(outputsList, ['out_1@1', 'ROW', 'out_2@2'])
     pass('the inspector is the canvas read top to bottom, lines included')
 
+    // The inspector panel scrolls, and its port list has drifted below the fold
+    // as the panel gained sections. `box()` reports viewport coordinates, so an
+    // off-screen grip yields a press that lands outside the window and reaches
+    // no element at all — a silent false red, not a product failure. Bring the
+    // grip into view first, then measure, the way the settings journeys do.
+    await evaluate(page,
+      `document.querySelector('[data-testid="inspector-port-grip-inputs-in_2"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(300)
     const grip = await box(page, '[data-testid="inspector-port-grip-inputs-in_2"]')
     const headerDivider = await box(page, '[data-testid="inspector-divider-inputs-header-0"]')
     await mouse(page, 'mouseMoved', grip.cx, grip.cy)
@@ -388,12 +396,18 @@ async function main() {
     pass('an inspector drag is one undo step, like a canvas drag')
 
     // ------------------------------------------------------- expanded ---
+    // Same rule as the grip above: measure only what is on screen. The panel
+    // scrolls, so scroll the control into view inside the same evaluate that
+    // reads its rect — otherwise the rect describes a point outside the window
+    // and `clickAt` reaches nothing.
     const expandedButton = JSON.parse(await evaluate(page, `(() => {
       const button = Array.from(document.querySelectorAll('[data-inspector-section="View"] button'))
         .find((node) => node.textContent.trim() === 'expanded')
+      button.scrollIntoView({ block: 'center' })
       const r = button.getBoundingClientRect()
       return JSON.stringify({ cx: r.x + r.width / 2, cy: r.y + r.height / 2 })
     })()`))
+    await delay(300)
     await clickAt(page, expandedButton.cx, expandedButton.cy)
     await delay(400)
     await waitFor(page, `document.querySelector('${scope(run)} .systemsketch-block-canvas[data-block-view="expanded"]')`, 'Expanded Block')

@@ -43,7 +43,12 @@ from urllib.parse import quote
 REPO = Path(__file__).resolve().parents[1]
 NAME = re.compile(r"^[a-z][a-z0-9-]{0,47}$")
 PORT_MIN = 4600
-PORT_MAX = 4698
+# WHY this range is wide: a retained review keeps its port pair reserved while
+# it is down, which is the point — the URL in an old handoff has to survive a
+# restart. Fifty pairs were all reserved by September, so a new review could
+# not be published at all, and the only way out looked like evicting someone
+# else's board. Room to grow is much cheaper than that.
+PORT_MAX = 4898
 START_TIMEOUT_SECONDS = 35.0
 STOP_TIMEOUT_SECONDS = 5.0
 
