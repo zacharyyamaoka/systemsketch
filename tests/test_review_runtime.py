@@ -207,13 +207,13 @@ class ReviewRuntimeTests(unittest.TestCase):
                 patch.object(runtime, "report_url", return_value="http://127.0.0.1:4600/report"),
             ):
                 card = runtime.show(review)
-            self.assertIn("Review · pill-entry", card)
-            self.assertIn("RUNNING", card)
-            self.assertIn("click here to open the live board", card)
-            self.assertIn("click here to read the report", card)
-            self.assertNotIn("worktree", card)
-            self.assertNotIn("ports", card)
-            self.assertNotIn("stop    ", card)
+            self.assertEqual(
+                card,
+                "Review · pill-entry\n🖱 Board  view\n📄 Report view",
+            )
+            for absent in ("RUNNING", "pinned", "Media", "builder", "Re-run", "worktree", "ports"):
+                with self.subTest(absent=absent):
+                    self.assertNotIn(absent, card)
 
     def test_report_media_stays_in_the_ignored_capture_namespace(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

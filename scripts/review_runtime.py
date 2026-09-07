@@ -638,26 +638,13 @@ def terminal_link(label: str, url: str) -> str:
 
 
 def show(review: Review) -> str:
-    state = review_state(review)
-    states = {
-        "up": ("●", "RUNNING"),
-        "down": ("○", "STOPPED"),
-        "unhealthy": ("!", "NEEDS ATTENTION"),
-    }
-    glyph, label = states[state]
-    lines = [
-        f"\n┌─ Review · {review.name}",
-        f"│  {glyph} {label}  ·  pinned {review.commit[:12]}",
-    ]
+    # The terminal is an opening surface, not a diagnostic report. Keep the
+    # contract to the artifact someone can click, so a handoff scans at once.
+    lines = [f"Review · {review.name}"]
     if url := board_url(review):
-        lines.append(f"│  🖱  Board   {terminal_link('click here to open the live board', url)}")
+        lines.append(f"🖱 Board  {terminal_link('view', url)}")
     if url := report_url(review):
-        lines.append(f"│  📄  Report  {terminal_link('click here to read the report', url)}")
-    if review.report_media:
-        lines.append("│  ✦  Media   retained with this review (outside Git)")
-    if review.report_builder:
-        lines.append("│  ↻  Report  builder runs on every cold restart")
-    lines.append("└─ Re-run the same command any time to reopen this review.")
+        lines.append(f"📄 Report {terminal_link('view', url)}")
     return "\n".join(lines)
 
 
