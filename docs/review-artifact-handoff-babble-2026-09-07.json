@@ -6,7 +6,7 @@
   "count": 5,
   "defaultId": "v2",
   "defaultWhy": "Purpose Lanes is the provisional pick at 89/100: it makes the two report versions and the three different interaction types legible without losing the compact, one-command terminal handoff.",
-  "decisionHinge": "If most reviews usually contain only one report and one board, move 15 points from relationship clarity to instant scanning: the flat Artifact Stack overtakes Purpose Lanes (84 versus 82).",
+  "decisionHinge": "If immediate task selection matters more than version lineage, move 10 points from relationship clarity to instant scanning: Action Menu overtakes Purpose Lanes (89 versus 87).",
   "invariants": [
     "Every direction shows the same five review artifacts and conceals raw URLs behind clickable links.",
     "Every artifact row contains an icon, a meaningful title, and an action that says what clicking does.",
