@@ -14,7 +14,7 @@
 import { T, type TLShape, type TLShapeId } from 'tldraw'
 
 import { measureBlockText } from '../blocks/layoutBlock'
-import type { BtNode, BtNodeKind } from './btcppXml'
+import { emptyBehaviorTreeXml, type BtNode, type BtNodeKind } from './btcppXml'
 
 export const BEHAVIOR_TREE_SHAPE_TYPE = 'behaviorTree' as const
 export const BEHAVIOR_TREE_TOOL_ID = 'behaviorTree' as const
@@ -542,12 +542,31 @@ export function translateScene(scene: BtScene, dx: number, dy: number): BtScene 
 
 /* --------------------------------- defaults --------------------------------- */
 
+/**
+ * A brand-new region needs a real, if empty, BT.CPP document — not a blank
+ * string. `insertBehaviorTreeNode` locates the tree to insert into before it
+ * ever reaches the "empty tree accepts a root" case; with a blank source
+ * `locateTree` fails first ("The file has no <root> element") and neither the
+ * on-canvas "+" menu nor the inspector's Library can ever place a first node.
+ * `emptyBehaviorTreeXml` already existed for exactly this — it just wasn't
+ * wired up here yet.
+ *
+ * `treeId` (the prop, not the XML's own tree ID above) stays `''`: it is an
+ * override for "which tree in this document am I viewing", and every reader
+ * (`locateTree`, the Library's Sub Tree self-exclusion) already falls back
+ * to the document's real main tree when it's empty. Setting it to a fixed
+ * "MainTree" here matched today's seed by coincidence but broke that
+ * fallback the moment a differently-named tree — the toolbar's own
+ * PickAndPlace sample among them — was loaded into the same region.
+ */
+const DEFAULT_TREE_ID = 'MainTree'
+
 export function getDefaultBehaviorTreeProps(): BehaviorTreeShapeProps {
 	return {
 		w: 900,
 		h: 600,
 		title: '',
-		xml: '',
+		xml: emptyBehaviorTreeXml(DEFAULT_TREE_ID),
 		treeId: '',
 		treeStack: [],
 		projection: 'tree',

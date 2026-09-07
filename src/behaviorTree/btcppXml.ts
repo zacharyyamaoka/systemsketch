@@ -1103,6 +1103,19 @@ export function emptyBehaviorTreeXml(treeId = 'MainTree'): string {
 	return `<root BTCPP_format="4" main_tree_to_execute="${treeId}">\n    <BehaviorTree ID="${treeId}"/>\n</root>\n`
 }
 
+/**
+ * True for a blank string and for `emptyBehaviorTreeXml`'s own output alike
+ * — a real, parseable document with every `<BehaviorTree>` rootless. The
+ * tool needs this rather than a literal `xml === ''` check now that a fresh
+ * region's default is a valid empty document, not a blank string.
+ */
+export function isEmptyBehaviorTreeXml(source: string): boolean {
+	if (source.trim() === '') return true
+	const document = parseBehaviorTreeXml(source)
+	if (document.parseError) return false
+	return document.trees.length === 0 || document.trees.every((tree) => tree.root === null)
+}
+
 /** The pick-and-place Zach drew on the wireframe board, as BT.CPP XML. */
 export const SAMPLE_BEHAVIOR_TREE_XML = `<root BTCPP_format="4" main_tree_to_execute="PickAndPlace">
     <BehaviorTree ID="PickAndPlace">
