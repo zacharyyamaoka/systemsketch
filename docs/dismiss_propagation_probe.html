@@ -1,0 +1,79 @@
+<!doctype html>
+<html><body>
+<div id="root"><div id="panel"><button id="btn">t</button></div></div>
+<pre id="out"></pre>
+<script>
+// Faithful model of the two dismissal architectures against SystemSketch's
+// docs/bugs/0002 guard shape. Pure DOM propagation semantics; synthetic
+// dispatchEvent follows the identical capture/at-target/bubble path as real input.
+const root = document.getElementById('root');
+const panel = document.getElementById('panel');
+const btn = document.getElementById('btn');
+const log = {};
+
+function run(name, guard) {
+  for (const k of Object.keys(log)) delete log[k];
+  const ac = new AbortController();
+  const s = { signal: ac.signal };
+
+  // --- Radix DismissableLayer model: bubble-phase listener on document ---
+  document.addEventListener('pointerdown', () => { log.radix_bubble = true; }, s);
+
+  // --- Base UI useDismiss model, read from
+  //     @base-ui/react@1.8.0 floating-ui-react/hooks/useDismiss.mjs:458 + :344 ---
+  //     capture listener on document that arms a one-shot listener on the TARGET.
+  document.addEventListener('pointerdown', (e) => {
+    log.baseui_capture = true;
+    const target = e.target;
+    if (!target) return;
+    const un = () => target.removeEventListener('pointerdown', h);
+    const h = () => { log.baseui_decision = true; un(); };
+    target.addEventListener('pointerdown', h, s);
+  }, { capture: true, signal: ac.signal });
+
+  guard(s);
+
+  btn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+  ac.abort();
+  return `${name.padEnd(56)} radix_bubble=${!!log.radix_bubble}  baseui_capture=${!!log.baseui_capture}  baseui_decision=${!!log.baseui_decision}`;
+}
+
+const lines = [
+  run('A. no guard (control)', () => {}),
+  // React 18/19 attaches synthetic handlers at the ROOT CONTAINER, so a React
+  // onPointerDown={e=>e.stopPropagation()} stops the NATIVE event at #root, bubble phase.
+  run('B. React-style guard: stopPropagation at #root (bubble)', (s) =>
+    root.addEventListener('pointerdown', (e) => e.stopPropagation(), s)),
+  run('C. native guard on panel (bubble)', (s) =>
+    panel.addEventListener('pointerdown', (e) => e.stopPropagation(), s)),
+  run('D. native guard on panel (CAPTURE)', (s) =>
+    panel.addEventListener('pointerdown', (e) => e.stopPropagation(), { capture: true, signal: s.signal })),
+  run('E. guard on the TARGET itself (bubble)', (s) =>
+    btn.addEventListener('pointerdown', (e) => e.stopPropagation(), s)),
+  run('F. stopImmediatePropagation on the TARGET', (s) =>
+    btn.addEventListener('pointerdown', (e) => e.stopImmediatePropagation(), s)),
+  run('G. document CAPTURE guard registered BEFORE (worst case)', (s) => {}),
+];
+
+// G needs its guard installed before the probes; run it separately.
+(function () {
+  const ac = new AbortController();
+  const s = { signal: ac.signal };
+  for (const k of Object.keys(log)) delete log[k];
+  document.addEventListener('pointerdown', (e) => e.stopPropagation(),
+    { capture: true, signal: ac.signal });
+  document.addEventListener('pointerdown', () => { log.radix_bubble = true; }, s);
+  document.addEventListener('pointerdown', (e) => {
+    log.baseui_capture = true;
+    const t = e.target; const h = () => { log.baseui_decision = true; };
+    t.addEventListener('pointerdown', h, s);
+  }, { capture: true, signal: ac.signal });
+  btn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+  ac.abort();
+  lines[6] = `G. document CAPTURE stopPropagation registered FIRST`.padEnd(56) +
+    ` radix_bubble=${!!log.radix_bubble}  baseui_capture=${!!log.baseui_capture}  baseui_decision=${!!log.baseui_decision}`;
+})();
+
+document.getElementById('out').textContent = lines.join('\n');
+</script>
+</body></html>

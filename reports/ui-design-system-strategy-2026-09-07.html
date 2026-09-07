@@ -61,6 +61,14 @@
   .metric strong { display:block; font-size:24px; letter-spacing:-.04em }
   .metric span { color:var(--muted); font-size:11px; line-height:1.4; display:block; margin-top:2px }
   .axes-svg { width:100%; height:auto; display:block; margin:16px 0 4px }
+  .probe { margin:14px 0 4px; padding:16px 18px; border:1px solid #cfd9ea; border-radius:12px; background:#f6f9ff }
+  .probe-h { margin:0 0 6px; font-size:13.5px; color:var(--blue) }
+  .probe-p { margin:0 0 10px; font-size:12.5px; line-height:1.55; color:#3a404a; max-width:82ch }
+  .probe-t { font-size:12.5px; margin:0 0 10px }
+  .probe-t th, .probe-t td { padding:7px 10px; border-bottom:1px solid #dde5f2 }
+  .probe-t td.ok { color:var(--green); font-weight:650 }
+  .probe-t td.bad { color:var(--red); font-weight:650 }
+  .probe-t td.warn { color:var(--amber); font-weight:650 }
   ol.srcs { margin:8px 0 0; padding-left:26px; font-size:12.5px; color:var(--muted); columns:2; column-gap:28px }
   ol.srcs li { margin:4px 0; break-inside:avoid }
   footer { margin-top:26px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px;
@@ -83,14 +91,26 @@
   <div class="verdict"><b>Recommendation, in one breath:</b> the two axes get two different
   answers. <b>Axis 1 — converge app-authored chrome on Base UI</b>, component-by-component as
   files are touched, never big-bang: it covers every primitive the app uses <i>plus</i> the
-  NumberField Radix lacks, and its outside-press dismissal is capture-phase — structurally
-  immune to the exact <code>stopPropagation</code>-starvation bug class in
-  <code>docs/bugs/0002</code><sup class="c"><a href="#s10">10</a>,<a href="#s33">33</a></sup>. <b>Axis 2 — adopt nothing.</b> The
+  NumberField Radix lacks, and — measured in a browser, not inferred — its outside-press
+  dismissal survives the exact guard shape that starves Radix's in
+  <code>docs/bugs/0002</code><sup class="c"><a href="#s10">10</a>,<a href="#s33">33</a>,<a href="#s39">39</a></sup>. <b>Axis 2 — adopt nothing.</b> The
   <code>--ss-*</code> token layer already is the design system; the dark/light bugs were
   palette-derivation math inside it, and none of the four candidates sells that fix without a
   look that fights the canvas<sup class="c"><a href="#s36">36</a>,<a href="#s37">37</a></sup>. The reversible default if you do nothing: both
   libraries stay exactly where they are, <b>new</b> chrome work reaches for Base UI first,
   and nothing migrates until its file is being edited anyway.</div>
+  <div class="quiet"><b>Correction, 2026-09-07 (second pass).</b> The first version of this
+  page claimed Base UI registers its press listeners "capture-phase, unconditionally" and is
+  therefore <i>structurally immune</i> to the <code>docs/bugs/0002</code> class. An
+  adversarial review pushed back, and re-deriving it from the installed
+  <code>@base-ui/react@1.8.0</code> source plus a browser probe showed the wording was wrong
+  twice over: the listener group is gated on <code>outsidePress !== false</code> (a default,
+  not an invariant), and the capture listener does not decide anything — it re-arms the
+  decision on the event's own <b>target</b>. The conclusion survives and the mechanism is
+  better than advertised, but the immunity is <b>conditional, not structural</b>, and three
+  guard shapes still defeat it. The corrected argument, with the measurement, is in the Base
+  UI section. Four further numbers were wrong and are fixed; they are called out where they
+  appear.</div>
   <div class="quiet">Two things this doc does <b>not</b> do: touch product code (research
   only, per the brief), and re-litigate the 2026-09-07 six-domain library audit — it extends
   that audit's method (adopt where a genuine gap exists: elkjs, dnd-kit, colorjs.io) to the
@@ -134,7 +154,7 @@
   <text class="lane-sub" x="30" y="62">focus traps · outside-press dismissal · roving tabindex · ARIA wiring · positioning — no pixels, no opinion about looks</text>
 
   <rect class="pill" x="30" y="86" width="150" height="30" fill="#3061e6"/>
-  <text class="pl" x="105" y="105">Radix (in use ×7)</text>
+  <text class="pl" x="105" y="105">Radix (in use ×6)</text>
   <rect class="pill" x="192" y="86" width="170" height="30" fill="#3061e6"/>
   <text class="pl" x="277" y="105">Base UI (in use ×1, lab)</text>
   <rect class="pill" x="374" y="86" width="188" height="30" fill="#8a93a3"/>
@@ -175,19 +195,28 @@
 
 <section>
   <h2>Current state — measured, not remembered</h2>
-  <p>Numbers below are computed at build time from the live tree at
-  <code>/home/bam/systemsketch</code> (main checkout), so this table cannot drift from the
-  code it describes. Branch/worktree facts are labeled as such.</p>
+  <p>Every count in this section is computed at build time by
+  <code>docs/build_ui_design_system_strategy.py</code> against the live tree at
+  <code>/home/bam/systemsketch</code> (main checkout), so it cannot drift from the code it
+  describes; each measurement's exact query is a comment beside it in that file, and
+  branch/worktree facts are labeled with their tree. <b>That was not true of the first
+  draft</b> — the Tailwind migration surface and the tldraw-DOM rule count were prose
+  literals sitting inside a table that claimed to be derived. They are derived now, which is
+  how the rule count moved. Figures from the six research legs (release dates, upstream issue
+  states, Foxglove's line counts) are external and carry their 2026-09-07 read date in the
+  source index instead.</p>
 
   <div class="metrics">
     <div class="metric"><strong>6</strong><span>files import Radix on main
-      (<code>radix-ui: 1.6.7</code>, MIT)</span></div>
+      (<code>radix-ui: 1.6.7</code>, MIT) — an
+      import-anchored count, so the WHY comment in <code>DraftModeBar.tsx</code> explaining why it
+      does <i>not</i> use Radix is correctly excluded</span></div>
     <div class="metric"><strong>167</strong><span><code>--ss-*</code> declarations in
       <code>src/theme/tokens.css</code> (447 lines, the only file allowed chrome color literals)</span></div>
     <div class="metric"><strong>65</strong><span>files consume
       <code>var(--ss-…)</code> — the token layer is load-bearing, not aspirational</span></div>
-    <div class="metric"><strong>56 / 19518</strong><span>hand-authored CSS
-      files / lines under <code>src/</code> (beside 125999 lines of TS/TSX)</span></div>
+    <div class="metric"><strong>56 / 19,518</strong><span>hand-authored CSS
+      files / lines under <code>src/</code> (beside 125,999 lines of TS/TSX)</span></div>
   </div>
 
   <h3>Axis 1 today — two headless kits, no rule</h3>
@@ -228,12 +257,15 @@
         <td>grep census, 2026-09-07</td></tr>
       <tr><th>the live bug on this axis</th>
         <td><code>docs/bugs/0002</code>: panel <code>stopPropagation</code> guards starve Radix's
-            bubble-phase outside-press listener — <b>60 occurrences / 29 files</b>, dismissal
-            currently working through an accidental focus side-channel. This is an
-            integration-discipline bug (the fix realigns to tldraw's
-            <code>markEventAsHandled</code>), not a component-library gap.</td>
+            bubble-phase outside-press listener — <b>57 occurrences /
+            26 files on main</b> (measured here at build time; the record's
+            headline <b>60 / 29</b> is its count on <code>claude/container-primitive-rebuild</code>,
+            which carries <code>src/uiEditor/</code> where the guidance spread fastest — the
+            record names the tree, and this row does too). Dismissal currently works through an
+            accidental focus side-channel. This is an integration-discipline bug (the fix realigns
+            to tldraw's <code>markEventAsHandled</code>), not a component-library gap.</td>
         <td><code>docs/bugs/0002-panel-guards-starve-radix-dismissal.md</code>
-            (worktree <code>pep-evidence</code>)</td></tr>
+            (worktree <code>pep-evidence</code>)<sup class="c"><a href="#s33">33</a></sup></td></tr>
     </tbody>
   </table>
 
@@ -264,17 +296,27 @@
         <td>theme-appearance-lab <code>c51978ce</code>; contrast measurements 2026-09-01;
             <code>tests/test_theme_tokens.py</code></td></tr>
       <tr><th>The hard constraint</th>
-        <td>28 CSS rules across 11 files style tldraw's own DOM (<code>.tl-container</code>,
-            <code>.tl-text-shape-label</code>, <code>tlui-menu</code>…) — DOM the app does not
+        <td>62 CSS rules across 15 files style
+            tldraw's own DOM (<code>.tlui-main-toolbar__tools</code>,
+            <code>.tl-text-shape-label</code>, <code>.tlui-input</code>…) — DOM the app does not
             render. No utility framework or component library can ever reach these; they stay
             hand-written CSS under any strategy<sup class="c"><a href="#s20">20</a></sup>.</td>
-        <td>measured 2026-09-07 (Tailwind leg, comment-filtered grep)</td></tr>
+        <td>computed at build time: comments stripped, a rule counted when the
+            <b>subject</b> (rightmost compound) of any of its selectors carries
+            <code>.tl-</code>, <code>.tlui-</code> or <code>[data-tl</code>. A bare grep for
+            <code>.tl-</code> anywhere in the selector returns 80;
+            that over-counts rules merely <i>scoped</i> inside the canvas container, which a
+            utility class could replace</td></tr>
       <tr><th>Multi-host requirement</th>
         <td>The IDE plugins re-theme the same chrome from <b>host</b> variables (VS Code, Obsidian)
-            at runtime, via CSS custom properties. Any JS-time theme object (MUI's
-            <code>createTheme</code>, M3's token build steps) would have to rebuild on every host
-            theme change; the CSS-variable layer re-themes for free. This is a structural argument
-            for keeping tokens in CSS, independent of taste.</td>
+            at runtime, via CSS custom properties, and the CSS-variable layer re-themes for free.
+            <b>This is a reason to keep what exists, not a reason no library could do it</b> — an
+            earlier draft of this page claimed a JS-time theme object could not follow live host
+            variables, and that is false: MUI 9.4's
+            <code>cssVariables: { nativeColor: true }</code> accepts
+            <code>'var(--host-token)'</code> as a palette value and derives from it in CSS<sup class="c"><a href="#s40">40</a></sup>.
+            The honest form of the argument is cost, not capability: the token layer already
+            works, is gated by tests, and owes nothing to a vendor's theming model.</td>
         <td><code>src/theme/tokens.css:148–210</code>; <code>vscode-systemsketch/</code></td></tr>
     </tbody>
   </table>
@@ -306,42 +348,78 @@
       app uses — Popover, Dialog, <b>Context Menu</b> (verified live; blog posts claiming it's
       missing are stale), Tabs, Slider, Toolbar, Menu, Toast — plus Number Field (the
       drag-scrub already adopted in the inspector worktree), Combobox, Autocomplete, Select,
-      Scroll Area<sup class="c"><a href="#s4">4</a>,<a href="#s5">5</a></sup>. The reverse gap is one component this app doesn't use (Hover
-      Card)<sup class="c"><a href="#s4">4</a></sup>.</li>
-    <li><b>The dismissal architecture is the load-bearing difference.</b> Verified from
-      source, not docs: Radix's <code>DismissableLayer</code> decides outside-press on a
-      <b>bubble-phase</b> document <code>pointerdown</code> — the listener that
-      <code>docs/bugs/0002</code> proves this app starves at 60 call sites across 29
-      files<sup class="c"><a href="#s9">9</a>,<a href="#s33">33</a></sup>. Base UI's vendored <code>useDismiss</code> registers <i>every</i>
-      press listener on the document in <b>capture phase, unconditionally</b> — it fires
-      before any panel handler can call <code>stopPropagation</code><sup class="c"><a href="#s10">10</a></sup>. Standardizing on
-      Base UI structurally retires the app-side half of that bug class as call sites
-      migrate. (The sweep to <code>editor.markEventAsHandled</code> is still needed —
-      tldraw ships Radix internally for its own menus, forever<sup class="c"><a href="#s35">35</a></sup>.)</li>
+      Scroll Area<sup class="c"><a href="#s4">4</a>,<a href="#s5">5</a></sup>. <b>There is no reverse gap</b> — an earlier draft named Hover Card
+      as the one thing Radix has and Base UI lacks, which was an artifact of searching by
+      Radix's name: Base UI ships it as <b>Preview Card</b>, and the installed 1.8.0 tree
+      carries <code>preview-card/</code> with docs describing the identical component<sup class="c"><a href="#s4">4</a></sup>.</li>
+    <li><b>The dismissal architecture is the load-bearing difference — but the honest
+      version is narrower than this page first claimed.</b> Radix's
+      <code>DismissableLayer</code> decides outside-press on a <b>bubble-phase</b> document
+      <code>pointerdown</code>, the listener <code>docs/bugs/0002</code> proves this app
+      starves at <b>57 call sites across 26 files on main</b>
+      (the record's headline 60/29 is its count on
+      <code>claude/container-primitive-rebuild</code>, which carries
+      <code>src/uiEditor/</code>)<sup class="c"><a href="#s9">9</a>,<a href="#s33">33</a></sup>. Base UI's vendored <code>useDismiss</code>
+      registers its press listeners in <b>capture phase</b> — <i>gated on
+      <code>outsidePress !== false</code></i>, which is the default and which
+      <code>PopoverRoot</code>, <code>MenuRoot</code> and <code>useDialogRoot</code> all
+      leave enabled<sup class="c"><a href="#s10">10</a></sup>. The mechanism that matters, though, is not the phase: the capture
+      handler decides nothing, it re-arms the decision as a one-shot listener on the event's
+      own <b>target</b> (<code>addTargetEventListenerOnce</code>) — <i>below</i> every
+      intervening guard, so no ancestor's <code>stopPropagation</code> can reach it<sup class="c"><a href="#s10">10</a></sup>.
+      <b>That immunity is conditional, not structural</b>, and the measured limits are in the
+      table below.</li>
     <li><b>Radix is not dying — but the momentum is real and one-directional.</b> Radix
-      still releases (Jun–Jul 2026, including a controlled ContextMenu)<sup class="c"><a href="#s7">7</a></sup>; the
-      abandonment narrative traces to one speculative blog post<sup class="c"><a href="#s38">38</a></sup>. But Base UI has MUI's
-      staffed team, monthly releases, a repo pushed the day this was researched<sup class="c"><a href="#s2">2</a>,<a href="#s6">6</a></sup> —
-      and the ecosystem is voting: shadcn/ui made Base UI its <b>default</b> primitive layer
-      in July 2026 (new projects pick it ~2:1)<sup class="c"><a href="#s14">14</a></sup>, MUI names Base UI its "long-term
-      direction"<sup class="c"><a href="#s22">22</a></sup>, and <b>tldraw itself has an open spike evaluating a Radix→Base UI
-      migration</b> (tldraw/tldraw#7584) — the engine under this app may make the same move<sup class="c"><a href="#s12">12</a></sup>.</li>
+      still releases (<code>1.6.7</code> on 2026-07-24 with a controlled ContextMenu, and
+      <code>1.7.0-rc</code> prereleases through 2026-07-31)<sup class="c"><a href="#s7">7</a>,<a href="#s8">8</a></sup>; the abandonment
+      narrative traces to one speculative blog post<sup class="c"><a href="#s38">38</a></sup>. But Base UI has MUI's staffed
+      team, monthly releases, a repo pushed the day this was researched<sup class="c"><a href="#s2">2</a>,<a href="#s6">6</a></sup> — and the
+      ecosystem is voting: shadcn/ui made Base UI its <b>default</b> primitive layer in July
+      2026 (new projects pick it ~2:1)<sup class="c"><a href="#s14">14</a></sup>, and MUI names Base UI its "long-term
+      direction"<sup class="c"><a href="#s22">22</a></sup>. tldraw has its own issue open on this (tldraw/tldraw#7584,
+      "Investigate migrating from Radix UI to Base UI") — but read it for what it is: an
+      <b>investigation opened 2026-01-04 and still open eight months later, with four
+      comments and no linked branch, PR or implementation</b>. It is evidence that tldraw
+      considers the question live, not evidence that the engine is moving<sup class="c"><a href="#s12">12</a></sup>.</li>
     <li><b>The migration is bounded but not a rename.</b> Core state props survive
       (<code>open</code>/<code>onOpenChange</code>); what changes is composition:
       <code>asChild</code> → <code>render</code> prop at every call site, a mandatory
       <code>Positioner</code> layer on popup-family components,
       <code>Overlay</code>→<code>Backdrop</code>, <code>Content</code>→<code>Popup</code>,
-      Tabs <code>Trigger</code>→<code>Tab</code><sup class="c"><a href="#s13">13</a></sup>. Seven files on main. Every
-      migration guide independently converges on strangler-fig, not big-bang<sup class="c"><a href="#s13">13</a>,<a href="#s14">14</a></sup>.</li>
-    <li><b>The one live hazard is the transition itself:</b> mui/base-ui#2854 — a Base UI
-      popup mounted <i>inside</i> a Radix Dialog renders but cannot be clicked; open,
-      unresolved<sup class="c"><a href="#s11">11</a></sup>. So the sequencing rule is absolute: <b>never nest one library's
-      popup inside the other's modal layer.</b> Standalone popovers
+      Tabs <code>Trigger</code>→<code>Tab</code><sup class="c"><a href="#s13">13</a></sup>. <b>6 files on
+      main</b> import Radix. Every migration guide independently converges on strangler-fig,
+      not big-bang<sup class="c"><a href="#s13">13</a>,<a href="#s14">14</a></sup>.</li>
+    <li><b>Mixed-library nesting: a caution, not a blocker.</b> This page previously cited
+      mui/base-ui#2854 — a Base UI popup inside a Radix Dialog that renders but cannot be
+      clicked — as an open live hazard. <b>That was wrong.</b> The issue was
+      <b>closed as completed on 2025-10-16</b>, and its repro pinned
+      <code>@base-ui-components/react@^1.0.0-beta.3</code> — a beta of the
+      <i>predecessor package</i>, now deprecated at <code>1.0.0-rc.0</code> and superseded
+      by <code>@base-ui/react</code>. It says nothing about 1.8.0<sup class="c"><a href="#s11">11</a></sup>. The sequencing rule
+      it motivated still earns its place, on general grounds rather than a tracked bug: two
+      libraries running independent portal, z-index and dismissal stacks against each other
+      is untested ground in <i>this</i> app, and stacking is the classic place it bites. So
+      keep it as prudence with a stated expiry — <b>don't nest one library's popup inside
+      the other's modal layer while both ship</b>, and if a case genuinely wants it, spike
+      that one case rather than treating it as forbidden. Standalone popovers
       (<code>BtInsertMenu</code>, <code>DraftsControl</code>, <code>ContextualControls</code>)
       migrate freely; anything hosted by <code>CompareDialog</code> or
-      <code>LocalWorkspace</code> migrates with or after its dialog; <code>ReliableContextMenu</code>
-      last (largest surface, and Radix just shipped the controlled API it leans on)<sup class="c"><a href="#s7">7</a></sup>.</li>
+      <code>LocalWorkspace</code> migrates with or after its dialog;
+      <code>ReliableContextMenu</code> last (largest surface, and Radix just shipped the
+      controlled API it leans on)<sup class="c"><a href="#s7">7</a></sup>.</li>
   </ul>
+  <div class="probe">
+  <h4 class="probe-h">The dismissal claim, executed rather than asserted</h4>
+  <p class="probe-p">Both architectures modelled against seven guard shapes in
+  <code>docs/dismiss_propagation_probe.html</code>, re-run at build time in google-chrome (headless). The Base UI column
+  models <code>useDismiss.mjs:458</code> (capture listener on <code>document</code>) plus
+  <code>:344</code> (<code>addTargetEventListenerOnce</code>, which re-arms the decision on
+  the event target). <b>Row B is SystemSketch's actual guard shape</b>: React 18/19 attaches
+  synthetic handlers at the root container, so
+  <code>onPointerDown={(e) =&gt; e.stopPropagation()}</code> stops the native event
+  there — which is exactly the <code>capture: 1, bubble: 0</code> the bug record
+  measured<sup class="c"><a href="#s33">33</a>,<a href="#s39">39</a></sup>.</p>
+<table class="probe-t"><thead><tr><th>Guard shape on the press</th><th>Radix (document, bubble)</th><th>Base UI (target, re-armed from capture)</th><th>Outcome</th></tr></thead><tbody><tr><td>A. no guard (control)</td><td class="ok">fires</td><td class="ok">fires</td><td class="ok">n/a — both fire</td></tr><tr><td>B. React-style guard: stopPropagation at #root (bubble)</td><td class="bad">starved</td><td class="ok">fires</td><td class="ok">survives</td></tr><tr><td>C. native guard on panel (bubble)</td><td class="bad">starved</td><td class="ok">fires</td><td class="ok">survives</td></tr><tr><td>D. native guard on panel (CAPTURE)</td><td class="bad">starved</td><td class="bad">starved</td><td class="warn">starved</td></tr><tr><td>E. guard on the TARGET itself (bubble)</td><td class="bad">starved</td><td class="ok">fires</td><td class="ok">survives</td></tr><tr><td>F. stopImmediatePropagation on the TARGET</td><td class="bad">starved</td><td class="bad">starved</td><td class="warn">starved</td></tr><tr><td>G. document CAPTURE stopPropagation registered FIRST</td><td class="bad">starved</td><td class="bad">starved</td><td class="warn">starved</td></tr></tbody></table><p class="probe-p"><b>Read the last three rows.</b> A capture-phase guard on an intervening ancestor (D), <code>stopImmediatePropagation</code> on the target (F), and a <code>document</code>-capture guard registered before the popup mounts (G) all defeat Base UI too. Base UI's advantage is that it survives shapes B, C and E — and B is the one this codebase actually writes. Counted on main today: <b>zero</b> capture-phase <code>pointerdown</code> guards that call <code>stopPropagation</code>, and two <code>stopImmediatePropagation</code> call sites, neither on a popup path (<code>canvasCamera.ts:101</code>, <code>PrimitiveSearch.tsx:101</code>). So the advantage is real <i>for the tree as it stands</i>, and a future capture-phase guard would silently remove it. That is a discipline the <code>markEventAsHandled</code> sweep buys and a library does not.</p><p class="probe-p"><b>One caveat the probe cannot settle:</b> Base UI's Popover defaults to <code>outsidePressEvent: 'intentional'</code> for mouse when not trapping focus, which moves the decision from <code>pointerdown</code> to <code>click</code>. The listeners are capture-registered and target-armed either way, so the shape of the result is unchanged — but a guard on <code>onClick</code> rather than <code>onPointerDown</code> is the one to watch under that mode. Main has 6 such <code>onClick</code> guards across 6 files today; none is on a popup path, and the spike below is where that gets confirmed against real markup.</p></div>
 </div>
 
 
@@ -380,13 +458,15 @@
   <div class="what">MIT · Tailwind Labs · a styling authoring syntax — explicitly not behavior (that's their separate Headless UI project) and not a semantic palette<sup class="c"><a href="#s19">19</a></sup></div>
   <p><b>The real cost, measured against this tree:</b></p>
   <ul>
-    <li><b>Migration surface:</b> 56 CSS files / 19,518 lines to port and 1,466
-      <code>className</code> call sites across 106 of 162 <code>.tsx</code> files to rewire —
-      against a codebase whose styling is already token-driven and class-organized (14:1
-      class-vs-inline ratio; this is not the inline-style sprawl Tailwind rescues)<sup class="c"><a href="#s20">20</a></sup>.</li>
-    <li><b>28 rules across 11 files are permanently unmigratable</b> — they style tldraw's
-      own DOM (<code>.tl-container</code>, <code>.tl-text-shape-label</code>,
-      <code>tlui-menu</code>…), markup the app does not render. Tailwind cannot reach the
+    <li><b>Migration surface:</b> 56 CSS files / 19,518 lines to port and
+      1,466 <code>className=</code> call sites across 106 of
+      162 <code>.tsx</code> files to rewire — against a codebase whose styling is
+      already token-driven and class-organized (14:1 class-vs-inline ratio; this is not the
+      inline-style sprawl Tailwind rescues)<sup class="c"><a href="#s20">20</a></sup>.</li>
+    <li><b>62 rules across 15 files are permanently
+      unmigratable</b> — their selector <i>subject</i> is tldraw's own DOM
+      (<code>.tlui-main-toolbar__tools</code>, <code>.tl-text-shape-label</code>,
+      <code>.tlui-input</code>…), markup the app does not render. Tailwind cannot reach the
       part of the page that is the product<sup class="c"><a href="#s20">20</a></sup>.</li>
     <li><b>Preflight is a documented, open hazard against exactly this app's shape.</b>
       Tailwind's own docs warn the global base reset "is known to conflict with third-party
@@ -465,11 +545,24 @@
     <li><b>What MUI buys them, quantified:</b> their entire theme package is ~1,468 lines
       (two ~20-token palettes, 48 small per-component overrides) — MUI derives contrast
       text, hover/disabled overlays and elevation from that<sup class="c"><a href="#s26">26</a></sup>. That derivation is
-      exactly where SystemSketch's <code>colorFromSwatch</code> bug lived<sup class="c"><a href="#s37">37</a></sup>. But the
-      price is MUI's JS-time <code>createTheme</code>: a theme object built in JavaScript,
-      which cannot follow live host CSS variables the way <code>--ss-*</code> follows a VS
-      Code or Obsidian theme change without a rebuild — a structural mismatch with this
-      app's multi-host requirement, on top of a second visual language fighting tldraw's<sup class="c"><a href="#s36">36</a></sup>.</li>
+      exactly where SystemSketch's <code>colorFromSwatch</code> bug lived<sup class="c"><a href="#s37">37</a></sup>.</li>
+    <li><b>Correction: the "MUI can't do multi-host theming" argument does not survive.</b>
+      This page previously said MUI's JS-time <code>createTheme</code> "cannot follow live
+      host CSS variables without a rebuild." <b>That is false for current MUI.</b>
+      <code>cssVariables: {'{'} nativeColor: true {'}'}</code> — stable in
+      <code>@mui/material</code> 9.4.0, released 2026-08-27, eleven days before this page —
+      accepts an external variable as a palette value
+      (<code>palette.primary.main: 'var(--colors-brand-primary)'</code>) and replaces
+      <code>alpha</code>/<code>lighten</code>/<code>darken</code>/<code>getContrastText</code>
+      with CSS <code>color-mix()</code> and relative color, so the derived ramp follows the
+      host variable live with no JS rebuild<sup class="c"><a href="#s40">40</a></sup>. The documented caveats are narrow and do
+      not bite here: modern-browser-only (every host this app ships into is Chromium), and
+      computed colors "may not exactly match" the JS ones. Two real things remain — Foxglove
+      itself pins <code>@mui/material@7.2.0</code> (2025-06-30), <b>fourteen months before
+      the feature existed</b>, so their stack is not evidence for it<sup class="c"><a href="#s26">26</a></sup>; and MUI still
+      arrives as a second visual language and a second component substrate beside tldraw's.
+      The theming objection is withdrawn; the second-look objection is what actually rules
+      MUI out<sup class="c"><a href="#s36">36</a></sup>.</li>
   </ul>
 </div>
 
@@ -507,12 +600,21 @@
   <p><b>Axis 1 — standardize on Base UI for app-authored chrome, by strangler fig.</b>
   Written as a standing rule: new chrome reaches for <code>@base-ui/react</code> first;
   existing Radix call sites migrate when their file is already being edited, never as a
-  sweep; one library's popup never mounts inside the other's modal layer while both exist
-  (mui/base-ui#2854)<sup class="c"><a href="#s11">11</a></sup>. Sequencing that falls out of the nesting rule: standalone
-  popovers first (<code>ContextualControls</code>, <code>BtInsertMenu</code>,
+  sweep; while both libraries ship, don't mount one library's popup inside the other's modal
+  layer without spiking that case first<sup class="c"><a href="#s11">11</a></sup>. Sequencing that falls out of the nesting
+  rule: standalone popovers first (<code>ContextualControls</code>, <code>BtInsertMenu</code>,
   <code>DraftsControl</code>), the two Dialogs (<code>CompareDialog</code>,
   <code>LocalWorkspace</code>) as units, <code>ReliableContextMenu</code> last. The
   inspector worktree's NumberField is already on the right side of this rule.</p>
+  <p><b>What that rule now rests on, stated plainly.</b> After the correction, the case for
+  Base UI is: (1) <b>coverage</b> — every primitive this app uses plus NumberField, Combobox
+  and Select, which Radix lacks<sup class="c"><a href="#s3">3</a>,<a href="#s4">4</a></sup>; (2) <b>ecosystem momentum</b> — a staffed team,
+  monthly releases, shadcn/ui's default<sup class="c"><a href="#s2">2</a>,<a href="#s6">6</a>,<a href="#s14">14</a>,<a href="#s22">22</a></sup>; and (3) a <b>real but conditional</b>
+  dismissal advantage: measured, Base UI survives the guard shape this app actually has,
+  where Radix does not<sup class="c"><a href="#s10">10</a>,<a href="#s39">39</a></sup>. What it is <b>not</b> is structural immunity — three guard
+  shapes still defeat Base UI, and if any of them ever lands in the tree the advantage
+  evaporates for that call site. Weigh (3) as a tiebreaker that happens to point the same
+  way as (1) and (2), not as the reason on its own.</p>
   <p><b>Axis 2 — keep the token layer; harden its two weak seams instead of replacing it.</b>
   (1) Adopt the <code>on-*</code> role-pair naming from M3's vocabulary next time
   <code>tokens.css</code> is touched, so "copy on a tint is ink" becomes a name the
@@ -520,10 +622,14 @@
   (the <code>colorFromSwatch</code> family) onto colorjs.io's HCT, already adopted in the
   theme-appearance-lab — that is the library-grade wheel for the one part of theming that
   was genuinely hand-rolled and genuinely broke<sup class="c"><a href="#s25">25</a>,<a href="#s37">37</a></sup>.</p>
-  <p><b>Independent of both:</b> land the <code>docs/bugs/0002</code> sweep
-  (<code>stopPropagation</code> → <code>editor.markEventAsHandled</code>, 60 sites) with its
-  regression test regardless of library choice — tldraw ships Radix internally, so its
-  bubble-phase dismissal stays on the page even after full app-side convergence<sup class="c"><a href="#s33">33</a>,<a href="#s35">35</a></sup>.</p>
+  <p><b>Independent of both, and load-bearing on its own:</b> land the
+  <code>docs/bugs/0002</code> sweep (<code>stopPropagation</code> →
+  <code>editor.markEventAsHandled</code>: 57 sites across 26 files
+  on main, 60 / 29 on <code>claude/container-primitive-rebuild</code>) with its
+  regression test <b>regardless of library choice</b>. tldraw ships Radix internally for its
+  own menus, so its bubble-phase dismissal stays on the page forever — full app-side
+  convergence on Base UI does not retire the bug class, it only removes the app's own
+  popovers from it<sup class="c"><a href="#s33">33</a>,<a href="#s35">35</a></sup>.</p>
 
   <h3>The reversible default (what happens if you say nothing)</h3>
   <p>Both libraries stay in <code>package.json</code>. Nothing migrates. The only change is
@@ -538,10 +644,14 @@
   it lives against the canvas, it sits in the middle of the panel-guards bug class, and it
   already has a journey (<code>npm run test:contextual-composition</code>). Acceptance is
   the mechanism, not the symptom: with a <code>stopPropagation</code> guard deliberately in
-  place, assert the document-level <b>capture</b> listener still dismisses — the check
-  <code>docs/bugs/0002</code> says no journey makes today<sup class="c"><a href="#s10">10</a>,<a href="#s33">33</a></sup>. If the spike holds, the
-  standing rule above is validated end to end; if it doesn't, one file reverts and the rule
-  flips back to Radix-first at zero cost.</p>
+  place, assert the popover dismisses <i>and</i> that it did so through Base UI's
+  target-armed press path rather than the <code>focusin</code> side-channel that currently
+  hides the Radix bug — the check <code>docs/bugs/0002</code> says no journey makes
+  today<sup class="c"><a href="#s10">10</a>,<a href="#s33">33</a></sup>. The probe below tells you what a passing run should look like; the spike
+  is what proves it survives contact with a real portal, a real canvas and a real tldraw
+  layer stack, which no synthetic probe can. If it holds, the standing rule is validated end
+  to end; if it doesn't, one file reverts and the rule flips back to Radix-first at zero
+  cost.</p>
 </section>
 
 
@@ -552,10 +662,10 @@
     <thead><tr><th>Ruled out</th><th>Why — from the evidence, not presupposed</th></tr></thead>
     <tbody>
       <tr><th>Tailwind as a repo migration</th>
-        <td>19,518 lines / 1,466 call sites of rewrite for a codebase already token-driven;
-        28 rules it can never reach because tldraw renders that DOM; Preflight's disable
-        path has open bugs in exactly the bleed-into-third-party-widget failure mode this
-        app cannot absorb<sup class="c"><a href="#s19">19</a>,<a href="#s20">20</a></sup>.</td></tr>
+        <td>19,518 lines / 1,466 call sites of rewrite for a codebase
+        already token-driven; 62 rules it can never reach because tldraw
+        renders that DOM; Preflight's disable path has open bugs in exactly the
+        bleed-into-third-party-widget failure mode this app cannot absorb<sup class="c"><a href="#s19">19</a>,<a href="#s20">20</a></sup>.</td></tr>
       <tr><th>Material Design 3 as a system</th>
         <td>No maintained React implementation exists to adopt (Google's own is Lit, in
         maintenance mode; MUI is M2 and pointing at Base UI); its density floor and 2025
@@ -567,15 +677,18 @@
         behind them); the pattern minus the stack reduces to what the app already does.
         Keep as a reference gallery<sup class="c"><a href="#s16">16</a>,<a href="#s17">17</a></sup>.</td></tr>
       <tr><th>MUI (Foxglove's substrate)</th>
-        <td>A second visual language and a second token system fighting tldraw's, plus
-        JS-time theming that cannot follow live host CSS variables in the IDE webviews. The
-        thing worth having from Foxglove — the schema-driven settings tree — the app
-        already independently built<sup class="c"><a href="#s26">26</a>,<a href="#s27">27</a>,<a href="#s34">34</a>,<a href="#s36">36</a></sup>.</td></tr>
+        <td>A second visual language and a second component substrate beside tldraw's. The
+        thing worth having from Foxglove — the schema-driven settings tree — the app already
+        independently built. <b>Note the argument that was withdrawn:</b> MUI 9.4's
+        <code>nativeColor</code> mode <i>can</i> alias live host CSS variables, so "JS-time
+        theming can't follow the host" is no longer a reason to rule it out<sup class="c"><a href="#s26">26</a>,<a href="#s27">27</a>,<a href="#s34">34</a>,<a href="#s36">36</a>,<a href="#s40">40</a></sup>.</td></tr>
       <tr><th>A big-bang Radix→Base UI sweep</th>
-        <td>The transition is the risky part, not the endpoints: the one open cross-library
-        bug lives exactly at mixed nesting (#2854), and the <code>asChild</code>→<code>render</code>
-        rewrite deserves per-file review, not a batch diff. Strangler fig gets the same
-        destination without the exposure<sup class="c"><a href="#s11">11</a>,<a href="#s13">13</a></sup>.</td></tr>
+        <td>The transition is the risky part, not the endpoints: two libraries running
+        independent portal/z-index/dismissal stacks is untested ground here, and the
+        <code>asChild</code>→<code>render</code> rewrite deserves per-file review, not a
+        batch diff. Strangler fig gets the same destination without the exposure. (The
+        specific bug once cited for this, #2854, is closed and was filed against the
+        deprecated pre-1.0 package — the caution is general, not tracked<sup class="c"><a href="#s11">11</a>,<a href="#s13">13</a></sup>.)</td></tr>
       <tr><th>Porting tldraw-owned chrome to either library</th>
         <td>The toolbar spike already priced this: near-parity costs 970 lines and loses the
         digit keys and responsive overflow that tldraw's <code>OverflowingToolbar</code>
@@ -592,15 +705,15 @@
     <li id="s1">base-ui.com/react/overview/about — Base UI team: "from the creators of Radix, Material UI, and Floating UI" (Colm Tuite et al.)</li>
     <li id="s2">base-ui.com/react/overview/releases — 1.0.0 stable 2025-12-11; monthly releases to 1.8.0 (2026-09-04)</li>
     <li id="s3">github.com/radix-ui/primitives — discussion #3352, NumberField request, open and unanswered</li>
-    <li id="s4">base-ui.com/react/components/* — component inventory verified live 2026-09-07: Context Menu, Toast, Number Field all 200; Hover Card 404</li>
+    <li id="s4">@base-ui/react@1.8.0 component directories + bundled docs/react/components/*.md, read from node_modules 2026-09-07: 37 components incl. context-menu, number-field, toast, combobox, autocomplete, select, scroll-area. No hover-card/ — Base UI names it preview-card ('a link that shows a destination preview'), i.e. Radix's Hover Card under a different name, so the 'reverse gap' in the first draft was a naming artifact. Those docs also confirm the @base-ui-components/react → @base-ui/react rename</li>
     <li id="s5">registry.npmjs.org/@base-ui/react — MIT, 1.8.0</li>
     <li id="s6">github.com/mui/base-ui — active, pushed 2026-09-07, 10,845 stars, not archived</li>
     <li id="s7">radix-ui.com/primitives/docs/overview/releases — releases through Jul 2026, incl. controlled ContextMenu (Jun 2026)</li>
-    <li id="s8">registry.npmjs.org/radix-ui — 1.6.7 (2026-07-31), MIT; 1.7.0-rc published same day</li>
+    <li id="s8">registry.npmjs.org/radix-ui — 1.6.7 published 2026-07-24, MIT; 1.7.0-rc prereleases through 2026-07-31 (re-read from the registry 2026-09-07; an earlier draft dated 1.6.7 to 07-31)</li>
     <li id="s9">radix-ui/primitives dismissable-layer.tsx (raw source) — outside-press decided by bubble-phase document pointerdown listener</li>
-    <li id="s10">mui/base-ui packages/react/src/floating-ui-react/hooks/useDismiss.ts lines 720–736 (raw source) — all press listeners registered capture-phase on document, unconditionally (hardened vendored fork; public @floating-ui/react defaults to bubble)</li>
-    <li id="s11">github.com/mui/base-ui/issues/2854 — Base UI popup inside Radix Dialog renders but cannot be clicked; open, labeled 'external dependency'</li>
-    <li id="s12">github.com/tldraw/tldraw/issues/7584 — tldraw's own open spike investigating a Radix→Base UI migration (Jan 2026)</li>
+    <li id="s10">@base-ui/react@1.8.0 floating-ui-react/hooks/useDismiss.mjs, read from node_modules (worktree tldraw-inspector-panel-cf524c): :37 outsidePress defaults true, :53 outsidePressEnabled = outsidePress !== false, :458 the press listeners (click/pointerdown/pointerup/pointercancel/mousedown/mouseup/touch*) all registered on document with capture, gated on that flag; :344 addTargetEventListenerOnce re-arms the decision on the event's own target; :358 closeOnPressOutsideCapture defers to it. PopoverRoot.mjs:111 passes no outsidePress (default on); MenuRoot.mjs:348 and useDialogRoot.mjs:34 pass functions, which also leave it enabled</li>
+    <li id="s11">github.com/mui/base-ui/issues/2854 — CLOSED as completed 2025-10-16; repro pinned @base-ui-components/react@^1.0.0-beta.3 (predecessor package, now deprecated at 1.0.0-rc.0) with @radix-ui/react-dialog@^1.1.15. Re-fetched 2026-09-07; an earlier draft of this page cited it as open and current</li>
+    <li id="s12">github.com/tldraw/tldraw/issues/7584 — 'Investigate migrating from Radix UI to Base UI'; opened 2026-01-04, still open 2026-09-07, 4 comments, labels sdk/keep, ~32 files in scope, no linked PR, branch or implementation</li>
     <li id="s13">basecn.dev/docs/get-started/migrating-from-radix-ui — asChild→render, Positioner layer, part renames; strangler-fig guidance</li>
     <li id="s14">ui.shadcn.com/docs/changelog/2026-07-base-ui-default + github.com/shadcn-ui/ui/discussions/9562 — Base UI default since July 2026; ~2:1 pick rate; Radix track continues</li>
     <li id="s15">ui.shadcn.com/docs/changelog/2026-02-radix-ui — Radix track moved to the unified radix-ui package</li>
@@ -608,7 +721,7 @@
     <li id="s17">shadcn-ui/ui apps/v4/registry/new-york-v4/ui/button.tsx (raw source) — variants are Tailwind utility strings in cva(), incl. JIT-only constructs</li>
     <li id="s18">tailwindcss.com/docs/theme — @theme inline can wrap pre-existing CSS custom properties</li>
     <li id="s19">tailwindcss.com/docs/preflight + tailwindlabs/tailwindcss#17481, #17445, #19114 — preflight 'known to conflict with third-party libraries'; disable is all-or-nothing with open leak bugs</li>
-    <li id="s20">local measurement 2026-09-07 (comment-filtered grep) — 28 CSS rules across 11 files under src/ target tldraw's own DOM classes; 1,466 className sites in 106 of 162 .tsx files</li>
+    <li id="s20">local measurement, computed at build time from /home/bam/systemsketch — CSS rules whose selector subject carries .tl-/.tlui-/[data-tl (comments stripped), and literal className= occurrences in src/**/*.tsx. Both were hardcoded prose in the first draft (28/11 and 1,466/106); they are now derived, and the CSS figure changed because the earlier one was not reproducible under any stated rule</li>
     <li id="s21">github.com/material-components/material-web discussion #5642 + releases — maintenance mode since June 2024, engineers reassigned to Wiz; volunteer releases since</li>
     <li id="s22">mui/material-ui#29345 (M3 request, open since 2021) + mui.com/blog/2026-and-beyond — no M3 on the roadmap; Base UI named the long-term direction</li>
     <li id="s23">m3.material.io — design-tokens (md.ref/md.sys/md.comp), density, elevation, canonical layouts; 48dp touch-target floor</li>
@@ -621,12 +734,14 @@
     <li id="s30">rerun.io/docs — "uses egui (written by Rerun's CTO)"; embed-web: the viewer executes inside a single &lt;canvas&gt;</li>
     <li id="s31">registry.npmjs.org/@rerun-io/web-viewer(-react) — WASM bundle + React lifecycle shell; zero authored DOM chrome</li>
     <li id="s32">docs.rs/re_ui design_tokens.rs — RON token files (design_tokens.ron, color_table.ron) applied to egui Style</li>
-    <li id="s33">docs/bugs/0002-panel-guards-starve-radix-dismissal.md (worktree pep-evidence) — stopPropagation starves Radix's bubble-phase listener; 60 occurrences / 29 files; dismissal survives via an accidental focus side-channel</li>
+    <li id="s33">docs/bugs/0002-panel-guards-starve-radix-dismissal.md (worktree pep-evidence) — stopPropagation starves Radix's bubble-phase listener; dismissal survives via an accidental focus side-channel. The record's headline census is 60 occurrences / 29 files on claude/container-primitive-rebuild, and it states its own scope: 'Run where this record lives it returns 57/26, and on main 57/26.' This page measures main at build time and labels it</li>
     <li id="s34">docs/work-order-primitive-inspector.md §5 (worktree tldraw-inspector-panel-cf524c) — the prior scrub-field survey: Radix #3352, react-aria/Blueprint/Mantine/Tweakpane no drag-scrub, Ark UI ~70 zag machines, Excalidraw DragInput.tsx pattern, Webstudio/Theatre.js AGPL read-never-copy</li>
     <li id="s35">reports/toolbar-radix-spike-2026-09-07.html (main, 8a25f263) — toolbar rebuilt on Radix: 52/52 checks, 12/12 tokens both schemes; digit keys 1–9 and responsive overflow lost; editor.menus registration is the permanent tax</li>
     <li id="s36">src/theme/tokens.css + tests/test_theme_tokens.py + tests/theme_contrast_smoke.mjs — single-owner token layer, literal ban, phantom-variable gate, 5-theme × ~25-probe WCAG journey</li>
     <li id="s37">theme-appearance-lab worktree — c51978ce (colorFromSwatch wrote five light-mode frame-chrome values into the dark table) and 224798d6 (contrast math moved onto colorjs.io); accent-on-accent-soft measured 2.60–4.29:1 across all palettes (2026-09-01)</li>
     <li id="s38">pkgpulse.com/guides/shadcn-ui-vs-base-ui-vs-radix-components-2026 — Radix 'relatively slowed' next to Base UI's staffed team, not stopped</li>
+    <li id="s39">docs/dismiss_propagation_probe.html — both dismissal architectures modelled against seven guard shapes and executed in headless Chrome at build time; the matrix in the Base UI section is that run's output, not a reading</li>
+    <li id="s40">mui.com/material-ui/customization/css-theme-variables/native-color/ + registry.npmjs.org/@mui/material — cssVariables.nativeColor accepts 'var(--external-token)' as a palette value and replaces alpha/lighten/darken/getContrastText with CSS color-mix() and relative color; modern browsers only; @mui/material 9.4.0 published 2026-08-27, while Lichtblick pins 7.2.0 (2025-06-30)</li>
   </ol>
 </section>
 
