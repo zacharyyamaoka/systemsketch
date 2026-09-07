@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Build the served-report contract gallery for retained human reviews."""
+
+from __future__ import annotations
+
+import html
+import os
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+RUNTIME = ROOT / "scripts" / "review_runtime.py"
+OUTPUT = Path(
+    os.environ.get(
+        "SYSTEMSKETCH_REPORT_OUTPUT",
+        ROOT / "reports" / "review-delivery-protocol-2026-09-07.html",
+    )
+)
+MEDIA = Path(
+    os.environ.get(
+        "SYSTEMSKETCH_REPORT_MEDIA_DIR",
+        ROOT / "reports" / "media" / "review-delivery-protocol",
+    )
+)
+
+
+def main() -> None:
+    source = RUNTIME.read_text(encoding="utf-8")
+    required = ("copy_report_media", "rebuild_report", "terminal_link", "report_media")
+    missing = [name for name in required if name not in source]
+    if missing:
+        raise SystemExit(f"review runtime no longer exposes required delivery seams: {missing}")
+
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    media_reference = "media/review-delivery-protocol/runtime-card.svg"
+    page = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Retained review delivery · SystemSketch</title>
+<style>
+:root{{--ink:#e9eef7;--muted:#9caabd;--paper:#0d1522;--card:#151f30;--line:#2a3a51;--cyan:#57d6ff;--lime:#a5e878;--orange:#ffb55c}}*{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(circle at 80% 0,#1a3858 0,transparent 34rem),var(--paper);color:var(--ink);font:16px/1.55 Inter,ui-sans-serif,system-ui,sans-serif}}main{{width:min(1060px,calc(100% - 36px));margin:auto;padding:58px 0 78px}}.eyebrow{{color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}}h1{{font-size:clamp(40px,7vw,76px);line-height:.94;letter-spacing:-.06em;margin:.18em 0;max-width:920px}}.lead{{font-size:20px;color:#c7d2e2;max-width:820px}}.card,.fact{{background:linear-gradient(145deg,#172438,#111a29);border:1px solid var(--line);border-radius:18px}}.card{{padding:22px;margin:26px 0}}.hero{{padding:14px;overflow:hidden}}.hero img{{width:100%;display:block;border-radius:11px;background:#0a101a}}.caption{{color:var(--muted);font-size:13px;padding:10px 4px 0}}.facts{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}}.fact{{padding:17px}}.fact b{{font-size:25px;display:block;color:var(--lime)}}.fact span{{font-size:13px;color:var(--muted)}}.flow{{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch}}.node{{border:1px solid var(--line);border-top:4px solid var(--cyan);border-radius:13px;padding:16px;background:#0e1827}}.node:nth-child(3){{border-top-color:var(--orange)}}.node:nth-child(5){{border-top-color:var(--lime)}}.node b{{display:block;font-size:17px}}.node span{{display:block;color:var(--muted);font-size:14px;margin-top:5px}}.arrow{{display:grid;place-content:center;color:var(--orange);font-size:25px}}h2{{font-size:25px;letter-spacing:-.03em;margin:0 0 8px}}p{{color:#c4cede}}code{{font:12px ui-monospace,SFMono-Regular,monospace;background:#24344b;border-radius:5px;padding:2px 5px;color:#d9edff}}ul{{padding-left:20px;margin:0}}li+li{{margin-top:8px}}.two{{display:grid;grid-template-columns:1fr 1fr;gap:15px}}footer{{border-top:1px solid var(--line);color:var(--muted);font-size:13px;margin-top:35px;padding-top:18px}}@media(max-width:700px){{main{{width:min(100% - 26px,1060px);padding-top:34px}}.facts,.two,.flow{{grid-template-columns:1fr}}.arrow{{transform:rotate(90deg);height:20px}}}}
+</style></head><body><main>
+<div class="eyebrow">SystemSketch · review delivery · 7 September 2026</div>
+<h1>One command opens the whole review.</h1>
+<p class="lead">A retained runtime now serves the pinned app, guided board, lightweight report, and its ignored capture media together. The final chat handoff can stay to a title and one re-runnable command.</p>
+<figure class="card hero"><img src="{media_reference}" alt="Diagram of the terminal review card with clickable Board and Report labels"><figcaption class="caption">Architecture diagram, not a screenshot: the terminal card deliberately reveals two short click targets instead of a worktree path, port pair, or encoded board URL.</figcaption></figure>
+<section class="facts"><div class="fact"><b>1 command</b><span>the only final opening gesture</span></div><div class="fact"><b>2 click targets</b><span>board and report in one terminal card</span></div><div class="fact"><b>0 capture blobs</b><span>in the tracked report page</span></div></section>
+<section class="card"><h2>The retention boundary</h2><div class="flow"><div class="node"><b>Git</b><span>Committed report page, report builder, board, and product revision.</span></div><div class="arrow">→</div><div class="node"><b>First publish</b><span>Copies ignored <code>reports/media/&lt;name&gt;/</code> into the detached review worktree.</span></div><div class="arrow">→</div><div class="node"><b>Restart</b><span>Serves the same page and retained captures after the implementation track is gone.</span></div></div></section>
+<section class="two"><article class="card"><h2>What changed</h2><ul><li><code>--report-media</code> is constrained to the ignored media namespace and copied safely before a cold start.</li><li>An optional <code>--report-builder</code> runs in the pinned worktree with output and media paths supplied as environment variables.</li><li>The terminal uses OSC-8 links for short, clickable Board and Report labels.</li></ul></article><article class="card"><h2>What a handoff omits</h2><ul><li>No “Open it” table.</li><li>No <code>file://</code> report link or percent-encoded board URL.</li><li>No stop command rendered as an accidental button.</li></ul></article></section>
+<footer>Measured from <code>{html.escape(str(RUNTIME.relative_to(ROOT)))}</code> by <code>docs/build_review_delivery_protocol.py</code>. The SVG diagram is intentionally separate ignored media, exercised by the retained review runtime.</footer>
+</main></body></html>"""
+    OUTPUT.write_text(page, encoding="utf-8")
+    print(OUTPUT)
+
+
+if __name__ == "__main__":
+    main()

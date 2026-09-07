@@ -1,6 +1,6 @@
 ---
 name: systemsketch-review-fixture
-description: Create or refresh feature-specific `.systemsketch` review fixtures after SystemSketch implementation work, with real interaction targets, numbered text cues, arrows, and an exact Preview URL. Use when a completed UI or canvas feature needs a fast human verification board; do not use as a substitute for automated or real-browser acceptance tests.
+description: Create or refresh feature-specific `.systemsketch` review fixtures after SystemSketch implementation work, with real interaction targets, numbered text cues, arrows, and one retained-review relaunch command. Use when a completed UI or canvas feature needs a fast human verification board; do not use as a substitute for automated or real-browser acceptance tests.
 ---
 
 # SystemSketch review fixture
@@ -40,13 +40,25 @@ This standing request may not repeat the feature that was just added. Read the c
 
    The helper cold-reopens the board, checks the `.systemsketch` envelope and shape inventory, **verifies that geometric containment matches real parentage**, and writes a PNG beside it. It refuses to overwrite by default; use `--force` only when intentionally replacing the same review fixture.
 9. Inspect the generated PNG yourself. Check text clipping, card overlap, cropped content, arrow/card crossings, arrow/label crossings, and whether every target segment is normal to the target edge. Then drive the saved fixture once in the real running app: move one arrow's target and confirm the cue remains attached, then verify the intended feature interaction.
-10. Check ports before launching. Reuse the current Preview only if it belongs to this checkout; otherwise allocate an unused Preview/API port pair. Report a clickable URL with the absolute fixture path:
+10. Commit the fixture and publish it with the report through the retained runtime. At first
+    publication provide `--board`, `--report`, and (when there is visual evidence)
+    `--report-media`; verify the runtime’s clickable **Board** card opens this fixture.
+    End the handoff with only the standard review heading and one runnable command:
 
-   ```text
-   http://127.0.0.1:<preview-port>/?board=%2Fabsolute%2Fpath%2Fto%2Ffixture.systemsketch
-   ```
+    ````markdown
+    ## Review · <feature>
 
-Keep the server running for Zach. Report the fixture, PNG, exact URL, gesture, and pass condition together.
+    ```bash
+    python3 /home/bam/systemsketch/scripts/review_runtime.py up <review-name> --ref <committed-sha>
+    ```
+    ````
+
+    Do not add an Open-it table, direct board URL, `file://` report link, or stop command.
+    The retained runtime supplies the clickable Board and Report targets together. The board
+    must stay under the reviewed worktree so the server can safely open it.
+
+    Report the gesture and pass condition in the report and on the fixture itself; its PNG
+    belongs with ignored review media, not in the chat.
 
 ## Calibrate layout changes with a visual loop
 

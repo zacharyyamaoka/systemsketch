@@ -1,3 +1,13 @@
+> [!warning] RETIRED 2026-09-07 — historical record only.
+> The local Review Hub described below was built, verified, and then retired the same day:
+> *"This is better so I don't have an app I need to maintain."* Nothing should conform to
+> this contract any more. The live rule is [the skill](../SKILL.md): one retained runtime
+> command serving a committed lightweight report, its retained ignored media, and any board.
+>
+> Kept because the distinction it drew is still worth reading — **work status is what a
+> human must do; preview runtime is whether a server happens to run** — and because
+> collapsing the two is the mistake the replacement also has to avoid.
+
 # Review Hub contract
 
 This is the provider-neutral contract for a local Review Hub. It is a behavioral

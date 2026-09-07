@@ -165,11 +165,14 @@ report, create an explicit retained review:
 
 ```bash
 python3 scripts/review_runtime.py up my-review --ref HEAD \\
-  --board sketches/review/example.systemsketch --report docs/example.html
+  --board sketches/review/example.systemsketch --report reports/example.html \\
+  --report-media reports/media/my-review --report-builder docs/build_example.py
 ```
 
-It pins the reviewed commit in its own worktree, waits for the public URL to be
-healthy, and survives the agent shell. It remains running until
+It pins the reviewed commit in its own worktree, retains ignored report media there, waits for
+the public URL to be healthy, and survives the agent shell. Its review card gives clickable
+Board and Report targets. The final handoff is only the concise `review_runtime.py up
+my-review --ref <committed-sha>` command. It remains running until
 `review_runtime.py down my-review` or `review_runtime.py down --all` is called.
 
 ## Before you hand anything back

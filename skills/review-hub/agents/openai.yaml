@@ -1,4 +1,4 @@
 interface:
   display_name: "Review Hub"
-  short_description: "Publish durable, versioned agent reviews"
-  default_prompt: "Use $review-hub to publish this task’s report, status, and optional preview manifest."
+  short_description: "Hand over a retained review with one relaunch command"
+  default_prompt: "Use $review-hub to retain this task's report, media, and review board, then hand it over with the one-line relaunch command."

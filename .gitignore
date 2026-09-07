@@ -15,3 +15,10 @@ docs/assets/**/crop-*.png
 # distilled readings the product is checked against live in docs/assets/.
 tools/figjam/appearance/
 tools/figjam/shots/
+
+# Report media — never Git history. A tracked report references these captures relatively,
+# and `review_runtime.py up --report-media reports/media/<name>` copies them into the
+# retained pinned review before Vite serves the page. That makes a later restart independent
+# of the implementation worktree without turning the source repository into a video archive.
+# `tests/test_report_weight.py` keeps the tracked page free of inlined capture payload.
+reports/media/

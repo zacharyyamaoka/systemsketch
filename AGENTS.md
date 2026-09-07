@@ -80,18 +80,21 @@ npm run dev
 - Run `npm run check` before handoff. For UI work, also drive a real CDP journey from
   `tests/*_smoke.mjs`, inspect its screenshots, and use a scratch `.systemsketch` or `.tldr`
   board—never Zach's auto-saved board.
-- Reports are `docs/build_<name>.py` builders producing self-contained dated HTML. Measure
-  facts from the live tree, render and inspect the report headlessly, then link it from
-  `README.md`. `docs/assets/crop-*.png` is ignored build output.
+- Reports are `docs/build_<name>.py` builders producing a lightweight dated page in
+  `reports/<name>-<date>.html`. Measure facts from the live tree, render and inspect it
+  through the retained review runtime, then link it from `README.md`. Put substantial
+  captures in ignored `reports/media/<review-name>/` and reference them relatively; do
+  not inline them into Git history. A builder passed to the runtime receives
+  `SYSTEMSKETCH_REPORT_OUTPUT` and `SYSTEMSKETCH_REPORT_MEDIA_DIR`.
 
 ## Seed the human review board before handoff
 
-After implementing a feature and before handing over a launched Preview, use the repo-local
+After implementing a feature and before handing over a retained review, use the repo-local
 [`systemsketch-review-fixture`](skills/systemsketch-review-fixture/SKILL.md) skill to create
 `sketches/review/<feature>.systemsketch`. Seed the minimum real Blocks, connections, and other
 objects needed to exercise the interaction. Put numbered instruction cards and orange arrows
-outside the interaction area, plus a green `PASS WHEN` card with the visible result. Give Zach
-the exact `?board=` URL and keep the server running.
+outside the interaction area, plus a green `PASS WHEN` card with the visible result. Verify it
+through the runtime’s clickable Board target; do not hand over a raw `?board=` URL.
 
 This standing instruction may not restate the feature just implemented. Recover it from the
 task history, diff, source, and regression test. If the fixture skill lacks the new shape,
@@ -105,9 +108,13 @@ targets `~/SystemSketch`.
 - A track's `serve.sh` is an agent-owned development process. Never describe its URL as a
   later-review link: it intentionally exits with the agent shell.
 - When a handoff includes a board or report Zach should be able to open later, first commit the
-  exact review artifacts, then run `python3 scripts/review_runtime.py up <review-name> --ref HEAD
-  --board <relative-board> --report <relative-report>`. It creates a detached, commit-pinned
-  review worktree and prints a URL only after its public health check passes.
+  exact report page, builder, and board, then run the full `review_runtime.py up` manifest
+  with `--board`, `--report`, `--report-media`, and `--report-builder` as applicable.
+  It copies ignored media into a detached, commit-pinned review worktree and prints a compact
+  card with clickable Board and Report targets only after its public health check passes.
+- The final handoff ends with just `## Review · <feature>` and the one-line absolute
+  `review_runtime.py up <review-name> --ref <committed-sha>` command. Never emit an Open-it
+  table, `file://` report link, raw board URL, or stop command.
 - Retained reviews stay live until an explicit `python3 scripts/review_runtime.py down
   <review-name>` or `python3 scripts/review_runtime.py down --all`. Do not use a chat/session-end
   hook as a proxy for archiving: it also fires after a short inactivity window, which defeats

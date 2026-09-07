@@ -1,87 +1,66 @@
 ---
 name: review-hub
-description: Publish durable, versioned reports and optional launchable previews to a local Review Hub. Use when an agent begins, updates, blocks, or finishes a task that should remain reviewable after its server or chat session ends; do not use for ordinary transient development output.
+description: Hand finished SystemSketch work to a human with one concise retained-review relaunch command. Use when work has a report, board, or runnable surface that must remain reviewable after the agent's shell ends.
 ---
 
-# Review Hub
+# Retained review handoff
 
-Use Review Hub as the durable human-facing record for a reviewable work item. It owns
-the work item's Kanban status, immutable report revisions, and optional on-demand
-preview recipes. It does **not** turn a temporary agent server into a deliverable.
+The deliverable is proof plus one reliable way to reopen it. The retained review runtime
+owns that surface: one pinned worktree, one Vite server, one command that serves the app,
+review board, report, and report media together. Do not give separate `file://` report
+links, a Markdown “Open it” table, long board URLs, or a list of stop instructions.
 
-## First check whether the Hub is available
+## Prepare the evidence
 
-The Hub may not be installed or running yet. Discover its installed CLI/help before
-attempting any mutation; use its actual accepted commands rather than inventing
-flags. If it is unavailable or rejects a record:
+- Commit the review board, report page, and optional report builder. The report page lives
+  in `reports/<feature>-<date>.html`; it is the small durable account that stays in Git.
+- Put captures, hero video, GIF fallback, and other heavy evidence in the ignored
+  `reports/media/<review-name>/` directory. Link to them relatively from the report, for
+  example `media/<review-name>/hero.mp4`. Never inline capture payloads in the tracked
+  HTML; `tests/test_report_weight.py` enforces this boundary.
+- On the first publish, run the runtime from the implementation checkout with the complete
+  manifest. It copies ignored media into the review's pinned worktree before starting Vite:
 
-- still create and hand off the self-contained report in the project;
-- do not claim that the report, revision, URI, or preview was published; and
-- state the exact local failure concisely so the user can install or repair the Hub.
+```bash
+python3 /home/bam/systemsketch/scripts/review_runtime.py up <review-name> --ref HEAD --board sketches/review/<feature>.systemsketch --report reports/<feature>-<date>.html --report-media reports/media/<review-name> --report-builder docs/build_<feature>.py
+```
 
-Read [the Review Hub contract](references/contract.md) before registering a report,
-status, revision, or preview. It defines the durable concepts that a conforming CLI
-or API must preserve even if its command spelling differs.
+  `--report-builder` is optional. When used, it runs in the pinned checkout with
+  `SYSTEMSKETCH_REPORT_OUTPUT` and `SYSTEMSKETCH_REPORT_MEDIA_DIR` set, so the page is
+  rebuilt immediately before it is served. A builder must honor those values rather than
+  write to a developer-specific absolute path.
+- Drive the retained review once. Verify the report loads its relative captures and the app
+  opens the intended board. The runtime prints a compact review card with clickable **Board**
+  and **Report** labels, not raw URLs. A later `up` on an
+  already-healthy review intentionally leaves it untouched; a cold restart reuses the
+  media retained in its own review worktree even after the original track is gone.
 
-## Publish the right thing
+## The final handoff
 
-1. Keep one stable work-item identity for one ongoing user objective. Obtain its ID
-   from the Hub when creating it; reuse it for later iterations.
-2. Update the work status at meaningful transitions:
-   `working` when implementation actually starts, `needs-user` when a concrete
-   decision or external condition blocks progress, and `ready-for-review` only once
-   the static review result is published. Treat `done` and `archived` as
-   user-owned unless the user explicitly delegates them.
-3. Produce a self-contained HTML report first. It must remain useful without a
-   server, task shell, or Internet connection. Give it a clear snapshot timestamp,
-   provenance, and an honest boundary between observed behavior and simulated or
-   unavailable behavior.
-4. Publish every material update as a new immutable revision. Never overwrite a
-   previous report, launch manifest, capture, or result note. Move the item's
-   `current` pointer only after the new revision was accepted.
-5. Register a preview only when exercising the real interaction adds value beyond
-   the report. Pin source and launch information, provide a health check, and make
-   the preview's static report fallback explicit. The Hub launches it on demand;
-   never hand the user a raw task-owned port as the only review link.
+End the final response with exactly a level-two review heading followed by one one-line
+`bash` fence. The heading identifies the feature; the command relaunches the immutable
+commit and prints clickable report and board labels. There is no introductory “Open it” section,
+no table, no raw URL, and no stop command in the response.
 
-## Preserve the two independent states
+````markdown
+## Review · <feature>
 
-Work status answers *what the user needs to do*; preview runtime answers *whether an
-optional server happens to be running*. Never encode one in the other. For example,
-an item can be `ready-for-review` with its preview `stopped`, or `needs-user` while
-an earlier preview remains `running` for comparison.
+```bash
+python3 /home/bam/systemsketch/scripts/review_runtime.py up <review-name> --ref <committed-sha>
+```
+````
 
-The Hub, not the agent, owns runtime transitions such as `stopped`, `starting`,
-`running`, and `failed`. An agent may register or update a manifest but must not
-guess a runtime result.
+The command must use the absolute script path, be one physical line, and be safe to run
+repeatedly. Do not pre-launch a new review merely for handoff; first publication and
+verification are implementation work, while the user-owned command is the durable opening
+gesture. `down` and `remove` are deliberately absent from the final response because their
+buttons would make a destructive action too easy to press.
 
-## Handle history deliberately
+## Why this is one surface
 
-- Link an update to its parent revision. The current revision is a convenience
-  pointer, not a destructive replacement.
-- Use a named variant lane only for genuinely competing directions. Do not create a
-  variant merely because a normal iteration changed a report.
-- A historical preview must restore from its own source pin into an isolated or
-  detached workspace. The Hub chooses a fresh port at launch time; a recorded port
-  is never a stable review address.
-- Mark a historical launch as `reproducible`, `best-effort`, or `report-only`.
-  Missing secrets, hardware, or dependencies must make the limitation visible, not
-  silently substitute a broken URL.
-
-## Safety and handoff
-
-- Never put secrets, tokens, private environment values, or arbitrary shell text in
-  an HTML `review-hub://` link. A deep link identifies a Hub record; the Hub shows
-  and validates the saved launch recipe before it runs anything new or changed.
-- Do not stop another agent's process or reuse its port. Let the Hub allocate and
-  manage preview processes.
-- In a final handoff, give the durable report/revision link and, when registered,
-  the Hub's launch link. State the work status, preview state, and whether the
-  preview was actually exercised.
-
-## Agent-facing outcome
-
-The desired user experience is: open the report immediately; inspect the current
-card and its history at any time; click **Launch preview** only when live behavior
-is useful; and reopen any old revision without depending on the original agent
-session.
+A browser-served report has a real URL base, so `media/<name>/…` resolves normally. The
+old `file://` preview rewrote HTML into a non-hierarchical `data:` URL, forcing every
+capture into a base64 blob and permanently inflating Git history. The retained runtime
+separates the durable source page from regenerated/raw evidence without leaving a report
+stranded in a disposable worktree. Its own pinned copy is the retention boundary: remove
+the named review explicitly only when its local visual evidence is no longer needed.

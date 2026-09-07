@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import socket
 import sys
 import tempfile
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 from urllib.parse import quote
 
 
@@ -29,7 +30,9 @@ class ReviewRuntimeTests(unittest.TestCase):
             port=4600,
             api_port=4601,
             board="sketches/review/pill.systemsketch",
-            report="docs/pill.html",
+            report="reports/pill.html",
+            report_media="reports/media/pill-entry",
+            report_builder="docs/build_pill.py",
         )
 
     def healthy_payload(self, review: runtime.Review) -> dict:
@@ -67,7 +70,7 @@ class ReviewRuntimeTests(unittest.TestCase):
                 runtime.write_reviews({review.name: review})
                 restored = runtime.load_reviews()
             self.assertEqual(restored, {review.name: review})
-            self.assertEqual(json.loads(registry.read_text(encoding="utf-8"))["version"], 2)
+            self.assertEqual(json.loads(registry.read_text(encoding="utf-8"))["version"], 3)
 
     def test_a_bound_requested_port_is_never_stolen(self) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
@@ -104,11 +107,30 @@ class ReviewRuntimeTests(unittest.TestCase):
         self.assertEqual(saved["new-review"].port, 4602)
         self.assertEqual(saved["new-review"].api_port, 4603)
 
+    def test_initial_publish_resolves_head_in_the_invoking_track(self) -> None:
+        source = Path("/tmp/implementation-track")
+        saved: dict[str, runtime.Review] = {}
+        with (
+            patch.object(runtime, "registry_lock", return_value=nullcontext()),
+            patch.object(runtime, "load_reviews", return_value={}),
+            patch.object(runtime, "invoking_checkout", return_value=source),
+            patch.object(runtime, "git", return_value="b" * 40) as git,
+            patch.object(runtime, "review_worktree", return_value=Path("/tmp/new-review")),
+            patch.object(runtime, "port_is_free", return_value=True),
+            patch.object(runtime, "start", side_effect=lambda review: review),
+            patch.object(runtime, "write_reviews", side_effect=lambda reviews: saved.update(reviews)),
+            patch.object(sys, "argv", ["review_runtime.py", "up", "new-review", "--ref", "HEAD"]),
+        ):
+            self.assertEqual(runtime.main(), 0)
+
+        self.assertIn(call("rev-parse", "HEAD^{commit}", cwd=source), git.call_args_list)
+        self.assertEqual(saved["new-review"].commit, "b" * 40)
+
     def test_review_urls_are_derived_from_the_pinned_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "review tree"
             review = self.review(root)
-            self.assertEqual(runtime.report_url(review), "http://127.0.0.1:4600/docs/pill.html")
+            self.assertEqual(runtime.report_url(review), "http://127.0.0.1:4600/reports/pill.html")
             self.assertEqual(
                 runtime.board_url(review),
                 "http://127.0.0.1:4600/?board="
@@ -175,6 +197,79 @@ class ReviewRuntimeTests(unittest.TestCase):
             self.assertEqual(wrapper, root / ".review-runtime" / "vite.review.config.mjs")
             self.assertIn(json.dumps(str(root / "vite.config.ts")), source)
             self.assertIn(json.dumps(str(root / ".review-runtime" / "vite-cache")), source)
+
+    def test_review_card_prefers_clear_actions_over_runtime_internals(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            review = self.review(Path(directory) / "review")
+            with (
+                patch.object(runtime, "review_state", return_value="up"),
+                patch.object(runtime, "board_url", return_value="http://127.0.0.1:4600/board"),
+                patch.object(runtime, "report_url", return_value="http://127.0.0.1:4600/report"),
+            ):
+                card = runtime.show(review)
+            self.assertIn("Review · pill-entry", card)
+            self.assertIn("RUNNING", card)
+            self.assertIn("click here to open the live board", card)
+            self.assertIn("click here to read the report", card)
+            self.assertNotIn("worktree", card)
+            self.assertNotIn("ports", card)
+            self.assertNotIn("stop    ", card)
+
+    def test_report_media_stays_in_the_ignored_capture_namespace(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "review"
+            root.mkdir()
+            self.assertEqual(
+                runtime.relative_report_media(root, "reports/media/pill-entry"),
+                "reports/media/pill-entry",
+            )
+            for candidate in ("reports/pill-entry", "docs/assets/pill-entry", "reports/media"):
+                with self.subTest(candidate=candidate):
+                    with self.assertRaises(runtime.ReviewRuntimeError):
+                        runtime.relative_report_media(root, candidate)
+
+    def test_initial_publish_copies_ignored_media_and_restart_uses_the_retained_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            directory_path = Path(directory)
+            source = directory_path / "track"
+            root = directory_path / "review"
+            (source / "reports/media/pill-entry").mkdir(parents=True)
+            (source / "reports/media/pill-entry/hero.mp4").write_bytes(b"first capture")
+            root.mkdir()
+            review = self.review(root)
+
+            runtime.copy_report_media(review, root, source)
+            retained = root / "reports/media/pill-entry/hero.mp4"
+            self.assertEqual(retained.read_bytes(), b"first capture")
+
+            # A later `up` may come from an arbitrary terminal after the source
+            # track has been swept. It must leave the retained evidence intact.
+            shutil.rmtree(source / "reports")
+            runtime.copy_report_media(review, root, source)
+            self.assertEqual(retained.read_bytes(), b"first capture")
+
+    def test_report_builder_receives_pinned_output_and_media_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "review"
+            (root / ".review-runtime").mkdir(parents=True)
+            (root / "docs").mkdir()
+            builder = root / "docs/build_pill.py"
+            builder.write_text(
+                "import os\n"
+                "from pathlib import Path\n"
+                "output = Path(os.environ['SYSTEMSKETCH_REPORT_OUTPUT'])\n"
+                "output.parent.mkdir(parents=True, exist_ok=True)\n"
+                "output.write_text(os.environ['SYSTEMSKETCH_REPORT_MEDIA_DIR'])\n",
+                encoding="utf-8",
+            )
+            review = self.review(root)
+
+            runtime.rebuild_report(review, root)
+
+            self.assertEqual(
+                (root / "reports/pill.html").read_text(encoding="utf-8"),
+                str(root / "reports/media/pill-entry"),
+            )
 
 
 if __name__ == "__main__":

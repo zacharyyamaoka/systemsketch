@@ -3,7 +3,9 @@
 
     python3 scripts/review_runtime.py up loop-ports --ref HEAD \
       --board sketches/review/loop-ports.systemsketch \
-      --report docs/loop-ports-2026-09-03.html
+      --report reports/loop-ports-2026-09-03.html \
+      --report-media reports/media/loop-ports \
+      --report-builder docs/build_loop_ports.py
     python3 scripts/review_runtime.py list
     python3 scripts/review_runtime.py down loop-ports
     python3 scripts/review_runtime.py down --all
@@ -13,7 +15,8 @@
 promised in a handoff: it pins one committed source tree, starts Vite and the
 API in a detached process session, and retains that review until ``down`` or
 ``remove`` is explicitly requested. It does not infer that an idle chat means
-the review is unwanted.
+the review is unwanted. A report is served beside its board; its ignored media
+is copied into the retained tree on first publish, not into Git history.
 """
 
 from __future__ import annotations
@@ -67,6 +70,14 @@ class Review:
     api_port: int
     board: str | None = None
     report: str | None = None
+    # Captures belong outside Git, but a published review must not depend on
+    # the implementation worktree that produced them.  On first publication we
+    # copy this ignored directory into the pinned review worktree.
+    report_media: str | None = None
+    # A report page is committed evidence; the builder is optional reproducible
+    # evidence.  When supplied it reruns in the pinned checkout before Vite
+    # starts, so one `up` command refreshes both the app and the served page.
+    report_builder: str | None = None
     pid: int | None = None
     started_at: float | None = None
 
@@ -146,7 +157,7 @@ def write_reviews(reviews: dict[str, Review], repo: Path = REPO) -> None:
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as output:
             json.dump(
-                {"version": 2, "reviews": {name: asdict(review) for name, review in reviews.items()}},
+                {"version": 3, "reviews": {name: asdict(review) for name, review in reviews.items()}},
                 output,
                 indent=2,
                 sort_keys=True,
@@ -179,6 +190,39 @@ def relative_artifact(worktree: Path, value: str | None, label: str) -> str | No
     if resolved != resolved_root and resolved_root not in resolved.parents:
         raise ReviewRuntimeError(f"{label} escapes the reviewed worktree")
     return str(candidate)
+
+
+def relative_report_media(worktree: Path, value: str | None) -> str | None:
+    """Accept only the ignored report-media namespace within a review tree."""
+    relative = relative_artifact(worktree, value, "report media")
+    if relative is None:
+        return None
+    parts = Path(relative).parts
+    if len(parts) < 3 or parts[:2] != ("reports", "media"):
+        raise ReviewRuntimeError(
+            "report media must be beneath reports/media/<review-name>; "
+            "that directory is intentionally ignored by Git",
+        )
+    return relative
+
+
+def invoking_checkout() -> Path:
+    """Find the checkout that supplied an initial review's ignored captures.
+
+    A handoff's absolute command can run from any terminal after a review was
+    published, when this value is irrelevant because the pinned worktree already
+    has its retained media.  During the first publish, though, an agent normally
+    invokes the shared script from its own track; its ignored captures must be
+    copied from that track rather than from the primary checkout containing this
+    script.
+    """
+    completed = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=Path.cwd(), capture_output=True, text=True, check=False,
+    )
+    if completed.returncode:
+        return REPO
+    return Path(completed.stdout.strip()).resolve()
 
 
 def port_is_free(port: int) -> bool:
@@ -277,11 +321,104 @@ def ensure_worktree(review: Review, repo: Path = REPO) -> Path:
 
 
 def validate_artifacts(review: Review, root: Path) -> None:
-    for label, relative in (("board", review.board), ("report", review.report)):
+    for label, relative in (
+        ("board", review.board),
+        ("report", review.report),
+        ("report builder", review.report_builder),
+    ):
         if relative and not (root / relative).is_file():
             raise ReviewRuntimeError(
                 f"{label} {relative!r} is not in pinned review commit {review.commit[:12]}; commit it before publishing",
             )
+
+
+def copy_report_media(review: Review, root: Path, source_root: Path) -> None:
+    """Retain ignored report media with the immutable review checkout.
+
+    The report HTML stays tracked in ``reports/``.  Its images and video stay
+    untracked in ``reports/media/<review-name>/`` so Git history does not absorb
+    every capture.  Copying that directory once into this durable worktree keeps
+    a stopped/restarted review whole after the originating implementation track
+    is swept.
+    """
+    if not review.report_media:
+        return
+    destination = (root / review.report_media).resolve()
+    resolved_root = root.resolve()
+    if destination != resolved_root and resolved_root not in destination.parents:
+        raise ReviewRuntimeError("report media escapes the pinned review worktree")
+
+    source = (source_root / review.report_media).resolve()
+    source_root = source_root.resolve()
+    if source != source_root and source_root not in source.parents:
+        raise ReviewRuntimeError("report media escapes the publishing checkout")
+    if not source.exists():
+        # This is the normal restart path: the media was retained when the
+        # review first went up, and the caller may now be in a fresh terminal.
+        if destination.is_dir():
+            return
+        raise ReviewRuntimeError(
+            f"report media {review.report_media!r} is absent from both the publishing "
+            f"checkout {source_root} and pinned review {root}; capture it before first publish",
+        )
+    if not source.is_dir():
+        raise ReviewRuntimeError(f"report media {review.report_media!r} must be a directory")
+    if source == destination:
+        return
+    for path in source.rglob("*"):
+        if path.is_symlink():
+            raise ReviewRuntimeError(
+                f"report media {review.report_media!r} contains symlink {path.relative_to(source)!s}; "
+                "copy the real capture instead",
+            )
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    staging = destination.parent / f".{destination.name}.staging-{os.getpid()}"
+    if staging.exists():
+        shutil.rmtree(staging)
+    try:
+        shutil.copytree(source, staging)
+        if destination.exists():
+            shutil.rmtree(destination)
+        staging.replace(destination)
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging)
+
+
+def rebuild_report(review: Review, root: Path) -> None:
+    """Run an opted-in report builder in the pinned checkout before serving it."""
+    if not review.report_builder:
+        return
+    builder = root / review.report_builder
+    log = root / ".review-runtime" / "report-build.log"
+    environment = {
+        **os.environ,
+        # New builders should consume these rather than bake a developer's
+        # checkout into their output path.  Existing builders remain usable by
+        # omitting --report-builder until they adopt the small contract.
+        "SYSTEMSKETCH_REPORT_OUTPUT": str(root / review.report) if review.report else "",
+        "SYSTEMSKETCH_REPORT_MEDIA_DIR": str(root / review.report_media) if review.report_media else "",
+    }
+    with log.open("wb") as output:
+        try:
+            completed = subprocess.run(
+                [sys.executable, str(builder)], cwd=root, env=environment,
+                stdout=output, stderr=subprocess.STDOUT, timeout=180, check=False,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise ReviewRuntimeError(
+                f"report builder {review.report_builder!r} exceeded 180 seconds; inspect {log}",
+            ) from error
+    if completed.returncode:
+        raise ReviewRuntimeError(
+            f"report builder {review.report_builder!r} exited {completed.returncode}; inspect {log}",
+        )
+    if review.report and not (root / review.report).is_file():
+        raise ReviewRuntimeError(
+            f"report builder {review.report_builder!r} did not write {review.report!r}; "
+            "honor SYSTEMSKETCH_REPORT_OUTPUT",
+        )
 
 
 def write_lease(review: Review, root: Path) -> None:
@@ -322,6 +459,11 @@ def start(review: Review, repo: Path = REPO) -> Review:
         if review_health(review):
             return review
         review = stop(review)
+    # A healthy review is left entirely alone by repeated `up` invocations.
+    # On a cold launch, reconstruct the report before Vite gets a chance to
+    # serve it so a refresh cannot race a half-written page or capture.
+    copy_report_media(review, root, invoking_checkout())
+    rebuild_report(review, root)
     if not port_is_free(review.port) or not port_is_free(review.api_port):
         raise ReviewRuntimeError(
             f"cannot start {review.name}: its ports {review.port}/{review.api_port} are in use",
@@ -483,19 +625,39 @@ def serve(root: Path, port: int, api_port: int, name: str, commit: str) -> int:
     return 0
 
 
+def terminal_link(label: str, url: str) -> str:
+    """Render a short OSC-8 terminal hyperlink instead of exposing a long URL."""
+    if not sys.stdout.isatty():
+        return label
+    # OSC-8 is supported by current terminal emulators, including the one that
+    # renders command output in the desktop app. It gives the user a target to
+    # click without making a review card unreadable with an encoded board path.
+    open_link = f"\033]8;;{url}\033\\"
+    close_link = "\033]8;;\033\\"
+    return f"{open_link}\033[1;36m{label}\033[0m{close_link}"
+
+
 def show(review: Review) -> str:
     state = review_state(review)
+    states = {
+        "up": ("●", "RUNNING"),
+        "down": ("○", "STOPPED"),
+        "unhealthy": ("!", "NEEDS ATTENTION"),
+    }
+    glyph, label = states[state]
     lines = [
-        f"{review.name}: {state}",
-        f"  commit  {review.commit}",
-        f"  worktree {review.worktree}",
-        f"  ports   {review.port}/{review.api_port}",
+        f"\n┌─ Review · {review.name}",
+        f"│  {glyph} {label}  ·  pinned {review.commit[:12]}",
     ]
     if url := board_url(review):
-        lines.append(f"  board   {url}")
+        lines.append(f"│  🖱  Board   {terminal_link('click here to open the live board', url)}")
     if url := report_url(review):
-        lines.append(f"  report  {url}")
-    lines.append(f"  stop    python3 scripts/review_runtime.py down {review.name}")
+        lines.append(f"│  📄  Report  {terminal_link('click here to read the report', url)}")
+    if review.report_media:
+        lines.append("│  ✦  Media   retained with this review (outside Git)")
+    if review.report_builder:
+        lines.append("│  ↻  Report  builder runs on every cold restart")
+    lines.append("└─ Re-run the same command any time to reopen this review.")
     return "\n".join(lines)
 
 
@@ -507,6 +669,14 @@ def parse_arguments() -> argparse.Namespace:
     up.add_argument("--ref", default="HEAD", help="committed ref to pin (default: HEAD)")
     up.add_argument("--board", help="board path relative to the reviewed worktree")
     up.add_argument("--report", help="report path relative to the reviewed worktree")
+    up.add_argument(
+        "--report-media",
+        help="ignored reports/media/<name>/ directory to retain with the pinned review",
+    )
+    up.add_argument(
+        "--report-builder",
+        help="optional committed Python builder rerun in the pinned worktree before serving",
+    )
     up.add_argument("--port", type=int, help="preferred public port; API uses the next port")
     subcommands.add_parser("list", help="show retained reviews, URLs, and live health")
     down = subcommands.add_parser("down", help="stop reviews but keep them restartable")
@@ -547,7 +717,10 @@ def main() -> int:
         if args.command == "down" and name is None:
             raise ReviewRuntimeError("down requires NAME or --all")
         if args.command == "up":
-            commit = git("rev-parse", f"{args.ref}^{{commit}}")
+            # A normal first publish runs from an implementation track but uses
+            # this shared absolute script. Resolve HEAD in that track, not in
+            # the primary checkout that owns the shared review registry.
+            commit = git("rev-parse", f"{args.ref}^{{commit}}", cwd=invoking_checkout())
             existing = reviews.get(name)
             if existing and existing.commit != commit:
                 raise ReviewRuntimeError(
@@ -559,6 +732,14 @@ def main() -> int:
                     review.board = relative_artifact(Path(review.worktree), args.board, "board")
                 if args.report:
                     review.report = relative_artifact(Path(review.worktree), args.report, "report")
+                if args.report_media:
+                    review.report_media = relative_report_media(
+                        Path(review.worktree), args.report_media,
+                    )
+                if args.report_builder:
+                    review.report_builder = relative_artifact(
+                        Path(review.worktree), args.report_builder, "report builder",
+                    )
             else:
                 # WHY: a retained review's address is part of its handoff.
                 # Reusing a stopped review's port makes its old board URL hit
@@ -575,6 +756,8 @@ def main() -> int:
                     name, commit, args.ref, str(root), port, api_port,
                     relative_artifact(root, args.board, "board"),
                     relative_artifact(root, args.report, "report"),
+                    relative_report_media(root, args.report_media),
+                    relative_artifact(root, args.report_builder, "report builder"),
                 )
             if args.port is not None and args.port != review.port:
                 raise ReviewRuntimeError(f"{name} already owns port {review.port}; published URLs do not move")
