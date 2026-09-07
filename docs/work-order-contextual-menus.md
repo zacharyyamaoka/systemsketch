@@ -3,8 +3,20 @@
 **For:** the agent picking this up. **Repo:** `~/systemsketch`.
 **Branch:** `claude/rectangle-line-thickness-86b080`, worktree
 `/home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080`, commit
-`b298f5a9`, forked from `main` at `0655fff8`. **Not merged** — landing it is Zach's call.
+`900cb1fa`, forked from `main` at `0655fff8`.
 **Written:** 2026-09-06, from measurements on that tree. Re-measure before trusting a number.
+
+**Merge status.** Zach asked for it to land. The branch is a strict descendant of `main`,
+so it is a clean **fast-forward** — no conflicts, no merge commit needed. It is *not*
+merged yet only because another session has uncommitted work in the main checkout
+(`/home/bam/systemsketch`: a Code-block legacy-migration track touching `src/code/*`,
+plus edits to `README.md` and `package.json`, which this branch also changes). Git
+correctly refuses rather than overwriting them, and stashing is forbidden here — the
+stash stack is shared across every worktree. Once those two files are committed there:
+
+```bash
+cd /home/bam/systemsketch && git merge --ff-only claude/rectangle-line-thickness-86b080
+```
 
 Report (hero recording, the ladder, the lab, the prior art):
 `docs/line-thickness-2026-09-06.html`.
