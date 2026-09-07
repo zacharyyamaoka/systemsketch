@@ -1,0 +1,101 @@
+{
+  "feature": "DRAW group hotkeys 1 2 3",
+  "viewport": { "width": 2400, "height": 1300 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "region",
+      "type": "frame",
+      "x": 620,
+      "y": 320,
+      "props": { "name": "Async region", "color": "violet", "w": 1000, "h": 560 },
+      "meta": { "systemSketchAsyncRegion": { "version": 1 } }
+    },
+    {
+      "id": "mission",
+      "type": "block",
+      "parentId": "region",
+      "x": 100,
+      "y": 140,
+      "props": {
+        "title": "Mission",
+        "description": "",
+        "blockType": "component",
+        "view": "port",
+        "w": 340,
+        "h": 220,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "robot",
+      "type": "block",
+      "parentId": "region",
+      "x": 560,
+      "y": 140,
+      "props": {
+        "title": "Robot",
+        "description": "",
+        "blockType": "component",
+        "view": "port",
+        "w": 340,
+        "h": 220,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the violet Async region, then press Communication. The DRAW group appears on the bar, and each arrow now carries its own digit.",
+      "x": 120,
+      "y": 420,
+      "w": 420,
+      "h": 190,
+      "target": { "shapeId": "region", "anchor": "left", "dy": 80 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Press 2. Service arms with no mouse at all — its button lights up and its chip reads 2.",
+      "x": 660,
+      "y": 90,
+      "w": 460,
+      "h": 150,
+      "target": { "shapeId": "region", "anchor": "top", "dx": -140 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Drag Mission's card onto Robot's. Then press 3 and drag again for Action. Press 3 once more to put the tool away.",
+      "x": 1180,
+      "y": 90,
+      "w": 460,
+      "h": 170,
+      "target": { "shapeId": "region", "anchor": "top", "dx": 180 }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Press Dataflow, where there is no DRAW group. Now 1, 2 and 3 pick toolbar tools again — the digits are borrowed, not taken.",
+      "x": 1700,
+      "y": 420,
+      "w": 420,
+      "h": 190,
+      "target": { "shapeId": "region", "anchor": "right", "dy": 80 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN every DRAW button shows its digit — Stream 1, Service 2, Action 3 — and pressing that digit arms exactly that arrow, with the same press again putting it away. Typing a digit into a name types it. Outside Communication the digits go back to the toolbar.",
+      "x": 620,
+      "y": 980,
+      "w": 1000,
+      "h": 210
+    }
+  ]
+}
