@@ -1,0 +1,84 @@
+/*
+ * The one Python (and general lezer-language) syntax palette for the whole
+ * app. `classHighlighter` (@lezer/highlight) emits stable `tok-*` classes
+ * with no baked-in colour; every CodeMirror instance that wants real syntax
+ * highlighting mounts `syntaxHighlighting(classHighlighter)` and carries this
+ * class on its own root, so a board's code reads as one family — the Code
+ * block, the parametric expression field, and anything added later — rather
+ * than each surface inventing its own palette. Colours are `--ss-*` tokens so
+ * this follows every board theme automatically.
+ */
+
+.ss-python-tokens .tok-keyword,
+.ss-python-tokens .tok-operatorKeyword,
+.ss-python-tokens .tok-controlKeyword,
+.ss-python-tokens .tok-definitionKeyword,
+.ss-python-tokens .tok-moduleKeyword {
+	color: color-mix(in srgb, var(--ss-accent) 78%, var(--ss-code-text));
+	font-weight: 600;
+}
+
+.ss-python-tokens .tok-string,
+.ss-python-tokens .tok-docString,
+.ss-python-tokens .tok-character,
+.ss-python-tokens .tok-attributeValue {
+	color: color-mix(in srgb, var(--ss-success) 62%, var(--ss-code-text));
+}
+
+.ss-python-tokens .tok-number,
+.ss-python-tokens .tok-integer,
+.ss-python-tokens .tok-float,
+.ss-python-tokens .tok-bool,
+.ss-python-tokens .tok-atom,
+.ss-python-tokens .tok-null,
+.ss-python-tokens .tok-unit {
+	color: color-mix(in srgb, var(--ss-warning) 58%, var(--ss-code-text));
+}
+
+.ss-python-tokens .tok-comment,
+.ss-python-tokens .tok-lineComment,
+.ss-python-tokens .tok-blockComment,
+.ss-python-tokens .tok-meta {
+	color: var(--ss-text-muted);
+	font-style: italic;
+}
+
+.ss-python-tokens .tok-typeName,
+.ss-python-tokens .tok-className,
+.ss-python-tokens .tok-namespace {
+	color: color-mix(in srgb, var(--ss-accent) 55%, var(--ss-code-text));
+}
+
+/* A bare name — `chassis_width` in `chassis_width / 4` — is the one token a
+ * board full of formulas most needs to read at a glance as "this references
+ * something", so it gets the accent at full strength: the single most
+ * saturated color in this palette, unlike every other token's muted mix. */
+.ss-python-tokens .tok-variableName,
+.ss-python-tokens .tok-variableName2,
+.ss-python-tokens .tok-definition,
+.ss-python-tokens .tok-self {
+	color: var(--ss-accent);
+}
+
+.ss-python-tokens .tok-propertyName,
+.ss-python-tokens .tok-attributeName,
+.ss-python-tokens .tok-labelName {
+	color: color-mix(in srgb, var(--ss-danger) 42%, var(--ss-code-text));
+}
+
+.ss-python-tokens .tok-function,
+.ss-python-tokens .tok-macroName {
+	color: var(--ss-code-text);
+	font-weight: 600;
+}
+
+.ss-python-tokens .tok-operator,
+.ss-python-tokens .tok-punctuation,
+.ss-python-tokens .tok-separator,
+.ss-python-tokens .tok-bracket {
+	color: var(--ss-text-muted);
+}
+
+.ss-python-tokens .tok-invalid {
+	color: var(--ss-danger);
+}

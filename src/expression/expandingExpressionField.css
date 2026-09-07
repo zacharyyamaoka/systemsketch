@@ -1,0 +1,160 @@
+/*
+ * The parametric property field: collapsed it is exactly as wide as the
+ * plain text field it replaces (the inspector's default-value column is
+ * only 54px), so a board with nothing parametric on it looks unchanged.
+ * Expanded, it breaks out of that column as an absolutely-positioned
+ * overlay — same trick every popover/tooltip in this panel already uses —
+ * rather than reflowing the row's grid.
+ */
+
+.ss-expr-field {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  min-width: 0;
+}
+
+.ss-expr-field__editor {
+  width: 100%;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 6px;
+  background: var(--ss-code-surface);
+  color: var(--ss-code-text);
+  cursor: text;
+  overflow: hidden;
+}
+
+.ss-expr-field__editor .cm-editor {
+  outline: none;
+  background: transparent;
+  height: auto;
+}
+
+.ss-expr-field__editor .cm-content {
+  padding: 0;
+  caret-color: var(--ss-accent);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.ss-expr-field__editor .cm-line {
+  padding: 0;
+}
+
+.ss-expr-field__editor .cm-scroller {
+  overflow: hidden;
+  font-family: inherit;
+  line-height: 1.35;
+}
+
+.ss-expr-field__editor .cm-selectionBackground,
+.ss-expr-field__editor .cm-focused .cm-selectionBackground,
+.ss-expr-field__editor ::selection {
+  background: color-mix(in srgb, var(--ss-accent) 30%, transparent);
+}
+
+.ss-expr-field__editor[aria-readonly='true'] {
+  cursor: pointer;
+}
+
+/* Expanded: pop out to the left (there is more room toward Name than past
+ * the mut/delete columns), grow to fit the real formula, and outrank the
+ * rest of the panel — but stay well under the autocomplete tooltip, which
+ * is parented onto `.tl-container` at its own very high z-index. */
+.ss-expr-field.is-expanded .ss-expr-field__editor {
+  position: absolute;
+  z-index: calc(var(--tl-layer-panels) + 1);
+  top: -1px;
+  right: -1px;
+  left: auto;
+  width: max-content;
+  min-width: calc(100% + 6px);
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 6px 10px;
+  border-color: var(--ss-accent);
+  box-shadow: var(--ss-shadow-2);
+  overflow: visible;
+  cursor: text;
+}
+
+.ss-expr-field.is-expanded .ss-expr-field__editor .cm-content,
+.ss-expr-field.is-expanded .ss-expr-field__editor .cm-scroller {
+  overflow: visible;
+}
+
+.ss-expr-field__placeholder {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  color: var(--ss-text-faint);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.ss-expr-squiggle {
+  text-decoration: underline wavy var(--ss-danger);
+  text-decoration-thickness: 1.4px;
+  text-underline-offset: 2px;
+}
+
+/* A collapsed field whose current text failed to resolve a real reference
+ * (not just an unreachable host) carries a small glyph rather than a
+ * squiggle — there is no formula text on screen to underline at rest. */
+.ss-expr-field__warning {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  color: var(--ss-danger);
+  font-size: 9px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Same data-error tooltip convention as `.systemsketch-file-title-editor`
+ * (local-workspace.css) — an always-rendered, visually-hidden help span that
+ * the wrapper's `data-error` attribute reveals, never a JS-toggled mount. */
+.ss-expr-field__help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Revealed on hover or while expanded — never permanently visible at rest,
+ * or a board full of legacy non-Python-safe text (a bare word standing in
+ * for a string, a path) would carry a wall of red tooltips it never asked
+ * for. The small warning glyph is the passive, always-visible signal. */
+.ss-expr-field[data-error='true']:hover .ss-expr-field__help,
+.ss-expr-field[data-error='true'].is-expanded .ss-expr-field__help {
+  z-index: calc(var(--tl-layer-panels) + 1);
+  top: calc(100% + 6px);
+  right: -1px;
+  left: auto;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  height: auto;
+  padding: 6px 8px;
+  overflow: visible;
+  clip: auto;
+  border: 1px solid color-mix(in srgb, var(--ss-danger) 55%, transparent);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-danger-soft);
+  box-shadow: var(--ss-shadow-1);
+  font-size: 10px;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.ss-expr-field[data-unreachable='true'] .ss-expr-field__editor {
+  border-style: dashed;
+}

@@ -1521,3 +1521,49 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Auto-detected from this Block's own expressions — editing a value here
+ * writes straight into the board-wide registry, exactly as the full
+ * Variables panel would; this is a convenience view onto the same data. */
+.block-inspector__used-variables {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--ss-border);
+}
+
+.block-inspector__used-variables-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.block-inspector__used-variables-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.block-inspector__used-variables-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-inspector__used-variables-new {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--ss-accent-soft);
+  color: var(--ss-accent);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}

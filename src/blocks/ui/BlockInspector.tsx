@@ -12,6 +12,10 @@ import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
+import { ExpandingExpressionField } from '../../expression/ExpandingExpressionField'
+import { EMPTY_VARIABLE_REGISTRY, useVariableRegistry, type VariableRegistryApi } from '../../expression/useVariableRegistry'
+import { isSafeNamespaceName } from '../../expression/pythonSafeNamespace'
+import type { UsedName } from '../../expression/expressionClient'
 
 import {
   BLOCK_HEADER_ALIGNS,
@@ -191,6 +195,14 @@ export interface BlockInspectorContentProps {
    * keeps the read lazy without a second `enabled` flag to keep in sync.
    */
   historyPanel?: ReactNode
+  /**
+   * The board's shared variable pool, injected for the same reason as
+   * `historyPanel`: this component renders in unit tests and development
+   * profiles with no live editor to read it from. Omitted, every property
+   * field still live-evaluates plain Python — it just has nothing in scope
+   * beyond the safe math namespace.
+   */
+  variableRegistry?: VariableRegistryApi
 }
 
 function TinyIcon({ children }: { children: ReactNode }) {
@@ -914,11 +926,13 @@ function PortSection({
   props,
   actions,
   semanticTagsVisible = true,
+  variableRegistry = EMPTY_VARIABLE_REGISTRY,
 }: {
   side: BlockPortSide
   props: BlockShapeProps
   actions?: BlockInspectorActions
 	semanticTagsVisible?: boolean
+	variableRegistry?: VariableRegistryApi
 }) {
 	const [managing, setManaging] = useState(false)
 	const [tagging, setTagging] = useState(false)
@@ -934,6 +948,33 @@ function PortSection({
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
 	const ports = props[side]
 	const visiblePorts = ports.filter((port) => port.visible)
+  // Which registry names this side's expressions actually reference right
+  // now, keyed by port so one port's stale result never lingers after its
+  // expression stops mentioning a name. Only `inputs` ports carry a default
+  // value at all (see `defaultField` below), so this is only ever populated,
+  // and only ever rendered, for that side.
+  const [usedByPort, setUsedByPort] = useState<ReadonlyMap<string, readonly UsedName[]>>(new Map())
+  const usedVariables = useMemo(() => {
+    const byName = new Map<string, boolean>()
+    for (const usedNames of usedByPort.values()) {
+      for (const used of usedNames) {
+        if (isSafeNamespaceName(used.name)) continue
+        byName.set(used.name, byName.get(used.name) || used.defined)
+      }
+    }
+    return [...byName.entries()].map(([name, defined]) => ({ name, defined })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [usedByPort])
+  // A deleted or hidden port's last-known result would otherwise linger in
+  // the map forever, keeping a variable listed after nothing references it.
+  useEffect(() => {
+    const liveIds = new Set(ports.map((port) => port.id))
+    setUsedByPort((current) => {
+      if ([...current.keys()].every((id) => liveIds.has(id))) return current
+      const next = new Map(current)
+      for (const id of current.keys()) if (!liveIds.has(id)) next.delete(id)
+      return next
+    })
+  }, [ports])
 	const addsBundleMember = side === 'inputs' && isBundleBlock(props)
 	const linkPrototype = portLinkPrototypeFromUrl()
   // A heading input belongs to control flow, not the body lane. Linking is a
@@ -1156,16 +1197,28 @@ function PortSection({
     )
     // The Default placeholder remains guidance text; the row paints the '='
     // itself in code-style mode, so the field needs no punctuation-specific state.
+    // Every default value is always live-evaluated as Python against the
+    // board's variable registry (there is no opt-in mode) — a value that
+    // isn't valid Python today, or isn't defined, falls back to showing its
+    // own raw text exactly as it always has, so no existing board changes.
     const defaultField = side === 'inputs' ? (
-      <LiveTextInput
+      <ExpandingExpressionField
         className="block-inspector__port-default"
         value={port.defaultValue ?? ''}
         disabled={!actions}
+        registry={variableRegistry.registryMap}
         placeholder={EMPTY_FIELD_GUIDANCE.block.defaultValue}
         ariaLabel={`Default value for ${port.name || port.id}`}
         beginEdit={() => actions?.beginEdit?.('edit port default')}
         onWrite={(defaultValue) =>
           actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
+        onEvalResult={(result) => {
+          setUsedByPort((current) => {
+            const next = new Map(current)
+            next.set(port.id, result?.usedNames ?? [])
+            return next
+          })
+        }}
       />
     ) : null
     return (
@@ -1506,6 +1559,32 @@ function PortSection({
       {linking && linkPrototype === '2' ? (
         <p className="block-inspector__port-help">Use the quiet seam between neighbouring body rows to join or split a run.</p>
       ) : null}
+      {side === 'inputs' && usedVariables.length > 0 ? (
+        <div className="block-inspector__used-variables" data-testid="inspector-used-variables">
+          <div className="block-inspector__section-title">
+            <span>Variables used here</span>
+          </div>
+          <ul className="block-inspector__used-variables-list">
+            {usedVariables.map((variable) => (
+              <li key={variable.name} className="block-inspector__used-variables-row">
+                <span className="block-inspector__used-variables-name">{variable.name}</span>
+                <ExpandingExpressionField
+                  className="block-inspector__used-variables-value"
+                  value={variableRegistry.registryMap[variable.name] ?? ''}
+                  disabled={!actions || variableRegistry.readOnly}
+                  registry={variableRegistry.registryMap}
+                  ariaLabel={`Global value for ${variable.name}`}
+                  onWrite={(expression) => variableRegistry.setEntryValue(variable.name, expression)}
+                />
+                {!variable.defined ? <span className="block-inspector__used-variables-new">new</span> : null}
+              </li>
+            ))}
+          </ul>
+          <p className="block-inspector__hint">
+            Shared board-wide — editing a value here changes it everywhere it's used. “Show Variables” lists every one.
+          </p>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -1520,6 +1599,7 @@ export function BlockInspectorContent({
   pill,
   semanticTagsVisible = true,
   historyPanel,
+  variableRegistry = EMPTY_VARIABLE_REGISTRY,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
@@ -1879,8 +1959,8 @@ export function BlockInspectorContent({
                 </p>
               </section>
 
-              <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
-              <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
+              <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} variableRegistry={variableRegistry} />
+              <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} variableRegistry={variableRegistry} />
 
               <section className="block-inspector__section" data-inspector-section="Ports">
                 <div className="block-inspector__section-title">Ports</div>
@@ -1937,6 +2017,7 @@ export function EditorBlockInspector({
 		() => getSemanticTagsVisible(editor),
 		[editor],
 	)
+  const variableRegistry = useVariableRegistry(editor)
   const context = useValue(
     'SystemSketch Block inspector context',
     (previous?: unknown) => {
@@ -2095,6 +2176,7 @@ export function EditorBlockInspector({
       actions={actions}
       pill={pillFacts}
 		semanticTagsVisible={semanticTagsVisible}
+      variableRegistry={variableRegistry}
       onRequestClose={onRequestClose}
       /*
        * History only for a Block that is actually ON the board.

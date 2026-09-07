@@ -27,6 +27,7 @@ import {
 import { LoopShapeUtil, LoopTool } from './loop'
 import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from './behaviorTree'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
+import { VariableRegistryShapeUtil } from './expression/VariableRegistryShapeUtil'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
@@ -112,6 +113,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BtControlShapeUtil,
   CodeShapeUtil,
   FloatingPortShapeUtil,
+  VariableRegistryShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
@@ -136,6 +138,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BtControlShapeUtil,
   CodeShapeUtil,
   FloatingPortShapeUtil,
+  VariableRegistryShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]

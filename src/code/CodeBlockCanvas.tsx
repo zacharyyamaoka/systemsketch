@@ -13,6 +13,7 @@ import { classHighlighter } from '@lezer/highlight'
 import { useEffect, useRef } from 'react'
 import { useEditor, useValue } from 'tldraw'
 import { codeFontPixels, type CodeLanguage, type CodeShape } from './codeModel'
+import '../theme/pythonTokens.css'
 import './code-block.css'
 
 function languageExtension(language: CodeLanguage): Extension {
@@ -120,7 +121,7 @@ export function CodeBlockCanvas({ shape }: { shape: CodeShape }) {
 
 	return (
 		<div
-			className="code-block-canvas"
+			className="code-block-canvas ss-python-tokens"
 			data-editing={isEditing}
 			data-testid={`code-block-${shape.id}`}
 			onPointerDown={(event) => {

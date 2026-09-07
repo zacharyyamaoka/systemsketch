@@ -38,6 +38,7 @@ from release_lib import (
     source_mtime,
     write_file_access_settings,
 )
+from expression_eval import evaluate_expression
 from recording_store import (
     FrameSidecar,
     RecordingError,
@@ -378,6 +379,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             "/api/workspace/trash",
             "/api/workspace/reveal",
             "/api/settings/file-access",
+            "/api/expression/evaluate",
         }:
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
             return
@@ -409,6 +411,17 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 return
             if path == "/api/recordings":
                 self._json(self.app.save_recording(payload))
+                return
+            if path == "/api/expression/evaluate":
+                expr = payload.get("expr")
+                if not isinstance(expr, str):
+                    raise ValueError("expr must be a string")
+                raw_registry = payload.get("registry") if payload.get("registry") is not None else {}
+                if not isinstance(raw_registry, dict) or not all(
+                    isinstance(key, str) and isinstance(value, str) for key, value in raw_registry.items()
+                ):
+                    raise ValueError("registry must be an object mapping names to expression strings")
+                self._json(evaluate_expression(expr, raw_registry))
                 return
             if path == "/api/settings/file-access":
                 raw_allow_any_path = payload.get("allowAnyPath")

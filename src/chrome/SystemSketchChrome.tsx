@@ -77,6 +77,7 @@ import { PrimitiveSearch } from '../library/PrimitiveSearch'
 import { BoardOverview } from './BoardOverview'
 import { LocalCommentsPanel } from '../comments'
 import { BoardDiagnosticsPanel } from '../diagnostics'
+import { VariableRegistryPanel } from '../expression/VariableRegistryPanel'
 import {
   SystemSketchCommandPalette,
   type CommandPaletteAction,
@@ -224,6 +225,7 @@ function RightSurfaceBody({
   if (surface === 'diagnostics') {
     return <BoardDiagnosticsPanel editor={editor} />
   }
+  if (surface === 'variable-registry') return <VariableRegistryPanel editor={editor} />
   if (surface === 'inspector') return <InspectorDock editor={editor} subject={subject} onClose={onClose} />
   return <LocalCommentsPanel editor={editor} readOnly={readOnly} />
 }
@@ -615,6 +617,14 @@ export function SystemSketchSurfaceHost() {
         run: () => setRight('diagnostics'),
       },
       {
+        id: 'show-variable-registry',
+        label: 'Show Variables',
+        description: 'Board-wide named variables any property’s expression can reference',
+        keywords: ['variable', 'registry', 'global', 'parameter', 'expression'],
+        icon: '◆',
+        run: () => setRight('variable-registry'),
+      },
+      {
         id: 'show-inspector',
         label: 'Show inspector',
         description: 'Open the panel for the current selection',
@@ -736,6 +746,8 @@ export function SystemSketchSurfaceHost() {
     ? 'Frames'
     : rightSurface === 'diagnostics'
       ? 'Problems'
+    : rightSurface === 'variable-registry'
+      ? 'Variables'
     : rightSurface === 'inspector'
       ? inspectorSubjectTitle(inspectorSubject)
       : 'Comments'

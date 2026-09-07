@@ -1,0 +1,112 @@
+.ss-registry-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--ss-text);
+}
+
+.ss-registry-panel__empty {
+  margin: 0;
+  padding: 10px;
+  border: 1px dashed var(--ss-border-strong);
+  border-radius: 8px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ss-registry-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ss-registry-panel__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px 22px;
+  align-items: center;
+  gap: 6px;
+}
+
+.ss-registry-panel__name {
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 6px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+}
+
+.ss-registry-panel__value {
+  min-width: 0;
+}
+
+.ss-registry-panel__delete {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ss-text-faint);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ss-registry-panel__delete:hover:not(:disabled) {
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
+}
+
+.ss-registry-panel__delete:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.ss-registry-panel__add {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ss-border);
+}
+
+.ss-registry-panel__add-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 6px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+}
+
+.ss-registry-panel__add-button {
+  padding: 0 12px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 6px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ss-registry-panel__add-button:hover:not(:disabled) {
+  border-color: var(--ss-accent);
+  color: var(--ss-accent);
+}
+
+.ss-registry-panel__add-button:disabled {
+  opacity: .5;
+  cursor: default;
+}

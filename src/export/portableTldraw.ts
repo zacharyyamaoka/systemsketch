@@ -38,6 +38,7 @@ import {
 } from '../behaviorTree'
 import { CODE_GUTTER_WIDTH, CODE_SIDE_PADDING, CodeShapeUtil, codeFontPixels, isCodeShape, type CodeShape } from '../code'
 import { FloatingPortShapeUtil } from '../floatingPort'
+import { VariableRegistryShapeUtil } from '../expression/VariableRegistryShapeUtil'
 import {
 	blockConnectionBindingUtils,
 	blockConnectionShapeUtils,
@@ -77,6 +78,7 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		BtControlShapeUtil,
 		CodeShapeUtil,
 		FloatingPortShapeUtil,
+		VariableRegistryShapeUtil,
 		...blockConnectionShapeUtils,
 	],
 )
