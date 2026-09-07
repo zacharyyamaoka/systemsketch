@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ElbowRect } from './geometry'
 import { routeElbow } from './elbowRouter'
-import { channelSpacingDefects, coincidentOverlap, countCrossings, nudgeRoutes } from './nudge'
+import { channelSpacingDefects, coincidentOverlap, countCrossings, nudgeRoutes, orderBundle } from './nudge'
 
 const A: ElbowRect = { x: 0, y: 0, w: 320, h: 260 }
 const B: ElbowRect = { x: 600, y: -80, w: 320, h: 200 }
@@ -280,5 +280,72 @@ describe('locked cables (the ones the user authored)', () => {
     const snapshot = JSON.stringify(before.map((r) => r.points))
     const report = nudgeRoutes(before, {}, [true, true, true])
     expect(JSON.stringify(report.routes.map((r) => r.points))).toBe(snapshot)
+  })
+})
+
+
+describe('bundle ordering when a leg runs the other way', () => {
+  /**
+   * The constraint `orderBundle` derives for one pair of segments sharing a
+   * channel. Built by hand because the interesting cases are the ones the
+   * left-to-right fixtures above cannot produce.
+   */
+  const segment = (over: Partial<Parameters<typeof orderBundle>[0][number]>) => ({
+    cable: 0,
+    at: 1,
+    axis: 'y' as const,
+    channel: 100,
+    lo: 0,
+    hi: 200,
+    fromSpan: 0,
+    toSpan: 200,
+    prevChannel: 60,
+    nextChannel: 60,
+    ...over,
+  })
+
+  /**
+   * WHY these two exist: the rule used to read "arriving from the LEFT" and
+   * "leaving to the RIGHT", which is the whole truth only while every port sits
+   * on a left or right wall and every cable flows left to right. A socket on a
+   * top or bottom wall — or an input on a card's RIGHT wall, which the
+   * communication lens produces routinely — reverses a leg, and the old form
+   * then dropped the constraint SILENTLY rather than reversing it. Half a
+   * constraint set is worse than none: it pins a crossing-free bundle into the
+   * one order that crosses, and hides the genuine cycles.
+   */
+  it('constrains a segment whose ARRIVING leg comes from the far side', () => {
+    const { order } = orderBundle([
+      segment({ cable: 0 }),
+      // Arrives inside the first segment's span, from the right.
+      segment({ cable: 1, fromSpan: 100, toSpan: 300, prevChannel: 180, nextChannel: 180 }),
+    ])
+    expect(order).toHaveLength(2)
+    // The reversed leg must place cable 1 on the far side of cable 0, not be
+    // ignored: ignoring it is what let the two cross.
+    expect(order[0]).toBe(0)
+  })
+
+  it('constrains the mirror image the mirrored way', () => {
+    const { order } = orderBundle([
+      segment({ cable: 0 }),
+      // Leaves inside the first segment's span, towards the left.
+      segment({ cable: 1, fromSpan: 300, toSpan: 150, prevChannel: 20, nextChannel: 20 }),
+    ])
+    expect(order).toHaveLength(2)
+    expect(order[0]).toBe(1)
+  })
+
+  it('still orders an ordinary left-to-right bundle', () => {
+    // Both legs of cable 1 cross cable 0's span, arriving from the left and
+    // leaving to the right — the case the original rule was written for. It is
+    // a genuine cycle (each leg wants the opposite order), so what matters is
+    // that it is REPORTED rather than silently resolved one way.
+    const { order, forced } = orderBundle([
+      segment({ cable: 0 }),
+      segment({ cable: 1, fromSpan: 100, toSpan: 150, prevChannel: 60, nextChannel: 180 }),
+    ])
+    expect(order).toHaveLength(2)
+    expect(forced.length).toBeGreaterThan(0)
   })
 })
