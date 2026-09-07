@@ -9,6 +9,7 @@
     "the lab composes the shape surface out of levers, using the real renderer",
     "switching preset recomposes the same registry into the connector surface",
     "a lever added a control and then folded it into its neighbour, live",
+    "the lab composes the Code selection pill, thickness row correctly absent",
     "the physical journey produced zero local console errors"
   ],
   "consoleErrors": [],
@@ -77,6 +78,10 @@
       "arrowheadStart",
       "lineShape",
       "arrowheadEnd"
+    ],
+    "codeTriggers": [
+      "codeLanguage",
+      "size"
     ]
   }
 }

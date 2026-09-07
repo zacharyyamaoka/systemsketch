@@ -1,0 +1,529 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 2,
+      "geo": 4,
+      "code": 1
+    },
+    "bindings": {
+      "arrow": 4
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.block": 12,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 2,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 1,
+      "com.tldraw.shape.floating-port": 0,
+      "com.tldraw.shape.variableRegistry": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.systemsketch-bt-insert-glyph": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 400,
+      "y": 384,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 120,
+          "y": 26
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a3jaL",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 520,
+      "y": 32,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 566,
+        "h": 188,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Click this Code block. Its selection pill has exactly two dropdowns — Language and Font size — beside the Code-only rows. No Line thickness row: a Code block's frame is chrome, not an edge you paint."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a26Wv",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 604,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 620,
+        "h": 150,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · Every preset name is legible, and the lab's Code block preset composes Language + Font size — the same two controls the real Code block's pill shows, with no Line thickness row anywhere."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5gVr",
+      "typeName": "shape"
+    },
+    {
+      "x": -130,
+      "y": 300,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 530,
+        "h": 168,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 14,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Open the ☰ main menu → Settings → Menu lab. Read the five preset card NAMES: Shape, Connector, Block title, Code block, Empty. Until this fix they painted near-white on near-white — only the grey descriptions were readable."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3BAb",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 300,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:code-subject",
+      "type": "code",
+      "props": {
+        "w": 566,
+        "h": 220,
+        "code": "def widen(edge, rung):\n    \"\"\"Thickness is an edge fact, not a font fact.\"\"\"\n    return edge.with_width(RUNGS[rung])",
+        "language": "python",
+        "size": "m",
+        "fontScale": 1,
+        "showLineNumbers": true,
+        "characterWidth": 48
+      },
+      "parentId": "page:page",
+      "index": "a15Rz",
+      "typeName": "shape"
+    },
+    {
+      "x": 191.9512195121951,
+      "y": 41.594512195121965,
+      "z": 1.0330708661417323,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": -130,
+      "y": 520,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 530,
+        "h": 144,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 8,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Click the \"Code block\" preset. The composed menu should be the same two controls you just saw on the real pill — and the printed recipe should read items: ['codeLanguage', 'size']."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4oxj",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:code-subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:code-subject",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:dash": "solid",
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 900
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "name": "",
+      "color": "#39B178",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:zYnMqJFLJJknT5oeoLTZH",
+      "typeName": "user"
+    },
+    {
+      "x": 803,
+      "y": 220,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 80
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2sAAV",
+      "typeName": "shape"
+    }
+  ]
+}

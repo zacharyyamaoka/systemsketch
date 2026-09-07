@@ -12,11 +12,13 @@ import {
 import {
   LAB_KINDS,
   LAB_PRESETS,
+  LAB_PRESET_RECIPES,
   emptyLabState,
   labCandidates,
   labComposition,
   labDangling,
   labRecipe,
+  labPresetDrift,
   labRecipeSource,
   moveLabControl,
   setLabControl,
@@ -109,5 +111,62 @@ describe('a lever that does nothing says so', () => {
     expect(labDangling(state)).toEqual([])
     expect(contextualControlIds(labComposition(state, noop))).toEqual(['color'])
     expect(labCandidates(state, noop)[0].modeControl?.id).toBe('font')
+  })
+})
+
+describe('a preset cannot drift from the surface it names', () => {
+  // WHY these run per preset rather than as one loop assertion: the lab's
+  // whole promise is "if a composition works here it works in the product".
+  // The presets are hand-written, so nothing but a test stops one from
+  // keeping a grouping the real recipe has since moved on from — and a lab
+  // that lies about the product is worse than no lab.
+  for (const preset of LAB_PRESETS.filter((candidate) => LAB_PRESET_RECIPES[candidate.id])) {
+    it(`${preset.id} composes only what its product recipe carries`, () => {
+      expect(labPresetDrift(preset)).toEqual({ absentFromRecipe: [], splitGroups: [] })
+    })
+  }
+
+  it('every preset that names a product surface is checked against one', () => {
+    // The escape hatch — an unmapped preset is skipped above — must stay
+    // deliberate. `empty` is the only preset that reproduces no surface.
+    const unmapped = LAB_PRESETS
+      .filter((candidate) => !LAB_PRESET_RECIPES[candidate.id])
+      .map((candidate) => candidate.id)
+    expect(unmapped).toEqual(['empty'])
+  })
+
+  it('catches a preset whose group the product recipe actually splits', () => {
+    // Font size lives in the recipe's `type` group and alignment in
+    // `alignment`; a preset that drew them as one group would be describing a
+    // menu the product cannot produce.
+    const drifted = {
+      ...LAB_PRESETS.find((candidate) => candidate.id === 'shape')!,
+      state: setLabControl(preset('shape'), 'align', { breakBefore: false }),
+    }
+    expect(labPresetDrift(drifted).splitGroups).toEqual(['group-3: alignment + type'])
+  })
+})
+
+describe('the Code selection pill, composed from the same registry', () => {
+  it('is Language plus the shared Font size ladder, and nothing it cannot paint', () => {
+    const ids = contextualControlIds(labComposition(preset('code'), noop))
+    expect(ids).toEqual(['codeLanguage', 'size'])
+  })
+
+  it('offers no thickness row, because a Code block has no painted edge', () => {
+    // WHY this is pinned rather than left to chance: `strokeWidth` only
+    // paints through `getCustomDisplayValues` on geo/draw/line/arrow
+    // (`hasAdjustableStrokeWidth`). A Code block's frame is chrome, so a
+    // thickness row here would be a control that silently does nothing —
+    // exactly the class of contextual-menu bug this work set out to end.
+    const ids = contextualControlIds(labComposition(preset('code'), noop))
+    expect(ids).not.toContain('strokeWidth')
+    expect(ids).not.toContain('strokeColor')
+  })
+
+  it('leaves the Block title with typography only, for the same reason', () => {
+    const ids = contextualControlIds(labComposition(preset('block-title'), noop))
+    expect(ids).toEqual(['font', 'size', 'bold', 'color', 'align'])
+    expect(ids).not.toContain('strokeWidth')
   })
 })

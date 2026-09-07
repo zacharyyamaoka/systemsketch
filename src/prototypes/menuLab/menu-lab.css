@@ -139,12 +139,28 @@
   text-transform: uppercase;
 }
 
-.menu-lab select {
+/* WHY these are scoped to `.menu-lab__shell` and not `.menu-lab`: `.menu-lab`
+ * is the STANDALONE route's own fixed-position wrapper. Settings renders the
+ * shell directly, with no such ancestor, so anything scoped to `.menu-lab`
+ * silently stops applying in the embedding people actually use — which is how
+ * every `select` in Settings > Menu lab ended up a bare native control while
+ * the same board at `?menu-lab` looked designed.
+ *
+ * WHY `color` is stated rather than inherited: a `button` and a `select` do
+ * not inherit `color` from their container — the UA paints them with its own
+ * `buttontext`. That is how the preset cards' NAMES came out near-white on a
+ * near-white surface while their descriptions read fine, in both entry
+ * points. Set it once for every form control here instead of per widget. */
+.menu-lab__shell button,
+.menu-lab__shell select {
+  color: var(--ss-text);
+}
+
+.menu-lab__shell select {
   padding: 2px 4px;
   border: 1px solid var(--ss-border);
   border-radius: 5px;
   background: var(--ss-surface);
-  color: inherit;
   font-family: inherit;
   font-size: 11px;
 }

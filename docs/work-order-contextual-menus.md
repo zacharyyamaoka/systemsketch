@@ -1,22 +1,28 @@
 # Work order — line thickness shipped; the contextual-menu composition layer is now the surface to build on
 
 **For:** the agent picking this up. **Repo:** `~/systemsketch`.
-**Branch:** `claude/rectangle-line-thickness-86b080`, worktree
-`/home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080`, commit
-`900cb1fa`, forked from `main` at `0655fff8`.
-**Written:** 2026-09-06, from measurements on that tree. Re-measure before trusting a number.
+**Written:** 2026-09-06, from measurements on the tree. Re-measure before trusting a number.
 
-**Merge status.** Zach asked for it to land. The branch is a strict descendant of `main`,
-so it is a clean **fast-forward** — no conflicts, no merge commit needed. It is *not*
-merged yet only because another session has uncommitted work in the main checkout
-(`/home/bam/systemsketch`: a Code-block legacy-migration track touching `src/code/*`,
-plus edits to `README.md` and `package.json`, which this branch also changes). Git
-correctly refuses rather than overwriting them, and stashing is forbidden here — the
-stash stack is shared across every worktree. Once those two files are committed there:
+**Merge status: LANDED.** `main` is `47d44537`. The fast-forward was blocked for a
+while because a peer session had uncommitted work in the main checkout — a Code-block
+legacy-migration track whose `README.md` and `package.json` edits collided with this
+branch's. Git refused rather than overwriting them, and stashing is forbidden here
+(the stash stack is shared across every worktree). It was resolved by three-way
+merging just those two files' *working-tree* content — base `0655fff8`, theirs the
+branch, ours the peer's uncommitted edits — restoring the merged text after the
+fast-forward. Both files merged with zero conflicts; the peer's pending diff came out
+byte-identical in content and still the only thing dirty in their tree.
 
-```bash
-cd /home/bam/systemsketch && git merge --ff-only claude/rectangle-line-thickness-86b080
-```
+**If you hit the same wall again:** do not `git stash`, do not commit a peer's files,
+and do not force the ref. The working-tree three-way is the safe move, and it needs a
+guard that the peer's files have not changed between measuring and writing.
+
+**A worktree is not yours just because you were handed it.** Mid-session a peer
+checked a different branch out of
+`.claude/worktrees/rectangle-line-thickness-86b080` — after detaching its HEAD, so a
+commit made there landed unreferenced and the branch ref silently stayed behind.
+`git reflog show HEAD` inside the worktree is what tells you; `git branch -f` is what
+rescues the commit. Re-read `git worktree list` before trusting a path.
 
 Report (hero recording, the ladder, the lab, the prior art):
 `docs/line-thickness-2026-09-06.html`.
@@ -209,38 +215,78 @@ Prior art it follows, recorded in `menuLabModel.ts`'s docstring rather than rein
 
 ## What to do next, if anything
 
-Nothing here is blocking. In rough order of value:
+Nothing here is blocking.
 
-1. **Land it.** Then delete `weight` references anywhere they resurface.
-2. **Use the lab to audit the other surfaces.** `BLOCK_TITLE_CONTEXTUAL_RECIPE` and the
-   Code selection pill were not touched; the lab is now the cheapest way to see whether
-   they compose the way they claim to.
-3. **Consider the thickness row on the Block title / Code pills** — currently absent
-   because neither target carries a painted edge. Probably correct; verify in the lab.
+**Done since this order was written** (branch `claude/contextual-menu-audit-38f080`):
+
+1. ~~Land it.~~ On `main` at `47d44537`. `weight` is gone from the tree — the only
+   surviving hits are font weight, elbow routing weights, and the unrelated
+   `ghost-weight` cable trait.
+2. ~~Audit the other surfaces with the lab.~~ The Code selection pill had never been
+   composable in the lab at all, so a `code` preset was added first. It is the SHARED
+   shape recipe narrowing itself: a Code block declares no `color`, `dash`, `font` or
+   align StyleProp, so the recipe every other shape uses resolves to
+   `codeLanguage · size`. Its unique rows (line numbers, character width) ride beside
+   the pill as `code-actions` — see `contextualSurfaceRegistry.ts`.
+3. ~~Decide the thickness row on Block title / Code pills.~~ **Correctly absent, and
+   now pinned.** A title is a run of text and a Code block's frame is chrome, so
+   neither carries a user-painted edge; `hasAdjustableStrokeWidth` paints one only on
+   `geo`, `draw`, `line`, `arrow`. Recorded at that seam and asserted in
+   `menuLabModel.test.ts` rather than left as a guess here.
+
+Still open:
+
 4. If a fourth edge section ever appears (opacity? corner radius?), it is one `above`
    link in `lineStyleWithThickness` and zero renderer changes. That is the test of
    whether this seam actually paid for itself.
+5. **Saving lever sets / emitting a recipe back to source.** The lab prints the recipe
+   literal but cannot yet write one. The obvious next increment *if* the lab starts
+   being used to design menus rather than to debug them.
+
+### What the audit found
+
+The lab is meant to be where a menu bug shows up first. It was carrying two of its own,
+both invisible to every assertion and obvious the moment anyone looked at a screenshot:
+
+- **A `button` does not inherit `color`.** Every preset card's *name* — the word you
+  click — painted near-white on a near-white surface, in both entry points, while its
+  description read fine. `select` and the `↑ ↓` move buttons had each been given a
+  colour locally; the preset cards were missed. Now set once for every form control in
+  `.menu-lab__shell`.
+- **Half the lab's chrome never applied inside Settings.** `.menu-lab select` was
+  scoped to `.menu-lab`, which is the *standalone* route's own fixed-position wrapper.
+  Settings renders the shell directly, with no such ancestor, so every select in
+  Settings › Menu lab was a bare native control while `?menu-lab` looked designed.
+  Re-scoped to `.menu-lab__shell`, which both entry points share. **Check any new rule
+  against both entry points — the class you scope to decides whether it exists in
+  Settings at all.**
+
+And `labPresetDrift` now checks each preset against the product recipe it names, so a
+preset cannot quietly keep a grouping the real recipe has moved on from. Stacked
+controls are exempt by construction: they fold into a host and never reach a recipe,
+which is why `strokeWidth` is legitimately absent from `SHAPE_CONTEXTUAL_RECIPE` while
+the Shape preset still composes it.
 
 ---
 
 ## How to run it
 
 ```bash
-cd /home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080 && npm run check
+cd /home/bam/systemsketch && npm run check
 ```
 
-`tsc -b` + 1966 vitest + 149 Python tests. Green on `b298f5a9`. Not sufficient for UI.
+`tsc -b` + 1975 vitest + 148 Python tests. Green on `6c0171af`. Not sufficient for UI.
 
 ```bash
-cd /home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080 && npm run test:line-thickness
+cd /home/bam/systemsketch && npm run test:line-thickness
 ```
 
-9 checks in real headless Chrome, reading exact painted widths off the canvas: the
+11 checks in real headless Chrome, reading exact painted widths off the canvas: the
 stacked popover, each rung's painted width, the font-size decoupling, next-shape memory,
-the connector's beside-row, and three lab checks. Also re-run the neighbour it changes:
+the connector's beside-row, and four lab checks including the Code pill's composition. Also re-run the neighbour it changes:
 
 ```bash
-cd /home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080 && npm run test:selection-menu
+cd /home/bam/systemsketch && npm run test:selection-menu
 ```
 
 The appearance journey (`tests/appearance_menu_smoke.mjs`, 24/24) is the one that pins
@@ -251,14 +297,14 @@ Rebuild the report after any change to the code it describes — it measures the
 build time and will fail loudly if a seam moved:
 
 ```bash
-cd /home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080 && python3 docs/build_line_thickness.py
+cd /home/bam/systemsketch && python3 docs/build_line_thickness.py
 ```
 
 Re-record the hero only if the interaction changes (it drives a copy of the fixture, so
 the committed board stays pristine):
 
 ```bash
-cd /home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080 && node docs/capture_line_thickness_hero.mjs
+cd /home/bam/systemsketch && node docs/capture_line_thickness_hero.mjs
 ```
 
 ---

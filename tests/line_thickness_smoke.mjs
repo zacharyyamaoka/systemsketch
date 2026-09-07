@@ -46,6 +46,7 @@ const FRAMES = {
   labConnector: join(ROOT, 'docs', 'assets', 'menu-lab-2-connector-2026-09-06.png'),
   labComposed: join(ROOT, 'docs', 'assets', 'menu-lab-3-composed-2026-09-06.png'),
   settings: join(ROOT, 'docs', 'assets', 'menu-lab-4-settings-2026-09-06.png'),
+  labCode: join(ROOT, 'docs', 'assets', 'menu-lab-5-code-2026-09-06.png'),
 }
 
 const EMPTY_CANVAS = { x: 200, y: 820 }
@@ -383,6 +384,31 @@ async function main() {
     measured.lab.leverStacked = stacked
     await shot(app.page, FRAMES.labComposed)
     pass('a lever added a control and then folded it into its neighbour, live')
+
+    // 10. The audit the work order asked for: the two surfaces the thickness
+    // work did not touch. A Code block carries no colour, dash, font or align
+    // StyleProp, so the SHARED shape recipe narrows itself to Language and the
+    // same Font size ladder every other shape uses — and offers no thickness
+    // row, because `hasAdjustableStrokeWidth` paints one only on geo, draw,
+    // line and arrow. A row here would be a control that silently does nothing.
+    await clickSelector(app.page, '[data-testid="menu-lab-preset-code"]')
+    await delay(400)
+    const labCode = JSON.parse(await evaluate(app.page, `(() => JSON.stringify({
+      triggers: [...document.querySelectorAll('[data-testid="menu-lab-menu"] .systemsketch-appearance__trigger')]
+        .map((t) => t.dataset.control),
+      dangling: document.querySelector('[data-testid="menu-lab-dangling"]')?.textContent ?? '',
+      recipe: document.querySelector('[data-testid="menu-lab-recipe"]').textContent,
+    }))()`))
+    assert.deepEqual(labCode.triggers, ['codeLanguage', 'size'],
+      'the Code pill is Language plus the shared Font size ladder')
+    assert.ok(!labCode.triggers.includes('strokeWidth'),
+      'and no thickness row, because a Code block has no painted edge')
+    assert.equal(labCode.dangling, '', 'nothing is stacked onto nothing')
+    assert.ok(labCode.recipe.includes("items: ['codeLanguage', 'size']"),
+      'the lab prints the Code pill it composed')
+    measured.lab.codeTriggers = labCode.triggers
+    await shot(app.page, FRAMES.labCode)
+    pass('the lab composes the Code selection pill, thickness row correctly absent')
 
     measured.consoleErrors = await localConsoleErrors(app.page)
     const errors = measured.consoleErrors
