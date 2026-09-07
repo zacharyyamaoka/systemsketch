@@ -1,6 +1,7 @@
 import { StyleProp, type TLShapeId } from 'tldraw'
 
 import type { LaidOutBlockPort } from '../layoutBlock'
+import type { TypeMatching } from '../../settings/edgePolicy'
 
 export const CONNECTION_SHAPE_TYPE = 'connection' as const
 export const CONNECTION_BINDING_TYPE = 'connection' as const
@@ -120,13 +121,46 @@ export interface PortDot {
 /**
  * The data-type seam.
  *
- * Ports carry a free-text `type` today ("Pose", "bytes", or nothing), so there
- * is no lattice to check against yet and a veto on a guess would refuse cables
- * people mean. When the Python side defines the types, this is the ONLY place
- * that changes: `judgeConnection` already routes every candidate pair through
- * it and reports `type-mismatch`, and the eligible-port highlight and the drop
- * both read that verdict.
+ * Ports carry a free-text `type` ("Pose", "bytes", or nothing), so there is no
+ * lattice to check against yet and a veto on a guess would refuse cables people
+ * mean. That is why the check is OFF in the default policy rather than absent
+ * from the code: `judgeConnection` routes every candidate pair through here and
+ * reports `type-mismatch` / `untyped-port`, and the eligible-port highlight and
+ * the drop both read that verdict. When the Python side defines real types,
+ * this is still the only place that changes.
+ *
+ * WHY the comparison is case- and whitespace-insensitive rather than exact:
+ * a port's type is text a person typed on a whiteboard, and refusing `pose` to
+ * `Pose` would read as a bug, not as rigour. Truthful rendering keeps every
+ * authored character on screen (see `feedback_truthful_property_rendering`) —
+ * that is a display rule, and it does not oblige the JUDGE to be pedantic.
  */
-export function arePortTypesCompatible(_sourceType: string, _sinkType: string): boolean {
-	return true
+export function arePortTypesCompatible(
+	sourceType: string,
+	sinkType: string,
+	mode: TypeMatching = 'off',
+): PortTypeVerdict {
+	if (mode === 'off') return 'ok'
+	const source = normalizePortType(sourceType)
+	const sink = normalizePortType(sinkType)
+	if (source === '' || sink === '') {
+		// Lenient reads an undeclared type as "not saying", which is the only way
+		// a half-annotated board stays workable; strict reads it as a gap to fill.
+		return mode === 'strict' ? 'untyped' : 'ok'
+	}
+	if (isWildcardPortType(source) || isWildcardPortType(sink)) return 'ok'
+	return source === sink ? 'ok' : 'mismatch'
+}
+
+export type PortTypeVerdict = 'ok' | 'mismatch' | 'untyped'
+
+/** Types that deliberately accept anything, so they never refuse a landing. */
+const WILDCARD_PORT_TYPES = new Set(['any', '*', 'object'])
+
+function isWildcardPortType(normalized: string): boolean {
+	return WILDCARD_PORT_TYPES.has(normalized)
+}
+
+export function normalizePortType(type: string): string {
+	return type.trim().toLowerCase()
 }

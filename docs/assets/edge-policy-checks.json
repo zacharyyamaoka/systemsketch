@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "SCENE      an Expanded box with a child, and two siblings beside it, all ports typed",
+    "SCENE-1    inner really is inside outer, so there is a real boundary to cross",
+    "SCENE-2    the gutter authored names AND types in one gesture",
+    "BASELINE-0  a fresh install has stored no policy at all",
+    "BASELINE-1  the panel opens on Guided, enforcing 5 of 9 rules, and says so on screen",
+    "BASELINE-2  an ordinary output → input still wires under the default policy",
+    "BASELINE-3  output → output is refused, and offers nothing in its place",
+    "BASELINE-4  a child reaching past its own Block's wall is refused — the black box holds",
+    "PRESET-WHITEBOARD  whiteboard enforces 0 of 9 rules, and says so on screen",
+    "WHITEBOARD-1  the choice is persisted with every permission granted",
+    "WHITEBOARD-2  the SAME output → output gesture now draws a cable",
+    "WHITEBOARD-3  the arrow points the way it was dragged, sibling → extra",
+    "BLACKBOX-1  a child now wires straight through its Block's wall",
+    "BLACKBOX-2  the cable takes a parent holding BOTH ends, so neither half is clipped away",
+    "PRESET-STRICT  strict enforces 8 of 9 rules, and says so on screen",
+    "TYPES-1    Pose → bytes is refused under Strict",
+    "TYPES-2    pose → Pose is kept: a typed whiteboard is not a case-sensitive one",
+    "FANIN-1    Strict refuses a second producer into one input",
+    "PRESET-GUIDED  guided enforces 5 of 9 rules, and says so on screen",
+    "FANIN-2    Guided allows it — the same gesture, the opposite answer",
+    "CUSTOM-1   flipping one switch reads Custom rather than naming a preset it is not",
+    "CUSTOM-2   Reset puts every rule back to Guided",
+    "CUSTOM-3   type matching moves independently of the nine switches",
+    "QUIET      the whole journey raised no console errors"
+  ],
+  "total": 24
+}

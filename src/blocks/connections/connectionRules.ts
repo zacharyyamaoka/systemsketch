@@ -26,6 +26,10 @@ import {
 } from './connectionModel'
 import { pairBlockFaces, type ScopeReader } from './connectionScope'
 import { isImportedPageFrame } from '../../singlePageDocument'
+import { edgePolicyPreset, getEdgePolicy, type EdgePolicy } from '../../settings/edgePolicy'
+
+/** Every rule stood down — what a cable already in the file is judged against. */
+const WHITEBOARD_POLICY: EdgePolicy = edgePolicyPreset('whiteboard').policy
 
 /**
  * The rules. One function decides whether two ports may be wired and which
@@ -39,8 +43,27 @@ export type ConnectionRefusal =
 	| 'no-shared-scope'
 	| 'same-polarity'
 	| 'type-mismatch'
+	| 'untyped-port'
 	| 'cycle'
 	| 'duplicate'
+	| 'self-connection'
+	| 'fan-in'
+	| 'fan-out'
+
+/** Which policy permission each refusal answers to — what a UI would name. */
+export const REFUSAL_PERMISSION: Readonly<Record<ConnectionRefusal, keyof EdgePolicy | null>> = Object.freeze({
+	'missing-port': null,
+	'no-shared-scope': null,
+	'hidden-port': 'allowHiddenPorts',
+	'same-polarity': 'allowSamePolarity',
+	'type-mismatch': 'typeMatching',
+	'untyped-port': 'typeMatching',
+	cycle: 'allowCycles',
+	duplicate: 'allowDuplicates',
+	'self-connection': 'allowSelfConnection',
+	'fan-in': 'allowFanIn',
+	'fan-out': 'allowFanOut',
+})
 
 export interface JudgedEndpoint extends PortEndpoint {
 	side: BlockPortLane
@@ -72,6 +95,12 @@ export interface JudgeOptions {
 	 * lands back where it started is not a copy of itself.
 	 */
 	connectionId?: TLShapeId
+	/**
+	 * Which rules are switched on. Defaults to the user's saved policy, so a
+	 * caller that does not care never has to thread it; a test names one
+	 * explicitly rather than mutating global state.
+	 */
+	policy?: EdgePolicy
 }
 
 type RulesReader = ScopeReader & { store?: Editor['store'] }
@@ -86,10 +115,23 @@ function livePort(editor: RulesReader, block: PortHostShape, portId: string): Bl
  *   1. both ports must exist, and be visible for a new cable
  *   2. the two Blocks must share a scope, which fixes each end's face
  *   3. the faces must differ in polarity — one emits, one receives
- *   4. the types must be compatible (a seam; permissive today)
+ *   4. the declared types must agree
  *   5. between outer faces, the landing must not close a loop
- *   6. the two faces must not already be joined — sinks fan in, but a second
- *      copy of the same wire is nothing anyone can tell apart
+ *   6. the two faces must not already be joined — a second copy of the same
+ *      wire is nothing anyone can tell apart
+ *   7. neither face may already be at its cable limit (fan-in / fan-out)
+ *
+ * Every one of those except rule 1 is a PERMISSION the user can withdraw in
+ * Settings › Connections, all the way down to a plain whiteboard where any dot
+ * reaches any other. The order is deliberate: the cheapest and most structural
+ * checks first, so a refusal names the most fundamental thing that was wrong
+ * rather than whichever rule happened to be tested first.
+ *
+ * WHY the policy is read here and nowhere else: the drop, the eligible-port
+ * highlight, the picker and load-time validation all already funnel through
+ * this one function, so a rule that lives here cannot be enforced in one path
+ * and forgotten in another — which is exactly how a port lights up as a legal
+ * target and then refuses the cable on release.
  */
 export function judgeConnection(
 	editor: RulesReader,
@@ -97,15 +139,31 @@ export function judgeConnection(
 	b: PortDot,
 	options: JudgeOptions = {},
 ): ConnectionVerdict {
+	// WHY an already-stored cable is judged under the fully permissive policy:
+	// tightening a rule must never retroactively invalidate a board that was
+	// authored under a looser one. The policy governs what you can DRAW, not
+	// what a file is allowed to contain.
+	const policy = options.existing
+		? WHITEBOARD_POLICY
+		: options.policy ?? getEdgePolicy()
+
 	const shapeA = editor.getShape(a.shapeId)
 	const shapeB = editor.getShape(b.shapeId)
 	if (!isPortHostShape(shapeA) || !isPortHostShape(shapeB)) return { ok: false, reason: 'missing-port' }
 	const portA = livePort(editor, shapeA, a.portId)
 	const portB = livePort(editor, shapeB, b.portId)
 	if (!portA || !portB) return { ok: false, reason: 'missing-port' }
-	if (!options.existing && (portA.hidden || portB.hidden)) return { ok: false, reason: 'hidden-port' }
+	if (!policy.allowHiddenPorts && (portA.hidden || portB.hidden)) {
+		return { ok: false, reason: 'hidden-port' }
+	}
+	if (!policy.allowSelfConnection && shapeA.id === shapeB.id) {
+		return { ok: false, reason: 'self-connection' }
+	}
 
-	const faces = pairBlockFaces(editor, shapeA, shapeB, { requireLive: !options.existing })
+	const faces = pairBlockFaces(editor, shapeA, shapeB, {
+		requireLive: !options.existing,
+		crossBoundary: policy.allowCrossBoundary,
+	})
 	if (!faces) {
 		return { ok: false, reason: 'no-shared-scope' }
 	}
@@ -126,26 +184,73 @@ export function judgeConnection(
 		polarity: portPolarity(portB.side, faces.b),
 		port: portB,
 	}
-	if (endpointA.polarity === endpointB.polarity) return { ok: false, reason: 'same-polarity' }
-
-	const [source, sink] = endpointA.polarity === 'source'
-		? [endpointA, endpointB]
-		: [endpointB, endpointA]
-	if (!arePortTypesCompatible(source.port.type, sink.port.type)) {
-		return { ok: false, reason: 'type-mismatch' }
+	if (endpointA.polarity === endpointB.polarity && !policy.allowSamePolarity) {
+		return { ok: false, reason: 'same-polarity' }
 	}
+
+	const [source, sink] = decideDirection(endpointA, endpointB)
+	const typeVerdict = arePortTypesCompatible(source.port.type, sink.port.type, policy.typeMatching)
+	if (typeVerdict === 'mismatch') return { ok: false, reason: 'type-mismatch' }
+	if (typeVerdict === 'untyped') return { ok: false, reason: 'untyped-port' }
+
 	if (
-		shapeA.id !== shapeB.id
+		!policy.allowCycles
+		&& shapeA.id !== shapeB.id
 		&& faces.a === 'outer' && faces.b === 'outer'
 		&& options.excludeBlocks?.has(shapeB.id)
 	) {
 		return { ok: false, reason: 'cycle' }
 	}
-	if (!options.existing && facesAlreadyJoined(editor, endpointA, endpointB, options.connectionId)) {
+	if (
+		!policy.allowDuplicates
+		&& !options.existing
+		&& facesAlreadyJoined(editor, endpointA, endpointB, options.connectionId)
+	) {
 		return { ok: false, reason: 'duplicate' }
+	}
+	if (!options.existing) {
+		if (!policy.allowFanIn && faceIsOccupied(editor, sink, options.connectionId)) {
+			return { ok: false, reason: 'fan-in' }
+		}
+		if (!policy.allowFanOut && faceIsOccupied(editor, source, options.connectionId)) {
+			return { ok: false, reason: 'fan-out' }
+		}
 	}
 
 	return { ok: true, a: endpointA, b: endpointB, source, sink, scopeId: faces.scopeId }
+}
+
+/**
+ * Which end emits. Polarity decides it whenever the two faces disagree, which
+ * is the only case the default policy allows.
+ *
+ * WHY the drag decides when they AGREE: with the polarity rule withdrawn, two
+ * outputs can be wired, and "which way does it point" has no answer left in the
+ * model — so it falls back to the whiteboard's own answer, the direction the
+ * person drew. `a` is always the anchored end a cable was dragged FROM (every
+ * caller passes the anchor first), so a→b is the gesture, and the arrowhead
+ * lands where they let go.
+ */
+function decideDirection(
+	a: JudgedEndpoint,
+	b: JudgedEndpoint,
+): [source: JudgedEndpoint, sink: JudgedEndpoint] {
+	if (a.polarity === b.polarity) return [a, b]
+	return a.polarity === 'source' ? [a, b] : [b, a]
+}
+
+/** Does this exact face already carry a cable other than the one being judged? */
+function faceIsOccupied(
+	editor: RulesReader,
+	endpoint: JudgedEndpoint,
+	except: TLShapeId | undefined,
+): boolean {
+	if (!editor.store) return false
+	return getBlockPortConnections(editor as Editor, endpoint.shapeId).some((connection) => (
+		connection.connectionId !== except
+		&& connection.ownPortId === endpoint.portId
+		&& connection.ownFace === endpoint.face
+	))
 }
 
 /** Is there some other cable already welded to exactly these two faces? */

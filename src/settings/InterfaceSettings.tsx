@@ -59,6 +59,19 @@ import {
 } from '../library/toolAliases'
 import { MenuLabPanel } from '../prototypes/menuLab/ContextualMenuLab'
 import { readFileAccessSettings, writeFileAccessSettings } from '../workspace/workspaceClient'
+import {
+  applyEdgePolicyPreset,
+  EDGE_POLICY_PRESETS,
+  EDGE_POLICY_RULE_COUNT,
+  edgePolicyPreset,
+  enforcedRuleCount,
+  matchingEdgePolicyPreset,
+  TYPE_MATCHING_MODES,
+  updateEdgePolicy,
+  useEdgePolicy,
+  type EdgePolicyBooleanKey,
+  type TypeMatching,
+} from './edgePolicy'
 import './interface-settings.css'
 
 export function SettingsGearIcon(props: ComponentProps<'svg'>) {
@@ -73,7 +86,7 @@ function CategoryIcon({ children }: { children: ReactNode }) {
   )
 }
 
-type SettingsCategoryId = 'general' | 'canvas' | 'appearance' | 'interface' | 'shortcuts' | 'menu-lab' | 'about'
+type SettingsCategoryId = 'general' | 'canvas' | 'connections' | 'appearance' | 'interface' | 'shortcuts' | 'menu-lab' | 'about'
 
 const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; icon: ReactNode }[] = [
   {
@@ -90,6 +103,12 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
     id: 'canvas',
     label: 'Canvas',
     icon: <CategoryIcon><circle cx="10" cy="10" r="5.8" /><path d="M10 1.8v3M10 15.2v3M1.8 10h3M15.2 10h3" /></CategoryIcon>,
+  },
+  {
+    id: 'connections',
+    label: 'Connections',
+    // Two ports and the cable between them — the thing the panel governs.
+    icon: <CategoryIcon><circle cx="4.6" cy="10" r="2.1" /><circle cx="15.4" cy="10" r="2.1" /><path d="M6.7 10h6.6" /></CategoryIcon>,
   },
   {
     id: 'interface',
@@ -114,7 +133,7 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'interface', 'shortcuts', 'menu-lab']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'connections', 'interface', 'shortcuts', 'menu-lab']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -167,6 +186,8 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
           ? <AppearancePanel />
           : category === 'canvas'
           ? <CanvasPanel />
+          : category === 'connections'
+          ? <ConnectionsPanel />
           : category === 'shortcuts'
           ? <ToolAliasesPanel />
           : category === 'menu-lab'
@@ -396,6 +417,258 @@ function MenuLabSettingsPanel() {
       <div className="menu-lab__container">
         <MenuLabPanel />
       </div>
+    </section>
+  )
+}
+
+/* ------------------------------- connections ------------------------------- */
+
+/**
+ * One permission, phrased as what it LETS you draw. The switch being on always
+ * means "more is possible", so the whiteboard end of the ladder is the row of
+ * every switch on, and nobody has to work out whether a checked box tightens or
+ * loosens the board.
+ */
+function PolicyToggle({
+  id,
+  title,
+  detail,
+  refuses,
+  value,
+  onChange,
+}: {
+  id: EdgePolicyBooleanKey
+  title: string
+  detail: string
+  /** The concrete thing that stops being drawable when this is off. */
+  refuses: string
+  value: boolean
+  onChange: (next: boolean) => void
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      className="systemsketch-settings__toggle-row"
+      aria-checked={value}
+      data-testid={`systemsketch-edge-policy-${id}`}
+      onClick={() => onChange(!value)}
+    >
+      <span>
+        <strong>{title}</strong>
+        <small>{detail}</small>
+        <small className="systemsketch-edge-policy__refuses">
+          {value ? 'Allowed' : <>Refused: <code>{refuses}</code></>}
+        </small>
+      </span>
+      <i aria-hidden="true"><span /></i>
+    </button>
+  )
+}
+
+const TYPE_MATCHING_LABELS: Readonly<Record<TypeMatching, { label: string; detail: string }>> = {
+  off: { label: 'Off', detail: 'Types are documentation. Any port may meet any other.' },
+  lenient: { label: 'Lenient', detail: 'Declared types must agree. A port with no type is a wildcard.' },
+  strict: { label: 'Strict', detail: 'Both ends must declare a type, and the two must agree.' },
+}
+
+/**
+ * The whole spectrum in one place: a plain whiteboard where a cable means
+ * whatever you meant, through to a board that can only be drawn correct.
+ *
+ * WHY presets sit ABOVE the toggles rather than replacing them: a preset is a
+ * shortcut into the same nine switches, never a second source of truth, so the
+ * chosen preset is DERIVED by matching the live policy — flip one switch and
+ * the row honestly reads Custom instead of lying about which preset is on.
+ */
+function ConnectionsPanel() {
+  const policy = useEdgePolicy()
+  const preset = matchingEdgePolicyPreset(policy)
+  const enforced = enforcedRuleCount(policy)
+
+  return (
+    <section
+      className="systemsketch-settings__panel"
+      aria-labelledby="edge-policy-title"
+      data-testid="systemsketch-connections-panel"
+      data-preset={preset ?? 'custom'}
+      data-enforced={enforced}
+    >
+      <div className="systemsketch-settings__eyebrow">Connections</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="edge-policy-title">Edge creation policy</h2>
+          <p>
+            What SystemSketch will let you wire. Slide it all the way down for a plain whiteboard —
+            any port to any port — or all the way up so only edges that could exist in the running
+            program can be drawn at all.
+          </p>
+        </div>
+        <output
+          className="systemsketch-edge-policy__count"
+          data-testid="systemsketch-edge-policy-count"
+          aria-label={`Enforcing ${enforced} of ${EDGE_POLICY_RULE_COUNT} rules`}
+        >
+          {enforced}<span>/{EDGE_POLICY_RULE_COUNT}</span>
+        </output>
+      </div>
+
+      <div
+        className="systemsketch-settings__presets systemsketch-edge-policy__presets"
+        aria-label="Edge policy presets"
+      >
+        {EDGE_POLICY_PRESETS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={item.id === preset ? 'is-active' : undefined}
+            aria-pressed={item.id === preset}
+            title={item.summary}
+            data-testid={`systemsketch-edge-preset-${item.id}`}
+            onClick={() => applyEdgePolicyPreset(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <p className="systemsketch-edge-policy__summary" data-testid="systemsketch-edge-policy-summary">
+        {preset
+          ? edgePolicyPreset(preset).summary
+          : 'Custom — these rules do not match a preset. Pick one above to start over.'}
+      </p>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="edge-direction-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="edge-direction-title">Direction</h3>
+          <p>Which way data is allowed to run, and whether it may come back around.</p>
+        </div>
+        <PolicyToggle
+          id="allowSamePolarity"
+          title="Wire two outputs, or two inputs"
+          detail="Off, a cable must join something that emits to something that receives — the arrowhead follows from the ports, not from which way you dragged."
+          refuses="output → output"
+          value={policy.allowSamePolarity}
+          onChange={(next) => updateEdgePolicy({ allowSamePolarity: next })}
+        />
+        <PolicyToggle
+          id="allowCycles"
+          title="Close a feedback loop"
+          detail="Off, a cable may not land on anything already upstream of where it started. Use a Loop region for deliberate feedback."
+          refuses="A → B → A"
+          value={policy.allowCycles}
+          onChange={(next) => updateEdgePolicy({ allowCycles: next })}
+        />
+        <PolicyToggle
+          id="allowSelfConnection"
+          title="Wire a Block to itself"
+          detail="A cable that leaves a Block's outlet and turns straight back into its own inlet."
+          refuses="A → A"
+          value={policy.allowSelfConnection}
+          onChange={(next) => updateEdgePolicy({ allowSelfConnection: next })}
+        />
+      </section>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="edge-boundaries-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="edge-boundaries-title">Boundaries</h3>
+          <p>Whether a Block is a black box — reachable only through the ports it shows you.</p>
+        </div>
+        <PolicyToggle
+          id="allowCrossBoundary"
+          title="Wire straight through a Block's wall"
+          detail="Off, a Block inside a box can only reach the outside through that box's own ports, so the picture on screen is the whole contract. On, any dot reaches any other and the cable takes the nearest frame that holds both ends."
+          refuses="child of A → sibling of A"
+          value={policy.allowCrossBoundary}
+          onChange={(next) => updateEdgePolicy({ allowCrossBoundary: next })}
+        />
+        <PolicyToggle
+          id="allowHiddenPorts"
+          title="Wire a hidden port"
+          detail="A port hidden in the current view keeps its identity and its anchor, but is normally not a landing target."
+          refuses="a port you cannot see"
+          value={policy.allowHiddenPorts}
+          onChange={(next) => updateEdgePolicy({ allowHiddenPorts: next })}
+        />
+      </section>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="edge-types-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="edge-types-title">Data types</h3>
+          <p>
+            Ports carry free text today — <code>Pose</code>, <code>bytes</code>, or nothing. Case and
+            surrounding space are ignored, and <code>any</code>, <code>object</code> and <code>*</code>
+            {' '}meet anything.
+          </p>
+        </div>
+        <div className="systemsketch-edge-policy__modes" role="radiogroup" aria-labelledby="edge-types-title">
+          {TYPE_MATCHING_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              role="radio"
+              aria-checked={policy.typeMatching === mode}
+              className={policy.typeMatching === mode ? 'is-active' : undefined}
+              data-testid={`systemsketch-edge-type-matching-${mode}`}
+              onClick={() => updateEdgePolicy({ typeMatching: mode })}
+            >
+              <strong>{TYPE_MATCHING_LABELS[mode].label}</strong>
+              <small>{TYPE_MATCHING_LABELS[mode].detail}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="edge-fan-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="edge-fan-title">How many cables meet at one port</h3>
+          <p>One value read by two consumers is ordinary. Two producers writing one input is a question the picture cannot answer.</p>
+        </div>
+        <PolicyToggle
+          id="allowFanIn"
+          title="Several cables into one input"
+          detail="Off, an input takes a single producer. Branch and Loop regions still choose between arms — that is not fan-in."
+          refuses="A → C, B → C"
+          value={policy.allowFanIn}
+          onChange={(next) => updateEdgePolicy({ allowFanIn: next })}
+        />
+        <PolicyToggle
+          id="allowFanOut"
+          title="Several cables out of one output"
+          detail="Off, an output feeds exactly one consumer, which forces an explicit copy or tee wherever a value is used twice."
+          refuses="A → B, A → C"
+          value={policy.allowFanOut}
+          onChange={(next) => updateEdgePolicy({ allowFanOut: next })}
+        />
+        <PolicyToggle
+          id="allowDuplicates"
+          title="A second copy of the same cable"
+          detail="Two cables joining the exact same pair of ports. There is nothing on screen that tells them apart."
+          refuses="A.out → B.in, twice"
+          value={policy.allowDuplicates}
+          onChange={(next) => updateEdgePolicy({ allowDuplicates: next })}
+        />
+      </section>
+
+      <div className="systemsketch-settings__note">
+        <span className="systemsketch-settings__saved-dot" aria-hidden="true" />
+        <div>
+          <strong>Saved on this computer</strong>
+          <p>
+            This governs what you can draw from now on. Cables already on a board are never
+            re-judged, so tightening the policy cannot break a board someone else authored.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="systemsketch-settings__reset"
+        data-testid="systemsketch-edge-policy-reset"
+        disabled={preset === 'guided'}
+        onClick={() => applyEdgePolicyPreset('guided')}
+      >
+        Reset to Guided
+      </button>
     </section>
   )
 }

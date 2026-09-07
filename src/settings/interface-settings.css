@@ -878,3 +878,120 @@
   outline: 2px solid var(--ss-accent);
   outline-offset: 3px;
 }
+
+/* ------------------------------- connections ------------------------------- */
+
+/* Four presets across, against the scale panel's five. */
+.systemsketch-edge-policy__presets {
+  grid-template-columns: repeat(4, 1fr);
+  margin-left: 0;
+}
+
+.systemsketch-edge-policy__summary {
+  margin: 10px 0 0;
+  min-height: 30px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* How many of the nine rules are live, so the ladder's position is a number
+   and not just a row of switches you have to read one by one. */
+.systemsketch-edge-policy__count {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  font-size: 15px;
+  font-weight: 730;
+  font-variant-numeric: tabular-nums;
+}
+
+.systemsketch-edge-policy__count > span {
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+/* The concrete edge that stops being drawable. Sits under the explanation so
+   a switch can be read at a glance without parsing the sentence above it. */
+.systemsketch-edge-policy__refuses {
+  margin-top: 2px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.systemsketch-settings__toggle-row[aria-checked='true'] .systemsketch-edge-policy__refuses {
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-edge-policy__refuses code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+}
+
+.systemsketch-edge-policy__modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.systemsketch-edge-policy__modes button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 12px;
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.systemsketch-edge-policy__modes button:hover {
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-edge-policy__modes button:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+.systemsketch-edge-policy__modes button strong {
+  color: var(--ss-text);
+  font-size: 12px;
+  font-weight: 730;
+}
+
+.systemsketch-edge-policy__modes button small {
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+/* WHY the selected mode is a tinted card with an accent BORDER rather than an
+   accent fill: body copy on --ss-accent-soft measures 2.6-4.3:1 in every
+   palette, so the ink stays on the quiet surface and the accent does the
+   pointing. See the `accent-on-accent-soft fails contrast` finding. */
+.systemsketch-edge-policy__modes button.is-active {
+  border-color: var(--ss-accent);
+  background: var(--ss-accent-soft);
+  box-shadow: inset 3px 0 0 var(--ss-accent);
+}
+
+.systemsketch-edge-policy__modes button.is-active strong,
+.systemsketch-edge-policy__modes button.is-active small {
+  color: var(--ss-text);
+}
+
+.systemsketch-settings[data-category='connections'] .systemsketch-settings__reset {
+  margin-top: 16px;
+  padding: 0 16px;
+}
