@@ -184,6 +184,22 @@ export function stopCommunicationLinkDraw(editor: Editor): void {
 	editor.setCurrentTool('select')
 }
 
+/**
+ * Arm one family, or disarm it when it is already the armed one.
+ *
+ * WHY both the DRAW buttons and the 1/2/3 keys route through here: they are one
+ * control said two ways. A keyboard path with its own copy of "already armed?
+ * then stop" is how a second press of 2 quietly starts meaning something the
+ * button never meant.
+ */
+export function toggleCommunicationLinkDraw(
+	editor: Editor,
+	family: CommunicationDrawFamily,
+): void {
+	if (activeCommunicationDrawFamily(editor) === family) stopCommunicationLinkDraw(editor)
+	else startCommunicationLinkDraw(editor, family)
+}
+
 export function activeCommunicationDrawFamily(editor: Editor): CommunicationDrawFamily | null {
 	return editor.getCurrentToolId() === COMMUNICATION_LINK_TOOL_ID
 		? communicationProjection.get(editor).drawFamily

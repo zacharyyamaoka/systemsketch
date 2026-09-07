@@ -33,9 +33,13 @@ import {
 } from './communicationAuthoring'
 import {
 	COMMUNICATION_LINK_TOOL_ID,
-	startCommunicationLinkDraw,
 	stopCommunicationLinkDraw,
+	toggleCommunicationLinkDraw,
 } from './CommunicationLinkTool'
+import {
+	COMMUNICATION_DRAW_SHORTCUTS,
+	shouldClaimCommunicationDigit,
+} from './communicationDrawShortcuts'
 import { CommunicationLinkPreview } from './CommunicationLinkPreview'
 import './communication-prototype.css'
 
@@ -193,6 +197,24 @@ export function CommunicationPrototypeControls() {
 	}, [editor, activeToolId, enabled, state.lens])
 
 	useEffect(() => {
+		if (!enabled || state.lens !== 'communication') return
+		// The same body tldraw's own shortcut layer listens on.
+		const body = editor.getContainer().ownerDocument.body
+		// WHY a listener beside the shortcut layer rather than in it: tldraw's
+		// toolbar owns 1-9 from a listener on the container DOCUMENT, and the
+		// shortcut layer that runs our action listens on BODY — so the toolbar
+		// always got the last word and put the Cursor tool back. Stopping
+		// propagation here, from body, leaves every body listener (tldraw's
+		// included) intact and denies only the later document one. Mounted with
+		// the DRAW group, so the toolbar keeps its digits everywhere else.
+		const claimDigits = (event: KeyboardEvent) => {
+			if (shouldClaimCommunicationDigit(editor, event)) event.stopPropagation()
+		}
+		body.addEventListener('keydown', claimDigits)
+		return () => body.removeEventListener('keydown', claimDigits)
+	}, [editor, enabled, state.lens])
+
+	useEffect(() => {
 		setRenameDraft(null)
 	}, [state.focusedGroupKey])
 
@@ -297,19 +319,24 @@ export function CommunicationPrototypeControls() {
 						{DRAW_FAMILIES.map((family) => {
 							const armed = drawingFamily === family.id
 							const paint = COMMUNICATION_FAMILY_PAINT[family.id]
+							const shortcut = COMMUNICATION_DRAW_SHORTCUTS[family.id]
 							return (
 								<button
 									key={family.id}
 									type="button"
 									aria-pressed={armed}
+									aria-keyshortcuts={shortcut}
 									data-testid={`communication-draw-${family.id}`}
-									title={family.hint}
+									data-shortcut={shortcut}
+									title={`${family.hint} — press ${shortcut}`}
 									style={{ '--family-ink': paint.ink, '--family-soft': paint.soft } as React.CSSProperties}
-									onClick={() => (armed
-										? stopCommunicationLinkDraw(editor)
-										: startCommunicationLinkDraw(editor, family.id))}
+									onClick={() => toggleCommunicationLinkDraw(editor, family.id)}
 								>
 									<i aria-hidden="true">{paint.monogram}</i>{family.label}
+									{/* WHY the digit is painted and not only bound: the mapping is
+									    reading order, which nobody can guess from three names. An
+									    unshown shortcut is one only its author uses. */}
+									<kbd aria-hidden="true">{shortcut}</kbd>
 								</button>
 							)
 						})}

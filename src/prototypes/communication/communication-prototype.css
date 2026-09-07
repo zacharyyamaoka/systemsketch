@@ -295,6 +295,29 @@
 	font-size: 10px;
 }
 
+/* WHY the digit is a chip on ordinary surface, not the family tint: family ink
+   on family soft measures 2.6-4.3:1 in these palettes, and a two-character
+   label has no size to spare. The border carries the family, the digit stays
+   readable ink. */
+.communication-prototype-draw button kbd {
+	display: grid;
+	place-items: center;
+	min-width: 15px;
+	height: 15px;
+	padding: 0 3px;
+	border: 1px solid var(--ss-border);
+	border-radius: 4px;
+	background: var(--ss-surface);
+	color: var(--ss-text-faint);
+	font: 700 9px/1 "JetBrains Mono", ui-monospace, monospace;
+}
+
+.communication-prototype-draw button:hover kbd,
+.communication-prototype-draw button[aria-pressed="true"] kbd {
+	border-color: color-mix(in srgb, var(--family-ink) 45%, transparent);
+	color: var(--ss-text);
+}
+
 .communication-prototype-draw button:hover {
 	background: color-mix(in srgb, var(--family-ink) 9%, var(--ss-surface));
 	color: var(--ss-text);
