@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 3,
+  "title": "Five ways to hand off a mixed review",
+  "kicker": "SystemSketch · review delivery · Babble & Prune",
+  "brief": "Compare terminal cards for the same retained review: a standard rich report, a previous report, a guided board, a local sandbox, and a current-versus-prior comparison. Every direction keeps the actual URL hidden behind a short OSC-8 link and gives every artifact a title plus an honest action.",
+  "count": 5,
+  "defaultId": "v2",
+  "defaultWhy": "Purpose Lanes is the provisional pick at 89/100: it makes the two report versions and the three different interaction types legible without losing the compact, one-command terminal handoff.",
+  "decisionHinge": "If most reviews usually contain only one report and one board, move 15 points from relationship clarity to instant scanning: the flat Artifact Stack overtakes Purpose Lanes (84 versus 82).",
+  "invariants": [
+    "Every direction shows the same five review artifacts and conceals raw URLs behind clickable links.",
+    "Every artifact row contains an icon, a meaningful title, and an action that says what clicking does.",
+    "The shell starts with the same review heading and keeps diagnostic status, ports, commits, and restart instructions out of the card."
+  ],
+  "boundary": "This is a browser-runnable concept gallery, not a change to the retained-review registry. The buttons exercise local presentational states only; no server, report, or board is opened from the prototype.",
+  "axes": [
+    {
+      "name": "Relationship model",
+      "values": ["one flat list", "purpose lanes", "comparison bundle", "action menu", "timeline index"]
+    },
+    {
+      "name": "Primary scanning cue",
+      "values": ["artifact name", "artifact role", "version pair", "verb", "time"]
+    },
+    {
+      "name": "Version treatment",
+      "values": ["peer rows", "history lane", "side-by-side pair", "action suffix", "chronological sequence"]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Instant scan to the intended artifact",
+      "weight": 35,
+      "why": "A review handoff is often opened days later in a noisy terminal; the reader should identify the next relevant surface without reconstructing the setup.",
+      "passCondition": "A reader can find the standard report, the board, and the comparison surface in one glance.",
+      "anchors": {
+        "1": "Labels are generic or compete with implementation detail.",
+        "3": "The right item is present but requires reading several rows or a legend.",
+        "5": "Artifact role, title, and next action are obvious from the card alone."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Version and comparison clarity",
+      "weight": 30,
+      "why": "Two reports or an A/B surface are easy to mistake for duplicates unless their relationship is visible before opening them.",
+      "passCondition": "A reader can tell current from prior and discover the direct comparison without relying on filenames.",
+      "anchors": {
+        "1": "Versions look interchangeable and comparison is hidden.",
+        "3": "Names distinguish versions but their relationship is implicit.",
+        "5": "Version lineage and the comparison path are explicit in the visual grouping."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Compact terminal fit",
+      "weight": 20,
+      "why": "The card must remain a calm handoff affordance rather than grow back into a dashboard or a README in the terminal.",
+      "passCondition": "Five artifacts fit in a small terminal region with no raw URLs or explanation paragraphs.",
+      "anchors": {
+        "1": "The card needs scrolling or restores runtime ceremony.",
+        "3": "It fits, but grouping or labels materially slow a quick read.",
+        "5": "It is short, quiet, and still understandable when pasted into terminal output."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Truthful action language",
+      "weight": 15,
+      "why": "A link should tell the reviewer whether it reads a document, launches a live surface, or opens a deliberate comparison.",
+      "passCondition": "The final linked word accurately predicts the destination behavior for all five artifacts.",
+      "anchors": {
+        "1": "Every link says click here or uses an ambiguous verb.",
+        "3": "Most actions are clear, with one important ambiguity.",
+        "5": "Every action is concise and materially informative."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "No raw URL or runtime internals",
+      "why": "The exploration cannot trade away the core handoff principle just to make a more decorative card."
+    },
+    {
+      "id": "g2",
+      "name": "All five artifacts stay reachable",
+      "why": "A layout may group or pair items, but cannot hide the old report, the board, the sandbox, or the comparison."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Artifact Stack",
+      "thesis": "Treat every destination as an equal, self-describing row: fastest to scan and easiest to generate from a simple artifact list.",
+      "accent": "#3f6fa8",
+      "bestWhen": "Most reviews are one-off collections and the reader usually arrives knowing which artifact they want.",
+      "losesWhen": "Two artifacts share a lineage or a comparison deserves stronger emphasis than a peer row.",
+      "decisions": [
+        {"label": "Primary object", "value": "One ordered list of destinations; no category chrome."},
+        {"label": "Version model", "value": "Current and previous reports are peer rows with explicit titles."},
+        {"label": "Action model", "value": "Each row ends with a destination-specific verb."}
+      ],
+      "keepParts": ["smallest generation contract", "explicit verbs", "stable artifact order"],
+      "proof": ["All five destinations fit without a secondary panel.", "The direct control highlights the comparison row, showing how a reviewer finds it."],
+      "previewLabel": "interactive flat card",
+      "story": {
+        "title": "Find the comparison",
+        "steps": [
+          {"label": "Scan the complete stack", "caption": "Every artifact is visible as a peer with an honest action.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Reveal the pair", "caption": "The direct control emphasizes the one row that opens current versus prior together.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Five named rows are visible in a single compact list.", "confidence": "high"},
+        "fr2": {"score": 2, "evidence": "Current and prior are named, but their relationship is only inferred from adjacent rows.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "No headings, legend, or expansion is required for five destinations.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "View, launch, and compare each describe their destination.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The rendered card contains only titles and short action links."},
+        "g2": {"pass": true, "evidence": "The five fixed rows remain visible in both interactive states."}
+      },
+      "preview": "<div style='background:#101722;color:#edf3fb;border-radius:12px;padding:18px;font:14px/1.55 ui-monospace,monospace;min-height:278px'><b style='display:block;margin-bottom:14px'>Review · drawing-relationships</b><div>📄 Standard HTML Rich Report&nbsp;&nbsp;<span style='color:#56d7ff'>view ↗</span></div><div>📄 Previous Report&nbsp;&nbsp;<span style='color:#56d7ff'>view ↗</span></div><div>🖱 Guided Review Board&nbsp;&nbsp;<span style='color:#56d7ff'>launch ↗</span></div><div>◉ Edge Sandbox&nbsp;&nbsp;<span style='color:#56d7ff'>launch ↗</span></div><div class='demo-base-only'>⇄ Current ↔ Prior Comparison&nbsp;&nbsp;<span style='color:#56d7ff'>open ↗</span></div><div class='demo-alt-only' style='outline:2px solid #ffbd65;border-radius:5px;padding:1px 5px;margin:0 -5px'>⇄ Current ↔ Prior Comparison&nbsp;&nbsp;<span style='color:#56d7ff'>open ↗</span></div><button class='demo-button' data-demo-toggle data-base-label='Highlight comparison' data-alt-label='Clear highlight' style='margin-top:18px'>Highlight comparison</button></div>",
+      "media": [{"label": "Row anatomy", "caption": "The repeatable icon · title · verb structure makes new artifact types cheap to add.", "html": "<div style='padding:18px;border:1px solid #cbd5e1;border-radius:10px;font:14px ui-monospace,monospace'>◉ Edge Sandbox <b style='color:#1678a2'>launch ↗</b><br><small>icon identifies kind · title identifies object · verb predicts behavior</small></div>"}]
+    },
+    {
+      "id": "v2",
+      "name": "Purpose Lanes",
+      "thesis": "Group the five rows by why a reviewer would open them: read the record, try the live surface, or compare a decision.",
+      "accent": "#2f7f74",
+      "bestWhen": "A review commonly mixes durable evidence, live interactions, and version-sensitive decisions.",
+      "losesWhen": "Most reviews only contain one or two artifacts, where lane labels would add more structure than value.",
+      "decisions": [
+        {"label": "Primary object", "value": "A reviewer intent lane, not a file or server type."},
+        {"label": "Version model", "value": "Current and previous report live together in Read."},
+        {"label": "Comparison model", "value": "The comparison is its own intentional destination, not a side effect of opening two files."}
+      ],
+      "keepParts": ["read / explore / compare lanes", "version adjacency", "purpose-first scanning"],
+      "proof": ["The toggle moves focus from evidence to exploration while all five rows remain present.", "The paired reports remain visibly in the same lane before any link is opened."],
+      "previewLabel": "interactive purpose card",
+      "story": {
+        "title": "Choose a review intent",
+        "steps": [
+          {"label": "Read the evidence", "caption": "The current and prior reports share the Read lane, making lineage clear.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Explore the live work", "caption": "The same card shifts focus to the board and sandbox without hiding the evidence.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Lane labels add a tiny read cost but let intent drive scanning.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "Both report versions are grouped and the comparison has a dedicated lane.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "Three quiet lane labels fit in the same terminal-sized specimen.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "Read, launch, and compare are explicit at every destination.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The card adds purpose labels but exposes no port, status, commit, or URL."},
+        "g2": {"pass": true, "evidence": "Read has two reports, Explore has two live surfaces, and Compare has the fifth destination."}
+      },
+      "preview": "<div style='background:#101722;color:#edf3fb;border-radius:12px;padding:17px;font:13px/1.45 ui-monospace,monospace;min-height:278px'><b>Review · drawing-relationships</b><div class='demo-base-only' style='margin-top:13px;padding:6px;border-left:3px solid #78d6c8'><small style='color:#78d6c8'>READ</small><br>📄 Standard HTML Rich Report <span style='color:#56d7ff'>view ↗</span><br>📄 Previous Report <span style='color:#56d7ff'>view ↗</span></div><div class='demo-alt-only' style='margin-top:13px;padding:6px;border-left:3px solid #78d6c8;opacity:.55'><small style='color:#78d6c8'>READ</small><br>📄 Standard HTML Rich Report <span style='color:#56d7ff'>view ↗</span><br>📄 Previous Report <span style='color:#56d7ff'>view ↗</span></div><div class='demo-base-only' style='margin-top:8px;opacity:.55'><small>EXPLORE</small><br>🖱 Guided Review Board <span style='color:#56d7ff'>launch ↗</span><br>◉ Edge Sandbox <span style='color:#56d7ff'>launch ↗</span></div><div class='demo-alt-only' style='margin-top:8px;padding:6px;border-left:3px solid #ffbd65'><small style='color:#ffbd65'>EXPLORE</small><br>🖱 Guided Review Board <span style='color:#56d7ff'>launch ↗</span><br>◉ Edge Sandbox <span style='color:#56d7ff'>launch ↗</span></div><div style='margin-top:8px'><small>COMPARE</small><br>⇄ Current ↔ Prior <span style='color:#56d7ff'>compare ↗</span></div><button class='demo-button' data-demo-toggle data-base-label='Focus explore' data-alt-label='Focus read' style='margin-top:12px'>Focus explore</button></div>",
+      "media": [{"label": "Intent map", "caption": "Five concrete destinations compress into three reasons to open them, which is the core purpose-lane claim.", "html": "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px'><b style='padding:12px;border-top:3px solid #2f7f74'>Read<br><small>current + prior</small></b><b style='padding:12px;border-top:3px solid #3f6fa8'>Explore<br><small>board + sandbox</small></b><b style='padding:12px;border-top:3px solid #b7791f'>Compare<br><small>paired view</small></b></div>"}]
+    },
+    {
+      "id": "v3",
+      "name": "Comparison Bundle",
+      "thesis": "Elevate version review into a first-class before/after block; the other three artifacts remain a quiet support list.",
+      "accent": "#b7791f",
+      "bestWhen": "The central question is what changed between two reports or revisions, rather than which individual destination to open.",
+      "losesWhen": "The current and prior artifacts are rarely consumed together or most reviews contain no real pair.",
+      "decisions": [
+        {"label": "Primary object", "value": "The current-versus-prior relationship."},
+        {"label": "Version model", "value": "A two-column bundle with a single comparison action."},
+        {"label": "Support model", "value": "Board, sandbox, and report links stay subordinate to the pair."}
+      ],
+      "keepParts": ["pair as one object", "before/after labels", "dedicated compare affordance"],
+      "proof": ["The toggle switches the pair from side-by-side reading to a highlighted compare action.", "All support artifacts remain reachable below the pair."],
+      "previewLabel": "interactive comparison card",
+      "story": {
+        "title": "Move from versions to difference",
+        "steps": [
+          {"label": "Inspect both reports", "caption": "Current and prior are spatially paired before a reviewer commits to opening either.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Open the comparison", "caption": "The pair collapses into the explicit comparison action the review is built around.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 3, "evidence": "The pair dominates the card, so a reviewer seeking only the sandbox has to look below it.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The version pair and its single compare action are the visual primary object.", "confidence": "high"},
+        "fr3": {"score": 3, "evidence": "Two-column pairing costs width and becomes less terminal-like on narrow windows.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Compare is clear; the paired report view actions are smaller than in the other directions.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Only readable titles and short actions appear in the specimen."},
+        "g2": {"pass": true, "evidence": "The version pair, comparison, board, and sandbox are all shown."}
+      },
+      "preview": "<div style='background:#101722;color:#edf3fb;border-radius:12px;padding:17px;font:13px/1.45 ui-monospace,monospace;min-height:278px'><b>Review · drawing-relationships</b><div class='demo-base-only' style='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px'><div style='border:1px solid #58718c;padding:8px'><small>CURRENT</small><br>📄 Rich Report<br><span style='color:#56d7ff'>view ↗</span></div><div style='border:1px solid #58718c;padding:8px'><small>PRIOR</small><br>📄 Report<br><span style='color:#56d7ff'>view ↗</span></div></div><div class='demo-alt-only' style='margin-top:14px;padding:12px;border:2px solid #ffbd65;border-radius:7px'>⇄ Current ↔ Prior<br><span style='color:#56d7ff'>compare changes ↗</span></div><div style='margin-top:13px;opacity:.86'>🖱 Guided Review Board <span style='color:#56d7ff'>launch ↗</span><br>◉ Edge Sandbox <span style='color:#56d7ff'>launch ↗</span></div><button class='demo-button' data-demo-toggle data-base-label='Compare versions' data-alt-label='Show versions' style='margin-top:16px'>Compare versions</button></div>",
+      "media": [{"label": "Pair anatomy", "caption": "The two report cards are one coherent object, which reduces the chance that a reviewer mistakes their relationship.", "html": "<div style='display:flex;gap:8px;padding:14px'><span style='border:1px solid #b7791f;padding:10px'>CURRENT<br>rich report</span><b style='align-self:center'>↔</b><span style='border:1px dashed #b7791f;padding:10px'>PRIOR<br>report</span></div>"}]
+    },
+    {
+      "id": "v4",
+      "name": "Action Menu",
+      "thesis": "Lead with the task verb—read, revisit, launch, test, compare—so a returning reviewer chooses an activity before a file type.",
+      "accent": "#7667c6",
+      "bestWhen": "The handoff is opened during an active review session and the user already thinks in next actions.",
+      "losesWhen": "People search by artifact name or need to understand version lineage before they know their next action.",
+      "decisions": [
+        {"label": "Primary object", "value": "A next activity instead of an artifact collection."},
+        {"label": "Version model", "value": "Read current and revisit prior make recency explicit in the action phrase."},
+        {"label": "Action model", "value": "The link word mirrors the leading verb for a strongly scannable menu."}
+      ],
+      "keepParts": ["verb-first scanning", "clear live versus document actions", "active-session fit"],
+      "proof": ["The toggle shifts focus to the action a reviewer selects next.", "All five actions remain explicit without raw destinations."],
+      "previewLabel": "interactive action card",
+      "story": {
+        "title": "Choose what to do next",
+        "steps": [
+          {"label": "Read the new evidence", "caption": "The first verb directs the reviewer to the standard rich report.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Test the live behavior", "caption": "The state change shifts focus to the sandbox, not an abstract server label.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Distinct leading verbs make an intended activity fast to find.", "confidence": "high"},
+        "fr2": {"score": 3, "evidence": "Read and revisit distinguish versions, but the relationship is not grouped.", "confidence": "medium"},
+        "fr3": {"score": 5, "evidence": "Five concise action rows fit in the flat terminal card shape.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Leading and linked verbs agree, though two verbs per row can feel slightly repetitive.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "No URL, port, state, or commit appears in the action menu."},
+        "g2": {"pass": true, "evidence": "Read, revisit, launch, test, and compare correspond to the five fixed destinations."}
+      },
+      "preview": "<div style='background:#101722;color:#edf3fb;border-radius:12px;padding:18px;font:14px/1.58 ui-monospace,monospace;min-height:278px'><b>Review · drawing-relationships</b><div class='demo-base-only' style='margin-top:14px;padding:4px;border-left:3px solid #a99cf4'>Read&nbsp;&nbsp;📄 Standard HTML Rich Report <span style='color:#56d7ff'>view ↗</span></div><div class='demo-alt-only' style='margin-top:14px'>Read&nbsp;&nbsp;📄 Standard HTML Rich Report <span style='color:#56d7ff'>view ↗</span></div><div>Revisit 📄 Previous Report <span style='color:#56d7ff'>view ↗</span></div><div>Launch 🖱 Guided Review Board <span style='color:#56d7ff'>launch ↗</span></div><div class='demo-base-only'>Test&nbsp;&nbsp;◉ Edge Sandbox <span style='color:#56d7ff'>launch ↗</span></div><div class='demo-alt-only' style='padding:4px;border-left:3px solid #a99cf4'>Test&nbsp;&nbsp;◉ Edge Sandbox <span style='color:#56d7ff'>launch ↗</span></div><div>Compare ⇄ Current ↔ Prior <span style='color:#56d7ff'>open ↗</span></div><button class='demo-button' data-demo-toggle data-base-label='Focus test' data-alt-label='Focus read' style='margin-top:18px'>Focus test</button></div>",
+      "media": [{"label": "Verb palette", "caption": "Five verbs make the destination behavior explicit, but they shift attention away from artifact relationships.", "html": "<div style='display:flex;flex-wrap:wrap;gap:7px;padding:15px'><b>Read</b><b>Revisit</b><b>Launch</b><b>Test</b><b>Compare</b></div>"}]
+    },
+    {
+      "id": "v5",
+      "name": "Review Timeline",
+      "thesis": "Put artifact recency first: the current report, live surfaces, comparison, and prior report form a compact evidence trail.",
+      "accent": "#a94f78",
+      "bestWhen": "A reviewer arrives later and needs to reconstruct the order in which evidence and live checks were produced.",
+      "losesWhen": "The card is used as a fast task launcher and chronological order does not match the reviewer’s immediate intent.",
+      "decisions": [
+        {"label": "Primary object", "value": "A short review history, newest evidence first."},
+        {"label": "Version model", "value": "Prior report is visibly earlier rather than merely differently named."},
+        {"label": "Comparison model", "value": "Comparison sits between the live checks and the earlier report as a bridge."}
+      ],
+      "keepParts": ["current / prior markers", "durable review narrative", "audit-friendly ordering"],
+      "proof": ["The toggle changes the selected moment in the review history.", "The current and prior reports are clearly separated by their temporal markers."],
+      "previewLabel": "interactive timeline card",
+      "story": {
+        "title": "Trace the review history",
+        "steps": [
+          {"label": "Start with today’s evidence", "caption": "The current rich report is the first, selected event in the trail.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Return to the prior report", "caption": "The direct control moves the selection to the earlier evidence without losing the trail.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Current and prior markers help orientation, but time competes with task intent.", "confidence": "medium"},
+        "fr2": {"score": 4, "evidence": "The two reports are clearly earlier and later, although comparison is not spatially paired with them.", "confidence": "medium"},
+        "fr3": {"score": 3, "evidence": "Time markers and a connecting rail add visual density to a terminal card.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "Every timeline event uses a specific, visible action link.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The timeline contains dates and titles, not internal runtime state or raw locations."},
+        "g2": {"pass": true, "evidence": "All five destinations appear as review events in the trail."}
+      },
+      "preview": "<div style='background:#101722;color:#edf3fb;border-radius:12px;padding:16px;font:13px/1.5 ui-monospace,monospace;min-height:278px'><b>Review · drawing-relationships</b><div class='demo-base-only' style='margin-top:12px;border-left:3px solid #ed8cb6;padding-left:10px'>NOW&nbsp;&nbsp;📄 Standard HTML Rich Report <span style='color:#56d7ff'>view ↗</span></div><div class='demo-alt-only' style='margin-top:12px;opacity:.55;border-left:3px solid #56677d;padding-left:10px'>NOW&nbsp;&nbsp;📄 Standard HTML Rich Report <span style='color:#56d7ff'>view ↗</span></div><div style='border-left:3px solid #56677d;padding-left:10px'>+ Board&nbsp;&nbsp;🖱 Guided Review Board <span style='color:#56d7ff'>launch ↗</span></div><div style='border-left:3px solid #56677d;padding-left:10px'>+ Test&nbsp;&nbsp;◉ Edge Sandbox <span style='color:#56d7ff'>launch ↗</span></div><div style='border-left:3px solid #56677d;padding-left:10px'>+ Diff&nbsp;&nbsp;⇄ Current ↔ Prior <span style='color:#56d7ff'>open ↗</span></div><div class='demo-base-only' style='border-left:3px solid #56677d;padding-left:10px'>EARLIER 📄 Previous Report <span style='color:#56d7ff'>view ↗</span></div><div class='demo-alt-only' style='border-left:3px solid #ed8cb6;padding-left:10px'>EARLIER 📄 Previous Report <span style='color:#56d7ff'>view ↗</span></div><button class='demo-button' data-demo-toggle data-base-label='Select prior' data-alt-label='Select current' style='margin-top:14px'>Select prior</button></div>",
+      "media": [{"label": "Evidence trail", "caption": "Recency becomes the relationship cue: useful for reconstruction, less useful for immediate task selection.", "html": "<div style='padding:14px;display:flex;align-items:center;gap:6px'><span>prior report</span><b>→</b><span>live checks</span><b>→</b><span>comparison</span><b>→</b><strong>current report</strong></div>"}]
+    }
+  ],
+  "checks": [
+    "Exactly five structurally distinct directions use the same five artifacts.",
+    "Every preview has an interactive state and a synchronized manual walkthrough.",
+    "All score cells include exercised prototype evidence and confidence.",
+    "Prototype buttons are local presentation only; links are illustrative and never open a runtime."
+  ]
+}

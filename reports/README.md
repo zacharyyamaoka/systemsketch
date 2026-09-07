@@ -33,3 +33,7 @@ Use those environment values rather than a hard-coded checkout path when adding 
 builder.
 
 Never add `reports/media/` to Git. It is a retained local review cache, not source history.
+
+## Current explorations
+
+- [Five ways to hand off a mixed review](review-artifact-handoff-babble-2026-09-07.html) — a runnable five-artifact comparison of flat, grouped, version-paired, action-first, and timeline review cards.
