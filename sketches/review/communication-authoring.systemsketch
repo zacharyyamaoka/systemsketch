@@ -101,7 +101,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3wqrO",
+      "index": "a3z0iV",
       "typeName": "shape"
     },
     {
@@ -114,7 +114,7 @@
     },
     {
       "x": 520,
-      "y": 845,
+      "y": 870,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -136,7 +136,7 @@
         },
         "end": {
           "x": 100,
-          "y": 25
+          "y": 0
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -153,16 +153,8 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4yDyV",
+      "index": "a4liB",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:Qop7J01YpkiTOwIIJ_O91",
-      "typeName": "user"
     },
     {
       "x": 1800,
@@ -205,7 +197,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5y5MC",
+      "index": "a5zcYG",
       "typeName": "shape"
     },
     {
@@ -249,7 +241,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6sSxV",
+      "index": "a6ht4V",
       "typeName": "shape"
     },
     {
@@ -294,7 +286,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2m6I",
+      "index": "a2Aze",
       "typeName": "shape"
     },
     {
@@ -320,8 +312,8 @@
           "y": 0
         },
         "end": {
-          "x": -470,
-          "y": -5
+          "x": -190,
+          "y": -275
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -338,7 +330,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a7oSnV",
+      "index": "a7tpvl",
       "typeName": "shape"
     },
     {
@@ -352,7 +344,7 @@
       "type": "geo",
       "props": {
         "w": 1080,
-        "h": 280,
+        "h": 320,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -375,7 +367,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN every arrow starts and ends on a port — there is no line between two card middles any more. Ports on a wall spread across the whole wall rather than clustering in one section, and no label is struck through by another. ARROW changes every cable in the region; a single selected cable still changes on its own. A socket dragged in Communication stays put when you flip to Dataflow and back."
+                  "text": "PASS WHEN every arrow starts and ends on a port — there is no line between two card middles any more. In Communication only summary ports exist, and the ones that do not exist cannot be selected. Ports on a wall spread edge to edge with the same small gap at each end however tall you make the card. Every relationship pill reads in full, clear of both cards, and clicking one always focuses the interaction it names. ARROW redraws the region and writes nothing: Dataflow's routes and every socket you dragged are exactly where you left them."
                 }
               ]
             }
@@ -383,7 +375,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a8xqU",
+      "index": "a8hhE",
       "typeName": "shape"
     },
     {
@@ -400,7 +392,7 @@
         "h": 170,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -420,7 +412,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Press Service, drag Mission's card onto Robot's. No ports, no port dots. Repeat with Action. Then Stream, Camera → Mission."
+                  "text": "2 · Press Service, drag Mission's card onto Robot's. No ports, no port dots. Repeat with Action between the SAME two cards. Then Stream, Camera → Mission."
                 }
               ]
             }
@@ -428,7 +420,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3rHn",
+      "index": "a39yr",
       "typeName": "shape"
     },
     {
@@ -450,10 +442,10 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 190,
+        "h": 240,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -473,7 +465,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · CABLES › Split. One arrow becomes its protocol legs, each tagged with its phase. Summary puts them back — it always rides the request, or the goal."
+                  "text": "3 · CARD › P. Only the summary sockets are drawn — the goal and the request, never feedback or response. Try to click where a missing one would be: it is gone from hit testing too. Then press and HOLD a real port dot and slide it to any of the four edges."
                 }
               ]
             }
@@ -481,7 +473,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4MZb",
+      "index": "a4ENn",
       "typeName": "shape"
     },
     {
@@ -518,7 +510,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "4 · Press Dataflow. Cards go Port, cables go Data, and every socket is back on a left or right lane — Dataflow has no top or bottom edge."
+                  "text": "4 · Press Dataflow. Cards go Port, cables go Data, every socket is back on a left or right lane, and now EVERY port shows — the split legs included."
                 }
               ]
             }
@@ -526,7 +518,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5vb6",
+      "index": "a5dZX",
       "typeName": "shape"
     },
     {
@@ -563,7 +555,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "5 · ARROW › Curve, then Straight. Every cable in the region changes shape at once, and one undo puts them all back. A single cable still takes its own shape from its selection menu."
+                  "text": "5 · Back in Communication: ARROW › Curve, then Straight. Every cable in the region redraws at once, and Dataflow's own routes are untouched. The lens writes nothing, so there is nothing to undo."
                 }
               ]
             }
@@ -571,8 +563,16 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6ez5",
+      "index": "a6DDj",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:MfvbHqeluZaSajp9bvvBu",
+      "typeName": "user"
     },
     {
       "x": 1800,
@@ -588,7 +588,7 @@
         "h": 210,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 32,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -608,7 +608,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "6 · CARD › P, then press and HOLD a port dot and drag it to any of the four edges. Or select the port and use the inspector's Block edge control. Hold still first — moving straight away draws a cable."
+                  "text": "6 · Click the label pill on the Service arrow — the pill, not the line. It focuses that relationship even where the Action arrow is painted over it, and its other legs appear. The two pills never overlap and never slide under a card."
                 }
               ]
             }
@@ -616,7 +616,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7PUJ",
+      "index": "a7ibj",
       "typeName": "shape"
     },
     {
@@ -724,7 +724,7 @@
         "color": "violet"
       },
       "parentId": "page:page",
-      "index": "a1OfM",
+      "index": "a1Phr",
       "typeName": "shape"
     },
     {
@@ -750,13 +750,13 @@
       "id": "binding:cue-step-6-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-6-arrow",
-      "toId": "shape:camera",
+      "toId": "shape:robot",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 1,
-          "y": 0.5
+          "y": 1
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -828,12 +828,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "nhWsJpilHwdC-ruQfnId1",
+        "definitionId": "7-JasLY1ZqW-PBhIwh5xV",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Robot"
       },
-      "index": "a2rzN",
+      "index": "a24kI",
       "typeName": "shape"
     },
     {
@@ -937,12 +937,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "b0IXhwWBvYjkK5fB1Vyob",
+        "definitionId": "Smip7Um8E3LCDOhiWFqNd",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Mission"
       },
-      "index": "a15Vz",
+      "index": "a1GR2",
       "typeName": "shape"
     },
     {
@@ -1091,12 +1091,12 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "Pg1FujFC5Xec-qoo3Hi0p",
+        "definitionId": "wayvZE_szp6KwHKmnd90p",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Camera"
       },
-      "index": "a3dkb",
+      "index": "a3FmM",
       "typeName": "shape"
     },
     {
@@ -1140,7 +1140,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2u3oG",
+      "index": "a2e9w",
       "typeName": "shape"
     }
   ]

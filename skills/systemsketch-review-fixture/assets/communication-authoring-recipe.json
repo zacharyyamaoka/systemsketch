@@ -85,7 +85,7 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Click the violet Async region. Press Communication — cards go Simple, cables go Summary, and the DRAW group appears.",
+      "text": "1 \u00b7 Click the violet Async region. Press Communication \u2014 cards go Simple, cables go Summary, and the DRAW group appears.",
       "x": 100,
       "y": 300,
       "w": 420,
@@ -99,7 +99,7 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Press Service, drag Mission's card onto Robot's. No ports, no port dots. Repeat with Action. Then Stream, Camera → Mission.",
+      "text": "2 \u00b7 Press Service, drag Mission's card onto Robot's. No ports, no port dots. Repeat with Action between the SAME two cards. Then Stream, Camera \u2192 Mission.",
       "x": 100,
       "y": 520,
       "w": 420,
@@ -112,11 +112,11 @@
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · CABLES › Split. One arrow becomes its protocol legs, each tagged with its phase. Summary puts them back — it always rides the request, or the goal.",
+      "text": "3 \u00b7 CARD \u203a P. Only the summary sockets are drawn \u2014 the goal and the request, never feedback or response. Try to click where a missing one would be: it is gone from hit testing too. Then press and HOLD a real port dot and slide it to any of the four edges.",
       "x": 100,
       "y": 750,
       "w": 420,
-      "h": 190,
+      "h": 240,
       "target": {
         "shapeId": "region",
         "anchor": "left",
@@ -126,7 +126,7 @@
     {
       "id": "step-4",
       "kind": "step",
-      "text": "4 · Press Dataflow. Cards go Port, cables go Data, and every socket is back on a left or right lane — Dataflow has no top or bottom edge.",
+      "text": "4 \u00b7 Press Dataflow. Cards go Port, cables go Data, every socket is back on a left or right lane, and now EVERY port shows \u2014 the split legs included.",
       "x": 1800,
       "y": 320,
       "w": 420,
@@ -140,7 +140,7 @@
     {
       "id": "step-5",
       "kind": "step",
-      "text": "5 · ARROW › Curve, then Straight. Every cable in the region changes shape at once, and one undo puts them all back. A single cable still takes its own shape from its selection menu.",
+      "text": "5 \u00b7 Back in Communication: ARROW \u203a Curve, then Straight. Every cable in the region redraws at once, and Dataflow's own routes are untouched. The lens writes nothing, so there is nothing to undo.",
       "x": 1800,
       "y": 560,
       "w": 420,
@@ -154,24 +154,25 @@
     {
       "id": "step-6",
       "kind": "step",
-      "text": "6 · CARD › P, then press and HOLD a port dot and drag it to any of the four edges. Or select the port and use the inspector's Block edge control. Hold still first — moving straight away draws a cable.",
+      "text": "6 \u00b7 Click the label pill on the Service arrow \u2014 the pill, not the line. It focuses that relationship even where the Action arrow is painted over it, and its other legs appear. The two pills never overlap and never slide under a card.",
       "x": 1800,
       "y": 860,
       "w": 420,
       "h": 210,
       "target": {
-        "shapeId": "camera",
-        "anchor": "right"
+        "shapeId": "robot",
+        "anchor": "right",
+        "dy": 180
       }
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN every arrow starts and ends on a port — there is no line between two card middles any more. Ports on a wall spread across the whole wall rather than clustering in one section, and no label is struck through by another. ARROW changes every cable in the region; a single selected cable still changes on its own. A socket dragged in Communication stays put when you flip to Dataflow and back.",
+      "text": "PASS WHEN every arrow starts and ends on a port \u2014 there is no line between two card middles any more. In Communication only summary ports exist, and the ones that do not exist cannot be selected. Ports on a wall spread edge to edge with the same small gap at each end however tall you make the card. Every relationship pill reads in full, clear of both cards, and clicking one always focuses the interaction it names. ARROW redraws the region and writes nothing: Dataflow's routes and every socket you dragged are exactly where you left them.",
       "x": 620,
       "y": 1290,
       "w": 1080,
-      "h": 280
+      "h": 320
     }
   ]
 }
