@@ -46,10 +46,6 @@ export interface SystemSketchDevelopmentSeam {
 		 * read, the same class of gap as the overlay ids above.
 		 */
 		dndDrag(): BtDndDragSignal | null
-	/** The journeys seed a region from the shipped sample without retyping it. */
-	behaviorTree: {
-		SAMPLE_BEHAVIOR_TREE_XML: string
-		reconcile(regionId: string): unknown
 		/**
 		 * Mock-run probes for the run-mode journey: drive the store like the UI
 		 * does, read the canonical log, and fold it independently — plus a
