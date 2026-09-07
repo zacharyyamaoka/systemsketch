@@ -25,6 +25,7 @@ import {
 import { CalloutAddLeaderTool, CalloutTool } from '../callout'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from '../code'
 import { FloatingPortShapeUtil, FloatingPortTool } from '../floatingPort'
+import { VariableRegistryShapeUtil } from '../expression/VariableRegistryShapeUtil'
 import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from '../behaviorTree'
 import { BtInsertGlyphShapeUtil } from '../library/BtInsertGlyphShapeUtil'
 import { BlockContextMenu } from '../blocks/ui'
@@ -140,6 +141,7 @@ const EMBEDDED_SHAPE_UTILS = [
   CodeShapeUtil,
   BtInsertGlyphShapeUtil,
   FloatingPortShapeUtil,
+  VariableRegistryShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]

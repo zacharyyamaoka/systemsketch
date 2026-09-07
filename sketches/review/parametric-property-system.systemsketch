@@ -1,0 +1,820 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 4,
+      "block": 1,
+      "geo": 5,
+      "variableRegistry": 1
+    },
+    "bindings": {
+      "arrow": 8
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.block": 12,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 0,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 1,
+      "com.tldraw.shape.floating-port": 0,
+      "com.tldraw.shape.variableRegistry": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 1140,
+      "y": 355,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -100,
+          "y": 144
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a3ze8l",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 1140,
+      "y": 675,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -100,
+          "y": -46
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a4zrAC",
+      "typeName": "shape"
+    },
+    {
+      "x": 700,
+      "y": 470,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wheel",
+      "type": "block",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "DriveWheel",
+        "description": "radius references chassis_width, not defined yet",
+        "blockType": "Function",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
+        "notes": "",
+        "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
+        "state": "normal",
+        "definitionId": "-6Ie7106zHvKCM-u9P_dx",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "radius",
+            "type": "float",
+            "visible": true,
+            "defaultValue": "chassis_width / 4"
+          },
+          {
+            "id": "in_2",
+            "name": "packet",
+            "type": "bytes",
+            "visible": true,
+            "defaultValue": "raw"
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "DriveWheel"
+      },
+      "parentId": "page:page",
+      "index": "a1Sxv",
+      "typeName": "shape"
+    },
+    {
+      "x": 670,
+      "y": 840,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 240,
+          "y": -172
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a5gwm",
+      "typeName": "shape"
+    },
+    {
+      "x": 440,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Select DriveWheel, click the radius field. It shows \"chassis_width / 4\" with a red squiggle and a tooltip: chassis_width isn't defined yet."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a2Zzw",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:_RgZv92x5Qg5Av6UScOVW",
+      "typeName": "user"
+    },
+    {
+      "x": 1140,
+      "y": 840,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN radius resolves once chassis_width is set, updates live from either place it's edited, and packet still reads exactly \"raw\"."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a6ToU",
+      "typeName": "shape"
+    },
+    {
+      "x": 1140,
+      "y": 260,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · In \"Variables used here\", type 0.42 into chassis_width's row. radius resolves to 0.105 right away."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3h1b",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:vPcjTXOsa2F9EOKk21v-A",
+      "typeName": "user"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 1140,
+      "y": 580,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Ctrl+P, \"Show Variables\", change chassis_width again. radius updates live, untouched."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4tdv",
+      "typeName": "shape"
+    },
+    {
+      "x": 440,
+      "y": 840,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-4",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Click the packet field. It shows \"raw\" as typed, with a quiet warning glyph — never a crash."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a52LM",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:wheel",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.3235294117647059,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:wheel",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.14646464646464646
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:wheel",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.803030303030303
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-4-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-4-arrow",
+      "toId": "shape:wheel",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.6176470588235294,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:CU5jQDOGp5RVTpNRxaOC8",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-4-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-4-arrow",
+      "toId": "shape:cue-step-4",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": -1000000,
+      "y": -1000000,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:4PqT3DlByEMsgKb5vVBWq",
+      "type": "variableRegistry",
+      "props": {
+        "w": 8,
+        "h": 8,
+        "entries": [
+          {
+            "id": "var_o27ejax1",
+            "name": "chassis_width",
+            "expression": "0.42"
+          }
+        ]
+      },
+      "parentId": "page:page",
+      "index": "a7Gzk",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 1
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 670,
+      "y": 310,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 140,
+          "y": 160
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2w8pG",
+      "typeName": "shape"
+    }
+  ]
+}

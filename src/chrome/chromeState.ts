@@ -4,7 +4,7 @@
  * the same left edge is the thing the switcher exists to avoid.
  */
 export type LeftSurface = 'shapes' | 'behaviors' | 'files'
-export type RightSurface = 'comments' | 'inspector' | 'board-overview' | 'diagnostics'
+export type RightSurface = 'comments' | 'inspector' | 'board-overview' | 'diagnostics' | 'variable-registry'
 export type ToolbarSurface = 'commands' | 'find-replace'
 
 export type ChromeSurfaceId =

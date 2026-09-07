@@ -13,6 +13,7 @@ import { BehaviorTreeShapeUtil, BtControlShapeUtil } from '../behaviorTree'
 import { CodeShapeUtil } from '../code'
 import { BtInsertGlyphShapeUtil } from '../library/BtInsertGlyphShapeUtil'
 import { FloatingPortShapeUtil } from '../floatingPort'
+import { VariableRegistryShapeUtil } from '../expression/VariableRegistryShapeUtil'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -43,6 +44,7 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
     BtControlShapeUtil,
     CodeShapeUtil,
     FloatingPortShapeUtil,
+    VariableRegistryShapeUtil,
     BranchArmShapeUtil,
     BtInsertGlyphShapeUtil,
     ...blockConnectionShapeUtils,

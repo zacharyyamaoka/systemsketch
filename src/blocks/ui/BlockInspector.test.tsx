@@ -102,7 +102,10 @@ describe('Block inspector content', () => {
 		expect(html).toMatch(/aria-expanded="false" aria-controls="inspector-semantic-tags-inputs" aria-label="Show Inputs semantic tags"/)
 		expect(html).toMatch(/aria-expanded="false" aria-controls="inspector-semantic-tags-outputs" aria-label="Show Outputs semantic tags"/)
     expect(html).toContain('Icon: SquareFunction. Change icon')
-    expect(html).toContain('value="raw"')
+    // The default-value field is now an ExpandingExpressionField, which mounts
+    // CodeMirror imperatively (useLayoutEffect) — static markup can't show its
+    // content, only its identity, the way it could for a plain `<input>`.
+    expect(html).toContain('aria-label="Default value for packet"')
     expect(html).toContain('aria-label="Port layout"')
     expect(html).toContain('Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.')
 		expect(html).toContain('data-inspector-section="Behaviour"')
@@ -204,9 +207,13 @@ describe('Block inspector content', () => {
       />,
     )
 
-    for (const role of ['Display description', 'Title', 'Type', 'Name', 'Default']) {
+    for (const role of ['Display description', 'Title', 'Type', 'Name']) {
       expect(block).toContain(`placeholder="${role}"`)
     }
+    // The default-value field is an ExpandingExpressionField, not a real
+    // `<input>` — it paints its own guidance text as a span rather than an
+    // HTML `placeholder` attribute (a `<div>` has no such attribute).
+    expect(block).toContain('class="ss-expr-field__placeholder" aria-hidden="true">Default<')
     expect(notes).toContain('placeholder="Notes"')
     for (const role of ['Name', 'Value', 'Type']) {
       expect(pill).toContain(`placeholder="${role}"`)

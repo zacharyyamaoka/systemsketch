@@ -83,74 +83,10 @@
 	background: color-mix(in srgb, var(--ss-accent) 30%, transparent);
 }
 
-/* --------------------------- syntax vocabulary ---------------------------
- * `classHighlighter` emits stable `tok-*` classes; the palette is the same
- * restrained accent-mixed scheme the Type primitive's spans use, so a board's
- * code reads as one family across light and dark themes rather than a third
- * editor theme pasted onto the canvas. */
-
-.code-block-canvas .tok-keyword,
-.code-block-canvas .tok-operatorKeyword,
-.code-block-canvas .tok-controlKeyword,
-.code-block-canvas .tok-definitionKeyword,
-.code-block-canvas .tok-moduleKeyword {
-	color: color-mix(in srgb, var(--ss-accent) 78%, var(--ss-code-text));
-	font-weight: 600;
-}
-
-.code-block-canvas .tok-string,
-.code-block-canvas .tok-docString,
-.code-block-canvas .tok-character,
-.code-block-canvas .tok-attributeValue {
-	color: color-mix(in srgb, var(--ss-success) 62%, var(--ss-code-text));
-}
-
-.code-block-canvas .tok-number,
-.code-block-canvas .tok-integer,
-.code-block-canvas .tok-float,
-.code-block-canvas .tok-bool,
-.code-block-canvas .tok-atom,
-.code-block-canvas .tok-null,
-.code-block-canvas .tok-unit {
-	color: color-mix(in srgb, var(--ss-warning) 58%, var(--ss-code-text));
-}
-
-.code-block-canvas .tok-comment,
-.code-block-canvas .tok-lineComment,
-.code-block-canvas .tok-blockComment,
-.code-block-canvas .tok-meta {
-	color: var(--ss-text-muted);
-	font-style: italic;
-}
-
-.code-block-canvas .tok-typeName,
-.code-block-canvas .tok-className,
-.code-block-canvas .tok-namespace {
-	color: color-mix(in srgb, var(--ss-accent) 55%, var(--ss-code-text));
-}
-
-.code-block-canvas .tok-propertyName,
-.code-block-canvas .tok-attributeName,
-.code-block-canvas .tok-labelName {
-	color: color-mix(in srgb, var(--ss-danger) 42%, var(--ss-code-text));
-}
-
-.code-block-canvas .tok-function,
-.code-block-canvas .tok-macroName {
-	color: var(--ss-code-text);
-	font-weight: 600;
-}
-
-.code-block-canvas .tok-operator,
-.code-block-canvas .tok-punctuation,
-.code-block-canvas .tok-separator,
-.code-block-canvas .tok-bracket {
-	color: var(--ss-text-muted);
-}
-
-.code-block-canvas .tok-invalid {
-	color: var(--ss-danger);
-}
+/* Syntax vocabulary: see ../theme/pythonTokens.css — the one `tok-*` palette
+ * every CodeMirror surface in the app shares. `.code-block-canvas` carries
+ * the `ss-python-tokens` class (see CodeBlockCanvas.tsx) rather than this
+ * file re-declaring the rules under its own selector. */
 
 /* --------------------- selection-menu contributions ---------------------
  * The controls reuse the appearance pill's own classes so a Code selection's

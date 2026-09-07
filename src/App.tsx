@@ -29,6 +29,7 @@ import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBeh
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { BtInsertGlyphShapeUtil } from './library/BtInsertGlyphShapeUtil'
 import { BtInsertGlyphTool } from './library/BtInsertGlyphTool'
+import { VariableRegistryShapeUtil } from './expression/VariableRegistryShapeUtil'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
@@ -116,6 +117,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   CodeShapeUtil,
   BtInsertGlyphShapeUtil,
   FloatingPortShapeUtil,
+  VariableRegistryShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
@@ -141,6 +143,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   CodeShapeUtil,
   BtInsertGlyphShapeUtil,
   FloatingPortShapeUtil,
+  VariableRegistryShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, TypeTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
