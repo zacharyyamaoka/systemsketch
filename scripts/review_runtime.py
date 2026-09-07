@@ -642,20 +642,19 @@ def show(review: Review) -> str:
     # contract to the artifact someone can click. Purpose lanes make a mixed
     # review scannable without turning the terminal back into a dashboard.
     lines = [f"Review · {review.name}"]
+    has_purpose_lane = False
     if url := report_url(review):
-        lines.extend([
-            "",
-            "Read",
-            f"📄 Standard HTML Rich Report  {terminal_link('view', url)}",
-        ])
+        lines.extend(["Read", f"📄 Standard HTML Rich Report  {terminal_link('view', url)}"])
+        has_purpose_lane = True
     if url := board_url(review):
+        if has_purpose_lane:
+            lines.append("")
         lines.extend([
-            "",
             "Explore",
             f"🖱 Guided Review Board  {terminal_link('launch', url)}",
         ])
     # A review is a small visual island in otherwise noisy terminal output.
-    # Keep a blank line around the card and before every purpose lane.
+    # Keep a blank line around the card and between purpose lanes.
     return f"\n{'\n'.join(lines)}\n"
 
 

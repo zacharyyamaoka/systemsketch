@@ -210,7 +210,6 @@ class ReviewRuntimeTests(unittest.TestCase):
             self.assertEqual(
                 card,
                 "\nReview · pill-entry\n"
-                "\n"
                 "Read\n"
                 "📄 Standard HTML Rich Report  view\n"
                 "\n"
@@ -230,11 +229,11 @@ class ReviewRuntimeTests(unittest.TestCase):
 
             self.assertEqual(
                 runtime.show(report_only),
-                "\nReview · pill-entry\n\nRead\n📄 Standard HTML Rich Report  view\n",
+                "\nReview · pill-entry\nRead\n📄 Standard HTML Rich Report  view\n",
             )
             self.assertEqual(
                 runtime.show(board_only),
-                "\nReview · pill-entry\n\nExplore\n🖱 Guided Review Board  launch\n",
+                "\nReview · pill-entry\nExplore\n🖱 Guided Review Board  launch\n",
             )
 
     def test_report_media_stays_in_the_ignored_capture_namespace(self) -> None:
