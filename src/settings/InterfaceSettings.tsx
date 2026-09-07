@@ -57,6 +57,7 @@ import {
   removeToolAlias,
   useToolAliases,
 } from '../library/toolAliases'
+import { MenuLabPanel } from '../prototypes/menuLab/ContextualMenuLab'
 import { readFileAccessSettings, writeFileAccessSettings } from '../workspace/workspaceClient'
 import './interface-settings.css'
 
@@ -72,7 +73,7 @@ function CategoryIcon({ children }: { children: ReactNode }) {
   )
 }
 
-type SettingsCategoryId = 'general' | 'canvas' | 'appearance' | 'interface' | 'shortcuts' | 'about'
+type SettingsCategoryId = 'general' | 'canvas' | 'appearance' | 'interface' | 'shortcuts' | 'menu-lab' | 'about'
 
 const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; icon: ReactNode }[] = [
   {
@@ -101,13 +102,19 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
     icon: <CategoryIcon><rect x="3" y="5" width="14" height="10" rx="2" /><path d="M6 8h.01M9 8h.01M12 8h.01M15 8h.01M6 11h.01M9 11h.01M12 11h3M7 13h6" /></CategoryIcon>,
   },
   {
+    id: 'menu-lab',
+    label: 'Menu lab',
+    // Three sliders: the levers themselves, which is what this section is.
+    icon: <CategoryIcon><path d="M4 6h5M13 6h3M4 10h9M17 10h-1M4 14h3M11 14h5" /><circle cx="11" cy="6" r="1.6" /><circle cx="15" cy="10" r="1.6" /><circle cx="9" cy="14" r="1.6" /></CategoryIcon>,
+  },
+  {
     id: 'about',
     label: 'About',
     icon: <CategoryIcon><circle cx="10" cy="10" r="6.5" /><path d="M10 9v4M10 6.7h.01" /></CategoryIcon>,
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'interface', 'shortcuts']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'interface', 'shortcuts', 'menu-lab']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -162,6 +169,8 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
             ? <CanvasPanel />
           : category === 'shortcuts'
             ? <ToolAliasesPanel />
+          : category === 'menu-lab'
+            ? <MenuLabSettingsPanel />
             : <InterfacePanel />}
       </TldrawUiDialogBody>
     </div>
@@ -354,6 +363,38 @@ function GeneralPanel() {
           <strong>Saved by the local SystemSketch server</strong>
           <p>This changes what the local SystemSketch server itself will read or write — it is not part of any board file.</p>
         </div>
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Settings → Menu lab. The lever board, in the dialog.
+ *
+ * WHY the real board rather than a link out to `?menu-lab`: the dialog is
+ * already inside the app's editor and UI context, so the embedded panel gets
+ * the live theme, tldraw's own popover, and the SAME registry, binder and
+ * renderer the appearance pill uses. A lab that ran somewhere else would
+ * gradually stop reproducing the bugs it exists to reproduce. The standalone
+ * route stays for driving it without an app around it.
+ */
+function MenuLabSettingsPanel() {
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="menu-lab-title">
+      <div className="systemsketch-settings__eyebrow">Interface</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="menu-lab-title">Menu lab</h2>
+          <p>
+            Compose a contextual menu out of its levers and watch the real menu
+            recompose. Every SystemSketch menu — the selection pill, a
+            connector&rsquo;s row, a Block title&rsquo;s formatting — is one
+            registry projected through settings like these.
+          </p>
+        </div>
+      </div>
+      <div className="menu-lab__container">
+        <MenuLabPanel />
       </div>
     </section>
   )

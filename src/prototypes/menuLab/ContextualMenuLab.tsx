@@ -3,15 +3,24 @@
  * menu on the right — same registry, same binder, same renderer as the
  * appearance pill. See `menuLabModel.ts` for the prior art this follows and
  * why the lab is not a second implementation.
+ *
+ * Two entry points, one board:
+ *
+ * - `MenuLabPanel` is what Settings → Menu lab renders. It mounts nothing of
+ *   its own: the dialog is already inside the app's editor and UI context, so
+ *   the panel gets the live theme and tldraw's own popover for free.
+ * - `ContextualMenuLab` is the standalone `?menu-lab` route, which has no app
+ *   around it and therefore has to supply that context itself.
  */
 import { getAssetUrlsByImport } from '@tldraw/assets/imports.vite'
 import { useState } from 'react'
-import { Tldraw, useEditor } from 'tldraw'
+import { ContainerProvider, Tldraw, useContainer, useEditor } from 'tldraw'
 import 'tldraw/tldraw.css'
 
-// The theme vocabulary itself. The lab is its own entry point, so nothing
-// else pulls it in — without this every `--ss-*` resolves to nothing and the
-// page renders as transparent-on-canvas, which is exactly what it did.
+// The theme vocabulary itself. Loaded here because the standalone route is
+// its own entry point and nothing else pulls it in — without this every
+// `--ss-*` resolves to nothing and the page renders transparent-on-canvas,
+// which is exactly what it did.
 import '../../theme/tokens.css'
 import { ContextualControls } from '../../contextualMenus/ContextualControls'
 import {
@@ -46,25 +55,37 @@ const ASSET_URLS = getAssetUrlsByImport()
 
 export function ContextualMenuLab() {
   return (
-    <div className="menu-lab" data-testid="menu-lab">
+    <div className="menu-lab menu-lab--standalone" data-testid="menu-lab">
       {/* WHY a real editor rather than a bare div: the renderer reads swatch
        * colours off the live theme and opens tldraw's own popover primitive.
        * A lab that mocked either would stop reproducing product bugs, which is
-       * the only reason to have one. */}
+       * the only reason to have one. Inside the app, Settings supplies the
+       * same context and this wrapper is not used. */}
       <Tldraw
         hideUi
         assetUrls={ASSET_URLS}
         components={{ Background: null }}
         onMount={(editor) => { editor.updateInstanceState({ isReadonly: true }) }}
       >
-        <LabBoard />
+        <MenuLabPanel standalone />
       </Tldraw>
     </div>
   )
 }
 
-function LabBoard() {
+/** The board itself. Requires an editor + UI context; supplies none. */
+export function MenuLabPanel({ standalone }: { standalone?: boolean }) {
   const editor = useEditor()
+  const container = useContainer()
+  // WHY the popovers are portaled into the host dialog rather than the editor
+  // container: tldraw stacks its popover layer at z-index 400 and its dialog
+  // layer at 500 (measured), so a contextual popover opened from inside
+  // Settings renders *behind* the dialog that hosts it — the panel is there,
+  // painted under the lever rows. Overriding the container for this subtree
+  // fixes both popover modes at once, because `TldrawUiPopoverContent` and
+  // the Radix path both portal into `useContainer()`. Outside a dialog this
+  // resolves to the editor container and nothing changes.
+  const [host, setHost] = useState<HTMLElement | null>(null)
   const [state, setState] = useState<LabState>(LAB_PRESETS[0].state)
   const [log, setLog] = useState<string[]>([])
   const composition = labComposition(state, (kind, value) => {
@@ -74,17 +95,27 @@ function LabBoard() {
   const dangling = labDangling(state)
 
   return (
-    <>
-      <div className="menu-lab__shell">
+    <ContainerProvider container={host ?? container}>
+    <div
+      className={standalone ? 'menu-lab__shell' : 'menu-lab__shell menu-lab__shell--embedded'}
+      data-testid="menu-lab-shell"
+      ref={(node) => {
+        setHost(node?.closest<HTMLElement>('.tlui-dialog__positioner') ?? null)
+      }}
+    >
         <aside className="menu-lab__levers">
-          <header className="menu-lab__header">
-            <h1>Contextual menu lab</h1>
-            <p>
-              One registry, one renderer, many surfaces. Every menu in
-              SystemSketch is these levers — press them and the real menu on the
-              right recomposes.
-            </p>
-          </header>
+          {/* Settings draws its own eyebrow and title, so the embedded board
+           * would otherwise carry a second heading for the same panel. */}
+          {standalone ? (
+            <header className="menu-lab__header">
+              <h1>Contextual menu lab</h1>
+              <p>
+                One registry, one renderer, many surfaces. Every menu in
+                SystemSketch is these levers — press them and the real menu
+                beside them recomposes.
+              </p>
+            </header>
+          ) : null}
 
           <section className="menu-lab__section">
             <h2>Start from</h2>
@@ -195,8 +226,8 @@ function LabBoard() {
             </ul>
           </section>
         </main>
-      </div>
-    </>
+    </div>
+    </ContainerProvider>
   )
 }
 

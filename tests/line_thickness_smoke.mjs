@@ -45,6 +45,7 @@ const FRAMES = {
   lab: join(ROOT, 'docs', 'assets', 'menu-lab-1-shape-2026-09-06.png'),
   labConnector: join(ROOT, 'docs', 'assets', 'menu-lab-2-connector-2026-09-06.png'),
   labComposed: join(ROOT, 'docs', 'assets', 'menu-lab-3-composed-2026-09-06.png'),
+  settings: join(ROOT, 'docs', 'assets', 'menu-lab-4-settings-2026-09-06.png'),
 }
 
 const EMPTY_CANVAS = { x: 200, y: 820 }
@@ -256,7 +257,67 @@ async function main() {
     await shot(app.page, FRAMES.connector)
     pass('a connector gets the same thickness control beside its line styles, labels off')
 
-    // 7. The composition lab: the levers themselves.
+    // 7. The Settings entry point — the lab where a person will actually
+    //    find it, inside the real app rather than at a URL they must know.
+    await clickSelector(app.page, '[data-testid="main-menu.button"]')
+    await waitFor(app.page, `document.querySelector('[data-testid="main-menu.settings"]')`,
+      'the Settings menu item')
+    await clickSelector(app.page, '[data-testid="main-menu.settings"]')
+    await waitFor(app.page, `document.querySelector('[data-testid="systemsketch-settings-dialog"]')`,
+      'the Settings dialog')
+    await clickSelector(app.page, '[data-testid="systemsketch-settings-category-menu-lab"]')
+    await waitFor(app.page, `document.querySelector('[data-testid="menu-lab-menu"]')`,
+      'the composed menu inside Settings')
+    await delay(500)
+    const settingsLab = JSON.parse(await evaluate(app.page, `(() => {
+      const shell = document.querySelector('[data-testid="menu-lab-shell"]')
+      const dialog = document.querySelector('[data-testid="systemsketch-settings-dialog"]')
+      return JSON.stringify({
+        insideDialog: Boolean(dialog && shell && dialog.contains(shell)),
+        // The embedded board must not mount a second editor beside the app's.
+        canvases: document.querySelectorAll('.tl-canvas').length,
+        triggers: [...document.querySelectorAll('[data-testid="menu-lab-menu"] .systemsketch-appearance__trigger')]
+          .map((t) => t.dataset.control),
+      })
+    })()`))
+    assert.equal(settingsLab.insideDialog, true, 'the lab renders inside the Settings dialog')
+    assert.equal(settingsLab.canvases, 1,
+      'the embedded board uses the app\'s editor rather than mounting a second one')
+    assert.ok(settingsLab.triggers.includes('strokeColor'))
+    // A popover opened from inside the dialog must actually be reachable —
+    // a dialog is a scroll container, and tldraw portals its popovers out.
+    await clickSelector(app.page,
+      '[data-testid="menu-lab-menu"] .systemsketch-appearance__trigger[data-control="strokeColor"]')
+    await waitFor(app.page,
+      `document.querySelector('[data-testid="systemsketch-appearance-panel-strokeColor"]')`,
+      'the lab popover, opened inside Settings')
+    const settingsPopover = JSON.parse(await evaluate(app.page, `(() => {
+      const panel = document.querySelector('[data-testid="systemsketch-appearance-panel-strokeColor"]')
+      const rect = panel.getBoundingClientRect()
+      const middle = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+      return JSON.stringify({
+        onScreen: rect.x >= 0 && rect.y >= 0
+          && rect.right <= window.innerWidth && rect.bottom <= window.innerHeight,
+        // Nothing may be painted over it: the point in its middle has to be
+        // the panel or something inside it.
+        onTop: Boolean(middle && panel.contains(middle)),
+        sections: [...panel.querySelectorAll('.systemsketch-appearance__mode')]
+          .map((section) => section.dataset.modeControl),
+      })
+    })()`))
+    assert.equal(settingsPopover.onScreen, true, 'the popover is not clipped out of the dialog')
+    assert.equal(settingsPopover.onTop, true, 'and nothing is painted over it')
+    assert.deepEqual(settingsPopover.sections, ['strokeWidth', 'lineStyle'])
+    await shot(app.page, FRAMES.settings)
+    measured.settings = settingsLab
+    pass('Settings > Menu lab renders the real board, on the app\'s own editor')
+
+    await clickSelector(app.page, '.systemsketch-settings__header .tlui-button')
+    await waitFor(app.page, `!document.querySelector('[data-testid="systemsketch-settings-dialog"]')`,
+      'the Settings dialog to close')
+    await delay(300)
+
+    // 8. The composition lab: the levers themselves.
     await openApp(app.page, app.port, '?menu-lab')
     await waitFor(app.page, 'document.querySelector("[data-testid=\\"menu-lab\\"]")', 'the lab')
     await waitFor(app.page, 'document.querySelector("[data-testid=\\"menu-lab-menu\\"]")',
@@ -289,7 +350,7 @@ async function main() {
     await shot(app.page, FRAMES.labConnector)
     pass('switching preset recomposes the same registry into the connector surface')
 
-    // 8. A lever Zach can press: add a control, then hide its labels.
+    // 9. A lever Zach can press: add a control, then hide its labels.
     await clickSelector(app.page, '[data-testid="menu-lab-include-geo"]')
     await delay(300)
     const added = JSON.parse(await evaluate(app.page, `(() => JSON.stringify(

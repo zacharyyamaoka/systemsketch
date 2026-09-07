@@ -118,10 +118,13 @@ and whose painter would ignore the override — the model can propose the row fo
 edge and let the selection decide. A section backed by a StyleProp still keeps its stock
 fallback; do not conflate the two.
 
-### 3. The composition lab — `?menu-lab`
+### 3. The composition lab — Settings › Menu lab, or `?menu-lab`
 
 `src/prototypes/menuLab/` — a lever board wired to the **real** registry, binder and
-renderer. It is not a second menu implementation: it builds `ContextualControl` objects
+renderer. Two entry points, one board: `MenuLabPanel` is what Settings renders (it
+mounts nothing — the dialog is already inside the app's editor and UI context), and
+`ContextualMenuLab` is the standalone route, which has no app around it and therefore
+supplies that context itself. It is not a second menu implementation: it builds `ContextualControl` objects
 and hands them to `ContextualControls`. If a composition works there it works in the
 product; if it is buggy there the product bug reproduces without a canvas selection.
 
@@ -183,10 +186,9 @@ Prior art it follows, recorded in `menuLabModel.ts`'s docstring rather than rein
 - **A thickness override does not travel to plain tldraw.** Display values are ours; a
   `.tldr` opened elsewhere paints from `size`. That is the documented, accepted cost of
   the meta approach — the same one stroke colour and the async cadence already pay.
-- **The lab is a prototype route, not product chrome.** It is lazily imported from
-  `src/main.tsx` so the product bundle never carries it, and it has no entry in any
-  menu. Promoting it (a Dev Hub entry, saving lever sets, generating a recipe file)
-  is open.
+- **Saving lever sets and writing a recipe back to source.** The lab prints the recipe
+  literal; it cannot yet save a composition or emit a file. That is the obvious next
+  increment if it starts being used to design menus rather than to debug them.
 - **No PEP.** Per `docs/peps/README.md` this is a fix plus a composition seam, not a
   fork where two approaches were defensible; the `WHY:` comments carry the rationale at
   the seams. If the cable decision above gets made, that one may deserve a PEP.
@@ -264,6 +266,11 @@ cd /home/bam/systemsketch/.claude/worktrees/rectangle-line-thickness-86b080 && n
 - **A lab route is its own entry point.** `?menu-lab` rendered transparent-on-canvas
   until it imported `src/theme/tokens.css` itself, and threw four `Uncaught (in promise)`
   errors until it passed `assetUrls={ASSET_URLS}` instead of reaching for tldraw's CDN.
+- **tldraw stacks popovers at z-index 400 and dialogs at 500** (measured). A contextual
+  surface hosted inside a dialog therefore opens its popover *behind* the dialog — the
+  panel is there, painted under the content. The fix is `ContainerProvider`: override
+  `useContainer()` for that subtree so both popover paths portal into the host dialog.
+  Generalise it if a second dialog-hosted surface appears.
 - **React swallows a bare `select.value = …`.** Drive its native setter, then dispatch a
   bubbling `change`, or the lever appears to do nothing.
 - **A `.claude/worktrees/` checkout has no `node_modules`.** `npm ci` first or every

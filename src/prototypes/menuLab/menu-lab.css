@@ -23,12 +23,46 @@
   grid-template-columns: minmax(420px, 42%) 1fr;
 }
 
+/* Inside Settings the dialog owns the frame, the scroll and the heading, so
+ * the board is an ordinary block that fills the panel it was given.
+ *
+ * One column by default: a lever row is four selects, a checkbox and two
+ * arrows, and the dialog is nowhere near wide enough to put that beside a
+ * menu without squeezing both. The stage sits under the levers, where the
+ * dialog's own scroll reaches it. */
+.menu-lab__container {
+  container-type: inline-size;
+}
+
+.menu-lab__shell--embedded {
+  position: static;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  grid-template-columns: 1fr;
+  inset: auto;
+}
+
+/* ...unless the dialog really is wide enough for both. */
+@container (min-width: 1040px) {
+  .menu-lab__shell--embedded {
+    grid-template-columns: minmax(420px, 46%) 1fr;
+  }
+}
+
 .menu-lab__levers,
 .menu-lab__stage {
   display: flex;
+  min-width: 0;
   overflow-y: auto;
   flex-direction: column;
   gap: 16px;
+}
+
+/* The dialog body scrolls; a second scroller inside it would trap the wheel. */
+.menu-lab__shell--embedded .menu-lab__levers,
+.menu-lab__shell--embedded .menu-lab__stage {
+  overflow-y: visible;
 }
 
 .menu-lab__header h1 {

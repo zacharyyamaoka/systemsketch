@@ -5,6 +5,7 @@
     "changing the font size grows the label and leaves the outline alone",
     "a chosen thickness carries to the next shape drawn",
     "a connector gets the same thickness control beside its line styles, labels off",
+    "Settings > Menu lab renders the real board, on the app's own editor",
     "the lab composes the shape surface out of levers, using the real renderer",
     "switching preset recomposes the same registry into the connector surface",
     "a lever added a control and then folded it into its neighbour, live",
@@ -31,6 +32,19 @@
     ],
     "labelled": false,
     "strokeWidth": 2
+  },
+  "settings": {
+    "insideDialog": true,
+    "canvases": 1,
+    "triggers": [
+      "geo",
+      "color",
+      "strokeColor",
+      "font",
+      "size",
+      "align",
+      "verticalAlign"
+    ]
   },
   "lab": {
     "shapeTriggers": [

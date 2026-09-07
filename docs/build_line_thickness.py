@@ -89,6 +89,10 @@ def main() -> None:
     assert results["connector"]["rungs"] == ["thin", "medium", "thick"]
     assert results["connector"]["labelled"] is False
     assert "has('menu-lab')" in (ROOT / "src/main.tsx").read_text(encoding="utf-8")
+    settings = (ROOT / "src/settings/InterfaceSettings.tsx").read_text(encoding="utf-8")
+    assert "label: 'Menu lab'," in settings and "MenuLabPanel" in settings
+    assert results["settings"]["insideDialog"] is True
+    assert results["settings"]["canvases"] == 1
     seams = paint_seams()
 
     hero_mp4 = data_uri(ASSETS / "line-thickness-hero-2026-09-06.mp4", "video/mp4")
@@ -98,6 +102,7 @@ def main() -> None:
     font_holds = data_uri(ASSETS / "line-thickness-3-font-size-holds-2026-09-06.png", "image/png")
     lab_shape = data_uri(ASSETS / "menu-lab-1-shape-2026-09-06.png", "image/png")
     lab_connector = data_uri(ASSETS / "menu-lab-2-connector-2026-09-06.png", "image/png")
+    lab_settings = data_uri(ASSETS / "menu-lab-4-settings-2026-09-06.png", "image/png")
     fixture_png = data_uri(ROOT / "sketches/review/line-thickness.png", "image/png")
 
     font = results["fontSize"]
@@ -213,8 +218,9 @@ footer{{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);color:
 </section>
 
 <section class="panel">
-<h2>The composition lab · <code>?menu-lab</code></h2>
+<h2>The composition lab · Settings &rsaquo; Menu lab, or <code>?menu-lab</code></h2>
 <p>Zach: “make a generic contextual menu with all the different configuration levers that I can just press myself… add this, hide the labels, stack the thing.” The lab is a lever board wired to the <em>real</em> registry, binder and renderer — not a second menu implementation. If a composition works there it works in the product, and if it is buggy there the product bug reproduces without a canvas selection.</p>
+<figure><img src="{lab_settings}" alt="The menu lab as a Settings section, with a contextual popover open over the dialog"><figcaption><b>Settings → Menu lab.</b> The same board, in the app. It mounts no editor of its own — the dialog is already inside one, so the panel gets the live theme and tldraw&rsquo;s own popover. Measured in the journey: exactly {results['settings']['canvases']} canvas on the page. Its popovers portal into the host dialog because tldraw stacks popovers at 400 and dialogs at 500, so otherwise the panel opens <em>behind</em> the dialog that hosts it.</figcaption></figure>
 <div class="grid">
 <figure><img src="{lab_shape}" alt="The contextual menu lab composing the shape surface"><figcaption><b>Shape preset.</b> Thickness and line style are stacked <code>above</code> the palette, so they are folded into its popover and are not triggers of their own.</figcaption></figure>
 <figure><img src="{lab_connector}" alt="The contextual menu lab composing the connector surface"><figcaption><b>Connector preset.</b> The same registry, recomposed: the thickness control set to <code>beside</code>, layouts set to <code>row</code> so labels disappear.</figcaption></figure>

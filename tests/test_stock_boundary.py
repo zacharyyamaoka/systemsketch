@@ -92,6 +92,30 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertNotIn("<UpdatePill", source)
         self.assertFalse((PROJECT_ROOT / "src" / "UpdatePill.tsx").exists())
 
+        # The Menu lab is a real Settings section, not a URL a person has to
+        # know. It renders the SAME board the standalone `?menu-lab` route
+        # does — a second implementation living in Settings is exactly the
+        # drift the shared registry exists to prevent.
+        settings_source = (
+            PROJECT_ROOT / "src" / "settings" / "InterfaceSettings.tsx"
+        ).read_text(encoding="utf-8")
+        self.assertIn("id: 'menu-lab',", settings_source)
+        self.assertIn("label: 'Menu lab',", settings_source)
+        self.assertIn("'shortcuts', 'menu-lab']", settings_source)
+        self.assertIn(
+            "import { MenuLabPanel } from '../prototypes/menuLab/ContextualMenuLab'",
+            settings_source,
+        )
+        lab_source = (
+            PROJECT_ROOT / "src" / "prototypes" / "menuLab" / "ContextualMenuLab.tsx"
+        ).read_text(encoding="utf-8")
+        self.assertIn("export function MenuLabPanel", lab_source)
+        self.assertIn("<MenuLabPanel standalone />", lab_source)
+        # Popovers opened inside the dialog must portal into it: tldraw's
+        # popover layer sits below its dialog layer.
+        self.assertIn("ContainerProvider container={host ?? container}", lab_source)
+        self.assertIn(".tlui-dialog__positioner", lab_source)
+
         toolbar_source = (
             PROJECT_ROOT / "src" / "toolbar" / "SystemSketchToolbar.tsx"
         ).read_text(encoding="utf-8")
