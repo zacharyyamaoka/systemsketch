@@ -142,6 +142,7 @@ def main() -> None:
     lab_connector = data_uri(ASSETS / "menu-lab-2-connector-2026-09-06.png", "image/png")
     lab_settings = data_uri(ASSETS / "menu-lab-4-settings-2026-09-06.png", "image/png")
     fixture_png = data_uri(ROOT / "sketches/review/line-thickness.png", "image/png")
+    audit_fixture_png = data_uri(ROOT / "sketches/review/menu-lab-audit.png", "image/png")
     lab_code = data_uri(ASSETS / "menu-lab-5-code-2026-09-06.png", "image/png")
     presets_before, presets_after = preset_crops()
     preset_ids = lab_presets()
@@ -311,6 +312,7 @@ footer{{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);color:
 <section class="panel">
 <h2>Guided review board</h2>
 <figure><img src="{fixture_png}" alt="The line-thickness review fixture with numbered cue cards"><figcaption><code>sketches/review/line-thickness.systemsketch</code> · five numbered gestures and a green PASS WHEN card.</figcaption></figure>
+<figure><img src="{audit_fixture_png}" alt="The menu-lab audit review fixture: a real Code block with three numbered cue cards"><figcaption><code>sketches/review/menu-lab-audit.systemsketch</code> · read the real Code block's pill, read the preset names in Settings, then compose the same pill from the lab's Code preset. The board exists because those last two agreeing <em>is</em> the audit's claim.</figcaption></figure>
 </section>
 
 <footer>Generated from the live tree and the real-browser results in <code>{RESULTS.relative_to(ROOT).as_posix()}</code> by <code>docs/build_line_thickness.py</code>. Journey: <code>npm run test:line-thickness</code> (<code>{JOURNEY.relative_to(ROOT).as_posix()}</code>, {len(journey.splitlines())} lines). Hero recording: <code>docs/capture_line_thickness_hero.mjs</code>.</footer>
