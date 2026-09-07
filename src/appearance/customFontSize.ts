@@ -22,6 +22,7 @@ import { DefaultSizeStyle, type Editor, type TLShape, type TLShapePartial } from
 
 import { CODE_FONT_SIZES, CODE_SHAPE_TYPE } from '../code/codeModel'
 import { sharedValueAcross } from '../contextualMenus/sharedValues'
+import { pinStrokeWidth } from './strokeMeta'
 
 export type SizeRung = 's' | 'm' | 'l' | 'xl'
 const RUNGS: readonly SizeRung[] = ['s', 'm', 'l', 'xl']
@@ -162,6 +163,10 @@ export function applyCustomFontPx(editor: Editor, px: number): void {
 	})
 	editor.markHistoryStoppingPoint('custom font size')
 	editor.run(() => {
+		// An exact px moves the shape's `scale`, which multiplies its stroke
+		// width too. Pin the painted thickness first so the outline stays where
+		// it was — the same rule the preset rungs follow (`pinStrokeWidth`).
+		pinStrokeWidth(editor)
 		editor.updateShapes(updates)
 		// Keep tldraw's next-shape memory on the rung the custom size anchored
 		// to, so the next text drawn lands near the chosen size.

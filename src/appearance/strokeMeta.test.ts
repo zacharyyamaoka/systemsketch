@@ -1,5 +1,6 @@
 /**
- * The edge model: a shape's own outline colour, and the async cadence.
+ * The edge model: a shape's own outline colour, its thickness, and the async
+ * cadence.
  *
  * Both live in metadata rather than in a style prop, so these tests pin the
  * two things that buys — a shape with no override is byte-identical to one
@@ -12,16 +13,24 @@ import { DefaultDashStyle, type Editor, type StyleProp, type TLShape } from 'tld
 import {
 	ASYNC_LINE_VALUE,
 	SYSTEMSKETCH_STROKE_META_KEY,
+	STROKE_WIDTH_PX,
 	applyLinePattern,
 	applyStrokeMeta,
+	applyStrokeWidth,
+	hasAdjustableStrokeWidth,
 	hasPaintedEdge,
+	installStrokeWidthDefault,
 	isAsyncStroke,
 	linePatternOf,
+	nextStrokeWidth,
+	pinStrokeWidth,
 	readStrokeMeta,
 	resolveStrokeHex,
 	seedDefaultLineStyle,
 	sharedEdgeValue,
 	strokeColorOf,
+	strokeWidthDisplayValue,
+	strokeWidthOf,
 	writeStrokeMeta,
 } from './strokeMeta'
 
@@ -59,9 +68,17 @@ const text = (id: string, color = 'blue'): FakeShape => ({
 function fakeEditor(shapes: FakeShape[], stored?: string) {
 	const marks: string[] = []
 	const styleWrites: Array<{ scope: 'selected' | 'next'; value: unknown }> = []
+	let instanceMeta: Record<string, unknown> = {}
 	const editor = {
 		getSelectedShapes: () => shapes as unknown as TLShape[],
-		getInstanceState: () => ({ stylesForNextShape: stored === undefined ? {} : { [DefaultDashStyle.id]: stored } }),
+		getInstanceState: () => ({
+			stylesForNextShape: stored === undefined ? {} : { [DefaultDashStyle.id]: stored },
+			meta: instanceMeta,
+		}),
+		updateInstanceState: (next: { meta?: Record<string, unknown> }) => {
+			if (next.meta) instanceMeta = next.meta
+		},
+		getInitialMetaForShape: () => ({}),
 		isIn: (state: string) => state === 'select',
 		markHistoryStoppingPoint: (label: string) => marks.push(label),
 		run: (fn: () => void) => fn(),
@@ -189,5 +206,116 @@ describe('the dash a fresh shape is drawn with', () => {
 		const { editor, styleWrites } = fakeEditor([], 'dashed')
 		seedDefaultLineStyle(editor)
 		expect(styleWrites).toEqual([])
+	})
+})
+
+describe('edge thickness', () => {
+	it('reads the rung a shape is painted at, override or stock size', () => {
+		// The whole complaint: `size` drove BOTH the label's font and the
+		// outline, so picking Extra large for a title thickened the rectangle.
+		// Un-overridden shapes still read truthfully off that rung...
+		expect(strokeWidthOf(geo('a', { size: 's' }))).toBe('thin')
+		expect(strokeWidthOf(geo('b', { size: 'm' }))).toBe('medium')
+		// ...and `l`/`xl` are off the three-rung ladder, so they report the
+		// number actually painted rather than claiming a rung they are not on.
+		expect(strokeWidthOf(geo('c', { size: 'l' }))).toBe('5')
+		expect(strokeWidthOf(geo('d', { size: 'xl' }))).toBe('10')
+		// An override wins over the rung outright — that is the decoupling.
+		const overridden = geo('e', { size: 'xl' }, {
+			[SYSTEMSKETCH_STROKE_META_KEY]: { width: STROKE_WIDTH_PX.thin },
+		})
+		expect(strokeWidthOf(overridden)).toBe('thin')
+	})
+
+	it('reports nothing for a shape whose painter would ignore the override', () => {
+		// A Block cable paints its own semantic width; offering a row that
+		// silently did nothing is exactly the lie the null reading prevents.
+		const cable = { ...geo('a'), type: 'connection' }
+		expect(hasAdjustableStrokeWidth(cable)).toBe(false)
+		expect(strokeWidthOf(cable)).toBeUndefined()
+		// A text shape has no outline at all.
+		expect(strokeWidthOf(text('t'))).toBeUndefined()
+		// Geo, draw, line and arrow all name `strokeWidth` the same way.
+		for (const type of ['geo', 'draw', 'line', 'arrow']) {
+			expect(hasAdjustableStrokeWidth({ ...geo('a'), type })).toBe(true)
+		}
+	})
+
+	it('hands the paint seam a width the shape\'s own scale cannot move', () => {
+		// tldraw multiplies the display value by `scale`, and this app moves
+		// `scale` to hit an exact font size (`customFontSize.ts`). Dividing here
+		// is what makes a chosen thickness survive a text-size change.
+		const scaled = geo('a', { scale: 2 }, {
+			[SYSTEMSKETCH_STROKE_META_KEY]: { width: 5 },
+		})
+		expect(strokeWidthDisplayValue(scaled)).toBe(2.5)
+		// No override: tldraw's own size-derived width is left completely alone.
+		expect(strokeWidthDisplayValue(geo('b', { size: 'xl' }))).toBeUndefined()
+		// ...but the READING is what is on screen, scale included.
+		expect(strokeWidthOf(geo('c', { size: 'm', scale: 3 }))).toBe('10.5')
+	})
+
+	it('writes one rung across the selection and remembers it for the next shape', () => {
+		const shapes = [geo('a'), geo('b')]
+		const { editor, marks } = fakeEditor(shapes)
+		applyStrokeWidth(editor, 'thick')
+		expect(marks).toEqual(['appearance'])
+		for (const shape of shapes) {
+			expect(readStrokeMeta(shape).width).toBe(STROKE_WIDTH_PX.thick)
+		}
+		expect(nextStrokeWidth(editor)).toBe(STROKE_WIDTH_PX.thick)
+
+		// A value that is not a rung is refused rather than stored raw.
+		applyStrokeWidth(editor, 'enormous')
+		expect(readStrokeMeta(shapes[0]).width).toBe(STROKE_WIDTH_PX.thick)
+	})
+
+	it('gives a fresh shape the remembered thickness and a copy its own', () => {
+		const { editor } = fakeEditor([geo('a')])
+		applyStrokeWidth(editor, 'thin')
+		const stop = installStrokeWidthDefault(editor)
+		const seeded = editor.getInitialMetaForShape(
+			{ type: 'geo', props: { dash: 'solid' } } as never,
+		)
+		expect(seeded[SYSTEMSKETCH_STROKE_META_KEY]).toEqual({ width: STROKE_WIDTH_PX.thin })
+		// A shape whose util cannot paint it is left completely alone.
+		expect(editor.getInitialMetaForShape(
+			{ type: 'connection', props: { dash: 'solid' } } as never,
+		)).toEqual({})
+		stop()
+		expect(editor.getInitialMetaForShape(
+			{ type: 'geo', props: { dash: 'solid' } } as never,
+		)).toEqual({})
+	})
+})
+
+describe('changing the text size no longer changes the outline', () => {
+	it('pins the painted thickness before something else can move it', () => {
+		// The reported bug in one assertion: `size` drove BOTH the label font
+		// and the stroke, so picking Extra large for a title thickened the
+		// rectangle from 3.5px to 10px.
+		const shapes = [geo('a', { size: 'm' }), geo('b', { size: 'm' })]
+		const { editor } = fakeEditor(shapes)
+		pinStrokeWidth(editor)
+		for (const shape of shapes) expect(readStrokeMeta(shape).width).toBe(3.5)
+		// The shape now paints 3.5 whatever its rung becomes.
+		shapes[0].props.size = 'xl'
+		expect(strokeWidthDisplayValue(shapes[0])).toBe(3.5)
+	})
+
+	it('leaves a thickness someone already chose alone', () => {
+		const chosen = geo('a', { size: 'm' }, {
+			[SYSTEMSKETCH_STROKE_META_KEY]: { width: STROKE_WIDTH_PX.thick },
+		})
+		const { editor } = fakeEditor([chosen])
+		pinStrokeWidth(editor)
+		expect(readStrokeMeta(chosen).width).toBe(STROKE_WIDTH_PX.thick)
+	})
+
+	it('never stamps a shape whose painter would ignore the stamp', () => {
+		const cable = { ...geo('a'), type: 'connection' }
+		const { editor } = fakeEditor([cable, text('t') as never])
+		pinStrokeWidth(editor)
+		expect(cable.meta).toEqual({})
 	})
 })

@@ -140,18 +140,22 @@ describe('appearance controls', () => {
     }
   })
 
-  it('merges a connector\'s weight and dash into one Line style, beside each other', () => {
+  it('merges a connector\'s thickness and dash into one Line style, beside each other', () => {
     const lineStyle = buildAppearanceControls(CONNECTOR, true).find((c) => c.id === 'lineStyle')!
     expect(lineStyle.style).toBe(DefaultDashStyle)
     expect(lineStyle.trigger).toBe('icon')
     expect(lineStyle.modePlacement).toBe('beside')
-    expect(lineStyle.modeControl?.style).toBe(DefaultSizeStyle)
-    // FigJam has two weights and so does this: `m`, the size everything is
-    // created at, and `xl`. Four rungs was tldraw's vocabulary, not FigJam's.
+    // The connector row is the SHAPE's thickness control, not a second
+    // vocabulary: same kind, same options, same meta-backed write. The old
+    // connector-only Weight wrote the stock `size` style, which a cable's
+    // painter ignored and which dragged a shape's label size along with it.
+    expect(lineStyle.modeControl?.kind).toBe('strokeWidth')
+    expect(lineStyle.modeControl?.style).toBeUndefined()
+    expect(lineStyle.modeControl?.meta).toBe('width')
     expect(lineStyle.modeControl?.options.map((option) => option.label))
-      .toEqual(['Thin', 'Thick'])
+      .toEqual(['Thin', 'Medium', 'Thick'])
     expect(lineStyle.modeControl?.options.map((option) => option.value))
-      .toEqual(['m', 'xl'])
+      .toEqual(['thin', 'medium', 'thick'])
     // `draw` is no longer offered, and a shape that still stores it is named
     // by its stored token rather than called mixed.
     expect(triggerLabel(lineStyle)).toBe('Line style, draw')
@@ -159,9 +163,12 @@ describe('appearance controls', () => {
 
   it('names both halves of the stacked Line style trigger, since its icon shows neither', () => {
     const stroke = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'strokeColor')!
-    expect(triggerLabel(stroke)).toBe('Line style, solid blue')
-    expect(triggerLabel(withEdgeValues(stroke, { color: 'black', pattern: 'async' })))
-      .toBe('Line style, async black')
+    // Three stacked sections, deepest first — thickness, line style, palette.
+    expect(triggerLabel(stroke)).toBe('Line style, mixed solid blue')
+    expect(triggerLabel(withEdgeValues(
+      stroke,
+      { color: 'black', pattern: 'async', width: 'thick' },
+    ))).toBe('Line style, thick async black')
     // A trigger that draws its own value still names only that value.
     const color = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'color')!
     expect(triggerLabel(color)).toBe('Color, blue')
@@ -183,6 +190,24 @@ describe('appearance controls', () => {
     expect(stroke.modeControl?.meta).toBe('pattern')
     expect(stroke.modeControl?.options.map((option) => option.label))
       .toEqual(['Solid', 'Dashed', 'Dotted', 'Async', 'None'])
+    // ...and the thickness rungs above those again, the same `above` link one
+    // more time rather than a second kind of relationship.
+    expect(stroke.modeControl?.modePlacement).toBe('above')
+    expect(stroke.modeControl?.modeControl?.id).toBe('strokeWidth')
+    expect(stroke.modeControl?.modeControl?.layout).toBe('row')
+    expect(stroke.modeControl?.modeControl?.meta).toBe('width')
+  })
+
+  it('drops the thickness row when nothing in the selection could paint one', () => {
+    // A Block cable carries a dash but paints its own semantic width, so its
+    // reading folds to null — the row goes away rather than lying about a
+    // write the canvas would ignore.
+    const stroke = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'strokeColor')!
+    const withNone = withEdgeValues(stroke, { color: null, pattern: null, width: null })
+    expect(withNone.modeControl?.id).toBe('lineStyle')
+    expect(withNone.modeControl?.modeControl).toBeUndefined()
+    const withSome = withEdgeValues(stroke, { color: null, pattern: null, width: 'thin' })
+    expect(withSome.modeControl?.modeControl?.value).toEqual({ type: 'shared', value: 'thin' })
   })
 
   it('gives a shape with no edge palette the same chips, without the palette', () => {
@@ -196,7 +221,9 @@ describe('appearance controls', () => {
     ])
     const control = buildAppearanceControls(draw, false).find((c) => c.id === 'lineStyle')!
     expect(control.layout).toBe('chips')
-    expect(control.modeControl).toBeUndefined()
+    // No palette under it — but the same thickness row above it, because a
+    // freehand stroke has a width like every other edge.
+    expect(control.modeControl?.id).toBe('strokeWidth')
     expect(control.options.map((option) => option.value))
       .toEqual(['solid', 'dashed', 'dotted', 'async', 'none'])
   })
@@ -376,13 +403,13 @@ describe('appearance controls', () => {
     expect(stroke.value).toEqual({ type: 'shared', value: 'blue' })
     expect(stroke.modeControl?.value).toEqual({ type: 'shared', value: 'solid' })
 
-    const filled = withEdgeValues(stroke, { color: 'black', pattern: 'async' })
+    const filled = withEdgeValues(stroke, { color: 'black', pattern: 'async', width: 'thin' })
     expect(filled.value).toEqual({ type: 'shared', value: 'black' })
     expect(filled.modeControl?.value).toEqual({ type: 'shared', value: 'async' })
     expect(selectedOption(filled)).toEqual({ value: 'black', label: 'black' })
     expect(selectedOption(filled.modeControl!)).toEqual({ value: 'async', label: 'Async' })
 
-    const disagreeing = withEdgeValues(stroke, { color: EDGE_MIXED, pattern: null })
+    const disagreeing = withEdgeValues(stroke, { color: EDGE_MIXED, pattern: null, width: EDGE_MIXED })
     expect(disagreeing.value).toEqual({ type: 'mixed' })
     // A control the selection has nothing to say about keeps its fallback.
     expect(disagreeing.modeControl?.value).toEqual({ type: 'shared', value: 'solid' })

@@ -15,6 +15,18 @@ async function start() {
 		)
 		return
 	}
+	// The composition lab: every contextual-menu lever, pressable. Same lazy
+	// route shape as the evidence viewer, so the product bundle never carries
+	// it. See `prototypes/menuLab/menuLabModel.ts` for the prior art it follows.
+	if (new URLSearchParams(window.location.search).has('menu-lab')) {
+		const { ContextualMenuLab } = await import('./prototypes/menuLab/ContextualMenuLab')
+		createRoot(document.getElementById('root')!).render(
+			<StrictMode>
+				<ContextualMenuLab />
+			</StrictMode>,
+		)
+		return
+	}
 	// Stable and Preview have separate origins and Chrome profiles. Restore the
   // narrowly-scoped promotion record before App imports preference stores.
   await restorePromotedWorkspaceState()

@@ -7,6 +7,7 @@ import type {
   ContextualGlyphFamily,
 } from '../contextualMenus/contextualControlRegistry'
 import { FIGJAM_ICONS } from './figjamIcons'
+import { STROKE_WIDTH_PX, strokeWidthPxForRung } from './strokeMeta'
 import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
 
 interface GlyphFamilyRenderer {
@@ -36,6 +37,7 @@ const GLYPH_FAMILIES: Record<ContextualGlyphFamily, GlyphFamilyRenderer> = {
   geo: { render: (value) => <GeoGlyph value={value} /> },
   dash: { render: (value) => <DashGlyph value={value} /> },
   size: { render: (value) => <SizeGlyph value={value} /> },
+  strokeWidth: { render: (value) => <StrokeWidthGlyph value={value} /> },
   align: { render: (value) => <AlignGlyph value={value} /> },
   verticalAlign: { render: (value) => <AlignGlyph value={value} vertical /> },
   lineShape: { render: (value) => <RoutingGlyph value={value} /> },
@@ -254,6 +256,39 @@ function SizeGlyph({ value }: { value: string | undefined }) {
   return (
     <Svg>
       <rect x="3" y={10 - height / 2} width="14" height={height} rx={height / 2} data-role="solid" />
+    </Svg>
+  )
+}
+
+/**
+ * The thickness rung drawn at the width it actually paints.
+ *
+ * WHY drawn rather than one of FigJam's two traced weight icons: there are
+ * three rungs and FigJam has two, so a traced pair plus one invented sibling
+ * would be the mismatch `figjamIconMap` exists to refuse. Excalidraw draws the
+ * same three as plain rules of increasing weight, which is the reference Zach
+ * pointed at — and one drawing serves both the stacked shape row and the
+ * connector's row beside its line styles.
+ *
+ * The 20-unit box is painted at 24px, so a rung's scene-unit width is divided
+ * by that 1.2 ratio to land on screen at the width it will draw on canvas.
+ */
+const GLYPH_UNITS_PER_PX = 24 / 20
+
+function StrokeWidthGlyph({ value }: { value: string | undefined }) {
+  const px = strokeWidthPxForRung(value) ?? STROKE_WIDTH_PX.medium
+  const height = px / GLYPH_UNITS_PER_PX
+  return (
+    <Svg>
+      <rect
+        x="3"
+        y={10 - height / 2}
+        width="14"
+        height={height}
+        rx={height / 2}
+        data-role="solid"
+        data-width={value}
+      />
     </Svg>
   )
 }

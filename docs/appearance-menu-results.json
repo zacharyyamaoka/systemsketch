@@ -60,7 +60,7 @@
   "ok": true
  },
  {
-  "label": "a connector's Line style holds weight beside dash in one 44px popover, and both write through",
+  "label": "a connector's Line style holds the shared thickness beside dash in one 44px popover, and both write through",
   "ok": true
  },
  {

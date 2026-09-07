@@ -203,7 +203,11 @@
   border-bottom: 1px solid #383838;
 }
 
-.systemsketch-appearance__mode .systemsketch-appearance__option {
+/* A labelled section widens its cells around the name; an icon-only one (the
+ * thickness rungs) keeps the 24px square every other icon row uses, so the
+ * same control reads identically stacked on a shape and beside a connector's
+ * line styles. */
+.systemsketch-appearance__mode[data-mode-layout='chips'] .systemsketch-appearance__option {
   width: auto;
   padding: 0 8px 0 0;
 }

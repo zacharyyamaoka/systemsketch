@@ -79,7 +79,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
-import { seedDefaultLineStyle } from './appearance/strokeMeta'
+import { installStrokeWidthDefault, seedDefaultLineStyle } from './appearance/strokeMeta'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
@@ -167,6 +167,7 @@ function SystemSketchCanvas() {
   const onMount = useCallback((editor: Editor) => {
     setMountedEditor(editor)
     seedDefaultLineStyle(editor)
+    const stopStrokeWidthDefault = installStrokeWidthDefault(editor)
     const stopCanvasNavigation = installSystemSketchCanvasNavigation(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
@@ -213,6 +214,7 @@ function SystemSketchCanvas() {
       stopDrafts()
       stopWorkspace()
       stopCanvasNavigation()
+      stopStrokeWidthDefault()
       setMountedEditor(null)
     }
   }, [attach, attachEditor])

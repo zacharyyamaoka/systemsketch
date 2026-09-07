@@ -48,6 +48,7 @@ import {
 import { clampPillPosition } from './blocks/connections/connectionModel'
 import { getConnectionControlPoints } from './blocks/connections/connectionRouting'
 import type { SystemSketchArrowPrimitiveStyle } from './stockPrimitiveVisuals'
+import { strokeWidthDisplay } from './appearance/strokeMeta'
 import {
 	DataCablePath as ConnectionDataCablePath,
 	DelayedCablePaths as ConnectionDelayedCablePaths,
@@ -892,7 +893,18 @@ function SystemSketchArrow({
  * record; Slanted deliberately uses SVG's public marker orientation and falls
  * back to stock if someone chooses a different endpoint style.
  */
-export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
+/**
+ * The stock arrow, wired to the one edge-thickness override.
+ *
+ * `strokeWidth` is the arrow's own display value, and its arrowheads are sized
+ * from it, so overriding it here scales the heads with the line — which is why
+ * the connector menu can drop the old `size`-writing Weight row entirely.
+ */
+const ConfiguredArrowShapeUtil = ArrowShapeUtil.configure({
+	getCustomDisplayValues: (_editor, shape) => strokeWidthDisplay(shape),
+})
+
+export class SystemSketchArrowShapeUtil extends ConfiguredArrowShapeUtil {
 	private activeRouteDrag: {
 		shapeId: TLShapeId
 		handleId: string

@@ -11,9 +11,9 @@ export type ContextualControlKind =
   | 'fill'
   | 'lineStyle'
   | 'strokeColor'
+  | 'strokeWidth'
   | 'codeLanguage'
   | 'size'
-  | 'weight'
   | 'font'
   | 'align'
   | 'verticalAlign'
@@ -45,6 +45,7 @@ export type ContextualGlyphFamily =
   | 'geo'
   | 'dash'
   | 'size'
+  | 'strokeWidth'
   | 'align'
   | 'verticalAlign'
   | 'lineShape'
@@ -146,9 +147,16 @@ const SIZE_OPTIONS = [
   option('xl', 'Extra large'),
 ] as const
 
-const WEIGHT_OPTIONS = [
-  option('m', 'Thin'),
-  option('xl', 'Thick'),
+// WHY one thickness vocabulary rather than a shape row and a connector row:
+// Zach's rule for these menus is that the connector's little row IS the
+// shape's control with the text toggled off — "all the icons by construction
+// must be the same". This replaced a connector-only `weight` whose two rungs
+// wrote the stock `size` style, which a cable's painter ignored outright and
+// which on every other shape dragged the label's font size along with it.
+const STROKE_WIDTH_OPTIONS = [
+  option('thin', 'Thin'),
+  option('medium', 'Medium'),
+  option('thick', 'Thick'),
 ] as const
 
 const FONT_OPTIONS = [
@@ -245,11 +253,14 @@ export const CONTEXTUAL_CONTROL_REGISTRY: Readonly<Record<ContextualControlKind,
     layout: 'swatches', trigger: 'icon', glyph: 'swatch', columns: FIGJAM_PALETTE_COLUMNS,
     meta: 'color',
   },
+  strokeWidth: {
+    kind: 'strokeWidth', label: 'Line thickness', options: STROKE_WIDTH_OPTIONS,
+    layout: 'row', trigger: 'value', glyph: 'strokeWidth', meta: 'width',
+  },
   codeLanguage: {
     kind: 'codeLanguage', label: 'Language', options: CODE_LANGUAGE_OPTIONS, layout: 'list', trigger: 'text',
   },
   size: { kind: 'size', label: 'Font size', options: SIZE_OPTIONS, layout: 'list', trigger: 'text', glyph: 'size' },
-  weight: { kind: 'weight', label: 'Weight', options: WEIGHT_OPTIONS, layout: 'row', trigger: 'value', glyph: 'size' },
   font: { kind: 'font', label: 'Typeface', options: FONT_OPTIONS, layout: 'list', trigger: 'icon', glyph: 'font' },
   align: { kind: 'align', label: 'Text alignment', options: ALIGN_OPTIONS, layout: 'row', trigger: 'value', glyph: 'align' },
   verticalAlign: {

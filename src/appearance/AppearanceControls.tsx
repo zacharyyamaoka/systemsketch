@@ -27,9 +27,12 @@ import {
 import {
   applyLinePattern,
   applyStrokeMeta,
+  applyStrokeWidth,
   linePatternOf,
+  pinStrokeWidth,
   sharedEdgeValue,
   strokeColorOf,
+  strokeWidthOf,
 } from './strokeMeta'
 import {
   applyCustomFontPx,
@@ -125,7 +128,15 @@ function useEdgeValues(editor: Editor): EdgeValues {
     () => encodeEdge(sharedEdgeValue(editor.getSelectedShapes(), linePatternOf)),
     [editor],
   )
-  return { color, pattern }
+  // `strokeWidthOf` reads nothing off a shape whose util cannot paint the
+  // override, so a cable-only selection folds to null here and the thickness
+  // row is dropped by `withEdgeValues` rather than shown dead.
+  const width = useValue(
+    'systemsketch edge thickness',
+    () => encodeEdge(sharedEdgeValue(editor.getSelectedShapes(), strokeWidthOf)),
+    [editor],
+  )
+  return { color, pattern, width }
 }
 
 function encodeEdge(shared: ReturnType<typeof sharedEdgeValue>): string | null {
@@ -170,6 +181,8 @@ function bindAppearanceControl(editor: Editor, control: AppearanceControl): Cont
         applyLinePattern(editor, value)
       } else if (control.meta === 'color') {
         applyStrokeMeta(editor, 'color', value)
+      } else if (control.meta === 'width') {
+        applyStrokeWidth(editor, value)
       } else if (control.style) {
         applyStyle(editor, control.style, value, { markHistory: !options?.continuous })
       }
@@ -199,7 +212,14 @@ export function applyStyle(
     // A preset must actually render at its named size: clear any custom scale
     // in the same history step, or the checked row in the Font size list
     // (`ContextualControls.tsx`'s `ControlPanel`) would lie.
-    if (style === DefaultSizeStyle) resetCustomFontScale(editor)
+    if (style === DefaultSizeStyle) {
+      // ...and it must change the TYPE only. `size` also drives a geo shape's
+      // stroke width in stock tldraw, which is the coupling Zach reported;
+      // pinning the painted thickness first is what breaks it. See
+      // `pinStrokeWidth`.
+      pinStrokeWidth(editor)
+      resetCustomFontScale(editor)
+    }
   })
 }
 

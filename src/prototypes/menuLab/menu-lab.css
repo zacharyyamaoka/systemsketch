@@ -1,0 +1,243 @@
+/* The lab's own chrome. Deliberately austere: the only thing worth looking at
+ * on this page is the real contextual menu, so nothing here competes with it.
+ * The menu itself is styled entirely by `appearance.css` — the lab adds no
+ * menu CSS at all, which is half the point. */
+.menu-lab {
+  position: fixed;
+  inset: 0;
+}
+
+.menu-lab__shell {
+  position: absolute;
+  z-index: 400;
+  display: grid;
+  overflow: hidden;
+  box-sizing: border-box;
+  inset: 0;
+  padding: 16px;
+  gap: 16px;
+  background: var(--ss-surface);
+  color: var(--ss-text);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  grid-template-columns: minmax(420px, 42%) 1fr;
+}
+
+.menu-lab__levers,
+.menu-lab__stage {
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menu-lab__header h1 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.menu-lab__header p,
+.menu-lab__hint {
+  margin: 0;
+  color: var(--ss-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.menu-lab__hint code {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--ss-surface-sunken);
+  font-size: 11px;
+}
+
+.menu-lab__section h2,
+.menu-lab__preview h2,
+.menu-lab__readout h2 {
+  margin: 0 0 8px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-lab__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.menu-lab__presets button {
+  display: flex;
+  max-width: 220px;
+  flex-direction: column;
+  padding: 8px 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  background: var(--ss-surface);
+  cursor: pointer;
+  gap: 2px;
+  text-align: left;
+}
+
+.menu-lab__presets button:hover {
+  border-color: var(--ss-accent);
+}
+
+.menu-lab__presets span {
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.menu-lab__field,
+.menu-lab__select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.menu-lab__select span {
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.menu-lab select {
+  padding: 2px 4px;
+  border: 1px solid var(--ss-border);
+  border-radius: 5px;
+  background: var(--ss-surface);
+  color: inherit;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.menu-lab__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-lab__control {
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--ss-surface-sunken);
+  opacity: 0.55;
+}
+
+.menu-lab__control[data-included] {
+  border-color: var(--ss-border);
+  background: var(--ss-surface);
+  opacity: 1;
+}
+
+.menu-lab__include {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.menu-lab__include code {
+  margin-left: 6px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.menu-lab__levers-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 6px;
+  gap: 10px;
+}
+
+.menu-lab__toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.menu-lab__move button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--ss-border);
+  border-radius: 4px;
+  background: var(--ss-surface);
+  color: var(--ss-text);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.menu-lab__warning {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--ss-warning-soft);
+  color: var(--ss-text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* The stage: one dark strip so the menu sits on the surface it ships on. */
+.menu-lab__pill {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--ss-surface-sunken);
+}
+
+.menu-lab__pill .systemsketch-appearance {
+  padding: 0 8px;
+  border-radius: 13px;
+  background: var(--ss-surface-inverse);
+}
+
+.menu-lab__empty {
+  margin: 0;
+  color: var(--ss-text-muted);
+}
+
+.menu-lab__readout dl {
+  display: grid;
+  margin: 0 0 8px;
+  gap: 2px 12px;
+  grid-template-columns: auto 1fr;
+}
+
+.menu-lab__readout dt {
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.menu-lab__readout dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  word-break: break-word;
+}
+
+.menu-lab__readout pre,
+.menu-lab__readout ul {
+  margin: 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--ss-surface-sunken);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.menu-lab__readout ul {
+  padding-left: 24px;
+}

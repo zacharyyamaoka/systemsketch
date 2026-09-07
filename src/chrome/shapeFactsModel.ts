@@ -145,6 +145,18 @@ export function getShapeFactsModel(editor: Editor): ShapeFactsModel | null {
       value: edgeColor.type === 'shared' ? verbatimToken(edgeColor.value) : 'Mixed',
     })
   }
+  // Thickness appears only once it has been chosen: without an override the
+  // stock `size` row above already reports what the outline is drawn at.
+  const thickness = sharedEdgeValue(
+    shapes,
+    (shape) => readStrokeMeta(shape).width?.toString(),
+  )
+  if (thickness) {
+    styles.push({
+      label: 'Line thickness',
+      value: thickness.type === 'shared' ? `${verbatimToken(thickness.value)}px` : 'Mixed',
+    })
+  }
 
   const flags: ShapeFact[] = []
   const locked = shapes.every((shape) => shape.isLocked)

@@ -210,6 +210,24 @@ const ControlTrigger = forwardRef<HTMLButtonElement, ControlTriggerProps>(functi
   )
 })
 
+/**
+ * The sections stacked above a control's own options, outermost last.
+ *
+ * WHY a chain rather than one `modeControl`: a shape's Stroke popover now
+ * carries three sections — thickness, line style, palette — and they are all
+ * the same relationship, each one placed `above` the next. Walking the chain
+ * here means a new edge section is one link in the model and no new renderer.
+ */
+function stackedModes(control: ContextualControl): ContextualControl[] {
+  const stack: ContextualControl[] = []
+  let mode = control.modePlacement === 'above' ? control.modeControl : undefined
+  while (mode) {
+    stack.unshift(mode)
+    mode = mode.modePlacement === 'above' ? mode.modeControl : undefined
+  }
+  return stack
+}
+
 function ControlPanel({
   control,
   editor,
@@ -220,7 +238,7 @@ function ControlPanel({
   popoverMode: ContextualPopoverMode
 }) {
   const mode = control.modeControl
-  const beside = mode && control.modePlacement === 'beside'
+  const beside = Boolean(mode) && control.modePlacement === 'beside'
   const options = control.automaticOption
     ? [control.automaticOption, ...control.options]
     : control.options
@@ -244,23 +262,30 @@ function ControlPanel({
       data-mode={mode ? control.modePlacement : undefined}
       data-testid={`systemsketch-appearance-panel-${control.id}`}
     >
-      {mode ? (
+      {(beside ? [mode!] : stackedModes(control)).map((section) => (
         <div
+          key={section.id}
           className={beside ? 'systemsketch-appearance__group' : 'systemsketch-appearance__mode'}
           role="group"
-          aria-label={mode.label}
+          aria-label={section.label}
+          data-mode-control={section.id}
+          data-mode-layout={section.layout}
         >
-          {mode.options.map((option) => (
+          {section.options.map((option) => (
             <OptionButton
               key={option.value}
-              control={mode}
+              control={section}
               option={option}
               editor={editor}
-              withLabel={!beside}
+              // The same rule the main option group uses: a `row` is icons
+              // only, anything else carries its name. That is what lets one
+              // registered control render as labelled chips on a shape and as
+              // a bare icon row beside a connector's line styles.
+              withLabel={!beside && section.layout !== 'row'}
             />
           ))}
         </div>
-      ) : null}
+      ))}
       {beside ? <span className="systemsketch-appearance__divider" aria-hidden="true" /> : null}
       <div
         className="systemsketch-appearance__options"

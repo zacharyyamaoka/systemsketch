@@ -1,14 +1,14 @@
 /**
- * A shape's edge: its own colour, and the one line style tldraw has no value
- * for.
+ * A shape's edge: its own colour, its thickness, and the one line style
+ * tldraw has no value for.
  *
  * FigJam paints a shape's fill and its edge separately — its Fill popover and
  * its Stroke popover each carry a palette — and SystemSketch needs a third
  * line style beside solid/dashed/dotted: the `async` packet cadence a cable
  * already draws (`connectionPresentation.ASYNC_PACKET_DASHARRAY`).
  *
- * Neither fits in a stock style prop, and both are deliberately kept out of
- * one:
+ * None of the three fits in a stock style prop, and all are deliberately kept
+ * out of one:
  *
  * - WHY meta, not a `StyleProp`: a StyleProp only reaches shapes whose util
  *   declares it, and `geo` is tldraw's own shape. Adding a prop to it would
@@ -22,6 +22,13 @@
  *   drawn with it. An async edge is therefore a `solid` dash wearing the
  *   packet cadence, which is also what makes it degrade to a plain outline
  *   anywhere but here.
+ * - WHY thickness is not the `size` style: stock tldraw derives a geo shape's
+ *   stroke width AND its label font size from the one `size` rung, so the
+ *   Font size list was silently the line-thickness control too — pick Extra
+ *   large for a title and the rectangle's outline jumps from 3.5px to 10px.
+ *   Zach's report ("it seems linked to the thickness of the text which is
+ *   bad!!!"). An edge thickness of its own is the only way to break that
+ *   coupling without forking the geo shape's schema.
  */
 import {
 	DefaultColorStyle,
@@ -44,15 +51,55 @@ export const ASYNC_LINE_VALUE = 'async'
 /** The stock dash a shape actually stores while it wears the async cadence. */
 export const ASYNC_BASE_DASH = 'solid'
 
+/** Where a remembered thickness rides between shapes — see `rememberStrokeWidth`. */
+const STROKE_WIDTH_INSTANCE_KEY = 'systemSketchStrokeWidth'
+
+/** The three rungs the Line style popover offers, Excalidraw's ladder. */
+export type StrokeWidthRung = 'thin' | 'medium' | 'thick'
+
+const STROKE_WIDTH_RUNGS: readonly StrokeWidthRung[] = ['thin', 'medium', 'thick']
+
+/**
+ * tldraw's own `STROKE_SIZES` × the default theme's `strokeWidth` (2): the
+ * width the engine paints a geo outline at for each `size` rung.
+ *
+ * WHY mirrored here: tldraw marks `STROKE_SIZES` `@internal` and does not
+ * export it, exactly as with the font tables in `customFontSize.ts`. The
+ * browser journey asserts rendered pixels, so an upstream change fails loudly
+ * rather than drifting.
+ */
+export const STOCK_STROKE_PX: Record<string, number | undefined> = {
+	s: 2, m: 3.5, l: 5, xl: 10,
+}
+
+/**
+ * The thickness each rung paints, in scene units.
+ *
+ * The ladder is anchored, not invented: `thin` is tldraw's own `s` width, and
+ * `medium` is exactly what every shape is already drawn at — so nothing on an
+ * existing board moves when the control appears, and an untouched rectangle
+ * reads truthfully as Medium instead of blank. `thick` is double medium,
+ * because a three-rung ladder is only useful if the top rung is visibly the
+ * top: tldraw's own `s`/`m`/`l` span just 2.5x end to end, which is why
+ * Excalidraw's own three (1 : 2 : 4) read as a ladder and those would not.
+ */
+export const STROKE_WIDTH_PX: Record<StrokeWidthRung, number> = {
+	thin: 2,
+	medium: 3.5,
+	thick: 7,
+}
+
 export interface SystemSketchStrokeMeta {
 	/** A palette colour name. Absent means the edge follows the shape's colour. */
 	color?: string
 	/** `async` only; absent means the stored `dash` is the whole story. */
 	pattern?: typeof ASYNC_LINE_VALUE
+	/** Scene units. Absent means the stock `size` rung still sets the width. */
+	width?: number
 }
 
-/** Which half of the edge a control writes. */
-export type StrokeMetaField = 'color' | 'pattern'
+/** Which part of the edge a control writes. */
+export type StrokeMetaField = 'color' | 'pattern' | 'width'
 
 /**
  * The two fields the edge model reads. Deliberately structural rather than
@@ -62,6 +109,8 @@ export type StrokeMetaField = 'color' | 'pattern'
 export interface ShapeLike {
 	meta?: Record<string, unknown>
 	props?: object
+	/** Present on real records only; the thickness model is the one reader. */
+	type?: string
 }
 
 function propOf(shape: ShapeLike, key: string): unknown {
@@ -78,7 +127,14 @@ export function readStrokeMeta(shape: ShapeLike): SystemSketchStrokeMeta {
 	if (!isRecord(value)) return {}
 	const color = typeof value.color === 'string' ? value.color : undefined
 	const pattern = value.pattern === ASYNC_LINE_VALUE ? ASYNC_LINE_VALUE : undefined
-	return { ...(color ? { color } : {}), ...(pattern ? { pattern } : {}) }
+	const width = typeof value.width === 'number' && Number.isFinite(value.width) && value.width > 0
+		? value.width
+		: undefined
+	return {
+		...(color ? { color } : {}),
+		...(pattern ? { pattern } : {}),
+		...(width !== undefined ? { width } : {}),
+	}
 }
 
 /**
@@ -94,7 +150,11 @@ export function writeStrokeMeta(
 	const next: SystemSketchStrokeMeta = { ...readStrokeMeta(shape) }
 	if (value === undefined) delete next[field]
 	else if (field === 'color') next.color = value
-	else next.pattern = ASYNC_LINE_VALUE
+	else if (field === 'width') {
+		const px = strokeWidthPxForRung(value)
+		if (px === undefined) delete next.width
+		else next.width = px
+	} else next.pattern = ASYNC_LINE_VALUE
 	const meta = { ...(shape.meta ?? {}) } as JsonObject
 	if (Object.keys(next).length === 0) delete meta[SYSTEMSKETCH_STROKE_META_KEY]
 	else meta[SYSTEMSKETCH_STROKE_META_KEY] = next as unknown as JsonObject
@@ -128,6 +188,89 @@ export function linePatternOf(shape: ShapeLike): string | undefined {
 
 export function isAsyncStroke(shape: ShapeLike): boolean {
 	return readStrokeMeta(shape).pattern === ASYNC_LINE_VALUE
+}
+
+/** The rung a control value names, or undefined for anything else. */
+export function strokeWidthPxForRung(value: string | undefined): number | undefined {
+	return value && value in STROKE_WIDTH_PX
+		? STROKE_WIDTH_PX[value as StrokeWidthRung]
+		: undefined
+}
+
+function scaleOf(shape: ShapeLike): number {
+	const scale = propOf(shape, 'scale')
+	return typeof scale === 'number' && Number.isFinite(scale) && scale > 0 ? scale : 1
+}
+
+/**
+ * Where a thickness override is actually painted.
+ *
+ * WHY a shape-type list rather than the broader `hasPaintedEdge`: the override
+ * rides `getCustomDisplayValues`, and only these four utils are configured to
+ * read it. A Block's cable carries a `dash` too, but its width is semantic —
+ * an effect cable is thicker than a data cable on purpose — so the broad
+ * predicate would offer a row whose paint the cable would silently ignore.
+ * The row reads nothing on a cable and is dropped, rather than lying.
+ */
+const STROKE_WIDTH_SHAPE_TYPES = new Set(['geo', 'draw', 'line', 'arrow'])
+
+export function hasAdjustableStrokeWidth(shape: ShapeLike): boolean {
+	return STROKE_WIDTH_SHAPE_TYPES.has(shape.type ?? '') && hasPaintedEdge(shape)
+}
+
+/**
+ * The thickness a shape is actually painted at, in scene units — the
+ * override, else the width its stock `size` rung derives.
+ *
+ * The stock reading is multiplied by `scale` because tldraw multiplies its own
+ * display value by it, so this is what is on screen rather than what is stored.
+ */
+export function strokeWidthPxOf(shape: ShapeLike): number | undefined {
+	if (!hasAdjustableStrokeWidth(shape)) return undefined
+	const override = readStrokeMeta(shape).width
+	if (override !== undefined) return override
+	const size = propOf(shape, 'size')
+	const base = typeof size === 'string' ? STOCK_STROKE_PX[size] : undefined
+	return base === undefined ? undefined : base * scaleOf(shape)
+}
+
+/**
+ * What the thickness row shows: the rung whose width is being painted, or the
+ * raw number when none is — a shape still on tldraw's `xl` rung reads `10`,
+ * and no row is check-marked, rather than a rung claiming a width it does not
+ * have.
+ */
+export function strokeWidthOf(shape: ShapeLike): string | undefined {
+	const px = strokeWidthPxOf(shape)
+	if (px === undefined) return undefined
+	const rung = STROKE_WIDTH_RUNGS.find(
+		(name) => Math.abs(STROKE_WIDTH_PX[name] - px) < 0.001,
+	)
+	return rung ?? String(Math.round(px * 100) / 100)
+}
+
+/**
+ * The unscaled width to hand `getCustomDisplayValues`, or undefined to leave
+ * tldraw's own size-derived one alone.
+ *
+ * WHY divided by `scale`: tldraw multiplies the display value by the shape's
+ * `scale`, and this app moves `scale` to reach an exact font size
+ * (`customFontSize.ts`). Dividing here is what makes a chosen thickness
+ * survive a text-size change — which is the entire point of the control.
+ */
+export function strokeWidthDisplayValue(shape: ShapeLike): number | undefined {
+	const width = readStrokeMeta(shape).width
+	return width === undefined ? undefined : width / scaleOf(shape)
+}
+
+/**
+ * The one display value a thickness override contributes, ready to spread into
+ * any `getCustomDisplayValues` result — geo, draw, line and arrow all name
+ * this field the same way, which is what lets one control paint four shapes.
+ */
+export function strokeWidthDisplay(shape: ShapeLike): { strokeWidth?: number } {
+	const width = strokeWidthDisplayValue(shape)
+	return width === undefined ? {} : { strokeWidth: width }
 }
 
 /**
@@ -212,6 +355,114 @@ export function applyLinePattern(editor: Editor, value: string): void {
 			})),
 		)
 	})
+}
+
+/**
+ * Apply a thickness rung to every width-bearing shape in the selection, and
+ * remember it for the next one.
+ *
+ * WHY the write is not `setStyleForSelectedShapes`: thickness lives in meta,
+ * for the reasons at the top of this file. `editor.updateShapes` is the same
+ * one-history-step shape `applyStrokeMeta` uses, so undo takes the whole row
+ * back at once.
+ */
+export function applyStrokeWidth(editor: Editor, rung: string): void {
+	const px = strokeWidthPxForRung(rung)
+	if (px === undefined) return
+	editor.markHistoryStoppingPoint('appearance')
+	editor.run(() => {
+		rememberStrokeWidth(editor, px)
+		const shapes = editor.getSelectedShapes().filter(hasAdjustableStrokeWidth)
+		if (shapes.length === 0) return
+		editor.updateShapes(
+			shapes.map((shape) => ({
+				id: shape.id,
+				type: shape.type,
+				meta: writeStrokeMeta(shape, 'width', rung),
+			})),
+		)
+	})
+}
+
+/**
+ * Freeze the thickness a selection is currently painted at, before something
+ * else moves it.
+ *
+ * WHY this exists: Zach's actual report was not "there is no thickness
+ * control", it was "it seems linked to the thickness of the text which is
+ * bad!!!" — stock tldraw derives a geo shape's stroke width AND its label font
+ * size from the one `size` rung, so choosing Extra large for a title jumped
+ * the outline from 3.5px to 10px. Adding a control does not fix that on its
+ * own; the Font size write has to stop dragging the outline with it. Pinning
+ * the CURRENT painted width first means the type change is visibly a type
+ * change, and the thickness row still reads exactly what it read before.
+ *
+ * Only shapes with no thickness of their own are touched — a chosen rung is
+ * already immune — so this converges rather than rewriting meta every time.
+ */
+export function pinStrokeWidth(editor: Editor): void {
+	const updates = editor.getSelectedShapes()
+		.filter((shape) => hasAdjustableStrokeWidth(shape) && readStrokeMeta(shape).width === undefined)
+		.flatMap((shape) => {
+			const px = strokeWidthPxOf(shape)
+			if (px === undefined) return []
+			const meta = { ...(shape.meta ?? {}) } as JsonObject
+			const existing = meta[SYSTEMSKETCH_STROKE_META_KEY]
+			meta[SYSTEMSKETCH_STROKE_META_KEY] = {
+				...(isRecord(existing) ? (existing as JsonObject) : {}),
+				width: px,
+			}
+			return [{ id: shape.id, type: shape.type, meta }]
+		})
+	if (updates.length > 0) editor.updateShapes(updates)
+}
+
+/**
+ * tldraw's `stylesForNextShape` for a value that is not a style.
+ *
+ * WHY the instance record's own `meta`: there is no `setMetaForNextShapes`,
+ * and a chosen thickness that the next rectangle silently forgets would read
+ * as broken beside Colour and Line style, which both persist. The instance
+ * record is the same place tldraw keeps its own next-shape memory.
+ */
+function rememberStrokeWidth(editor: Editor, px: number): void {
+	const meta = { ...editor.getInstanceState().meta }
+	meta[STROKE_WIDTH_INSTANCE_KEY] = px
+	editor.updateInstanceState({ meta })
+}
+
+/** The thickness the next drawn shape will take, if one has been chosen. */
+export function nextStrokeWidth(editor: Editor): number | undefined {
+	const value = editor.getInstanceState().meta[STROKE_WIDTH_INSTANCE_KEY]
+	return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined
+}
+
+/**
+ * Give a freshly created shape the remembered thickness.
+ *
+ * `getInitialMetaForShape` is tldraw's own seam for exactly this, and its
+ * result is spread UNDER the shape's own meta — so a duplicate, a paste, and
+ * a detached composite all keep the thickness they were carrying, and only a
+ * genuinely new shape picks up the remembered one.
+ */
+export function installStrokeWidthDefault(editor: Editor): () => void {
+	const stock = editor.getInitialMetaForShape.bind(editor)
+	editor.getInitialMetaForShape = (shape) => {
+		const base = stock(shape)
+		const px = nextStrokeWidth(editor)
+		if (px === undefined || !hasAdjustableStrokeWidth(shape)) return base
+		const existing = base[SYSTEMSKETCH_STROKE_META_KEY]
+		return {
+			...base,
+			[SYSTEMSKETCH_STROKE_META_KEY]: {
+				...(isRecord(existing) ? (existing as JsonObject) : {}),
+				width: px,
+			},
+		}
+	}
+	return () => {
+		editor.getInitialMetaForShape = stock
+	}
 }
 
 /**

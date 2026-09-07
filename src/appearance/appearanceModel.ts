@@ -82,7 +82,6 @@ const STYLE_BY_KIND: Partial<Record<AppearanceControlId, StyleProp<string>>> = {
   // a bespoke Code-only control.
   codeLanguage: CodeLanguageStyle as StyleProp<string>,
   size: DefaultSizeStyle as StyleProp<string>,
-  weight: DefaultSizeStyle as StyleProp<string>,
   font: DefaultFontStyle as StyleProp<string>,
   align: DefaultHorizontalAlignStyle as StyleProp<string>,
   verticalAlign: DefaultVerticalAlignStyle as StyleProp<string>,
@@ -147,26 +146,62 @@ function strokeColorControl(styles: ReadonlySharedStyleMap): AppearanceControl |
   const colorStyle = DefaultColorStyle as StyleProp<string>
   const color = styles.get(colorStyle) ?? { type: 'mixed' as const }
   const control = bindStyleControl('strokeColor', colorStyle, color)
-  control.modeControl = bindStyleControl('lineStyle', dashStyle, dash)
-  control.modeControl.layout = 'chips'
+  control.modeControl = lineStyleWithThickness(dashStyle, dash)
   control.modePlacement = 'above'
   return control
 }
 
-/** A connector's line style is the same options with labels hidden and weight beside it. */
+/**
+ * The Stroke popover's stack: thickness, then line style, then the palette.
+ *
+ * WHY thickness rides ABOVE line style rather than beside the palette: all
+ * three answer "what does this edge look like", which is why FigJam keeps
+ * them in one popover — and it is the layout Zach drew. The renderer walks
+ * this `above` chain, so a new edge section is a link here and no new surface.
+ * The reading is filled in by `withEdgeValues`, which also drops the row when
+ * the selection holds nothing that could paint it.
+ */
+function lineStyleWithThickness(
+  dashStyle: StyleProp<string>,
+  dash: SharedStyle<string>,
+): AppearanceControl {
+  const lineStyle = bindStyleControl('lineStyle', dashStyle, dash)
+  lineStyle.layout = 'chips'
+  lineStyle.modeControl = strokeWidthControl()
+  lineStyle.modePlacement = 'above'
+  return lineStyle
+}
+
+/**
+ * A connector's line style: the same options with the labels hidden and the
+ * same thickness row beside it.
+ *
+ * WHY the identical control rather than a connector-only weight: Zach's rule
+ * for these menus — "in the spirit of the modular composable contextual menu,
+ * all the icons by construction must be the same. In this case we hide the
+ * color selector and hide the labels and then put the things side by side
+ * instead of stacked on top of each other." The composition differs; the
+ * vocabulary, glyphs and write path do not.
+ */
 function connectorLineStyleControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefined {
   const dashStyle = DefaultDashStyle as StyleProp<string>
   const dash = styles.get(dashStyle)
   if (!dash) return undefined
   const control = bindStyleControl('lineStyle', dashStyle, dash)
   control.layout = 'row'
-  const sizeStyle = DefaultSizeStyle as StyleProp<string>
-  const size = styles.get(sizeStyle)
-  if (size) {
-    control.modeControl = bindStyleControl('weight', sizeStyle, size)
-    control.modePlacement = 'beside'
-  }
+  control.modeControl = strokeWidthControl()
+  control.modePlacement = 'beside'
   return control
+}
+
+/** The one thickness control, before `withEdgeValues` fills in its reading. */
+function strokeWidthControl(): AppearanceControl {
+  return {
+    ...CONTEXTUAL_CONTROL_REGISTRY.strokeWidth,
+    id: 'strokeWidth',
+    kind: 'strokeWidth',
+    value: { type: 'mixed' },
+  }
 }
 
 function translateShared(
@@ -257,12 +292,14 @@ export function buildAppearanceControls(
         continue
       }
       // Freehand strokes have line style but no separately paintable edge.
+      // They still get the thickness row above the chips: it is the same edge
+      // concept and the same paint seam, only without a palette under it.
       const dashStyle = DefaultDashStyle as StyleProp<string>
       const dash = styles.get(dashStyle)
-      if (dash) controls.push(bindStyleControl('lineStyle', dashStyle, dash))
+      if (dash) controls.push(lineStyleWithThickness(dashStyle, dash))
       continue
     }
-    if (kind === 'fill' || kind === 'weight') continue
+    if (kind === 'fill' || kind === 'strokeWidth') continue
     const style = STYLE_BY_KIND[kind]
     if (!style) continue
     const value = styles.get(style)
@@ -284,6 +321,7 @@ export function buildAppearanceControls(
 export interface EdgeValues {
   color: string | null
   pattern: string | null
+  width: string | null
 }
 
 export const EDGE_MIXED = '\u0000mixed'
@@ -293,19 +331,36 @@ function edgeShared(value: string | null): SharedStyle<string> | undefined {
   return value === EDGE_MIXED ? { type: 'mixed' } : { type: 'shared', value }
 }
 
-/** Replace stock fallbacks with the edge values actually stored on selected shapes. */
+/**
+ * Replace stock fallbacks with the edge values actually stored on selected
+ * shapes, all the way down the stacked/beside chain.
+ *
+ * A section backed by a StyleProp keeps its stock reading when the selection
+ * has no meta of its own to report — that is the fallback the Line style chips
+ * have always relied on. A section backed ONLY by meta has no such fallback,
+ * so a null reading means nothing in the selection could carry it and the
+ * section is dropped, whatever it was carrying spliced up in its place. That
+ * is what keeps the thickness row off a Block cable, whose width is semantic
+ * and whose painter would ignore the override.
+ */
 export function withEdgeValues(
   control: AppearanceControl,
   values: EdgeValues,
 ): AppearanceControl {
   const mode = control.modeControl
-  const modeValue = mode?.meta ? edgeShared(values[mode.meta]) : undefined
+  const resolved = mode ? withEdgeValues(mode, values) : undefined
+  const unpaintable = resolved !== undefined
+    && resolved.style === undefined
+    && resolved.meta !== undefined
+    && values[resolved.meta] === null
+  const nextMode = unpaintable ? resolved.modeControl : resolved
   const own = control.meta ? edgeShared(values[control.meta]) : undefined
-  if (!modeValue && !own) return control
+  if (nextMode === mode && !own) return control
   return {
     ...control,
     ...(own ? { value: own } : {}),
-    ...(mode && modeValue ? { modeControl: { ...mode, value: modeValue } } : {}),
+    modeControl: nextMode,
+    ...(nextMode ? {} : { modePlacement: undefined }),
   }
 }
 
@@ -334,9 +389,16 @@ export function triggerLabel(control: AppearanceControl): string {
     if (selected) return selected.label.toLowerCase()
     return unofferedValue(candidate) ?? MIXED_LABEL.toLowerCase()
   }
-  const stacked = control.trigger === 'icon' && control.modePlacement === 'above'
+  // Every section a stacked icon trigger hides gets named, deepest first, so
+  // the one label says the whole state the icon cannot show.
+  const stack: AppearanceControl[] = []
+  let mode = control.trigger === 'icon' && control.modePlacement === 'above'
     ? control.modeControl
     : undefined
-  const value = stacked ? `${valueName(stacked)} ${valueName(control)}` : valueName(control)
+  while (mode) {
+    stack.unshift(mode)
+    mode = mode.modePlacement === 'above' ? mode.modeControl : undefined
+  }
+  const value = [...stack, control].map(valueName).join(' ')
   return `${control.label}, ${value}`
 }

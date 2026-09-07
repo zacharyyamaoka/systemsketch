@@ -25,7 +25,12 @@ import type { CSSProperties } from 'react'
 
 import { withAsyncEdge } from './appearance/asyncEdge'
 import { fillPaintFor } from './appearance/fillPaint'
-import { readStrokeMeta, resolveStrokeHex } from './appearance/strokeMeta'
+import {
+	readStrokeMeta,
+	resolveStrokeHex,
+	strokeWidthDisplay,
+	strokeWidthDisplayValue,
+} from './appearance/strokeMeta'
 
 export const SYSTEMSKETCH_PRIMITIVE_STYLE_META_KEY = 'systemSketchPrimitiveStyle'
 export const SYSTEMSKETCH_ROUNDED_RECT_GEO = 'systemsketch-rounded-rect'
@@ -193,8 +198,16 @@ export function systemSketchGeoDisplayValues(
 	const edge = theme && colorMode
 		? resolveStrokeHex(theme, colorMode, readStrokeMeta(shape).color)
 		: undefined
+	// `strokeRoundness` rides with the width because tldraw defines it as
+	// `strokeWidth * 2`; left behind, a `draw`-dashed outline would round its
+	// corners for a width it is no longer drawn at.
+	const width = strokeWidthDisplayValue(shape)
 	const values = { ...fill, ...detached }
-	return edge ? { ...values, strokeColor: edge } : values
+	return {
+		...values,
+		...(edge ? { strokeColor: edge } : {}),
+		...(width === undefined ? {} : { strokeWidth: width, strokeRoundness: width * 2 }),
+	}
 }
 
 /** Exact Block typography on otherwise normal, editable stock text shapes. */
@@ -232,18 +245,23 @@ class SystemSketchTextShapeUtil extends ConfiguredSystemSketchTextShapeUtil {
 const SystemSketchLineShapeUtil = LineShapeUtil.configure({
 	getCustomDisplayValues(_editor, shape: TLLineShape) {
 		const style = readSystemSketchPrimitiveStyle(shape)
-		if (style?.kind !== 'line') return {}
+		// A chosen thickness is more specific than the paint a composite was
+		// frozen with, the same order the geo values resolve in.
+		const width = strokeWidthDisplayValue(shape)
+		if (style?.kind !== 'line') return width === undefined ? {} : { strokeWidth: width }
 		return {
 			strokeColor: style.strokeColor,
-			strokeWidth: style.strokeWidth,
+			strokeWidth: width ?? style.strokeWidth,
 		}
 	},
 })
 
 /** A closed freehand stroke fills with the same three fills a rectangle has. */
 const SystemSketchDrawShapeUtil = DrawShapeUtil.configure({
-	getCustomDisplayValues: (_editor, shape, theme, colorMode) =>
-		fillPaintFor(theme.colors[colorMode] as never, shape.props.fill, shape.props.color),
+	getCustomDisplayValues: (_editor, shape, theme, colorMode) => ({
+		...fillPaintFor(theme.colors[colorMode] as never, shape.props.fill, shape.props.color),
+		...strokeWidthDisplay(shape),
+	}),
 })
 
 /**

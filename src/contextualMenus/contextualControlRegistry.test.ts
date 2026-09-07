@@ -16,12 +16,26 @@ const shared = (value: string) => ({ type: 'shared' as const, value })
 describe('contextual control composition', () => {
   it('keeps each control vocabulary entry in one registry', () => {
     expect(Object.keys(CONTEXTUAL_CONTROL_REGISTRY)).toEqual([
-      'geo', 'color', 'fill', 'lineStyle', 'strokeColor', 'codeLanguage', 'size', 'weight', 'font', 'align',
+      'geo', 'color', 'fill', 'lineStyle', 'strokeColor', 'strokeWidth', 'codeLanguage', 'size', 'font', 'align',
       'verticalAlign', 'lineShape',
       'arrowheadStart', 'arrowheadEnd', 'bold', 'addText',
     ])
     expect(CONTEXTUAL_CONTROL_REGISTRY.font.options.map((option) => option.label))
       .toEqual(['Simple', 'Bookish', 'Technical', 'Scribbled'])
+  })
+
+  it('registers thickness once: the shape row and the connector row are one control', () => {
+    // The connector used to own a `weight` kind of its own — two rungs writing
+    // the stock `size` style — beside a shape that had no thickness control at
+    // all. Zach's rule: "all the icons by construction must be the same", so
+    // there is ONE registered vocabulary and the surfaces differ only in how
+    // they compose it.
+    const thicknessLabelled = Object.values(CONTEXTUAL_CONTROL_REGISTRY)
+      .filter((definition) => definition.label === 'Line thickness')
+    expect(thicknessLabelled).toHaveLength(1)
+    expect(thicknessLabelled[0].options.map((option) => option.value))
+      .toEqual(['thin', 'medium', 'thick'])
+    expect(thicknessLabelled[0].meta).toBe('width')
   })
 
   it('registers Line shape once: one concept, one label, one vocabulary', () => {

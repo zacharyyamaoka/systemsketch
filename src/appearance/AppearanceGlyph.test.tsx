@@ -32,14 +32,26 @@ function markup(subject: ContextualControl, value: string | undefined): string {
 
 describe('glyph dispatch is the registry field, not the kind', () => {
   it('two kinds naming one family draw identically', () => {
-    // `weight` reuses the `size` family: the whole point of the field is that
-    // sharing a look is one word of registry data, not a renderer branch.
-    // (Compared at `s`, a value neither kind has a traced icon for — the
-    // per-kind FigJam icon data stays per kind, only the DRAWING is shared.)
-    expect(CONTEXTUAL_CONTROL_REGISTRY.weight.glyph).toBe('size')
-    expect(CONTEXTUAL_CONTROL_REGISTRY.size.glyph).toBe('size')
-    expect(markup(control('weight'), 's'))
-      .toBe(markup(control('size', { layout: 'row' }), 's'))
+    // The whole point of the field is that sharing a look is one word of
+    // registry data, not a renderer branch. (Compared at a value neither kind
+    // has a traced icon for — the per-kind FigJam icon data stays per kind,
+    // only the DRAWING is shared.)
+    const refamilied = control('verticalAlign', { glyph: 'align' as ContextualGlyphFamily })
+    expect(markup(refamilied, 'weird')).toBe(markup(control('align'), 'weird'))
+  })
+
+  it('draws one thickness ladder however the surface composes it', () => {
+    // Zach's rule for the connector row: "all the icons by construction must
+    // be the same". The shape's stacked chips and the connector's bare row are
+    // ONE registered control, so the same value can only draw one way — the
+    // layout differs, the glyph cannot.
+    const stacked = control('strokeWidth', { layout: 'row' })
+    const beside = control('strokeWidth', { layout: 'row', id: 'connectorThickness' })
+    expect(markup(stacked, 'thick')).toBe(markup(beside, 'thick'))
+    // Each rung is drawn at the width it paints: 2 / 3.5 / 7 scene units in a
+    // 20-unit box shown at 24px.
+    expect(markup(stacked, 'thin')).toContain('height="1.6666666666666667"')
+    expect(markup(stacked, 'thick')).toContain('height="5.833333333333334"')
   })
 
   it('swapping a control\'s family swaps its drawing, kind untouched', () => {

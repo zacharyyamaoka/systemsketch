@@ -361,7 +361,14 @@ class StockBoundaryTests(unittest.TestCase):
         arrow_util = (
             PROJECT_ROOT / "src" / "systemSketchArrow.tsx"
         ).read_text(encoding="utf-8")
-        self.assertIn("class SystemSketchArrowShapeUtil extends ArrowShapeUtil", arrow_util)
+        # Still tldraw's own arrow: `configure` returns a subclass of
+        # ArrowShapeUtil, so the thickness override rides the published
+        # display-value seam rather than a reimplemented renderer.
+        self.assertIn("ArrowShapeUtil.configure({", arrow_util)
+        self.assertIn("getCustomDisplayValues: (_editor, shape) => strokeWidthDisplay(shape)", arrow_util)
+        self.assertIn(
+            "class SystemSketchArrowShapeUtil extends ConfiguredArrowShapeUtil", arrow_util
+        )
         self.assertIn("return super.onHandleDrag(shape, info)", arrow_util)
         self.assertIn("return super.component(shape)", arrow_util)
         self.assertIn("return super.toSvg(shape, ctx)", arrow_util)

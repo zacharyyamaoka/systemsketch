@@ -109,7 +109,11 @@ async function readMenu(page) {
       label: b.querySelector('.systemsketch-appearance__label')?.textContent ?? null,
       // Which glyph this option drew: a traced FigJam icon, or one of ours.
       glyph: b.querySelector('[data-icon]')?.dataset.icon
-        ?? (b.querySelector('[data-dash]') ? 'dash/' + b.querySelector('[data-dash]').dataset.dash : null),
+        ?? (b.querySelector('[data-dash]') ? 'dash/' + b.querySelector('[data-dash]').dataset.dash : null)
+        ?? (b.querySelector('[data-width]')
+          ? 'width/' + b.querySelector('[data-width]').dataset.width
+            + '@' + b.querySelector('[data-width]').getAttribute('height')
+          : null),
       ...box(b), radius: getComputedStyle(b).borderRadius, background: getComputedStyle(b).backgroundColor,
       fontSize: b.querySelector('.systemsketch-appearance__label')
         ? parseFloat(getComputedStyle(b.querySelector('.systemsketch-appearance__label')).fontSize) : null,
@@ -159,6 +163,14 @@ async function readMenu(page) {
         background: getComputedStyle(panel).backgroundColor,
         radius: getComputedStyle(panel).borderRadius,
         modeRow: [...panel.querySelectorAll('.systemsketch-appearance__mode .systemsketch-appearance__option')].map(cell),
+        // A stacked popover can now carry several sections (thickness over
+        // line style over the palette), so each is readable on its own.
+        modeSections: Object.fromEntries(
+          [...panel.querySelectorAll('.systemsketch-appearance__mode')].map((section) => [
+            section.dataset.modeControl,
+            [...section.querySelectorAll('.systemsketch-appearance__option')].map(cell),
+          ]),
+        ),
         group: [...panel.querySelectorAll('.systemsketch-appearance__group .systemsketch-appearance__option')].map(cell),
         divider: box(panel.querySelector('.systemsketch-appearance__divider')),
         grid: box(panel.querySelector('.systemsketch-appearance__options')),
@@ -261,6 +273,7 @@ const geometry = {}
 
 /** A shape's Line style row, kept so the connector's can be compared to it. */
 let shapeLineStyle = null
+let shapeThickness = null
 
 async function saveScreenshot(page, path) {
   const capture = await page.send('Page.captureScreenshot', { format: 'png' })
@@ -518,13 +531,18 @@ async function main() {
     const stroke = await openControl(page, 'strokeColor')
     assert.equal(stroke.panel.layout, 'swatches')
     assert.equal(stroke.panel.mode, 'above')
-    assert.deepEqual(stroke.panel.modeRow.map((c) => c.value),
+    assert.deepEqual(stroke.panel.modeSections.lineStyle.map((c) => c.value),
       ['solid', 'dashed', 'dotted', 'async', 'none'])
-    assert.ok(stroke.panel.modeRow.find((c) => c.value === 'solid').checked,
+    assert.ok(stroke.panel.modeSections.lineStyle.find((c) => c.value === 'solid').checked,
       'a freshly drawn shape is seeded solid, so the menu must show it as chosen')
+    // ...with the thickness rungs stacked above those again: three sections in
+    // one popover, thickness → line style → palette.
+    assert.deepEqual(stroke.panel.modeSections.strokeWidth.map((c) => c.value),
+      ['thin', 'medium', 'thick'])
     assert.equal(stroke.panel.options.length, 21, 'the edge gets the same palette the fill has')
     // Held for the connector, which must show this exact row with the text off.
-    shapeLineStyle = stroke.panel.modeRow.map((c) => ({ value: c.value, glyph: c.glyph }))
+    shapeLineStyle = stroke.panel.modeSections.lineStyle.map((c) => ({ value: c.value, glyph: c.glyph }))
+    shapeThickness = stroke.panel.modeSections.strokeWidth.map((c) => ({ value: c.value, glyph: c.glyph }))
     // No 22nd cell: a custom hex writes tldraw's own colour style, which is
     // the fill's. The edge takes palette names only, for now.
     assert.equal(stroke.panel.custom, null)
@@ -610,9 +628,17 @@ async function main() {
     assert.equal(connector.triggers.find((t) => t.control === 'lineStyle').icon, 'trigger/Line style')
     const lineStyle = await openControl(page, 'lineStyle')
     assert.equal(lineStyle.panel.mode, 'beside')
-    // Two weights, as FigJam has: `m` is what everything is drawn at, `xl` is
-    // the thick rung beside it.
-    assert.deepEqual(lineStyle.panel.group.map((c) => c.value), ['m', 'xl'])
+    // The SHAPE's thickness control, beside instead of above and with the
+    // labels off — Zach's rule that a connector's little row is the shape's
+    // control with the text toggled off, "all the icons by construction must
+    // be the same". It used to be a connector-only Weight writing the stock
+    // `size` style, which also drove label typography.
+    assert.deepEqual(
+      lineStyle.panel.group.map((c) => ({ value: c.value, glyph: c.glyph })),
+      shapeThickness,
+      'a connector shows the shape\'s thickness rungs, labels off')
+    assert.ok(lineStyle.panel.group.every((c) => !c.label),
+      'and shows them bare: no labels beside the rungs')
     // The shape's own row with the text turned off — same options, same
     // glyphs, in the same order. Before they were two lists and two glyph
     // paths, and the connector's Dotted option was being drawn by the
@@ -629,17 +655,23 @@ async function main() {
     assert.ok([...lineStyle.panel.group, ...lineStyle.panel.options]
       .every((c) => c.w === FIGJAM.cell && c.h === FIGJAM.cell && c.radius === FIGJAM.cellRadius))
     const widthBefore = lineStyle.strokeWidth
-    await pickOption(page, 'lineStyle', 'xl')
+    await pickOption(page, 'lineStyle', 'thin')
     const weighted = await readMenu(page)
-    assert.ok(weighted.panel, 'the popover stays open after a weight')
-    assert.ok(weighted.panel.group.find((c) => c.value === 'xl').checked)
-    assert.equal(weighted.panel.group.find((c) => c.value === 'xl').background, FIGJAM.cellChosen)
-    assert.notEqual(weighted.strokeWidth, widthBefore, 'the weight repaints the stroke')
+    assert.ok(weighted.panel, 'the popover stays open after a thickness')
+    assert.ok(weighted.panel.group.find((c) => c.value === 'thin').checked)
+    assert.equal(weighted.panel.group.find((c) => c.value === 'thin').background, FIGJAM.cellChosen)
+    assert.notEqual(weighted.strokeWidth, widthBefore, 'the thickness repaints the stroke')
+    // The exact rung, on the canvas: an arrowhead sizes off this same value,
+    // so this is what proves the override reaches tldraw's own display seam
+    // rather than only the menu.
+    assert.equal(Number(weighted.strokeWidth), 2, 'thin paints tldraw\'s own `s` width')
+    await pickOption(page, 'lineStyle', 'thick')
+    assert.equal(Number((await readMenu(page)).strokeWidth), 7, 'thick paints double medium')
     await frame(page, 'lineStyle')
     await pickOption(page, 'lineStyle', 'dashed')
     assert.equal((await readMenu(page)).labels.lineStyle, 'Line style, dashed')
     await closeControl(page, 'lineStyle')
-    pass('a connector\'s Line style holds weight beside dash in one 44px popover, and both write through')
+    pass('a connector\'s Line style holds the shared thickness beside dash in one 44px popover, and both write through')
 
     // 15. The line shape must sit between the two ends. Stock tldraw stores a
     //     straight arrow as an arc with zero bend; this control exposes that

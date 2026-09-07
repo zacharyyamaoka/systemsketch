@@ -1,0 +1,68 @@
+{
+  "checks": [
+    "the shape Stroke popover stacks thickness over line style over the palette",
+    "each thickness rung repaints the rectangle at its own width",
+    "changing the font size grows the label and leaves the outline alone",
+    "a chosen thickness carries to the next shape drawn",
+    "a connector gets the same thickness control beside its line styles, labels off",
+    "the lab composes the shape surface out of levers, using the real renderer",
+    "switching preset recomposes the same registry into the connector surface",
+    "a lever added a control and then folded it into its neighbour, live",
+    "the physical journey produced zero local console errors"
+  ],
+  "consoleErrors": [],
+  "freshStrokeWidth": 3.5,
+  "rungs": {
+    "thick": 7,
+    "thin": 2
+  },
+  "fontSize": {
+    "beforeLabelPx": 22,
+    "afterLabelPx": 32,
+    "beforeStrokeWidth": 7,
+    "afterStrokeWidth": 7,
+    "stockWouldHavePainted": 10
+  },
+  "connector": {
+    "rungs": [
+      "thin",
+      "medium",
+      "thick"
+    ],
+    "labelled": false,
+    "strokeWidth": 2
+  },
+  "lab": {
+    "shapeTriggers": [
+      "geo",
+      "color",
+      "strokeColor",
+      "font",
+      "size",
+      "align",
+      "verticalAlign"
+    ],
+    "connectorTriggers": [
+      "color",
+      "lineStyle",
+      "arrowheadStart",
+      "lineShape",
+      "arrowheadEnd"
+    ],
+    "leverAdded": [
+      "color",
+      "lineStyle",
+      "arrowheadStart",
+      "lineShape",
+      "arrowheadEnd",
+      "geo"
+    ],
+    "leverStacked": [
+      "color",
+      "lineStyle",
+      "arrowheadStart",
+      "lineShape",
+      "arrowheadEnd"
+    ]
+  }
+}
