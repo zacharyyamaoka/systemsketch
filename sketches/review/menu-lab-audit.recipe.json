@@ -1,0 +1,71 @@
+{
+  "feature": "Menu lab audit — the Code pill, composed two ways",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "shapes": [
+    {
+      "id": "code-subject",
+      "type": "code",
+      "x": 520,
+      "y": 300,
+      "props": {
+        "w": 566,
+        "h": 220,
+        "code": "def widen(edge, rung):\n    \"\"\"Thickness is an edge fact, not a font fact.\"\"\"\n    return edge.with_width(RUNGS[rung])",
+        "language": "python",
+        "size": "m",
+        "showLineNumbers": true,
+        "characterWidth": 48
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click this Code block. Its selection pill has exactly two dropdowns — Language and Font size — beside the Code-only rows. No Line thickness row: a Code block's frame is chrome, not an edge you paint.",
+      "x": 520,
+      "y": 32,
+      "w": 566,
+      "h": 188,
+      "target": {
+        "shapeId": "code-subject",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Open the ☰ main menu → Settings → Menu lab. Read the five preset card NAMES: Shape, Connector, Block title, Code block, Empty. Until this fix they painted near-white on near-white — only the grey descriptions were readable.",
+      "x": -130,
+      "y": 300,
+      "w": 530,
+      "h": 168,
+      "target": {
+        "shapeId": "code-subject",
+        "anchor": "left"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Click the \"Code block\" preset. The composed menu should be the same two controls you just saw on the real pill — and the printed recipe should read items: ['codeLanguage', 'size'].",
+      "x": -130,
+      "y": 520,
+      "w": 530,
+      "h": 144
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Every preset name is legible, and the lab's Code block preset composes Language + Font size — the same two controls the real Code block's pill shows, with no Line thickness row anywhere.",
+      "x": 520,
+      "y": 604,
+      "w": 620,
+      "h": 150
+    }
+  ]
+}
