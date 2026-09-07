@@ -106,6 +106,14 @@ export function edgePortPoint(
 
 /** Clearance between a horizontal rail's socket and its inward label. */
 export const RAIL_LABEL_GAP_PX = 12
+/**
+ * Breathing room kept at each END of a wall, in pixels.
+ *
+ * Constant on purpose: a proportional margin grows with the card, which is what
+ * left a tall component's sockets huddled in the middle of its side walls.
+ */
+export const RAIL_END_MARGIN_PX = 18
+
 /** Clear space kept between two neighbouring labels on the same wall. */
 export const RAIL_LABEL_GUTTER_PX = 10
 /**
@@ -793,7 +801,29 @@ function placeHorizontalRails(
 			t: portRailT(entry.port) ?? (index + 1) / (lane.length + 1),
 		}))
 		withFraction.sort((a, b) => a.t - b.t)
-		const spread = withFraction.map((_entry, index) => (index + 1) / (lane.length + 1))
+		/**
+		 * Sockets run from one end of the wall to the other, keeping a CONSTANT
+		 * margin at each end rather than a proportional one.
+		 *
+		 * WHY (Zach, 2026-09-07): "there's too much padding between the top and
+		 * bottom port names and the first port on the edges… that space should
+		 * remain constant as you resize it vertically, and it should remain
+		 * fairly small. We definitely want to maximise the edge space." An even
+		 * i/(n+1) spread leaves a gap of one whole slot at each end, so the
+		 * padding GREW with the card and three sockets used barely half the wall.
+		 * A fixed margin keeps the same visual breathing room at any height and
+		 * hands the rest of the edge to the ports.
+		 *
+		 * One socket still lands dead centre; that rule came first and stands.
+		 */
+		const spread = withFraction.map((_entry, index) => {
+			if (withFraction.length === 1) return 0.5
+			const span = edge === 'left' || edge === 'right'
+				? Math.max(1, usableSide.bottom - usableSide.top)
+				: Math.max(1, width)
+			const margin = Math.min(RAIL_END_MARGIN_PX / span, 0.45)
+			return margin + (index / (withFraction.length - 1)) * (1 - margin * 2)
+		})
 		withFraction.forEach(({ port, side }, index) => {
 			const t = spread[index]
 			const vertical = edge === 'left' || edge === 'right'
@@ -1347,9 +1377,15 @@ function computeBlockLayout(
 		h: Math.max(0, height - headerHeight),
 	}
 
-	visibleHeaderInputs.forEach((port, index) => {
+	// WHY gated: in the communication lens EVERY socket is placed by
+	// `placeHorizontalRails`, which is the one path that applies the summary
+	// filter. A header input placed here bypassed it entirely and painted a
+	// column of dots down the left edge for ports the lens had decided not to
+	// show — visible, and worse, hit-testable.
+	const headerInputsToPlace = lens === 'communication' ? [] : visibleHeaderInputs
+	headerInputsToPlace.forEach((port, index) => {
 		const y = headerHeight / 2 + (
-			index - (visibleHeaderInputs.length - 1) / 2
+			index - (headerInputsToPlace.length - 1) / 2
 		) * HEADER_PORT_PITCH_PX
 		placed.push({
 			port,
@@ -1565,8 +1601,10 @@ function computeBlockLayout(
 
 	// The top edge, last: the box is only now known, and an effect port is placed
 	// by its `edgeT` fraction along it — the port has no slot, so a cable dragged
-	// somewhere else moves the fraction and the dot follows.
-	for (const port of effectPorts) {
+	// somewhere else moves the fraction and the dot follows. Gated for the same
+	// reason the header inputs above are: the communication lens places through
+	// one filtered path or it does not place at all.
+	for (const port of lens === 'communication' ? [] : effectPorts) {
 		if (!port.visible) continue
 		const point = edgePortPoint('top', portEdgeT(port), width, height)
 		placed.push({

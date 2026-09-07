@@ -184,15 +184,16 @@ async function clickRelationship(page, id, mode = 'components') {
       .find((node) => node.dataset.communicationId === ${JSON.stringify(id)})
     const path = root?.querySelector('[data-communication-focus-hit]')
     if (!path || !path.getTotalLength || !path.getScreenCTM) return null
-    // Prefer the label pill: it is a dedicated hit target that is never under a
-    // card, which the stroke can be once an interaction's ports are bundled on
-    // one edge and its legs run as a tight parallel bundle.
+    // Aim at the label pill, unconditionally, and do NOT check what is painted
+    // on top of it. Several relationships between one pair of cards share a
+    // long corridor — in Simple view they leave the same edge midpoint — so the
+    // last arrow painted covers every other one's pill. The product rule is
+    // that a pill always wins its own click; clicking only where a relationship
+    // happened to be topmost is what hid that bug for as long as it existed.
     const label = root.querySelector('[data-communication-label]')
     if (label) {
       const box = label.getBoundingClientRect()
-      const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
-      const onTop = document.elementFromPoint(centre.x, centre.y)
-      if (onTop && root.contains(onTop)) return centre
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
     }
     const length = path.getTotalLength()
     const ctm = path.getScreenCTM()
@@ -334,6 +335,49 @@ async function main() {
     pass('Components collapses the same graph into nine enumerated relationships without namespace collisions')
     await shot(app.page, '04-components-enumerated.png')
 
+    // Every pill has to be readable and aimable: clear of its own endpoint
+    // cards, which paint OVER a cable, and clear of every other pill. Both
+    // failed before — `S1 · service · robot` rendered as `S1 · service ·` with
+    // its tail behind a card, and `A2` sat under `A3` where it could not be
+    // clicked at all.
+    const pills = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const cards = editor.getCurrentPageShapes()
+        .filter((shape) => shape.type === 'block')
+        .map((shape) => {
+          const bounds = editor.getShapePageBounds(shape.id)
+          const a = editor.pageToViewport({ x: bounds.minX, y: bounds.minY })
+          const b = editor.pageToViewport({ x: bounds.maxX, y: bounds.maxY })
+          return { minX: a.x, minY: a.y, maxX: b.x, maxY: b.y }
+        })
+      return [...document.querySelectorAll('[data-communication-mode="components"] [data-communication-label]')]
+        .map((node) => {
+          const box = node.getBoundingClientRect()
+          const rect = { minX: box.x, minY: box.y, maxX: box.right, maxY: box.bottom }
+          const overlaps = (other) => rect.minX < other.maxX && other.minX < rect.maxX
+            && rect.minY < other.maxY && other.minY < rect.maxY
+          return {
+            id: node.dataset.communicationLabel,
+            rect,
+            underCard: cards.some(overlaps),
+          }
+        })
+    })())`))
+    assert.equal(pills.length, 9, JSON.stringify(pills.map((pill) => pill.id)))
+    assert.deepEqual(
+      pills.filter((pill) => pill.underCard).map((pill) => pill.id), [],
+      'a label pill slid under a component card, where a cable is painted over',
+    )
+    for (let i = 0; i < pills.length; i += 1) {
+      for (let j = i + 1; j < pills.length; j += 1) {
+        const a = pills[i].rect
+        const b = pills[j].rect
+        const overlap = a.minX < b.maxX && b.minX < a.maxX && a.minY < b.maxY && b.minY < a.maxY
+        assert.equal(overlap, false, `${pills[i].id} and ${pills[j].id} pills overlap`)
+      }
+    }
+    pass('every relationship pill is fully readable: clear of both endpoint cards and of every other pill')
+
     await clickRelationship(app.page, 'A2')
     await delay(400)
     state = await projectionState(app.page)
@@ -345,22 +389,29 @@ async function main() {
     pass('focused A2 aggregate reveals cancel, feedback, and result over the Simple cards while goal remains the aggregate track')
     await shot(app.page, '05-components-a2-focus-elbow.png')
 
-    // Straight is now the CABLE's own shape, written to every cable in the
-    // region, not a centre-to-centre line replacing them: focus still reveals
-    // A2's other three legs, and every one of them still runs port to port.
+    // Straight re-DRAWS every cable in the region and writes nothing: the two
+    // lenses have completely separate appearances, so a shape chosen here can
+    // never reach Dataflow's stored routes. Focus still reveals A2's other
+    // three legs, and every one of them still runs port to port.
+    const trackPath = (id) => evaluate(app.page,
+      `document.querySelector('[data-communication-mode="components"][data-communication-id=${JSON.stringify(id)}] [data-communication-track-path]')?.getAttribute('d') ?? ''`)
+    const elbowPath = await trackPath('A2')
     await clickElement(app.page, '[data-testid="communication-route-straight"]')
     await delay(500)
     state = await projectionState(app.page)
     assert.equal(state.members, 3, JSON.stringify(state.memberIds))
     assert.deepEqual(new Set(state.memberIds), new Set(['A2']))
+    const straightPath = await trackPath('A2')
+    assert.notEqual(straightPath, elbowPath)
+    assert.ok(straightPath.length > 0, straightPath)
     const routings = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
       const editor = window.__systemsketch.editor
       return [...new Set(editor.getCurrentPageShapes()
         .filter((shape) => shape.type === 'connection')
         .map((shape) => shape.props.routing))]
     })())`))
-    assert.deepEqual(routings, ['straight'], JSON.stringify(routings))
-    pass('the Arrow control writes one cable shape to every cable in the region, port to port')
+    assert.deepEqual(routings, ['elbow'], JSON.stringify(routings))
+    pass('the Arrow control redraws every cable in the region without writing a stored route')
     await shot(app.page, '06-components-a2-focus-straight.png')
 
     await clickElement(app.page, '[data-testid="communication-focus-clear"]')
@@ -375,22 +426,15 @@ async function main() {
     pass('every relationship stays independently focusable by its own label')
     await shot(app.page, '07-components-s4-focus-straight.png')
 
-    // The Arrow control is a real edit, not paint — so put it back, and prove
-    // the whole bulk write was ONE history step while doing it. Everything
-    // after this point is projection only, which is what the final check tests.
+    // Nothing the lens did is on the undo stack, because nothing it did touched
+    // the document. Undo is the sharpest way to say so: it must NOT restore an
+    // elbow, because the elbow was never replaced — and it must not reach past
+    // the lens into the seeded graph either.
     await evaluate(app.page, `(() => { window.__systemsketch.editor.undo(); return true })()`)
     await delay(400)
-    const restored = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
-      const editor = window.__systemsketch.editor
-      return [...new Set(editor.getCurrentPageShapes()
-        .filter((shape) => shape.type === 'connection')
-        .map((shape) => shape.props.routing))]
-    })())`))
-    assert.deepEqual(restored, ['elbow'], JSON.stringify(restored))
-    pass('one undo puts every cable back, so the bulk shape change is a single history step')
+    assert.equal(await storedGraph(app.page), before)
+    pass('the projection choice is not a history step: undo has nothing of the lens to take back')
 
-    // Undo already cleared focus by changing the selection; only clear it when
-    // the control is still there to click.
     if (await evaluate(app.page, `Boolean(document.querySelector('[data-testid="communication-focus-clear"]'))`) === 'true'
       || await evaluate(app.page, `Boolean(document.querySelector('[data-testid="communication-focus-clear"]'))`) === true) {
       await clickElement(app.page, '[data-testid="communication-focus-clear"]')

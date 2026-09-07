@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps, type BlockPort, type BlockShapeProps } from './blockModel'
-import { layoutBlock } from './layoutBlock'
+import { RAIL_END_MARGIN_PX, layoutBlock } from './layoutBlock'
 
 /**
  * The rule the whole two-lens design rests on.
@@ -164,6 +164,44 @@ describe('spacing along a wall', () => {
 		// placed them, so the gaps are equal and nothing clusters at an end.
 		const gaps = rail.slice(1).map((entry, index) => entry.x - rail[index].x)
 		for (const gap of gaps) expect(gap).toBeCloseTo(gaps[0], 5)
-		expect(rail[0].x).toBeCloseTo(three.w / 4, 5)
+		// And the run reaches BOTH ends of the wall, leaving only a constant
+		// margin — not a whole empty slot that grows with the card.
+		expect(rail[0].x).toBeCloseTo(RAIL_END_MARGIN_PX, 5)
+		expect(rail[rail.length - 1].x).toBeCloseTo(three.w - RAIL_END_MARGIN_PX, 5)
+	})
+})
+
+describe('the end margin is constant, not proportional', () => {
+	// "That space should remain constant as you resize it vertically."
+	const sideWall = (height: number) => {
+		const tall = {
+			...props([
+				{ id: 'in_a', name: 'a.goal' },
+				{ id: 'in_b', name: 'b.goal' },
+			]),
+			h: height,
+		}
+		return layoutBlock(tall, { lens: 'communication' }).ports
+			.filter((entry) => entry.edge === 'left')
+			.sort((a, b) => a.y - b.y)
+	}
+
+	it('keeps the same gap at the top of the wall however tall the card is', () => {
+		const short = sideWall(220)
+		const tall = sideWall(900)
+		expect(short).toHaveLength(2)
+		expect(tall).toHaveLength(2)
+		// The first socket sits the same distance from the band's start in both.
+		const shortInset = short[0].y
+		const tallInset = tall[0].y
+		expect(Math.abs(tallInset - shortInset)).toBeLessThan(2)
+	})
+
+	it('gives the extra height to the ports, not to the margins', () => {
+		const short = sideWall(220)
+		const tall = sideWall(900)
+		const shortSpan = short[1].y - short[0].y
+		const tallSpan = tall[1].y - tall[0].y
+		expect(tallSpan).toBeGreaterThan(shortSpan * 2)
 	})
 })

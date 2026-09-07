@@ -1,6 +1,9 @@
 import {
 	Box,
 	Mat,
+	WeakCache,
+	computed,
+	type Computed,
 	ShapeUtil,
 	SVGContainer,
 	T,
@@ -169,6 +172,8 @@ import {
 	chooseCommunicationRepresentative,
 	collectCommunicationRelations,
 	applyCommunicationFocus,
+	communicationLabelWidth,
+	communicationRelationLabel,
 	communicationProjection,
 	describeCommunicationConnection,
 	isConnectionInCommunicationScope,
@@ -989,7 +994,7 @@ function CommunicationLabel({
 	onPointerDown?: (event: React.PointerEvent<SVGGElement>) => void
 	communicationId?: string
 }) {
-	const width = Math.max(74, text.length * 7.1 + 22)
+	const width = communicationLabelWidth(text)
 	return (
 		<g
 			className="CommunicationEdge-label"
@@ -1133,6 +1138,190 @@ function boundaryPoint(bounds: Box, toward: PagePoint): PagePoint {
  * it starts and ends where the data does, and its shape is the ordinary
  * `routing` style that cable already carries.
  */
+/**
+ * How close a label pill may come to either END of its route.
+ *
+ * A pill sitting on a card's edge reads as belonging to the card, not the
+ * cable, so a packed run that overflows its corridor stops here rather than
+ * sliding under a component.
+ */
+const COMMUNICATION_LABEL_EDGE_MARGIN_PX = 46
+
+/** Half the height of a label pill, matching the rect `CommunicationLabel` draws. */
+const COMMUNICATION_LABEL_HALF_HEIGHT_PX = 13
+
+/** How often the label walk samples its route, in shape-space pixels. */
+const COMMUNICATION_LABEL_SAMPLE_PX = 6
+
+/** The endpoint cards a label must not slide under, in the cable's own space. */
+function communicationEndpointBoxes(editor: Editor, connection: ConnectionShape): Box[] {
+	const bindings = getConnectionBindings(editor, connection)
+	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
+	const boxes: Box[] = []
+	for (const binding of [bindings.start, bindings.end]) {
+		if (!binding) continue
+		const bounds = editor.getShapePageBounds(binding.toId)
+		if (!bounds) continue
+		boxes.push(Box.FromPoints([
+			Mat.applyToPoint(inverse, { x: bounds.minX, y: bounds.minY }),
+			Mat.applyToPoint(inverse, { x: bounds.maxX, y: bounds.maxY }),
+		]))
+	}
+	return boxes
+}
+
+/**
+ * Where every relationship's label pill goes, in PAGE space, decided together.
+ *
+ * Three rules, in order of who yields to whom:
+ *
+ *  1. The packed offset (`packCommunicationLabels`) says where a pill WANTS to
+ *     sit so the siblings of one component pair read as a row rather than a
+ *     stack. That is a model-level answer, computed from the real pill widths.
+ *  2. A pill must clear both endpoint CARDS. A card paints over a cable, so a
+ *     pill that lands under one is unreadable and unclickable —
+ *     `S1 · service · robot` came back from the packer rendering as
+ *     `S1 · service ·`, with its tail behind the Robot card.
+ *  3. A pill must clear every pill already placed, INCLUDING relationships
+ *     between other pairs, which the packer cannot see. `S2` and `S4` join
+ *     different pairs and still landed on top of each other.
+ *
+ * WHY this is one pass over all of them instead of per-shape geometry: rules 2
+ * and 3 need the routes, and rule 3 needs every other answer. A shape can only
+ * see itself, which is exactly how each of the three failures above got in.
+ * Placement is deterministic (relationships are visited in `displayId` order)
+ * so the board does not reshuffle between repaints, and every pill is measured
+ * at its UNFOCUSED width so focusing one cannot move any of them.
+ */
+interface CommunicationLabelPlacement {
+	page: { x: number; y: number }
+	halfWidth: number
+}
+
+/** How often the label walk samples its route, in page pixels. */
+const COMMUNICATION_LABEL_STEP_PX = 8
+
+function computeCommunicationLabelPlacements(
+	editor: Editor,
+): Map<string, CommunicationLabelPlacement> {
+	const placements = new Map<string, CommunicationLabelPlacement>()
+	const taken: Box[] = []
+	const relations = [...collectCommunicationRelations(editor).relations]
+		.sort((a, b) => a.displayId.localeCompare(b.displayId))
+	for (const relation of relations) {
+		const representative = resolveCommunicationRepresentative(editor, relation)
+		if (!representative) continue
+		const carrier = editor.getShape(representative.connectionId)
+		if (!carrier || carrier.type !== CONNECTION_SHAPE_TYPE) continue
+		const transform = editor.getShapePageTransform(carrier)
+		const points = getConnectionRenderPoints(editor, carrier as ConnectionShape)
+		const length = polylineLength(points)
+		const at = (distance: number) => Mat.applyToPoint(
+			transform,
+			pointAtFraction(points, length > 0 ? distance / length : 0.5),
+		)
+		const halfWidth = communicationLabelWidth(communicationRelationLabel(relation)) / 2
+		const pillAt = (distance: number) => {
+			const centre = at(distance)
+			return new Box(
+				centre.x - halfWidth,
+				centre.y - COMMUNICATION_LABEL_HALF_HEIGHT_PX,
+				halfWidth * 2,
+				COMMUNICATION_LABEL_HALF_HEIGHT_PX * 2,
+			)
+		}
+		const cards = communicationEndpointBoxes(editor, carrier as ConnectionShape)
+		const clear = (distance: number) => {
+			const pill = pillAt(distance)
+			return cards.every((card) => !card.collides(pill))
+				&& taken.every((other) => !other.collides(pill))
+		}
+		const margin = Math.min(COMMUNICATION_LABEL_EDGE_MARGIN_PX, length / 2)
+		const desired = Math.max(margin, Math.min(
+			length - margin,
+			length / 2 + relation.labelOffsetPx,
+		))
+		let chosen = desired
+		if (length > 0 && !clear(desired)) {
+			// Nearest clear spot, walking outwards from where the packer put it,
+			// so a crowded pair keeps its ORDER even when the corridor forces the
+			// pills to shuffle. Falling through means the whole route is covered,
+			// which is a cable shorter than its own label.
+			const steps = Math.ceil(length / COMMUNICATION_LABEL_STEP_PX)
+			for (let step = 1; step <= steps; step += 1) {
+				const delta = step * COMMUNICATION_LABEL_STEP_PX
+				const before = desired - delta
+				const after = desired + delta
+				if (before >= margin && clear(before)) { chosen = before; break }
+				if (after <= length - margin && clear(after)) { chosen = after; break }
+			}
+		}
+		taken.push(pillAt(chosen))
+		placements.set(relation.groupKey, { page: at(chosen), halfWidth })
+	}
+	return placements
+}
+
+const communicationLabelPlacementCache = new WeakCache<
+	Editor,
+	Computed<Map<string, CommunicationLabelPlacement>>
+>()
+
+function communicationLabelPlacements(editor: Editor): Map<string, CommunicationLabelPlacement> {
+	return communicationLabelPlacementCache
+		.get(editor, () => computed(
+			'communication label placements',
+			() => computeCommunicationLabelPlacements(editor),
+		))
+		.get()
+}
+
+/** The placed pill, back in one cable's own space, for the shape that draws it. */
+function communicationLabelPoint(
+	editor: Editor,
+	connection: ConnectionShape,
+	relation: CommunicationRelation,
+) {
+	const placement = communicationLabelPlacements(editor).get(relation.groupKey)
+	const points = getConnectionRenderPoints(editor, connection)
+	if (!placement) return pointAtFraction(points, 0.5)
+	return Mat.applyToPoint(
+		Mat.Inverse(editor.getShapePageTransform(connection)),
+		placement.page,
+	)
+}
+
+/**
+ * The relationship whose label pill covers a page point, if any.
+ *
+ * WHY this exists at all: several relationships between one pair of cards share
+ * a long corridor — in Simple view they leave the same edge midpoint — so their
+ * summary arrows overlap for most of their length and the LAST one painted wins
+ * every click along it. A pill is the one thing a person can actually aim at,
+ * and it was the one thing that did not work: clicking `A2` focused `A3`
+ * because A3's transparent hit stroke lay on top of A2's pill.
+ *
+ * The pills are packed so they never overlap (`packCommunicationLabels`), which
+ * is what makes this answer unambiguous. Measured with the UNFOCUSED width in
+ * both places, so a pill that shrinks while focused cannot open a gap that
+ * belongs to nobody.
+ */
+function communicationRelationshipLabelAt(
+	editor: Editor,
+	page: { x: number; y: number },
+): CommunicationRelation | null {
+	const placements = communicationLabelPlacements(editor)
+	for (const relation of collectCommunicationRelations(editor).relations) {
+		const placement = placements.get(relation.groupKey)
+		if (!placement) continue
+		if (
+			Math.abs(page.x - placement.page.x) <= placement.halfWidth
+			&& Math.abs(page.y - placement.page.y) <= COMMUNICATION_LABEL_HALF_HEIGHT_PX
+		) return relation
+	}
+	return null
+}
+
 function componentRelationshipGeometry(
 	editor: Editor,
 	connection: ConnectionShape,
@@ -1141,17 +1330,18 @@ function componentRelationshipGeometry(
 ) {
 	void representative
 	const points = getConnectionRenderPoints(editor, connection)
-	// WHY the lane stagger: several relationships between one pair of cards run
-	// as near-parallel channels, so their labels all want the same midpoint and
-	// pile up — badly enough that a pill can cover its neighbour's and make it
-	// unclickable. `lane` already numbers the siblings of a pair, so offsetting
-	// each label along ITS OWN route by that number separates them without
-	// moving a single cable. (This is the one idea worth keeping from the
-	// centre-to-centre line that used to need it far more.)
-	const labelFraction = Math.max(0.18, Math.min(0.82, 0.5 + relation.lane * 0.13))
+	// WHY the offset is in PIXELS and comes from the projection: several
+	// relationships between one pair of cards run as near-parallel channels, so
+	// their labels all want the same midpoint and pile up — badly enough that a
+	// pill covered its neighbour's and made it unclickable. The projection packs
+	// the whole sibling set with their real pill widths (see
+	// `packCommunicationLabels`); all this does is walk that many pixels along
+	// its own route. A fraction-based stagger could not do it: it has no idea
+	// how wide the pills are, and 0.13 of a short route is 23px.
+	void points
 	return {
 		path: getConnectionShapePath(editor, connection),
-		label: pointAtFraction(points, labelFraction),
+		label: communicationLabelPoint(editor, connection, relation),
 	}
 }
 
@@ -1204,12 +1394,19 @@ function ComponentCommunicationConnection({
 	// exact phase beside the other expanded phase labels.
 	const label = focusState === 'active'
 		? `${relation.displayId} · ${phaseLabel(representative.phase)}`
-		: `${relation.displayId} · ${relation.family} · ${relation.name}`
+		: communicationRelationLabel(relation)
 	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
 		if (event.button !== 0) return
 		event.stopPropagation()
-		editor.select(connection.id)
-		applyCommunicationFocus(editor, relation.groupKey)
+		// A pill outranks a route, including a route belonging to somebody else:
+		// the thing under the finger is what the click is about.
+		const page = editor.screenToPage({ x: event.clientX, y: event.clientY })
+		const owner = communicationRelationshipLabelAt(editor, page) ?? relation
+		const carrier = owner === relation
+			? connection.id
+			: resolveCommunicationRepresentative(editor, owner)?.connectionId ?? connection.id
+		editor.select(carrier)
+		applyCommunicationFocus(editor, owner.groupKey)
 	}
 	return (
 		<SVGContainer
@@ -1246,6 +1443,11 @@ function ComponentCommunicationConnection({
 				strokeWidth={2.8}
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				// WHY: the transparent 18px stroke above IS the hit target. Left
+				// interactive, this 2.8px line also swallowed clicks — including
+				// clicks meant for a NEIGHBOUR relationship's pill lying under it,
+				// which focused the wrong interaction with no way to tell.
+				pointerEvents="none"
 				markerStart={relation.bidirectional ? `url(#${markerId(connection.id, 'start')})` : undefined}
 				markerEnd={`url(#${markerId(connection.id, 'end')})`}
 				vectorEffect="non-scaling-stroke"

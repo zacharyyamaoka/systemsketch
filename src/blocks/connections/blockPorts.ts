@@ -151,7 +151,14 @@ function projectBlockConnectionPorts(
 				name: port.name,
 				type: port.type,
 				side,
-				hidden: !port.visible,
+				// WHY a port the LAYOUT declined to place counts as hidden: in the
+				// communication lens only summary sockets are laid out, and the
+				// rest fall through to `fallback` — which kept them out of the
+				// painting but left them at a real point, so the magnet still
+				// grabbed them and a drag could start from a socket nobody could
+				// see. They keep the fallback anchor, because an existing cable
+				// still has to resolve somewhere; they just stop being targets.
+				hidden: !port.visible || (lens === 'communication' && !placed),
 				x: point.x,
 				y: point.y,
 				anchor: {

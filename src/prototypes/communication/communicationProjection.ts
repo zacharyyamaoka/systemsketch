@@ -130,6 +130,12 @@ export interface CommunicationRelation extends CommunicationDescriptor {
 	memberDescriptors: CommunicationDescriptor[]
 	displayId: string
 	lane: number
+	/**
+	 * How far along its own route this relationship's label pill sits, in page
+	 * pixels from the route's midpoint. Packed across the siblings of a
+	 * component pair, so two pills can never cover one another.
+	 */
+	labelOffsetPx: number
 }
 
 export interface CommunicationRepresentativeCandidate {
@@ -297,6 +303,7 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 			memberDescriptors: [...members],
 			displayId: '',
 			lane: 0,
+			labelOffsetPx: 0,
 		}
 	})
 	for (const relation of unslotted) {
@@ -378,6 +385,7 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 		counters[relation.family] = ordinal
 		return { ...relation, displayId: `${familyPrefix[relation.family]}${ordinal}` }
 	})
+	relations = packCommunicationLabels(relations)
 	return {
 		edgeCount: connections.length,
 		taggedEdgeCount: described.length,
@@ -386,6 +394,64 @@ function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 		relations,
 		issues,
 	}
+}
+
+/** Clear space kept between two label pills sharing one corridor. */
+export const COMMUNICATION_LABEL_GUTTER_PX = 16
+
+/**
+ * The pill a relationship's label is drawn in, measured rather than guessed.
+ *
+ * WHY it lives beside the packer instead of inside the renderer: the packer has
+ * to know exactly how wide each pill will be to guarantee they do not overlap,
+ * and a second copy of this formula would drift the moment either changed.
+ */
+export function communicationLabelWidth(text: string): number {
+	return Math.max(74, text.length * 7.1 + 22)
+}
+
+/** The text a relationship's carrier shows when nothing is focused. */
+export function communicationRelationLabel(relation: CommunicationRelation): string {
+	return `${relation.displayId} · ${relation.family} · ${relation.name}`
+}
+
+/**
+ * Slide each label along its OWN route so the pills of one component pair tile
+ * instead of stacking.
+ *
+ * WHY here and not in the shape: several relationships between one pair of
+ * cards run as near-parallel channels — more so since an interaction's ports
+ * bundle on a single edge — so every pill wants the same midpoint. A shape can
+ * only see itself, and an index-based stagger measured as a FRACTION of the
+ * route produced gaps of 23px between 160px pills; the real answer needs the
+ * widths of all the siblings at once, which is exactly what this pass has.
+ * Offsets are page pixels along the route, so equal-length parallel routes give
+ * pills that line up in a readable row.
+ */
+export function packCommunicationLabels(relations: CommunicationRelation[]): CommunicationRelation[] {
+	const byPair = new Map<string, CommunicationRelation[]>()
+	for (const relation of relations) {
+		const siblings = byPair.get(relation.pairKey)
+		if (siblings) siblings.push(relation)
+		else byPair.set(relation.pairKey, [relation])
+	}
+	const offsets = new Map<string, number>()
+	for (const siblings of byPair.values()) {
+		const ordered = [...siblings].sort((a, b) => a.lane - b.lane)
+		const widths = ordered.map((relation) => communicationLabelWidth(
+			communicationRelationLabel(relation)))
+		const run = widths.reduce((total, width) => total + width, 0)
+			+ COMMUNICATION_LABEL_GUTTER_PX * Math.max(0, ordered.length - 1)
+		let cursor = -run / 2
+		ordered.forEach((relation, index) => {
+			offsets.set(relation.groupKey, cursor + widths[index] / 2)
+			cursor += widths[index] + COMMUNICATION_LABEL_GUTTER_PX
+		})
+	}
+	return relations.map((relation) => ({
+		...relation,
+		labelOffsetPx: offsets.get(relation.groupKey) ?? 0,
+	}))
 }
 
 const communicationSummaryCache = new WeakCache<Editor, Computed<CommunicationSummary>>()
@@ -620,20 +686,37 @@ export function selectedCommunicationGroupKey(
  * visibility rule cannot disagree — and disagreeing is exactly what left
  * hidden cables selectable on the canvas.
  */
-export function summaryCarrierConnectionId(
+export interface CommunicationSummaryCarrier {
+	/** The relationship this cable is one leg of. */
+	groupKey: string
+	/** The single leg the summary arrow rides, or null if none could be chosen. */
+	connectionId: TLShapeId | null
+}
+
+export function summaryCarrierFor(
 	editor: Editor,
 	connection: ConnectionShape,
-): TLShapeId | null {
+): CommunicationSummaryCarrier | null {
 	const descriptor = describeCommunicationConnection(editor, connection)
 	if (!descriptor) return null
 	const relation = collectCommunicationRelations(editor).relations
 		.find((candidate) => candidate.groupKey === descriptor.groupKey)
 	if (!relation) return null
-	return chooseCommunicationRepresentative(
-		relation.family,
-		relation.memberDescriptors.map((member) => ({
-			descriptor: member,
-			pathLength: Number.POSITIVE_INFINITY,
-		})),
-	)?.connectionId ?? null
+	return {
+		groupKey: relation.groupKey,
+		connectionId: chooseCommunicationRepresentative(
+			relation.family,
+			relation.memberDescriptors.map((member) => ({
+				descriptor: member,
+				pathLength: Number.POSITIVE_INFINITY,
+			})),
+		)?.connectionId ?? null,
+	}
+}
+
+export function summaryCarrierConnectionId(
+	editor: Editor,
+	connection: ConnectionShape,
+): TLShapeId | null {
+	return summaryCarrierFor(editor, connection)?.connectionId ?? null
 }

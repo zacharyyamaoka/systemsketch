@@ -13,8 +13,9 @@ import { getActiveDepthScopeId } from '../depth/depthNavigation'
 import {
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
+	isConnectionInCommunicationScope,
 	isShapeInCommunicationScope,
-	summaryCarrierConnectionId,
+	summaryCarrierFor,
 } from '../prototypes/communication/communicationProjection'
 import type { ConnectionShape } from './connections/ConnectionShapeUtil'
 
@@ -80,15 +81,34 @@ export function getBlockShapeVisibility(
 	return 'inherit'
 }
 
-/** A cable the communication lens does not draw: every leg but the carrier. */
+/**
+ * A cable the communication lens does not draw: every leg but the carrier.
+ *
+ * WHY the three tests below mirror `CommunicationConnectionShapeComponent`
+ * clause for clause rather than approximating it: this seam removes a shape
+ * from hit testing as well as from paint, so any cable the renderer DOES paint
+ * and this rule hides becomes invisible-and-uninteractive, and any cable it
+ * hides that this rule keeps stays selectable with nothing on screen. Both
+ * failures have already happened once each.
+ */
 function hiddenByCommunicationSummary(editor: Editor, shape: TLShape): boolean {
 	if (!isCommunicationPrototypeEnabled(editor)) return false
-	if (communicationProjection.get(editor).lens !== 'communication') return false
-	if (!isShapeInCommunicationScope(editor, shape.id)) return false
-	const carrier = summaryCarrierConnectionId(editor, shape as ConnectionShape)
+	const projection = communicationProjection.get(editor)
+	// The renderer branches on the CABLE STYLE, not the lens — Summary is what
+	// collapses a relationship onto one leg, and Dataflow can be asked for it.
+	if (projection.cableStyle !== 'summary') return false
+	// And on a connection's ENDPOINTS, not its parent: a cable between two
+	// in-region components is in scope even when it is parented to the page.
+	if (!isConnectionInCommunicationScope(editor, shape as ConnectionShape)) return false
+	const carrier = summaryCarrierFor(editor, shape as ConnectionShape)
 	// A cable in no relationship at all (an ordinary data edge) keeps its
 	// ordinary visibility; only a relationship's non-carrier legs go.
-	return carrier !== null && carrier !== shape.id
+	if (!carrier || carrier.connectionId === null || carrier.connectionId === shape.id) return false
+	// WHY focus is an exception: focusing a relationship is precisely the
+	// gesture that asks to see its other legs, and the renderer answers by
+	// painting each one as a `focus-member` tag. Hiding them here would delete
+	// the reveal — the whole point of the click.
+	return projection.focusedGroupKey !== carrier.groupKey
 }
 
 export function connectionHiddenByBranch(editor: Editor, connection: TLShape): boolean {

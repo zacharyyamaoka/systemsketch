@@ -3,6 +3,9 @@ import { createShapeId } from 'tldraw'
 
 import {
 	chooseCommunicationRepresentative,
+	communicationLabelWidth,
+	communicationRelationLabel,
+	packCommunicationLabels,
 	inspectCommunicationChannel,
 	parseCommunicationChannel,
 	selectedCommunicationGroupKey,
@@ -158,4 +161,77 @@ describe('communication representative edge policy', () => {
 		])).toBe(cancel)
 	})
 
+})
+
+describe('label pills of one component pair tile instead of stacking', () => {
+	// The bug this replaces: an index-based stagger measured as a FRACTION of
+	// the route put `A2 · action · move` and `A3 · action · status` 101px apart
+	// while the pills were 164px wide, so one covered the other — and the
+	// covered one could not be clicked at all, because the neighbour's
+	// transparent hit stroke was on top of it.
+	function relation(
+		displayId: string,
+		family: CommunicationFamily,
+		name: string,
+		lane: number,
+		pairKey = 'mission:robot',
+	) {
+		return {
+			...descriptor(`edge_${displayId}`, family, 'goal'),
+			name,
+			groupKey: `${family}:${name}`,
+			pairKey,
+			representativeId: createShapeId(`edge_${displayId}`),
+			edgeCount: 1,
+			memberIds: [],
+			memberDescriptors: [],
+			displayId,
+			lane,
+			labelOffsetPx: 0,
+		}
+	}
+
+	const spans = (packed: ReturnType<typeof packCommunicationLabels>) =>
+		packed.map((entry) => {
+			const half = communicationLabelWidth(communicationRelationLabel(entry)) / 2
+			return { id: entry.displayId, from: entry.labelOffsetPx - half, to: entry.labelOffsetPx + half }
+		}).sort((a, b) => a.from - b.from)
+
+	it('leaves a real gap between every pair of neighbouring pills', () => {
+		const packed = packCommunicationLabels([
+			relation('A1', 'action', 'move', -1),
+			relation('A2', 'action', 'status', 0),
+			relation('A3', 'action', 'dock', 1),
+		])
+		const laid = spans(packed)
+		for (let index = 1; index < laid.length; index += 1) {
+			expect(laid[index].from).toBeGreaterThanOrEqual(laid[index - 1].to)
+		}
+	})
+
+	it('sizes the gap from the real pill widths, not from an index', () => {
+		// A very long name must push its neighbours further away, which a
+		// fraction-of-the-route stagger could never do.
+		const packed = packCommunicationLabels([
+			relation('S1', 'service', 'a', -0.5),
+			relation('S2', 'service', 'a-very-long-interaction-name-indeed', 0.5),
+		])
+		const laid = spans(packed)
+		expect(laid[1].from).toBeGreaterThanOrEqual(laid[0].to)
+		expect(Math.abs(packed[1].labelOffsetPx - packed[0].labelOffsetPx))
+			.toBeGreaterThan(communicationLabelWidth('S1 · service · a'))
+	})
+
+	it('centres the run, so a lone relationship keeps the route midpoint', () => {
+		const [only] = packCommunicationLabels([relation('T1', 'topic', 'telemetry', 0)])
+		expect(only.labelOffsetPx).toBeCloseTo(0, 5)
+	})
+
+	it('packs each component pair independently', () => {
+		const packed = packCommunicationLabels([
+			relation('A1', 'action', 'move', 0, 'mission:robot'),
+			relation('A2', 'action', 'dock', 0, 'mission:dashboard'),
+		])
+		for (const entry of packed) expect(entry.labelOffsetPx).toBeCloseTo(0, 5)
+	})
 })
