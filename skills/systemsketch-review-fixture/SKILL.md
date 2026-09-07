@@ -42,7 +42,7 @@ This standing request may not repeat the feature that was just added. Read the c
 9. Inspect the generated PNG yourself. Check text clipping, card overlap, cropped content, arrow/card crossings, arrow/label crossings, and whether every target segment is normal to the target edge. Then drive the saved fixture once in the real running app: move one arrow's target and confirm the cue remains attached, then verify the intended feature interaction.
 10. Commit the fixture and publish it with the report through the retained runtime. At first
     publication provide `--board`, `--report`, and (when there is visual evidence)
-    `--report-media`; verify the runtime’s clickable **Board** card opens this fixture.
+    `--report-media`; verify the runtime’s clickable **Guided Review Board** card opens this fixture.
     End the handoff with only the standard review heading and one runnable command:
 
     ````markdown

@@ -642,10 +642,12 @@ def show(review: Review) -> str:
     # contract to the artifact someone can click, so a handoff scans at once.
     lines = [f"Review · {review.name}"]
     if url := board_url(review):
-        lines.append(f"🖱 Board  {terminal_link('view', url)}")
+        lines.append(f"🖱 Guided Review Board  {terminal_link('launch', url)}")
     if url := report_url(review):
-        lines.append(f"📄 Report {terminal_link('view', url)}")
-    return "\n".join(lines)
+        lines.append(f"📄 Standard HTML Rich Report  {terminal_link('view', url)}")
+    # A review is a small visual island in otherwise noisy terminal output.
+    # Keep one blank line around it without reintroducing diagnostic ceremony.
+    return f"\n{'\n'.join(lines)}\n"
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -688,7 +690,11 @@ def main() -> int:
     with registry_lock():
         reviews = load_reviews()
         if args.command == "list":
-            print("\n\n".join(show(review) for _, review in sorted(reviews.items())) or "no retained reviews")
+            cards = "".join(show(review) for _, review in sorted(reviews.items()))
+            if cards:
+                print(cards, end="")
+            else:
+                print("no retained reviews")
             return 0
 
         if args.command == "down" and args.all:

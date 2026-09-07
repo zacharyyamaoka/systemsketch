@@ -209,7 +209,9 @@ class ReviewRuntimeTests(unittest.TestCase):
                 card = runtime.show(review)
             self.assertEqual(
                 card,
-                "Review · pill-entry\n🖱 Board  view\n📄 Report view",
+                "\nReview · pill-entry\n"
+                "🖱 Guided Review Board  launch\n"
+                "📄 Standard HTML Rich Report  view\n",
             )
             for absent in ("RUNNING", "pinned", "Media", "builder", "Re-run", "worktree", "ports"):
                 with self.subTest(absent=absent):
