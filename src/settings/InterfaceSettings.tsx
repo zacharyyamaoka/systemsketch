@@ -166,12 +166,12 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
           : category === 'appearance'
           ? <AppearancePanel />
           : category === 'canvas'
-            ? <CanvasPanel />
+          ? <CanvasPanel />
           : category === 'shortcuts'
-            ? <ToolAliasesPanel />
+          ? <ToolAliasesPanel />
           : category === 'menu-lab'
-            ? <MenuLabSettingsPanel />
-            : <InterfacePanel />}
+          ? <MenuLabSettingsPanel />
+          : <InterfacePanel />}
       </TldrawUiDialogBody>
     </div>
   )
@@ -381,7 +381,7 @@ function GeneralPanel() {
 function MenuLabSettingsPanel() {
   return (
     <section className="systemsketch-settings__panel" aria-labelledby="menu-lab-title">
-      <div className="systemsketch-settings__eyebrow">Interface</div>
+      <div className="systemsketch-settings__eyebrow">Menu lab</div>
       <div className="systemsketch-settings__intro">
         <div>
           <h2 id="menu-lab-title">Menu lab</h2>

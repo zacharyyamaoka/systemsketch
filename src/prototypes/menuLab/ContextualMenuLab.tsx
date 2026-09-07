@@ -96,13 +96,13 @@ export function MenuLabPanel({ standalone }: { standalone?: boolean }) {
 
   return (
     <ContainerProvider container={host ?? container}>
-    <div
-      className={standalone ? 'menu-lab__shell' : 'menu-lab__shell menu-lab__shell--embedded'}
-      data-testid="menu-lab-shell"
-      ref={(node) => {
-        setHost(node?.closest<HTMLElement>('.tlui-dialog__positioner') ?? null)
-      }}
-    >
+      <div
+        className={standalone ? 'menu-lab__shell' : 'menu-lab__shell menu-lab__shell--embedded'}
+        data-testid="menu-lab-shell"
+        ref={(node) => {
+          setHost(node?.closest<HTMLElement>('.tlui-dialog__positioner') ?? null)
+        }}
+      >
         <aside className="menu-lab__levers">
           {/* Settings draws its own eyebrow and title, so the embedded board
            * would otherwise carry a second heading for the same panel. */}
@@ -226,7 +226,7 @@ export function MenuLabPanel({ standalone }: { standalone?: boolean }) {
             </ul>
           </section>
         </main>
-    </div>
+      </div>
     </ContainerProvider>
   )
 }
