@@ -210,12 +210,30 @@ class ReviewRuntimeTests(unittest.TestCase):
             self.assertEqual(
                 card,
                 "\nReview · pill-entry\n"
-                "🖱 Guided Review Board  launch\n"
-                "📄 Standard HTML Rich Report  view\n",
+                "Read\n"
+                "📄 Standard HTML Rich Report  view\n"
+                "Explore\n"
+                "🖱 Guided Review Board  launch\n",
             )
             for absent in ("RUNNING", "pinned", "Media", "builder", "Re-run", "worktree", "ports"):
                 with self.subTest(absent=absent):
                     self.assertNotIn(absent, card)
+
+    def test_review_card_omits_empty_purpose_lanes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_only = self.review(Path(directory) / "report")
+            report_only.board = None
+            board_only = self.review(Path(directory) / "board")
+            board_only.report = None
+
+            self.assertEqual(
+                runtime.show(report_only),
+                "\nReview · pill-entry\nRead\n📄 Standard HTML Rich Report  view\n",
+            )
+            self.assertEqual(
+                runtime.show(board_only),
+                "\nReview · pill-entry\nExplore\n🖱 Guided Review Board  launch\n",
+            )
 
     def test_report_media_stays_in_the_ignored_capture_namespace(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

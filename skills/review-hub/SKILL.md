@@ -30,10 +30,10 @@ python3 /home/bam/systemsketch/scripts/review_runtime.py up <review-name> --ref 
   rebuilt immediately before it is served. A builder must honor those values rather than
   write to a developer-specific absolute path.
 - Drive the retained review once. Verify the report loads its relative captures and the app
-  opens the intended board. The runtime prints a blank line, the review heading, then one
-  clickable artifact row such as `🖱 Guided Review Board launch` or
-  `📄 Standard HTML Rich Report view`, followed by a blank line—never state, commit, media,
-  builder, or restart details. A later `up` on an
+  opens the intended board. The runtime prints a blank line, the review heading, then compact
+  purpose lanes: `Read` above `📄 Standard HTML Rich Report view` and `Explore` above
+  `🖱 Guided Review Board launch`, followed by a blank line—never state, commit, media, builder,
+  or restart details. A later `up` on an
   already-healthy review intentionally leaves it untouched; a cold restart reuses the
   media retained in its own review worktree even after the original track is gone.
 

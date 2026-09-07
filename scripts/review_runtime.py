@@ -639,12 +639,15 @@ def terminal_link(label: str, url: str) -> str:
 
 def show(review: Review) -> str:
     # The terminal is an opening surface, not a diagnostic report. Keep the
-    # contract to the artifact someone can click, so a handoff scans at once.
+    # contract to the artifact someone can click. Purpose lanes make a mixed
+    # review scannable without turning the terminal back into a dashboard.
     lines = [f"Review · {review.name}"]
-    if url := board_url(review):
-        lines.append(f"🖱 Guided Review Board  {terminal_link('launch', url)}")
     if url := report_url(review):
+        lines.append("Read")
         lines.append(f"📄 Standard HTML Rich Report  {terminal_link('view', url)}")
+    if url := board_url(review):
+        lines.append("Explore")
+        lines.append(f"🖱 Guided Review Board  {terminal_link('launch', url)}")
     # A review is a small visual island in otherwise noisy terminal output.
     # Keep one blank line around it without reintroducing diagnostic ceremony.
     return f"\n{'\n'.join(lines)}\n"
