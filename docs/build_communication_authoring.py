@@ -17,6 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "docs" / "assets" / "communication-authoring"
+FOCUS_ASSETS = ROOT / "docs" / "assets" / "communication-association-focus"
 FIXTURE_IMAGE = ROOT / "sketches" / "review" / "communication-authoring.png"
 SOURCE = ROOT / "src" / "prototypes" / "communication" / "communicationAuthoring.ts"
 UNIT_TEST = ROOT / "src" / "prototypes" / "communication" / "communicationAuthoring.test.ts"
@@ -95,6 +96,7 @@ INK = {"stream": "#7558d7", "service": "#3971dd", "action": "#d27a0a"}
 
 def main() -> None:
     acceptance = json.loads((ASSETS / "acceptance.json").read_text(encoding="utf-8"))
+    focus = json.loads((FOCUS_ASSETS / "acceptance.json").read_text(encoding="utf-8"))
     legs = measured_legs()
     counts = measured_counts()
     total_legs = sum(len(v) for v in legs.values())
@@ -461,16 +463,54 @@ the dot so the first downward cable cannot strike through the words.</p>
   <div class="stat"><b>{total_legs}</b><span>canonical cables the three arrows generate</span></div>
 </div>
 <p style="margin-top:18px"><code>npm run check</code> — tsc, the full vitest
-suite, the Python suite and the breadcrumb journey — is green on this commit,
-and the shipped <code>test:async-region</code> and
-<code>test:communication-focus</code> journeys pass unchanged. The counts above
-are measured from the tree at build time; the suite totals are deliberately not
-restated here, because a number pasted from a run is the one thing in this
-report that could quietly stop being true.</p>
+suite, the Python suite and the breadcrumb journey — is green on this commit, as
+are <code>test:async-region</code> and <code>test:edge-crossing</code>. The
+counts above are measured from the tree at build time; the suite totals are
+deliberately not restated here, because a number pasted from a run is the one
+thing in this report that could quietly stop being true.</p>
+<p><code>test:communication-focus</code> did <b>not</b> pass unchanged, and
+saying so is the point: it had been red at check 8 for several commits. It is
+now {len(focus['checks'])}/{len(focus['checks'])}, with one gate added and two
+rewritten — see <a href="#labels">the label pass</a> below.</p>
 <h3 style="margin-top:22px">Browser journey</h3>
 <ul class="checks">{checks}</ul>
 <h3 style="margin-top:22px">Round-trip unit contract</h3>
 <ul class="checks">{unit_items}</ul>
+
+<h2 id="labels">A pill you can read, and aim at</h2>
+<div class="card">
+<p>Three relationships between one pair of cards share a corridor — in Simple
+view their arrows leave the same edge midpoint — so every summary label wanted
+the same midpoint, and the last arrow painted covered the rest. Three separate
+failures came out of that one fact:</p>
+<ul>
+<li><b>A pill under another pill.</b> An index-based stagger measured as a
+fraction of the route put <code>A2</code> and <code>A3</code> 101px apart while
+the pills were 164px wide.</li>
+<li><b>A pill under a card.</b> A card paints over a cable, so
+<code>S1 · service · robot</code> rendered as <code>S1 · service ·</code>.</li>
+<li><b>A pill nobody could click.</b> A neighbour's transparent 18px hit stroke
+lay on top, so clicking <code>A2</code> focused <code>A3</code> — silently, with
+the wrong relationship's legs revealed.</li>
+</ul>
+<p>Placement is now one pass over every relationship: pack the siblings of a
+pair by their <em>real</em> pill widths, then walk each pill along its own route
+to the nearest spot clear of both endpoint cards and of every pill already
+placed. A pill outranks any route under the pointer, so clicking one always
+focuses the interaction it names. The journey now asserts all of it — every pill
+clear of every card and every other pill, and a click aimed at a pill
+<em>without</em> first checking what is painted on top of it, which is the check
+that had been hiding the bug.</p>
+<figure style="margin:18px 0 0">
+<img style="display:block;width:100%;max-width:100%;height:auto;border-radius:10px"
+  src="{data_uri(FOCUS_ASSETS / '04-components-enumerated.png')}"
+  alt="Nine relationship pills on the adversarial board, each fully readable and clear of every card">
+<figcaption>The adversarial board's nine relationships, straight out of
+<code>test:communication-focus</code>. Three actions and three services share the
+Mission ↔ Robot corridor; every pill reads in full and every one is its own hit
+target. This exact frame is what the new gate measures.</figcaption>
+</figure>
+</div>
 
 <h2>Keeping review artifacts alive — five proposals</h2>
 <p>Asked in the same breath, and this session proved the point the hard way: a
@@ -488,8 +528,9 @@ still; press-and-hold to move a socket between edges; rename in place.
 {len(acceptance['checks'])} browser checks, {counts['unit_tests']} unit tests in
 the authoring contract plus {counts['placement_tests']} more for placement and
 spacing, full
-<code>npm run check</code> green, and the shipped Async-region and
-communication-focus journeys still pass unchanged.</li>
+<code>npm run check</code> green, and the Async-region, edge-crossing and
+communication-focus journeys green — the last of these for the first time, at
+{len(focus['checks'])}/{len(focus['checks'])}.</li>
 <li><b>Needs you.</b> Two product calls I made and would reverse on a word:
 Action generates three legs rather than four (no <code>cancel</code>), and a new
 relationship is named after the publisher for a Stream but the server for a
