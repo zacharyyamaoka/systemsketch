@@ -97,21 +97,10 @@ export const FIGJAM_ICON_FOR: Partial<Record<AppearanceControlId, ValueToIcon>> 
     middle: 'align/Text align center',
     end: 'align/Text align right',
   },
-  geo: {
-    rectangle: 'shape/Square',
-    ellipse: 'shape/Ellipse',
-    // `oval` intentionally has no entry: FigJam's own picker has no shape
-    // distinct from its ellipse, but tldraw's `oval` and `ellipse` geos are
-    // different shapes — reusing the traced ellipse icon for both drew them
-    // identically. AppearanceGlyph.tsx renders `oval` from an original glyph
-    // (OVAL_RING_PATH) before this map is ever consulted.
-    triangle: 'shape/Triangle',
-    diamond: 'shape/Diamond',
-    pentagon: 'shape/Pentagon',
-    hexagon: 'shape/Hexagon',
-    octagon: 'shape/Octagon',
-    trapezoid: 'shape/Trapezoid',
-  },
+  // `geo` intentionally has no entry: it is `ownDrawing` in
+  // AppearanceGlyph.tsx's GLYPH_FAMILIES and always renders tldraw's own
+  // vendored icon (tldrawGeoIcons.tsx) — see that file's WHY. This map is
+  // never consulted for it.
 }
 
 /** FigJam's icon name for a value, when FigJam draws that value at all. */
