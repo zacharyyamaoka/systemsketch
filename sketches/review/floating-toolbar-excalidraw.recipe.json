@@ -1,0 +1,81 @@
+{
+  "feature": "Floating toolbar — Excalidraw controls, now defaulting to V3 Figma Segmented",
+  "viewport": { "width": 1440, "height": 960 },
+  "shapes": [
+    {
+      "id": "rectBack",
+      "type": "geo",
+      "x": 560,
+      "y": 380,
+      "props": { "w": 220, "h": 140, "geo": "rectangle", "color": "blue", "fill": "none" }
+    },
+    {
+      "id": "rectFront",
+      "type": "geo",
+      "x": 660,
+      "y": 440,
+      "props": { "w": 220, "h": 140, "geo": "rectangle", "color": "orange", "fill": "none" }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "cue-select",
+      "kind": "step",
+      "text": "1 · Select this rectangle",
+      "x": 610,
+      "y": 140,
+      "w": 380,
+      "h": 120,
+      "target": { "shapeId": "rectFront", "anchor": "top" }
+    },
+    {
+      "id": "cue-fill",
+      "kind": "step",
+      "text": "2 · Open Color, set Fill to Hatched",
+      "x": 460,
+      "y": 680,
+      "w": 340,
+      "h": 110,
+      "target": { "shapeId": "rectFront", "anchor": "bottom", "dx": -70 }
+    },
+    {
+      "id": "cue-line-style",
+      "kind": "step",
+      "text": "3 · Open Line style, choose Hand-drawn",
+      "x": 860,
+      "y": 680,
+      "w": 340,
+      "h": 110,
+      "target": { "shapeId": "rectFront", "anchor": "bottom", "dx": 0 }
+    },
+    {
+      "id": "cue-opacity-front",
+      "kind": "step",
+      "text": "4 · Drag Opacity to 30%, then click Bring to front",
+      "x": 1260,
+      "y": 680,
+      "w": 340,
+      "h": 110,
+      "target": { "shapeId": "rectFront", "anchor": "bottom", "dx": 70 }
+    },
+    {
+      "id": "cue-pill-lab",
+      "kind": "step",
+      "text": "5 · This pill IS V3 · Figma Segmented, the new default — no setup needed. Settings → Pill lab compares it against the original layout.",
+      "x": 1080,
+      "y": 850,
+      "w": 540,
+      "h": 130
+    },
+    {
+      "id": "cue-pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The pill shows Excalidraw's icons via V3's segmented groups, and Hatched fill, Hand-drawn stroke, 30% opacity, and Bring to front all stick",
+      "x": 460,
+      "y": 850,
+      "w": 560,
+      "h": 130
+    }
+  ]
+}

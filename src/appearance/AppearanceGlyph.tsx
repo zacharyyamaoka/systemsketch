@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ComponentType, ReactElement, ReactNode } from 'react'
 import { useValue, type Editor } from 'tldraw'
 
 import type {
@@ -9,6 +9,37 @@ import type {
 import { FIGJAM_ICONS } from './figjamIcons'
 import { STROKE_WIDTH_PX, strokeWidthPxForRung } from './strokeMeta'
 import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
+import { TLDRAW_GEO_ICONS } from './tldrawGeoIcons'
+import {
+  ArrowheadArrowIcon,
+  ArrowheadBarIcon,
+  ArrowheadCircleIcon,
+  ArrowheadDiamondIcon,
+  ArrowheadNoneIcon,
+  ArrowheadTriangleIcon,
+  elbowArrowIcon,
+  FillHachureIcon,
+  FillSolidIcon,
+  FontSizeExtraLargeIcon,
+  FontSizeLargeIcon,
+  FontSizeMediumIcon,
+  FontSizeSmallIcon,
+  roundArrowIcon,
+  sharpArrowIcon,
+  SloppinessArtistIcon,
+  StrokeStyleDashedIcon,
+  StrokeStyleDottedIcon,
+  StrokeStyleSolidIcon,
+  StrokeWidthBaseIcon,
+  StrokeWidthBoldIcon,
+  StrokeWidthExtraBoldIcon,
+  TextAlignBottomIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignMiddleIcon,
+  TextAlignRightIcon,
+  TextAlignTopIcon,
+} from './excalidrawIcons/icons'
 
 interface GlyphFamilyRenderer {
   /**
@@ -34,7 +65,11 @@ const GLYPH_FAMILIES: Record<ContextualGlyphFamily, GlyphFamilyRenderer> = {
   swatch: { ownDrawing: true, render: (value, editor) => <ColorSwatch editor={editor} name={value} /> },
   font: { ownDrawing: true, render: (value) => <FontGlyph value={value} /> },
   fill: { render: (value) => <FillGlyph value={value} /> },
-  geo: { render: (value) => <GeoGlyph value={value} /> },
+  // Always tldraw's own vendored icon (tldrawGeoIcons.tsx) — including for
+  // `oval`, which used to be a special-cased original glyph ahead of a
+  // FigJam lookup that had no correct icon for it at all. See that file's
+  // own WHY for the full history.
+  geo: { ownDrawing: true, render: (value) => <GeoGlyph value={value} /> },
   dash: { render: (value) => <DashGlyph value={value} /> },
   size: { render: (value) => <SizeGlyph value={value} /> },
   strokeWidth: { render: (value) => <StrokeWidthGlyph value={value} /> },
@@ -43,6 +78,114 @@ const GLYPH_FAMILIES: Record<ContextualGlyphFamily, GlyphFamilyRenderer> = {
   lineShape: { render: (value) => <RoutingGlyph value={value} /> },
   arrowheadStart: { render: (value) => <ArrowheadGlyph value={value} atStart /> },
   arrowheadEnd: { render: (value) => <ArrowheadGlyph value={value} /> },
+}
+
+/**
+ * Excalidraw's vendored glyphs, exactly where Zach asked for them: "use the
+ * excalidraw icons exactly for showing things like line styling, line
+ * thickness, etc, so we don't need to reinvent another visual icon grammar."
+ *
+ * This is a SECOND lookup layer, keyed the same way `GLYPH_FAMILIES` is (by
+ * `ContextualGlyphFamily`), but narrower on purpose: only the value/family
+ * combinations named in the icon-vendoring plan get a vendored glyph. Every
+ * value absent from a family's map here keeps whatever it already drew —
+ * FigJam's traced icon where one exists, or this file's own drawn glyph
+ * otherwise — because inventing an Excalidraw-styled glyph for a state
+ * Excalidraw has no icon for (tldraw's `semi`/`none` fill, `inverted`/
+ * `square`/`pipe` arrowheads, `async`) would be worse than the honest
+ * mismatch the truthful-rendering rule already accepts elsewhere in this
+ * file. `size` is looked up too, but only reached outside the Font size
+ * LIST layout below — the list's rows stay glyph-free on purpose (each row
+ * previews itself at its own size; see the dispatcher).
+ */
+const EXCALIDRAW_GLYPHS: Partial<Record<ContextualGlyphFamily, Readonly<Record<string, ReactNode>>>> = {
+  fill: { solid: FillSolidIcon, pattern: FillHachureIcon },
+  dash: {
+    draw: SloppinessArtistIcon,
+    solid: StrokeStyleSolidIcon,
+    dashed: StrokeStyleDashedIcon,
+    dotted: StrokeStyleDottedIcon,
+  },
+  strokeWidth: {
+    thin: StrokeWidthBaseIcon,
+    medium: StrokeWidthBoldIcon,
+    thick: StrokeWidthExtraBoldIcon,
+  },
+  size: {
+    s: FontSizeSmallIcon,
+    m: FontSizeMediumIcon,
+    l: FontSizeLargeIcon,
+    xl: FontSizeExtraLargeIcon,
+  },
+  align: {
+    start: TextAlignLeftIcon,
+    middle: TextAlignCenterIcon,
+    end: TextAlignRightIcon,
+  },
+  verticalAlign: {
+    start: TextAlignTopIcon,
+    middle: TextAlignMiddleIcon,
+    end: TextAlignBottomIcon,
+  },
+  lineShape: {
+    elbow: elbowArrowIcon,
+    curve: roundArrowIcon,
+    straight: sharpArrowIcon,
+  },
+}
+
+/**
+ * The arrowhead values Excalidraw draws, as flip-aware components rather than
+ * fixed nodes — `flip` mirrors the glyph for the start side, matching
+ * `createIcon.tsx`'s `ArrowheadIconProps` contract. `inverted`, `square` and
+ * `pipe` have no Excalidraw analog (the plan's own exclusion list) and are
+ * left out, so they fall through to FigJam's traced icon or this file's drawn
+ * `ArrowheadGlyph`, exactly as before.
+ */
+const EXCALIDRAW_ARROWHEADS: Readonly<Record<string, ComponentType<{ flip?: boolean }>>> = {
+  none: ArrowheadNoneIcon,
+  arrow: ArrowheadArrowIcon,
+  triangle: ArrowheadTriangleIcon,
+  diamond: ArrowheadDiamondIcon,
+  dot: ArrowheadCircleIcon,
+  bar: ArrowheadBarIcon,
+}
+
+/**
+ * A vendored icon wrapped for this app's 24px option-cell grid.
+ *
+ * `createIcon` never sets a `width`/`height` DOM attribute (only a `viewBox`
+ * — see `createIcon.tsx`), so an unstyled vendored `<svg>` renders at the
+ * browser's intrinsic default and blows out the pill. This class-only wrapper
+ * gives it the same box every drawn glyph already sits in
+ * (`.systemsketch-appearance__glyph`), sized in `appearance.css`; a
+ * non-square source (the 40x20 arrowhead preview strip) letterboxes inside
+ * the square cell via the SVG's own default `preserveAspectRatio`, rather
+ * than stretching.
+ */
+function ExcalidrawGlyph({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="systemsketch-appearance__glyph systemsketch-appearance__glyph--excalidraw"
+      aria-hidden="true"
+    >
+      {children}
+    </span>
+  )
+}
+
+/** The vendored glyph for an ordinary (non-arrowhead) family/value pair, if one is mapped. */
+function excalidrawGlyphFor(
+  family: ContextualGlyphFamily | undefined,
+  value: string | undefined,
+): ReactNode | undefined {
+  if (!family || value === undefined) return undefined
+  return EXCALIDRAW_GLYPHS[family]?.[value]
+}
+
+/** The vendored, flip-aware arrowhead component for a value, if one is mapped. */
+function excalidrawArrowheadFor(value: string | undefined): ComponentType<{ flip?: boolean }> | undefined {
+  return value === undefined ? undefined : EXCALIDRAW_ARROWHEADS[value]
 }
 
 /**
@@ -67,6 +210,23 @@ export function AppearanceGlyph({
   // own size, and the label carries that. (The same `size` family still draws
   // its bars where the layout is a compact row — the connector's weight.)
   if (control.glyph === 'size' && control.layout === 'list') return null
+  // Excalidraw's own vendored glyph, wherever the icon-vendoring plan names
+  // one for this family/value — see `EXCALIDRAW_GLYPHS` and
+  // `EXCALIDRAW_ARROWHEADS` above for exactly which values these are. This
+  // OUTRANKS FigJam's traced icon below: Zach's explicit ask is Excalidraw's
+  // own glyphs for these controls, not FigJam's redrawn ones.
+  if (control.glyph === 'arrowheadStart' || control.glyph === 'arrowheadEnd') {
+    const ArrowheadIcon = excalidrawArrowheadFor(value)
+    if (ArrowheadIcon) {
+      // Excalidraw draws one arrowhead set pointing at its terminal (unflipped)
+      // side; the start control mirrors it, same convention as FigJam's own
+      // traced pair below.
+      return <ExcalidrawGlyph><ArrowheadIcon flip={control.glyph === 'arrowheadStart'} /></ExcalidrawGlyph>
+    }
+  } else {
+    const excalidraw = excalidrawGlyphFor(control.glyph, value)
+    if (excalidraw) return <ExcalidrawGlyph>{excalidraw}</ExcalidrawGlyph>
+  }
   // FigJam's own icon wherever FigJam draws this value. The drawn families
   // below stay for the states tldraw has and FigJam does not.
   const figjam = figjamIconName(control.kind as AppearanceControlId, value)
@@ -189,32 +349,9 @@ function FillGlyph({ value }: { value: string | undefined }) {
   )
 }
 
-/** A rough outline per geo kind — enough to tell a diamond from an ellipse. */
-const GEO_PATHS: Record<string, string> = {
-  rectangle: 'M3 4h14v12H3z',
-  ellipse: 'M10 4a7 6 0 1 0 .01 0z',
-  triangle: 'M10 3.5 17 16.5H3z',
-  diamond: 'M10 3l7 7-7 7-7-7z',
-  pentagon: 'M10 3l7 5-2.7 8.3H5.7L3 8z',
-  hexagon: 'M6 4h8l4 6-4 6H6l-4-6z',
-  octagon: 'M7 3h6l4 4v6l-4 4H7l-4-4V7z',
-  star: 'M10 3l2.2 4.7 5.1.6-3.8 3.5 1 5-4.5-2.5L5.5 16.8l1-5L2.7 8.3l5.1-.6z',
-  rhombus: 'M6 4h11l-3 12H3z',
-  'rhombus-2': 'M3 4h11l3 12H6z',
-  oval: 'M7 4h6a5 6 0 0 1 0 12H7a5 6 0 0 1 0-12z',
-  trapezoid: 'M6 4h8l3 12H3z',
-  cloud: 'M6 15a3.4 3.4 0 0 1 .3-6.8A4.3 4.3 0 0 1 14.4 8 3.5 3.5 0 0 1 14 15z',
-  heart: 'M10 16.5S3 12.3 3 7.9A3.4 3.4 0 0 1 10 6a3.4 3.4 0 0 1 7 1.9c0 4.4-7 8.6-7 8.6z',
-  'x-box': 'M3 4h14v12H3zM6.5 7.5l7 5M13.5 7.5l-7 5',
-  'check-box': 'M3 4h14v12H3zM6.5 10.2l2.4 2.4 4.6-4.8',
-  'arrow-right': 'M3 7.5h7V4l7 6-7 6v-3.5H3z',
-  'arrow-left': 'M17 7.5h-7V4L3 10l7 6v-3.5h7z',
-  'arrow-up': 'M7.5 17v-7H4l6-7 6 7h-3.5v7z',
-  'arrow-down': 'M7.5 3v7H4l6 7 6-7h-3.5V3z',
-}
-
+/** tldraw's own vendored icon for the value — see `tldrawGeoIcons.tsx`. */
 function GeoGlyph({ value }: { value: string | undefined }) {
-  return <Svg><path d={GEO_PATHS[value ?? 'rectangle'] ?? GEO_PATHS.rectangle} /></Svg>
+  return <>{TLDRAW_GEO_ICONS[value ?? 'rectangle'] ?? TLDRAW_GEO_ICONS.rectangle}</>
 }
 
 /**

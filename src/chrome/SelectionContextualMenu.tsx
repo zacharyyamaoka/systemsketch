@@ -13,8 +13,9 @@ import {
   isSelectionOnScreen,
   placeSelectionMenu,
   type SelectionMenuSide,
-} from './selectionMenuPlacement'
+} from './floatingToolbarPlacement'
 import { useInterfaceScale } from '../settings/interfaceScale'
+import { usePillPresentation } from '../settings/pillPresentation'
 
 /**
  * Select-tool states in which the pointer is manipulating the selection.
@@ -64,7 +65,10 @@ export interface SelectionContextualMenuProps {
  * per-frame position write, `TldrawUiToolbar` for the toolbar semantics,
  * `usePassThroughWheelEvents` so scrolling over the menu still pans the canvas.
  *
- * Placement policy lives in {@link placeSelectionMenu}; see
+ * Placement policy lives in {@link placeSelectionMenu} (`@floating-ui/core`
+ * middleware since 2026-09-07, replacing this file's own hand-rolled flip
+ * math — see `floatingToolbarPlacement.ts`'s own doc for why and its
+ * differential test for proof the policy is unchanged); see
  * `docs/figjam-contextual-menu-spec-2026-09-01.html` for the measurements.
  */
 export function SelectionContextualMenu(props: SelectionContextualMenuProps) {
@@ -93,6 +97,7 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
   const editor = useEditor()
   const ref = useRef<HTMLDivElement>(null)
   usePassThroughWheelEvents(ref)
+  const presentation = usePillPresentation()
 
   // Content changes the menu's width, which changes where its centre lands.
   // A resize is not a signal, so bump one the position reactor can subscribe to.
@@ -114,11 +119,22 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
     sizeEpoch.update((epoch) => epoch + 1)
   }, [interfaceScale, sizeEpoch])
 
+  // `placeSelectionMenu` is async under `@floating-ui/core` (its
+  // `computePosition` always resolves, even against the synthetic zero-DOM
+  // platform — see `floatingToolbarPlacement.ts`). A monotonic pass id is
+  // what keeps a slow/reordered resolution from writing stale coordinates
+  // over a newer pass's: every reactor run claims the next id before calling
+  // `placeSelectionMenu`, and the `.then` only writes if its own id is still
+  // current when the promise settles.
+  const placementPass = useRef(0)
+
   useQuickReactor(
     'systemsketch selection menu position',
     () => {
       // Read every signal before touching the DOM, so this reactor stays
-      // subscribed even on a pass that bails out early.
+      // subscribed even on a pass that bails out early — and before the one
+      // `await`-shaped boundary below, so the subscription is captured
+      // synchronously regardless of how long `placeSelectionMenu` takes.
       const screenBounds = editor.getSelectionRotatedScreenBounds()
       const viewportBounds = editor.getViewportScreenBounds()
       sizeEpoch.get()
@@ -154,24 +170,39 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
         .querySelector(BOTTOM_CHROME_SELECTOR)
         ?.getBoundingClientRect()
 
-      const placement = placeSelectionMenu({
+      const pass = ++placementPass.current
+      placeSelectionMenu({
         selection,
         menu: { w: menu.width, h: menu.height },
         viewport,
         bottomObstacleTop: bottomChrome
           ? bottomChrome.top - viewportBounds.y
           : undefined,
+      }).then((placement) => {
+        // A newer pass (a later selection/resize/scale change) already ran
+        // and possibly unmounted this element — never let a stale resolution
+        // overwrite what it wrote, or write into a detached node.
+        if (placementPass.current !== pass || ref.current !== element) return
+        // Custom properties rather than `transform`, so the stylesheet keeps
+        // ownership of how the interface scale is applied on top of the anchor.
+        element.style.setProperty('--systemsketch-selection-menu-x', `${placement.x}px`)
+        element.style.setProperty('--systemsketch-selection-menu-y', `${placement.y}px`)
+        element.dataset.side = placement.side satisfies SelectionMenuSide
+        element.dataset.visible = 'true'
       })
-
-      // Custom properties rather than `transform`, so the stylesheet keeps
-      // ownership of how the interface scale is applied on top of the anchor.
-      element.style.setProperty('--systemsketch-selection-menu-x', `${placement.x}px`)
-      element.style.setProperty('--systemsketch-selection-menu-y', `${placement.y}px`)
-      element.dataset.side = placement.side satisfies SelectionMenuSide
-      element.dataset.visible = 'true'
     },
     [editor, sizeEpoch],
   )
+
+  // A plain test/inspection hook — the skin itself is a CSS custom-property
+  // scope stamped at the app root (`App.tsx`), not here, because a control's
+  // popover panel portals out of this element entirely (`useContainer()`)
+  // and would not inherit a property scoped only to this local wrapper.
+  // WHY only stamped while `compare` is on: an attribute selector with no
+  // value never matches, so leaving it off entirely when Zach is not
+  // actively comparing is part of what keeps the shipped pill byte-identical
+  // to before this feature existed — see `pillPresentation.ts`.
+  const pillLayout = presentation.compare && presentation.layout !== 'default' ? presentation.layout : undefined
 
   return (
     <div
@@ -179,6 +210,7 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
       className={className}
       data-testid="systemsketch-selection-menu"
       data-visible="false"
+      data-ss-pill-layout={pillLayout}
       onPointerDown={editor.markEventAsHandled}
     >
       <TldrawUiToolbar

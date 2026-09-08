@@ -110,9 +110,15 @@
 	gap: 8px;
 	margin-top: 6px;
 	padding: 6px 8px 2px;
-	border-top: 1px solid var(--ss-border-inverse);
+	/* This row renders INSIDE `.systemsketch-appearance__panel`, whose surface
+	 * a Pill lab skin repaints — so it has to read the pill's own ink rather
+	 * than the fixed-white app inverse token, which measured 1.00:1 (white on
+	 * white) against skin 3 and 1.04-1.14:1 against the other light skins.
+	 * Each fallback is the exact token used before, so an unskinned panel is
+	 * unchanged. */
+	border-top: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
 	font-size: 11px;
-	color: var(--ss-text-inverse);
+	color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
 }
 
 .code-width-custom span:first-child {
@@ -122,10 +128,10 @@
 .code-width-custom input {
 	width: 56px;
 	padding: 4px 6px;
-	border: 1px solid var(--ss-border-inverse);
+	border: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
 	border-radius: 4px;
-	background: var(--ss-surface-inverse-hover);
-	color: var(--ss-text-inverse);
+	background: var(--systemsketch-pill-hover, var(--ss-surface-inverse-hover));
+	color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
 	font: inherit;
 	text-align: right;
 }
@@ -136,7 +142,7 @@
 }
 
 .code-width-custom__unit {
-	color: color-mix(in srgb, var(--ss-text-inverse) 65%, transparent);
+	color: color-mix(in srgb, var(--systemsketch-pill-ink, var(--ss-text-inverse)) 65%, transparent);
 }
 
 /* ------------------------------ resize HUD ------------------------------ */

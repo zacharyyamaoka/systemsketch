@@ -499,7 +499,19 @@ function CustomFontSizeCell({ binding }: { binding: ContextualCustomSize }) {
   )
 }
 
-function ContextualPopover({
+/**
+ * The one disclosure every control in a contextual menu opens through.
+ *
+ * WHY exported: the Arrange cluster moved behind a trigger of its own
+ * (`ArrangeControls.tsx`'s `ArrangeTrigger`, 2026-09-08) and needs exactly this
+ * popover — stock `TldrawUiPopover*` in the pill, Radix while a canvas text
+ * editor is live. Building it a second copy beside this one is how two menus
+ * end up flipping, offsetting and portalling differently; the alternative of
+ * reaching for `TldrawUiPopover*` directly from `ArrangeControls.tsx` would
+ * also have put tldraw's React context into a module whose whole point is that
+ * it renders with `renderToStaticMarkup` and no editor.
+ */
+export function ContextualPopover({
   id,
   mode,
   trigger,

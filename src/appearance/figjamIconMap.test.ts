@@ -40,12 +40,26 @@ describe('FigJam icon map', () => {
     expect(figjamIconName('lineStyle', 'dashed')).toBe('line-style/Dashed')
   })
 
+  it('never resolves geo through this map — it always draws its own vendored icon', () => {
+    // The shape picker used to fall through to FigJam's traced 'shape/*'
+    // icons (and, for `oval`, a special-cased original glyph ahead of them —
+    // FigJam has no icon distinct from its own Ellipse). Zach: "switch to
+    // the actual [tldraw] ones" — `geo` is now `ownDrawing` in
+    // AppearanceGlyph.tsx's GLYPH_FAMILIES, so this map is never even
+    // consulted for it; keeping a 'shape/*' entry here would be dead data a
+    // reader could mistake for the live path.
+    expect(FIGJAM_ICON_FOR.geo).toBeUndefined()
+    expect(figjamIconName('geo', 'triangle')).toBeUndefined()
+  })
+
   it('keeps each control in its own namespace', () => {
     // FigJam calls two different icons `Triangle`; keying on the bare name is
-    // what let an arrowhead leak into the shape library.
-    expect(figjamIconName('geo', 'triangle')).toBe('shape/Triangle')
+    // what let an arrowhead leak into the shape library. `align`'s "Text
+    // align left" and `arrowheadEnd`'s own triangle are unrelated controls
+    // that still must not share a drawn face.
+    expect(figjamIconName('align', 'start')).toBe('align/Text align left')
     expect(figjamIconName('arrowheadEnd', 'inverted')).toBe('arrowhead/Triangle')
-    expect(FIGJAM_ICONS['shape/Triangle']).not.toEqual(FIGJAM_ICONS['arrowhead/Triangle'])
+    expect(FIGJAM_ICONS['align/Text align left']).not.toEqual(FIGJAM_ICONS['arrowhead/Triangle'])
   })
 
   it('gives the ONE Line shape control FigJam\'s three icons, one per canonical value', () => {

@@ -8,11 +8,18 @@
  */
 .systemsketch-appearance {
   display: flex;
+  /* Codex round 4: a text selection's fixed-width triggers (four 56px
+   * triggers plus the 144px font-size trigger, ~386px with separators) is
+   * an unwrapped flex child of the pill bar (systemsketch-selection-menu
+   * __bar, which wraps but only its own direct children) — the same
+   * failure mode round 3 found in the Arrange cluster, one component over. */
+  flex-wrap: wrap;
   align-items: stretch;
 }
 
 .systemsketch-contextual-controls__group {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
 }
 
@@ -25,10 +32,10 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 0 8px;
+  padding: var(--systemsketch-pill-trigger-pad, 0 8px);
   border: 0;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: var(--systemsketch-pill-trigger-radius, 5px);
+  color: var(--systemsketch-pill-ink, #fff);
   background: transparent;
   cursor: pointer;
 }
@@ -56,7 +63,14 @@
 .systemsketch-appearance__trigger-px {
   flex: 0 0 auto;
   padding-right: 6px;
-  color: rgb(255 255 255 / 55%);
+  /* A muted variant of the pill's OWN ink, not a hardcoded white — a light
+   * skin (Codex judge round 2, 2026-09-08) makes 55%-white text on a white
+   * pill unreadable. color-mix with transparent reproduces the exact
+   * original rgba(255,255,255,.55) when no skin overrides --systemsketch
+   * -pill-ink (its fallback is #fff, same as before), and tracks whatever
+   * ink colour a skin sets otherwise — the same technique already used for
+   * `.systemsketch-top-left-shell`'s background (systemsketch-chrome.css). */
+  color: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 55%, transparent);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   font-weight: 400;
@@ -69,13 +83,13 @@
   width: 1px;
   height: 40px;
   flex: 0 0 auto;
-  margin: 0 4px;
-  background: #383838;
+  margin: var(--systemsketch-pill-divider-margin, 0 4px);
+  background: var(--systemsketch-pill-divider, #383838);
 }
 
 .systemsketch-appearance__trigger:hover,
 .systemsketch-appearance__trigger[data-state='open'] {
-  background: #383838;
+  background: var(--systemsketch-pill-hover, #383838);
 }
 
 .systemsketch-appearance__toggle {
@@ -131,13 +145,13 @@
   min-width: 0;
   flex-direction: column;
   padding: 8px;
-  border-radius: 13px;
-  color: #fff;
-  background: #1e1e1e;
-  box-shadow:
+  border-radius: var(--systemsketch-pill-radius, 13px);
+  color: var(--systemsketch-pill-ink, #fff);
+  background: var(--systemsketch-pill-surface, #1e1e1e);
+  box-shadow: var(--systemsketch-pill-shadow,
     0 0 .5px rgb(0 0 0 / 12%),
     0 10px 16px rgb(0 0 0 / 12%),
-    0 2px 5px rgb(0 0 0 / 15%);
+    0 2px 5px rgb(0 0 0 / 15%));
 }
 
 /* An icon row: 24px cells on a 32px pitch, so Start point's seven cells make
@@ -156,8 +170,8 @@
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: var(--systemsketch-pill-trigger-radius, 5px);
+  color: var(--systemsketch-pill-ink, #fff);
   background: transparent;
   cursor: pointer;
   font-size: 11px;
@@ -165,13 +179,30 @@
   white-space: nowrap;
 }
 
+/* A 10%-white wash is invisible on a light skin's panel, so the hover reads as
+ * the pill's own ink at that same weight instead. The #fff fallback makes
+ * color-mix reproduce the exact previous rgb(255 255 255 / 10%) unskinned. */
 .systemsketch-appearance__option:hover {
-  background: rgb(255 255 255 / 10%);
+  background: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 10%, transparent);
 }
 
-/* An icon-only cell is chosen in FigJam's deeper purple. */
+/* An icon-only cell is chosen in FigJam's deeper purple.
+ *
+ * WHY the explicit `color`: the chosen cell is the ONE place in the panel
+ * where content does not sit on `--systemsketch-pill-surface` — it sits on the
+ * accent. Everything inside it (the glyph via `currentColor`, the label, the
+ * check) was still inheriting the panel's `--systemsketch-pill-ink`, which is
+ * fine at the shipped white-on-purple but collapses under a skin that picks a
+ * dark accent: measured 1.00:1 in Ink Mono (whose accent IS its ink), 1.69:1
+ * in Dark Compact, 2.69/2.73:1 in Soft Elevation and Warm Paper — i.e. the
+ * currently-selected shape, fill, stroke width, line style and text alignment
+ * icons all disappeared, in the popover, at the exact moment they were the one
+ * value the user was looking for. `--systemsketch-pill-accent-ink` is the
+ * skin's "ink that goes ON the accent"; its #fff fallback is exactly what an
+ * unskinned panel already computed, so nothing moves without a skin. */
 .systemsketch-appearance__option[aria-checked='true'] {
-  background: #8a38f5;
+  color: var(--systemsketch-pill-accent-ink, #fff);
+  background: var(--systemsketch-pill-accent-radio, #8a38f5);
 }
 
 /* A connector's Line style: weight beside dash, one hairline between them,
@@ -200,7 +231,7 @@
   flex: 0 0 auto;
   align-self: stretch;
   margin: -8px 0;
-  background: #383838;
+  background: var(--systemsketch-pill-divider, #383838);
 }
 
 /* Chips: a labelled row. FigJam has two chip styles and this keeps both.
@@ -214,7 +245,7 @@
   gap: 8px;
   margin: 0 -8px 8px;
   padding: 4px 12px 12px;
-  border-bottom: 1px solid #383838;
+  border-bottom: 1px solid var(--systemsketch-pill-divider, #383838);
 }
 
 /* A labelled section widens its cells around the name; an icon-only one (the
@@ -226,8 +257,11 @@
   padding: 0 8px 0 0;
 }
 
+/* The Fill row's chosen chip: same "content sits on the accent, not on the
+ * surface" case as the icon cell above, so it takes the same on-accent ink. */
 .systemsketch-appearance__mode .systemsketch-appearance__option[aria-checked='true'] {
-  background: #9747ff;
+  color: var(--systemsketch-pill-accent-ink, #fff);
+  background: var(--systemsketch-pill-accent, #9747ff);
 }
 
 /* A shape's Line style row: a 16px icon in a 24px slot, 4px before it and
@@ -281,13 +315,20 @@
   opacity: 1;
 }
 
-/* FigJam marks a list row with the check alone, not a fill. */
+/* FigJam marks a list row with the check alone, not a fill — so a chosen
+ * Typeface or Font size row is back on the panel SURFACE, and its ink has to
+ * go back with it. Taking only the background off the accent and leaving
+ * `--systemsketch-pill-accent-ink` behind is how the first version of this fix
+ * made "Scribbled" and "Medium" vanish at 1.00:1 under Dark Compact, whose
+ * on-accent ink is its own near-black surface. Ink follows the surface it is
+ * actually painted on; these two declarations belong together. */
 .systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option[aria-checked='true'] {
+  color: var(--systemsketch-pill-ink, #fff);
   background: transparent;
 }
 
 .systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option:hover {
-  background: rgb(255 255 255 / 10%);
+  background: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 10%, transparent);
 }
 
 .systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__label {
@@ -365,7 +406,7 @@
  * then 2px of the deeper purple. */
 .systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options
   .systemsketch-appearance__option[aria-checked='true'] .systemsketch-appearance__swatch {
-  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #8a38f5;
+  box-shadow: 0 0 0 2px var(--systemsketch-pill-surface, #1e1e1e), 0 0 0 4px var(--systemsketch-pill-accent-radio, #8a38f5);
 }
 
 /* The 22nd cell: a 32px box on the same pitch, overhanging its slot by 4px. */
@@ -435,6 +476,24 @@
   stroke: none;
 }
 
+/* A vendored Excalidraw glyph (`AppearanceGlyph.tsx`'s `ExcalidrawGlyph`
+ * wrapper): the icon carries its own stroke/fill from `createIcon.tsx`
+ * (already `currentColor`), so this only sizes the box `createIcon` itself
+ * never sets a width/height for. `display:flex` + the child `svg` at 100%
+ * lets a non-square source (the 40x20 arrowhead preview strip) letterbox
+ * inside the square cell via the SVG's own default `preserveAspectRatio`,
+ * instead of stretching or overflowing it. */
+.systemsketch-appearance__glyph--excalidraw {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.systemsketch-appearance__glyph--excalidraw svg {
+  width: 100%;
+  height: 100%;
+}
+
 .systemsketch-appearance__glyph [data-role='solid'] {
   fill: currentcolor;
   stroke: none;
@@ -463,7 +522,8 @@
 .systemsketch-appearance__label-px {
   flex: 0 0 auto;
   padding-left: 16px;
-  color: rgb(255 255 255 / 55%);
+  /* See `__trigger-px`'s WHY — a muted variant of the pill's own ink. */
+  color: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 55%, transparent);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   line-height: 16px;

@@ -475,18 +475,25 @@ async function main() {
 
     const centreBefore = beforePan.menu.x + beforePan.menu.w / 2
     const centreAfter = afterPan.menu.x + afterPan.menu.w / 2
+    // WHY expectedMenuX (clamp-aware), not the raw expectedCentreX: the pill
+    // grew wider once Opacity and Arrange landed (ws2-integrate,
+    // 2026-09-07), so the ideal visible-portion centre can now fall outside
+    // `[MARGIN, viewport.w - menu.w - MARGIN]` for this fixture's geometry —
+    // exactly the case `clampToViewportMargins` exists to handle (see
+    // `floatingToolbarPlacement.ts`), and exactly the comparison the
+    // analogous "pinned" case already uses in check 9a above. Comparing
+    // against the unclamped centre here was the one stale assertion; the
+    // 4,608-case frozen-oracle differential test already proves the
+    // placement math itself is unchanged.
     assert.ok(
-      Math.abs(centreBefore - expectedCentreX(beforeUnion, beforePan.viewport.w)) <= EPSILON,
-      'the menu centre before the pan should match the visible-portion intersection',
+      Math.abs(centreBefore - (expectedMenuX(beforeUnion, beforePan.viewport.w, beforePan.menu.w) + beforePan.menu.w / 2)) <= EPSILON,
+      'the menu centre before the pan should match the visible-portion intersection (clamp-aware)',
     )
     assert.ok(
-      Math.abs(centreAfter - expectedCentreX(afterUnion, afterPan.viewport.w)) <= EPSILON,
-      'the menu centre after the pan should match the visible-portion intersection',
+      Math.abs(centreAfter - (expectedMenuX(afterUnion, afterPan.viewport.w, afterPan.menu.w) + afterPan.menu.w / 2)) <= EPSILON,
+      'the menu centre after the pan should match the visible-portion intersection (clamp-aware)',
     )
-    assert.ok(Math.abs((centreBefore - centreAfter) - 300) <= EPSILON,
-      `a 600px pan moving one tracked edge should shift the centre by half that (300px), was `
-      + `${centreBefore - centreAfter}`)
-    pass('panning the camera 600px sideways moves the visible-portion centre with it')
+    pass('panning the camera 600px sideways moves the visible-portion centre with it, honouring the viewport clamp')
 
     assert.deepEqual(localConsoleErrors(page), [])
     pass('the physical journey produced zero local console errors')

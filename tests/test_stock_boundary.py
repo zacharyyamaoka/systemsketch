@@ -101,7 +101,7 @@ class StockBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("id: 'menu-lab',", settings_source)
         self.assertIn("label: 'Menu lab',", settings_source)
-        self.assertIn("'shortcuts', 'menu-lab']", settings_source)
+        self.assertIn("'shortcuts', 'menu-lab', 'pill-lab']", settings_source)
         self.assertIn(
             "import { MenuLabPanel } from '../prototypes/menuLab/ContextualMenuLab'",
             settings_source,

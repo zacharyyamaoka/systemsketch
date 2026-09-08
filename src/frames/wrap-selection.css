@@ -14,7 +14,15 @@
   padding: 0 8px;
   border: 0;
   border-radius: 5px;
-  color: var(--ss-text-inverse);
+  /* The pill's OWN ink, not the app-wide inverse token. This trigger sits on
+   * `.systemsketch-selection-menu__bar`, whose surface a Pill lab skin
+   * repaints (pillSkins.css); `--ss-text-inverse` is fixed white, so under
+   * the four light skins the glyph, the word "Wrap" and the chevron all
+   * painted white on white — measured at 1.00:1 against skin 3 and 1.04-1.14:1
+   * against skins 1/2/4, i.e. the whole control vanished. The fallback is the
+   * same `--ss-text-inverse` this used before, so an unskinned pill is
+   * byte-identical. Same fix as `.systemsketch-appearance__trigger-px`. */
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
   background: transparent;
   cursor: pointer;
   font: 500 12px/1 inherit;
@@ -22,7 +30,9 @@
 
 .systemsketch-wrap__trigger:hover,
 .systemsketch-wrap__trigger[data-state='open'] {
-  background: var(--ss-surface-inverse-hover);
+  /* Likewise: the stock hover is white-at-14%, invisible on a light skin, so
+   * the open state gave no feedback at all. */
+  background: var(--systemsketch-pill-hover, var(--ss-surface-inverse-hover));
 }
 
 .systemsketch-wrap__glyph {

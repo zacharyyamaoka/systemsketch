@@ -60,6 +60,11 @@ CONTENT_FILES: dict[str, str] = {
         "a debug instrument: the reds outline hit areas for the browser journeys and are "
         "compiled out of released builds."
     ),
+    "src/appearance/pillSkins.css": (
+        "the Phase 2 ink-pass comparison lab: five real, non-shipping visual directions for "
+        "the selection pill, deliberately isolated from the live theme vocabulary since none "
+        "of them is a decision yet — only something to look at side by side."
+    ),
 }
 
 

@@ -40,7 +40,7 @@
   "ok": true
  },
  {
-  "label": "panning the camera 600px sideways moves the visible-portion centre with it",
+  "label": "panning the camera 600px sideways moves the visible-portion centre with it, honouring the viewport clamp",
   "ok": true
  },
  {

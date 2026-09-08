@@ -18,6 +18,7 @@ import { connectionRoutingForArrowPreset } from '../toolbar/toolbarModel'
 import {
   buildAppearanceControls,
   isConnectorSelection,
+  restructureForV1Cluster,
   withEdgeValues,
   EDGE_MIXED,
   type AppearanceControl,
@@ -54,11 +55,15 @@ import type { ArrowPreset } from '../toolbar/toolbarModel'
 import {
   CONNECTOR_CONTEXTUAL_RECIPE,
   SHAPE_CONTEXTUAL_RECIPE,
+  V1_COMPACT_RECIPE,
+  V3_SEGMENTED_RECIPE,
   bindContextualControl,
   composeContextualControls,
   type ContextualControl,
+  type ContextualControlRecipe,
 } from '../contextualMenus/contextualControlRegistry'
 import { ContextualControls } from '../contextualMenus/ContextualControls'
+import { usePillPresentation } from '../settings/pillPresentation'
 
 /**
  * The stock-style/meta adapter. It binds tldraw and edge values into the same
@@ -89,14 +94,28 @@ export function AppearanceControls() {
     [editor],
   )
   const edges = useEdgeValues(editor)
+  const presentation = usePillPresentation()
+  // WHY gated on `compare`: a `layout` left over from a previous lab session
+  // must never silently change the shipped pill on an ordinary day — see
+  // `pillPresentation.ts`. V3 "Figma Segmented" is that shipped pill as of
+  // 2026-09-08 (Zach: "please set v3 to the default"); `'default'` now names
+  // the pre-lab Phase 1 layout, kept reachable only through Pill lab compare.
+  const layout = presentation.compare ? presentation.layout : 'v3'
 
   const appearance = buildAppearanceControls(styles, hasText, selectedArrowRouting)
     .map((control) => withEdgeValues(control, edges))
-  const candidates = appearance.map((control) => bindAppearanceControl(editor, control))
+  let candidates: ContextualControl[] = appearance.map((control) => bindAppearanceControl(editor, control))
   if (addTextShape) candidates.push(bindAddTextControl(editor, addTextShape))
-  const recipe = styles && isConnectorSelection(styles)
-    ? CONNECTOR_CONTEXTUAL_RECIPE
-    : SHAPE_CONTEXTUAL_RECIPE
+
+  let recipe: ContextualControlRecipe
+  if (layout === 'v1') {
+    candidates = restructureForV1Cluster(candidates)
+    recipe = V1_COMPACT_RECIPE
+  } else if (layout === 'v3') {
+    recipe = V3_SEGMENTED_RECIPE
+  } else {
+    recipe = styles && isConnectorSelection(styles) ? CONNECTOR_CONTEXTUAL_RECIPE : SHAPE_CONTEXTUAL_RECIPE
+  }
   const composition = composeContextualControls(recipe, candidates)
   if (composition.groups.length === 0) return null
 
