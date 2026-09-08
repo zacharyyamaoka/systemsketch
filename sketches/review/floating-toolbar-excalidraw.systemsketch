@@ -4,7 +4,7 @@
     "application": "SystemSketch",
     "shapes": {
       "arrow": 5,
-      "geo": 7,
+      "geo": 8,
       "text": 1
     },
     "bindings": {
@@ -110,7 +110,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3L02",
+      "index": "a3Rdv",
       "typeName": "shape"
     },
     {
@@ -185,7 +185,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a1wIQ",
+      "index": "a1Kbz",
       "typeName": "shape"
     },
     {
@@ -230,7 +230,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a9UPJ",
+      "index": "a9mlb",
       "typeName": "shape"
     },
     {
@@ -282,16 +282,8 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a7j5WV",
+      "index": "a7zoOl",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#F2555A",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:uL14YZImZbOR8Pp51m109",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -352,7 +344,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5ufbG",
+      "index": "a5wnEV",
       "typeName": "shape"
     },
     {
@@ -410,7 +402,52 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7NB2",
+      "index": "a7gnI",
+      "typeName": "shape"
+    },
+    {
+      "x": 1080,
+      "y": 850,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pill-lab",
+      "type": "geo",
+      "props": {
+        "w": 540,
+        "h": 130,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 · Settings → Pill lab → Compare toolbar layouts. Try the Layout and Style pickers bottom-left of the canvas."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aAyL2",
       "typeName": "shape"
     },
     {
@@ -449,16 +486,8 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2mpQ",
+      "index": "a2ZM6",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#39B178",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:zHSpTohuNIzkzuMjGGAEy",
-      "typeName": "user"
     },
     {
       "x": 610,
@@ -502,7 +531,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5kTv",
+      "index": "a5Ufe",
       "typeName": "shape"
     },
     {
@@ -546,16 +575,8 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a8y6zd",
+      "index": "a8xAEO",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:LO-sn7TsjobGLFlRlMoye",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -616,16 +637,8 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6qv7G",
+      "index": "a6ymNl",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#7B66DC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:mhGqDZfvAS6TJHcOehIx8",
-      "typeName": "user"
     },
     {
       "x": 1260,
@@ -669,7 +682,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a8f9j",
+      "index": "a8s8X",
       "typeName": "shape"
     },
     {
@@ -732,7 +745,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6bfr",
+      "index": "a6dgv",
       "typeName": "shape"
     },
     {
@@ -768,7 +781,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4OtI",
+      "index": "a44Rj",
       "typeName": "shape"
     },
     {
@@ -790,6 +803,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:vgqVhTi5CT8JHmE4KiecI",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "page:page",
       "name": "Page 1",
@@ -802,14 +823,6 @@
       "meta": {},
       "id": "document:document",
       "typeName": "document"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:D7tW-FjDg7YRtkjP4TqHo",
-      "typeName": "user"
     },
     {
       "followingUserId": null,
@@ -831,8 +844,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1440,
-        "h": 960
+        "w": 1600,
+        "h": 1150
       },
       "insets": [
         false,
@@ -895,14 +908,6 @@
         "terminal": "end"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#E34BA9",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:cqwP-LjpuHHL2cebYDUDV",
-      "typeName": "user"
     }
   ]
 }
