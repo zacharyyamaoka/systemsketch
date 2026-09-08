@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
-import { ArrangeControls, type ArrangeAction } from './ArrangeControls'
+import { ArrangeControls, type ArrangeAction, type ArrangeActionGroup } from './ArrangeControls'
 
 function icon(name: string) {
   function Icon({ className }: { className?: string }) {
@@ -17,22 +17,27 @@ const Z_ORDER: ArrangeAction[] = [
   { id: 'bringForward', label: 'Bring forward', icon: icon('bring-forward') },
   { id: 'bringToFront', label: 'Bring to front', icon: icon('bring-to-front') },
 ]
+const Z_ORDER_GROUP: ArrangeActionGroup = { id: 'z-order', actions: Z_ORDER }
 
-const ALIGN: ArrangeAction[] = [
+const ALIGN_HORIZONTAL: ArrangeAction[] = [
   { id: 'alignLeft', label: 'Align left', icon: icon('align-left') },
   { id: 'alignCenterH', label: 'Align center', icon: icon('align-center-h') },
   { id: 'alignRight', label: 'Align right', icon: icon('align-right') },
+]
+const ALIGN_VERTICAL: ArrangeAction[] = [
   { id: 'alignTop', label: 'Align top', icon: icon('align-top') },
   { id: 'alignCenterV', label: 'Align middle', icon: icon('align-center-v') },
   { id: 'alignBottom', label: 'Align bottom', icon: icon('align-bottom') },
+]
+const DISTRIBUTE: ArrangeAction[] = [
   { id: 'distributeHorizontal', label: 'Distribute horizontally', icon: icon('distribute-h') },
   { id: 'distributeVertical', label: 'Distribute vertically', icon: icon('distribute-v') },
 ]
 
 describe('ArrangeControls', () => {
-  it('renders exactly the given z-order actions in order, no align group when align is omitted', () => {
+  it('renders exactly the given z-order actions in order, no divider for a single group', () => {
     const html = renderToStaticMarkup(
-      <ArrangeControls zOrder={Z_ORDER} onAction={vi.fn()} />,
+      <ArrangeControls groups={[Z_ORDER_GROUP]} onAction={vi.fn()} />,
     )
     const order = Z_ORDER.map((a) => `data-testid="systemsketch-arrange-${a.id}"`)
     let searchFrom = 0
@@ -45,22 +50,46 @@ describe('ArrangeControls', () => {
     expect(html).not.toContain('systemsketch-arrange-alignLeft')
   })
 
-  it('renders the align+distribute group and a divider when align is provided', () => {
+  it('divides every additional group from its neighbour — the segmenting idea applied to align and distribute too', () => {
     const html = renderToStaticMarkup(
-      <ArrangeControls zOrder={Z_ORDER} align={ALIGN} onAction={vi.fn()} />,
+      <ArrangeControls
+        groups={[
+          Z_ORDER_GROUP,
+          { id: 'align-horizontal', actions: ALIGN_HORIZONTAL },
+          { id: 'align-vertical', actions: ALIGN_VERTICAL },
+          { id: 'distribute', actions: DISTRIBUTE },
+        ]}
+        onAction={vi.fn()}
+      />,
     )
-    expect(html).toContain('data-testid="systemsketch-arrange-divider"')
-    for (const action of ALIGN) {
+    // Three dividers for four groups — one between each pair, never a
+    // leading or trailing one.
+    expect(html.split('data-testid="systemsketch-arrange-divider"').length - 1).toBe(3)
+    for (const action of [...ALIGN_HORIZONTAL, ...ALIGN_VERTICAL, ...DISTRIBUTE]) {
       expect(html).toContain(`data-testid="systemsketch-arrange-${action.id}"`)
     }
     expect(html).toContain('data-testid="systemsketch-arrange-group-z-order"')
-    expect(html).toContain('data-testid="systemsketch-arrange-group-align"')
+    expect(html).toContain('data-testid="systemsketch-arrange-group-align-horizontal"')
+    expect(html).toContain('data-testid="systemsketch-arrange-group-align-vertical"')
+    expect(html).toContain('data-testid="systemsketch-arrange-group-distribute"')
+  })
+
+  it('drops an empty group silently, along with the divider it would have cost', () => {
+    const html = renderToStaticMarkup(
+      <ArrangeControls
+        groups={[Z_ORDER_GROUP, { id: 'align-horizontal', actions: [] }, { id: 'distribute', actions: DISTRIBUTE }]}
+        onAction={vi.fn()}
+      />,
+    )
+    expect(html).not.toContain('systemsketch-arrange-group-align-horizontal')
+    // Exactly one divider — between z-order and distribute — not two.
+    expect(html.split('data-testid="systemsketch-arrange-divider"').length - 1).toBe(1)
   })
 
   it('honors the disabled set and leaves everything else enabled', () => {
     const html = renderToStaticMarkup(
       <ArrangeControls
-        zOrder={Z_ORDER}
+        groups={[Z_ORDER_GROUP]}
         onAction={vi.fn()}
         disabled={new Set(['sendToBack', 'bringToFront'])}
       />,
@@ -75,7 +104,7 @@ describe('ArrangeControls', () => {
 
   it('uses plain type="button" elements with title and aria-label set from the action label', () => {
     const html = renderToStaticMarkup(
-      <ArrangeControls zOrder={[Z_ORDER[0]]} onAction={vi.fn()} />,
+      <ArrangeControls groups={[{ id: 'z-order', actions: [Z_ORDER[0]] }]} onAction={vi.fn()} />,
     )
     expect(html).toContain('type="button"')
     expect(html).toContain('title="Send to back"')

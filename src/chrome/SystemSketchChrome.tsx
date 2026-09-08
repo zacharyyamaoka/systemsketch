@@ -29,7 +29,7 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../appearance/excalidrawIcons/icons'
-import { ArrangeControls, type ArrangeAction } from '../contextualMenus/ArrangeControls'
+import { ArrangeControls, type ArrangeAction, type ArrangeActionGroup } from '../contextualMenus/ArrangeControls'
 import { OpacityControl } from '../contextualMenus/OpacityControl'
 import { CompareTrigger } from '../compare'
 import { PillPresentationChip } from './PillPresentationChip'
@@ -324,10 +324,16 @@ const ARRANGE_Z_ORDER: readonly ArrangeAction[] = [
   { id: 'bringToFront', label: 'Bring to front', icon: excalidrawIcon(BringToFrontIcon) },
 ]
 
-const ARRANGE_ALIGN: readonly ArrangeAction[] = [
+// Split horizontal from vertical, rather than one flat 6-icon row, so the
+// segmenting Zach asked for reads the same way Figma's own align panel
+// does: two families of the same operation, not one undifferentiated list.
+const ARRANGE_ALIGN_HORIZONTAL: readonly ArrangeAction[] = [
   { id: 'left', label: 'Align left', icon: excalidrawIcon(AlignLeftIcon) },
   { id: 'center-horizontal', label: 'Align horizontal centers', icon: excalidrawIcon(CenterHorizontallyIcon) },
   { id: 'right', label: 'Align right', icon: excalidrawIcon(AlignRightIcon) },
+]
+
+const ARRANGE_ALIGN_VERTICAL: readonly ArrangeAction[] = [
   { id: 'top', label: 'Align top', icon: excalidrawIcon(AlignTopIcon) },
   { id: 'center-vertical', label: 'Align vertical centers', icon: excalidrawIcon(CenterVerticallyIcon) },
   { id: 'bottom', label: 'Align bottom', icon: excalidrawIcon(AlignBottomIcon) },
@@ -367,9 +373,14 @@ function ArrangeAdapter() {
     [editor],
   )
   if (selectionCount === 0) return null
-  const align = selectionCount >= 2
-    ? (selectionCount >= 3 ? [...ARRANGE_ALIGN, ...ARRANGE_DISTRIBUTE] : ARRANGE_ALIGN)
-    : undefined
+  const groups: ArrangeActionGroup[] = [{ id: 'z-order', actions: ARRANGE_Z_ORDER }]
+  if (selectionCount >= 2) {
+    groups.push(
+      { id: 'align-horizontal', actions: ARRANGE_ALIGN_HORIZONTAL },
+      { id: 'align-vertical', actions: ARRANGE_ALIGN_VERTICAL },
+    )
+  }
+  if (selectionCount >= 3) groups.push({ id: 'distribute', actions: ARRANGE_DISTRIBUTE })
   const onAction = (id: string) => {
     const ids = editor.getSelectedShapeIds()
     if (ids.length === 0) return
@@ -380,7 +391,7 @@ function ArrangeAdapter() {
     if (id === 'distribute-horizontal') { editor.distributeShapes(ids, 'horizontal'); return }
     if (id === 'distribute-vertical') { editor.distributeShapes(ids, 'vertical') }
   }
-  return <ArrangeControls zOrder={ARRANGE_Z_ORDER} align={align} onAction={onAction} />
+  return <ArrangeControls groups={groups} onAction={onAction} />
 }
 
 /**

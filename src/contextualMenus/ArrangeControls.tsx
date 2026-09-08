@@ -1,4 +1,4 @@
-import type { ComponentType, ReactElement } from 'react'
+import { Fragment, type ComponentType, type ReactElement } from 'react'
 
 export interface ArrangeAction {
   /** Stable id — also the editor call the wave-2 binder dispatches on `onAction`. */
@@ -8,17 +8,24 @@ export interface ArrangeAction {
   icon: ComponentType<{ className?: string }>
 }
 
+export interface ArrangeActionGroup {
+  /** Stable id, surfaced as `data-testid="systemsketch-arrange-group-${id}"`. */
+  id: string
+  actions: readonly ArrangeAction[]
+}
+
 export interface ArrangeControlsProps {
-  /** Z-order actions, valid for any selection: sendToBack/sendBackward/bringForward/bringToFront. */
-  zOrder: readonly ArrangeAction[]
   /**
-   * The 6 align ops plus 2 distribute ops. Omitted (undefined) hides the
-   * whole group AND its divider — this component holds no selection-count
-   * logic of its own; the wave-2 binder decides align needs >=2 shapes and
-   * distribute needs >=3, and simply doesn't pass the group when it doesn't
-   * qualify.
+   * Rendered in order, each set off from its neighbour by one divider — the
+   * same segmenting idea as the pill's own appearance/text/arrange split
+   * (Zach, 2026-09-08: "apply the same idea of segmenting to the arrange
+   * and alignment icons", after picking V3 Figma Segmented over V1's one
+   * dense row). A group with zero actions is simply not rendered, and
+   * costs no divider either — this component holds no selection-count
+   * logic of its own; the wave-2 binder decides which groups qualify for
+   * the current selection and passes only those.
    */
-  align?: readonly ArrangeAction[]
+  groups: readonly ArrangeActionGroup[]
   onAction(id: string): void
   /** Action ids to render disabled, e.g. sendToBack when already at the back. */
   disabled?: ReadonlySet<string>
@@ -67,21 +74,23 @@ function ArrangeGroup({
  * No `editor` import, no selection-count logic: every action this renders
  * comes in as data, and every click just reports the id back up.
  */
-export function ArrangeControls({ zOrder, align, onAction, disabled }: ArrangeControlsProps): ReactElement {
+export function ArrangeControls({ groups, onAction, disabled }: ArrangeControlsProps): ReactElement {
+  const visible = groups.filter((group) => group.actions.length > 0)
   return (
     <div className="systemsketch-arrange" data-testid="systemsketch-arrange">
-      <ArrangeGroup groupId="z-order" actions={zOrder} onAction={onAction} disabled={disabled} />
-      {align && align.length > 0 ? (
-        <>
-          <div
-            className="systemsketch-arrange__divider"
-            role="separator"
-            aria-orientation="vertical"
-            data-testid="systemsketch-arrange-divider"
-          />
-          <ArrangeGroup groupId="align" actions={align} onAction={onAction} disabled={disabled} />
-        </>
-      ) : null}
+      {visible.map((group, index) => (
+        <Fragment key={group.id}>
+          {index > 0 ? (
+            <div
+              className="systemsketch-arrange__divider"
+              role="separator"
+              aria-orientation="vertical"
+              data-testid="systemsketch-arrange-divider"
+            />
+          ) : null}
+          <ArrangeGroup groupId={group.id} actions={group.actions} onAction={onAction} disabled={disabled} />
+        </Fragment>
+      ))}
     </div>
   )
 }
