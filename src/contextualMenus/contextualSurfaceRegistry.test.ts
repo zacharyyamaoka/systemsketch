@@ -15,8 +15,16 @@ describe('contextual surface composition', () => {
     ])
   })
 
-  it('keeps Behavior Tree actions as a named composition surface', () => {
-    expect(contextualSurfaceItems('behavior-tree-selection')).toEqual(['behavior-tree-actions'])
+  it('keeps Behavior Tree actions as a named composition surface, plus the opacity/arrange every selection gets', () => {
+    expect(contextualSurfaceItems('behavior-tree-selection')).toEqual([
+      'behavior-tree-actions', 'opacity', 'arrange',
+    ])
+  })
+
+  it('gives a Branch selection opacity and arrange alongside its own actions', () => {
+    expect(contextualSurfaceItems('branch-selection')).toEqual([
+      'branch-actions', 'opacity', 'arrange',
+    ])
   })
 
   it('keeps live title editing as a named composition, not a second toolbar implementation', () => {

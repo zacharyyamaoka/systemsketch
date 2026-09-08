@@ -31,8 +31,14 @@ export type ContextualSurfaceItemId =
 export const CONTEXTUAL_SURFACE_REGISTRY: Readonly<
   Record<ContextualSurfaceId, readonly ContextualSurfaceItemId[]>
 > = {
-  'branch-selection': ['branch-actions'],
-  'behavior-tree-selection': ['behavior-tree-actions'],
+  // Opacity and z-order/align/distribute apply to ANY selection in stock
+  // tldraw, a Branch or Behavior Tree region included — Codex code review
+  // caught these two surfaces omitting them while `shape-selection` and
+  // `block-selection` carry both. Positioned right after the surface's own
+  // actions item, matching where they land relative to `block-actions` on
+  // `block-selection`.
+  'branch-selection': ['branch-actions', 'opacity', 'arrange'],
+  'behavior-tree-selection': ['behavior-tree-actions', 'opacity', 'arrange'],
   'block-selection': [
     'block-actions', 'appearance', 'opacity', 'arrange', 'code-actions', 'wrap', 'layout', 'propagation-focus',
   ],

@@ -184,6 +184,21 @@ function excalidrawArrowheadFor(value: string | undefined): ComponentType<{ flip
 }
 
 /**
+ * tldraw's `oval` geo is a distinct, wider shape from `ellipse` (see
+ * `node_modules/@tldraw/assets/icons/icon/geo-oval.svg` vs. `geo-ellipse.svg`),
+ * but `figjamIconMap`'s `geo` table used to point both at FigJam's traced
+ * `shape/Ellipse` icon — FigJam's own picker draws them identically, so the
+ * trace was faithful to FigJam, just wrong for tldraw's shape set. Rather than
+ * hand-adding a fabricated entry to `figjamIcons.ts` (every entry there is
+ * documented as traced from the real app, re-run by an emitter — mixing in an
+ * invented one breaks that guarantee), this is a small original glyph: a ring
+ * drawn from two concentric ellipses (rx 8/ry 5 outer, rx 7/ry 4 inner) at the
+ * same 18x18 box and ~1px ring weight as the traced glyphs beside it, so it
+ * sits in the pill without announcing itself as different machinery.
+ */
+const OVAL_RING_PATH = 'M1 9A8 5 0 1 0 17 9A8 5 0 1 0 1 9ZM2 9A7 4 0 1 0 16 9A7 4 0 1 0 2 9Z'
+
+/**
  * What an appearance option looks like.
  *
  * FigJam previews the value rather than naming it — the size list is drawn at
@@ -221,6 +236,16 @@ export function AppearanceGlyph({
   } else {
     const excalidraw = excalidrawGlyphFor(control.glyph, value)
     if (excalidraw) return <ExcalidrawGlyph>{excalidraw}</ExcalidrawGlyph>
+  }
+  // tldraw's `oval` is a distinct geo from `ellipse` — see OVAL_RING_PATH's
+  // comment. Ahead of the FigJam lookup below, which has no icon of its own
+  // for this distinction.
+  if (control.kind === 'geo' && value === 'oval') {
+    return (
+      <svg viewBox="0 0 18 18" className="systemsketch-appearance__glyph" data-filled="" aria-hidden="true">
+        <path d={OVAL_RING_PATH} fillRule="evenodd" />
+      </svg>
+    )
   }
   // FigJam's own icon wherever FigJam draws this value. The drawn families
   // below stay for the states tldraw has and FigJam does not.

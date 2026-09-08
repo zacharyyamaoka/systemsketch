@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest'
 import {
   SELECTION_MENU_GAP,
   SELECTION_MENU_MARGIN,
+  SELECTION_MENU_MIN_WIDTH,
   SELECTION_OVERLAY_INSET,
   isSelectionOnScreen,
   placeSelectionMenu,
+  selectionMenuMaxWidth,
   type Rect,
   type SelectionMenuPlacement,
   type SelectionMenuSide,
@@ -186,5 +188,36 @@ describe('isSelectionOnScreen', () => {
     const viewport: Size = { w: 1280, h: 720 }
     expect(isSelectionOnScreen({ x: 1300, y: 0, w: 100, h: 100 }, viewport)).toBe(false)
     expect(isSelectionOnScreen({ x: 0, y: -200, w: 100, h: 100 }, viewport)).toBe(false)
+  })
+})
+
+describe('selectionMenuMaxWidth', () => {
+  it('caps a wide pill to the Codex-reported scenario: ~935px of controls in a ~900px viewport', () => {
+    // Three selected text shapes with the full appearance + opacity + arrange
+    // cluster measured ~935px in Codex's repro; a 900px-wide viewport leaves
+    // only 860px (900 - 2*MARGIN) once the CSS max-width applies. The pill's
+    // own `getBoundingClientRect().width` (read in SelectionContextualMenu.tsx)
+    // reflects that CSS constraint, so `placeSelectionMenu` never sees the
+    // unclamped 935px width that produced the inverted x-range Codex found.
+    const viewport: Size = { w: 900, h: 650 }
+    const cappedWidth = selectionMenuMaxWidth(viewport)
+    expect(cappedWidth).toBe(viewport.w - 2 * SELECTION_MENU_MARGIN)
+    expect(cappedWidth).toBeLessThan(935)
+
+    const selection: Rect = { x: 300, y: 350, w: 200, h: 40 }
+    const result = placeSelectionMenu({ selection, menu: { w: cappedWidth, h: 40 }, viewport })
+    return result.then((placement) => {
+      // The pill's left edge and right edge (x + capped width) both stay
+      // within the margins — the bug Codex found was the right edge running
+      // off-screen because `menu.w` (935) exceeded `viewport.w - 2*MARGIN`
+      // (860), which inverts the clamp range `placeSelectionMenu` computes.
+      expect(placement.x).toBeGreaterThanOrEqual(SELECTION_MENU_MARGIN)
+      expect(placement.x + cappedWidth).toBeLessThanOrEqual(viewport.w - SELECTION_MENU_MARGIN + 0.001)
+    })
+  })
+
+  it('never caps below the floor, so a tiny viewport still leaves a readable pill', () => {
+    const tiny: Size = { w: 200, h: 400 }
+    expect(selectionMenuMaxWidth(tiny)).toBe(SELECTION_MENU_MIN_WIDTH)
   })
 })

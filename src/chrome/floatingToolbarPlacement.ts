@@ -133,6 +133,38 @@ export function isSelectionOnScreen(selection: Rect, viewport: Size): boolean {
 }
 
 /**
+ * Floor under {@link selectionMenuMaxWidth} so a tiny viewport still leaves the
+ * pill wide enough to read as one control, rather than folding to a sliver.
+ */
+export const SELECTION_MENU_MIN_WIDTH = 160
+
+/**
+ * The pill's own width budget, in real (unscaled) viewport pixels.
+ *
+ * Codex code review (2026-09-07) caught a selection needing ~935px of controls
+ * — three selected shapes with the full appearance + opacity + arrange +
+ * align/distribute + wrap cluster all rendering at once — pinned at a fixed
+ * `x` in a ~900px-wide viewport with no wrapping or scroll: `clampToViewportMargins`
+ * only ever clamps the pill's *position*, never its *size*, so once
+ * `menu.w > viewport.w - 2 * SELECTION_MENU_MARGIN` the inverted clamp range
+ * pins `x` to `SELECTION_MENU_MARGIN` while the pill keeps its full unclamped
+ * width — the rightmost buttons (arrange, in Codex's repro) land off-screen
+ * with no way to reach them.
+ *
+ * `SelectionContextualMenu.tsx` writes this as a `max-width` custom property
+ * on the pill *before* measuring it, so `.systemsketch-selection-menu__bar`'s
+ * `flex-wrap: wrap` folds any overflow onto additional rows while the
+ * measured width this function's caller feeds back into `placeSelectionMenu`
+ * never exceeds the budget — the existing x-clamp above never inverts. Kept
+ * as its own pure function (rather than inlined at the call site) so it is
+ * unit-testable without a DOM, the same reasoning `isSelectionOnScreen` above
+ * documents for itself.
+ */
+export function selectionMenuMaxWidth(viewport: Size): number {
+  return Math.max(SELECTION_MENU_MIN_WIDTH, viewport.w - 2 * SELECTION_MENU_MARGIN)
+}
+
+/**
  * A synthetic Floating UI platform with no DOM behind it.
  *
  * `computePosition` only ever calls `getElementRects` (always) and

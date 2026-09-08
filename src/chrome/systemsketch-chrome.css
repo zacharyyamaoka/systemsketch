@@ -826,6 +826,10 @@
   --systemsketch-selection-menu-height: 40px;
   --systemsketch-selection-menu-x: 0px;
   --systemsketch-selection-menu-y: 0px;
+  /* Mirrors `SELECTION_MENU_MARGIN` in floatingToolbarPlacement.ts (20px) —
+   * one value the placement math and the bar's overflow clamp below both
+   * read, so they can never quietly drift apart. */
+  --systemsketch-selection-menu-margin: 20px;
 
   position: absolute;
   z-index: var(--tl-layer-menus, 400);
@@ -863,16 +867,61 @@
 
 /* The pill is the opposite polarity of the board, FigJam's dark-on-light;
  * in a dark theme the inverse surface flips light, the way tldraw's own
- * tooltip does. */
+ * tooltip does.
+ *
+ * Codex code review (2026-09-07) caught the pill running past the right edge
+ * of the viewport with no way to reach the clipped buttons — a wide
+ * Excalidraw-parity selection (opacity + full arrange cluster + appearance)
+ * measured ~935px, wider than a ~900px-wide window. Neither of tldraw's own
+ * toolbar primitives is a free fit: `OverflowingToolbar` (the bottom tool
+ * belt's mechanism) requires every item duplicated verbatim into a second
+ * "overflow" copy keyed by matching DOM position, built for interchangeable
+ * tool buttons — not this pill's handful of differently-shaped mini-menus.
+ * Wrapping the pill onto a second row was the other stock option, but this
+ * is FigJam's one-row pill (`docs/figjam-contextual-menu-spec-2026-09-01.
+ * html`) and Excalidraw has no floating equivalent to borrow from either
+ * (its Stats panel is CSS-docked, not selection-following) — two rows
+ * changes what shape "the pill" is. `max-width` + a horizontal scroll
+ * keeps the one-row shape and reuses the same clamp `floatingToolbarPlacement
+ * .ts` already applies on X: the bar's own `getBoundingClientRect().width`
+ * (measured by `SelectionContextualMenu.tsx`) is what the CSS constrains, so
+ * `clampToViewportMargins` sees the CLAMPED width and keeps the whole pill
+ * on screen instead of computing an inverted range from the unclamped one.
+ */
 .systemsketch-selection-menu__bar {
   display: flex;
   height: var(--systemsketch-selection-menu-height);
   align-items: stretch;
+  max-width: calc(100vw - (var(--systemsketch-selection-menu-margin) * 2));
+  overflow-x: auto;
   padding: 0 4px;
   border-radius: 13px;
   color: var(--ss-text-inverse);
   background: var(--ss-surface-inverse);
   box-shadow: var(--ss-shadow-2);
+  /* A themed thin scrollbar rather than the OS trough, matching `.ss-scroll`'s
+   * shape (`src/scroll/scroll-area.css`) but in the pill's own inverse
+   * palette — `--ss-border-strong` is tuned for a light panel and all but
+   * disappears against this dark surface. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ss-border-inverse) transparent;
+}
+
+.systemsketch-selection-menu__bar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.systemsketch-selection-menu__bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.systemsketch-selection-menu__bar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--ss-border-inverse);
+}
+
+.systemsketch-selection-menu__bar::-webkit-scrollbar-thumb:hover {
+  background: var(--ss-text-inverse);
 }
 
 /* The Block menu supplies its own surface when it stands alone; nested in the
