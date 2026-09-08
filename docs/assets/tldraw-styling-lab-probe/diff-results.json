@@ -1,0 +1,50 @@
+{
+  "none-vs-layers-board": {
+    "changed_px": 282352,
+    "total_px": 1382400,
+    "pct": 20.4248,
+    "bbox": [
+      1008,
+      8,
+      1314,
+      945
+    ],
+    "diff_image": "/home/bam/.claude/jobs/c3a25911/tmp/tw-tldraw-probe/shots/diff-none-vs-layers-board.png"
+  },
+  "none-vs-full-board": {
+    "changed_px": 401261,
+    "total_px": 1382400,
+    "pct": 29.0264,
+    "bbox": [
+      0,
+      0,
+      1440,
+      960
+    ],
+    "diff_image": "/home/bam/.claude/jobs/c3a25911/tmp/tw-tldraw-probe/shots/diff-none-vs-full-board.png"
+  },
+  "none-vs-layers-panel": {
+    "changed_px": 282352,
+    "total_px": 1382400,
+    "pct": 20.4248,
+    "bbox": [
+      1008,
+      8,
+      1314,
+      945
+    ],
+    "diff_image": "/home/bam/.claude/jobs/c3a25911/tmp/tw-tldraw-probe/shots/diff-none-vs-layers-panel.png"
+  },
+  "none-vs-full-panel": {
+    "changed_px": 407218,
+    "total_px": 1382400,
+    "pct": 29.4573,
+    "bbox": [
+      0,
+      0,
+      1440,
+      960
+    ],
+    "diff_image": "/home/bam/.claude/jobs/c3a25911/tmp/tw-tldraw-probe/shots/diff-none-vs-full-panel.png"
+  }
+}

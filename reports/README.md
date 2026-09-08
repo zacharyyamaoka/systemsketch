@@ -37,3 +37,4 @@ Never add `reports/media/` to Git. It is a retained local review cache, not sour
 ## Current explorations
 
 - [Five ways to hand off a mixed review](review-artifact-handoff-babble-2026-09-07.html) — a runnable five-artifact comparison of flat, grouped, version-paired, action-first, and timeline review cards.
+- [tldraw styling lab — the plan](tldraw-styling-lab-plan-2026-09-07.html) — stock tldraw plus one Figma-shaped inspector on Base UI + shadcn: reference choice (open-pencil's grammar), the stack cell by cell, a measured Tailwind-vs-tldraw pixel probe, five milestones with gates, and the decision surface.

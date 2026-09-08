@@ -1,0 +1,36 @@
+{
+  "none-vs-layers-board-CANVASONLY": {
+    "changed_px": 0,
+    "total_px": 800000,
+    "pct": 0.0,
+    "bbox": null
+  },
+  "none-vs-layers-panel-CANVASONLY": {
+    "changed_px": 0,
+    "total_px": 800000,
+    "pct": 0.0,
+    "bbox": null
+  },
+  "none-vs-full-board-CANVASONLY": {
+    "changed_px": 92049,
+    "total_px": 800000,
+    "pct": 11.5061,
+    "bbox": [
+      0,
+      0,
+      1000,
+      800
+    ]
+  },
+  "none-vs-full-panel-CANVASONLY": {
+    "changed_px": 98006,
+    "total_px": 800000,
+    "pct": 12.2508,
+    "bbox": [
+      0,
+      0,
+      1000,
+      800
+    ]
+  }
+}

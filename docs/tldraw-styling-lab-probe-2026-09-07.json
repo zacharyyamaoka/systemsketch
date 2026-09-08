@@ -1,0 +1,40 @@
+{
+  "_source": "docs/assets/tldraw-styling-lab-probe/RESULT.md — scratch Vite project, headless Chrome via tests/cdp_kit.mjs, PIL ImageChops.difference; measured 2026-09-07",
+  "versions": {"tldraw": "5.3.2", "tailwindcss": "4.3.3", "shadcn": "4.21.0", "base_ui": "1.8.0", "react": "19.2.8", "vite": "8.2.2", "typescript": "6.0.3"},
+  "pixels": [
+    {"pair": "none vs layers-only", "what": "canvas, idle board (1000×800)", "changed_px": "0", "pct": "0.0000%", "bbox": "none", "note": "pixel-identical"},
+    {"pair": "none vs layers-only", "what": "canvas, style panel open", "changed_px": "0", "pct": "0.0000%", "bbox": "none", "note": "pixel-identical"},
+    {"pair": "none vs full (preflight)", "what": "canvas, idle board (1000×800)", "changed_px": "92,049", "pct": "11.51%", "bbox": "(0,0)–(1000,800), the whole canvas", "note": "shape outlines shift, not just glyphs"},
+    {"pair": "none vs full (preflight)", "what": "canvas, style panel open", "changed_px": "98,006", "pct": "12.25%", "bbox": "(0,0)–(1000,800), the whole canvas", "note": "shape outlines shift, not just glyphs"},
+    {"pair": "none vs layers-only", "what": "full viewport incl. the Tailwind-styled aside", "changed_px": "282,352", "pct": "20.42%", "bbox": "(1008,8)–(1314,945) — the aside only", "note": "expected: the aside carries utilities"},
+    {"pair": "none vs full (preflight)", "what": "full viewport incl. the aside", "changed_px": "401,261", "pct": "29.03%", "bbox": "(0,0)–(1440,960)", "note": "everything moved"}
+  ],
+  "style_deltas": {
+    "layers-only": "",
+    "full (preflight)": ".tl-container font-family: 'Times New Roman' → -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto…; .tl-container line-height: normal → 18px; .tlui-button font family likewise; body margin 8px → 0, line-height normal → 24px. Root cause: preflight resets html/body font-family and .tl-container sets none of its own, so text metrics — and every growY / auto-size measurement built on them — change. Unchanged under both modes: .tl-svg-container display, .tlui-style-panel background/shadow/radius, .tl-text-label__inner font (tldraw sets those explicitly)."
+  },
+  "console": {"none": "2 (tldraw's own unlicensed-embed promise rejection)", "layers-only": "2 (same)", "full": "2 (same)"},
+  "shadcn": {
+    "init_command": "npx shadcn@latest init -b base -p nova -t vite -y",
+    "init_notes": "-b base picks the Base UI primitive layer; -p nova is the preset name (base-nova is not accepted as -p); -y alone still prompts for a preset. The CLI refuses a bare Vite scaffold until a @/* → ./src/* alias exists in tsconfig + vite resolve.alias. Under TypeScript ~6.0 the classic baseUrl alias shadcn's docs show raises TS5101 (baseUrl deprecated) and breaks `tsc -b`; vite build alone stays green. Use `paths` without baseUrl, or ignoreDeprecations 6.0.",
+    "components_json": "{\n  \"$schema\": \"https://ui.shadcn.com/schema.json\",\n  \"style\": \"base-nova\",\n  \"rsc\": false,\n  \"tsx\": true,\n  \"tailwind\": { \"config\": \"\", \"css\": \"src/styles/full.css\", \"baseColor\": \"neutral\", \"cssVariables\": true, \"prefix\": \"\" },\n  \"iconLibrary\": \"lucide\",\n  \"rtl\": false,\n  \"aliases\": { \"components\": \"@/components\", \"utils\": \"@/lib/utils\", \"ui\": \"@/components/ui\", \"lib\": \"@/lib\", \"hooks\": \"@/hooks\" },\n  \"menuColor\": \"default\",\n  \"menuAccent\": \"subtle\",\n  \"registries\": {}\n}",
+    "primitive_landed": "@base-ui/react@1.8.0 — zero @radix-ui/* or radix-ui in package.json after init + 13 adds",
+    "import_census": "14 of 14 generated ui/*.tsx import only from @base-ui/react/* (button, button-group, collapsible, input, popover, select, separator, slider, tabs, toggle, toggle-group, tooltip…); zero Radix imports",
+    "tsc": "red on TS5101 (baseUrl deprecated under TS 6) — a tsconfig matter, not a component one",
+    "build": "vite build green (5 chunks; layers css 36.6 kB with shadcn tokens, full css 65.0 kB)",
+    "added": {
+      "button": "ok (already present from init)",
+      "input": "ok", "select": "ok", "slider": "ok", "toggle-group": "ok (+ toggle)", "tabs": "ok", "collapsible": "ok",
+      "popover": "ok", "tooltip": "ok", "separator": "ok", "field": "ok (+ label, textarea)", "input-group": "ok", "button-group": "ok",
+      "kibo-ui color-picker": "installs via https://www.kibo-ui.com/r/color-picker.json, but see Kibo"
+    }
+  },
+  "kibo": {
+    "summary": "`npx shadcn add https://www.kibo-ui.com/r/color-picker.json` installed one file and pulled radix-ui@1.6.7 and color@5.0.3 into a project whose components.json style is base-nova — Kibo's source imports `Slider` from radix-ui unconditionally. With the tsconfig deprecation silenced, tsc reports exactly one real error: Kibo's <Select onValueChange={setMode}> was written against Radix's (value: string) signature and Base UI's Select passes string | null. So a Base UI shadcn project and a Kibo item are not composable out of the box: both primitive libraries end up installed, and the item needs a patch to type-check."
+  },
+  "screenshots": [
+    {"file": "probe-none-board.png", "caption": "<b>Baseline.</b> The seeded nine-shape board with only tldraw.css loaded (the aside on the right is the deliberately unstyled control)."},
+    {"file": "probe-diff-none-vs-layers.png", "caption": "<b>Layers-only Tailwind.</b> Amplified ×8 diff against the baseline: the canvas is solid black — 0 of 800,000 pixels changed. Only the aside (which now carries utility classes) lights up."},
+    {"file": "probe-diff-none-vs-full.png", "caption": "<b>Full Tailwind with preflight.</b> Same amplification: every shape shows doubled edges, not just its label — the font reset cascaded into .tl-container and moved geometry."}
+  ]
+}
