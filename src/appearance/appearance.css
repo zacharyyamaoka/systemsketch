@@ -179,12 +179,29 @@
   white-space: nowrap;
 }
 
+/* A 10%-white wash is invisible on a light skin's panel, so the hover reads as
+ * the pill's own ink at that same weight instead. The #fff fallback makes
+ * color-mix reproduce the exact previous rgb(255 255 255 / 10%) unskinned. */
 .systemsketch-appearance__option:hover {
-  background: rgb(255 255 255 / 10%);
+  background: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 10%, transparent);
 }
 
-/* An icon-only cell is chosen in FigJam's deeper purple. */
+/* An icon-only cell is chosen in FigJam's deeper purple.
+ *
+ * WHY the explicit `color`: the chosen cell is the ONE place in the panel
+ * where content does not sit on `--systemsketch-pill-surface` — it sits on the
+ * accent. Everything inside it (the glyph via `currentColor`, the label, the
+ * check) was still inheriting the panel's `--systemsketch-pill-ink`, which is
+ * fine at the shipped white-on-purple but collapses under a skin that picks a
+ * dark accent: measured 1.00:1 in Ink Mono (whose accent IS its ink), 1.69:1
+ * in Dark Compact, 2.69/2.73:1 in Soft Elevation and Warm Paper — i.e. the
+ * currently-selected shape, fill, stroke width, line style and text alignment
+ * icons all disappeared, in the popover, at the exact moment they were the one
+ * value the user was looking for. `--systemsketch-pill-accent-ink` is the
+ * skin's "ink that goes ON the accent"; its #fff fallback is exactly what an
+ * unskinned panel already computed, so nothing moves without a skin. */
 .systemsketch-appearance__option[aria-checked='true'] {
+  color: var(--systemsketch-pill-accent-ink, #fff);
   background: var(--systemsketch-pill-accent-radio, #8a38f5);
 }
 
@@ -240,7 +257,10 @@
   padding: 0 8px 0 0;
 }
 
+/* The Fill row's chosen chip: same "content sits on the accent, not on the
+ * surface" case as the icon cell above, so it takes the same on-accent ink. */
 .systemsketch-appearance__mode .systemsketch-appearance__option[aria-checked='true'] {
+  color: var(--systemsketch-pill-accent-ink, #fff);
   background: var(--systemsketch-pill-accent, #9747ff);
 }
 
@@ -295,13 +315,20 @@
   opacity: 1;
 }
 
-/* FigJam marks a list row with the check alone, not a fill. */
+/* FigJam marks a list row with the check alone, not a fill — so a chosen
+ * Typeface or Font size row is back on the panel SURFACE, and its ink has to
+ * go back with it. Taking only the background off the accent and leaving
+ * `--systemsketch-pill-accent-ink` behind is how the first version of this fix
+ * made "Scribbled" and "Medium" vanish at 1.00:1 under Dark Compact, whose
+ * on-accent ink is its own near-black surface. Ink follows the surface it is
+ * actually painted on; these two declarations belong together. */
 .systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option[aria-checked='true'] {
+  color: var(--systemsketch-pill-ink, #fff);
   background: transparent;
 }
 
 .systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option:hover {
-  background: rgb(255 255 255 / 10%);
+  background: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 10%, transparent);
 }
 
 .systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__label {

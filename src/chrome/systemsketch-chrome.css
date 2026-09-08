@@ -953,12 +953,15 @@
   background: transparent;
 }
 
+/* Skinned like its twin `.systemsketch-arrange__button` — this cluster sits on
+ * the same repainted pill surface, and a white-at-14% wash gives no hover
+ * feedback at all on the four light skins. */
 .systemsketch-selection-layout-action:hover {
-  background: var(--ss-surface-inverse-hover);
+  background: var(--systemsketch-pill-hover, var(--ss-surface-inverse-hover));
 }
 
 .systemsketch-selection-layout-action:focus-visible {
-  outline: 2px solid var(--ss-accent);
+  outline: 2px solid var(--systemsketch-pill-accent, var(--ss-accent));
   outline-offset: -2px;
 }
 

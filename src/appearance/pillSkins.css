@@ -32,6 +32,8 @@
   --systemsketch-pill-hover: #ece9e3;
   --systemsketch-pill-accent: #1a1a1a;
   --systemsketch-pill-accent-radio: #1a1a1a;
+  /* Ink that goes ON the accent, not on the surface — 17.4:1 on its black accent. */
+  --systemsketch-pill-accent-ink: #ffffff;
   --systemsketch-pill-radius: 4px;
   --systemsketch-pill-trigger-radius: 3px;
   --systemsketch-pill-shadow: 0 1px 2px rgb(0 0 0 / 8%);
@@ -49,6 +51,8 @@
   --systemsketch-pill-hover: #f1ede4;
   --systemsketch-pill-accent: #7c6fd1;
   --systemsketch-pill-accent-radio: #6a5cc4;
+  /* Ink that goes ON the accent, not on the surface — 4.16:1 on the accent, 5.33:1 on the radio accent. */
+  --systemsketch-pill-accent-ink: #ffffff;
   --systemsketch-pill-radius: 20px;
   --systemsketch-pill-trigger-radius: 12px;
   --systemsketch-pill-shadow: 0 8px 24px rgb(60 50 30 / 14%), 0 2px 6px rgb(60 50 30 / 10%);
@@ -66,6 +70,8 @@
   --systemsketch-pill-hover: #ececec;
   --systemsketch-pill-accent: #e34d2b;
   --systemsketch-pill-accent-radio: #e34d2b;
+  /* Ink that goes ON the accent, not on the surface — 5.36:1 on the terracotta accent — white would be only 3.92:1. */
+  --systemsketch-pill-accent-ink: #000000;
   --systemsketch-pill-radius: 0px;
   --systemsketch-pill-trigger-radius: 0px;
   /* A 2px solid ring, drawn as a box-shadow rather than a border so no
@@ -85,6 +91,8 @@
   --systemsketch-pill-hover: #ece4d3;
   --systemsketch-pill-accent: #c1602f;
   --systemsketch-pill-accent-radio: #a94f24;
+  /* Ink that goes ON the accent, not on the surface — 4.22:1 on the accent, 5.48:1 on the radio accent. */
+  --systemsketch-pill-accent-ink: #ffffff;
   --systemsketch-pill-radius: 12px;
   --systemsketch-pill-trigger-radius: 8px;
   --systemsketch-pill-shadow: 0 10px 24px rgb(80 60 30 / 12%), 0 2px 6px rgb(80 60 30 / 10%);
@@ -102,6 +110,8 @@
   --systemsketch-pill-hover: #1a1d21;
   --systemsketch-pill-accent: #35c6e8;
   --systemsketch-pill-accent-radio: #35c6e8;
+  /* Ink that goes ON the accent, not on the surface — 10.4:1 on the cyan accent — white would be 2.02:1. */
+  --systemsketch-pill-accent-ink: #0b0d10;
   --systemsketch-pill-radius: 6px;
   --systemsketch-pill-trigger-radius: 4px;
   --systemsketch-pill-shadow: 0 4px 14px rgb(0 0 0 / 45%);

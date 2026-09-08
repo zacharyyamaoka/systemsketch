@@ -19,12 +19,17 @@
   padding: 3px 5px;
 }
 
+/* These controls mount inside the selection pill (`SystemSketchChrome`'s
+ * `propagation-focus` item), so they take the pill's own ink — a Pill lab skin
+ * repaints that bar, and the fixed-white inverse token would leave them white
+ * on white. Fallbacks are the previous tokens, so an unskinned pill is
+ * unchanged. Same fix as the Wrap trigger and the font-size px suffix. */
 .systemsketch-propagation-focus button,
 .systemsketch-propagation-focus input {
   min-height: 24px;
   border: 0;
   border-radius: 4px;
-  color: var(--ss-text-inverse);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
   background: transparent;
 }
 
@@ -34,7 +39,7 @@
 }
 
 .systemsketch-propagation-focus button:hover {
-  background: color-mix(in srgb, var(--ss-text-inverse) 15%, transparent);
+  background: var(--systemsketch-pill-hover, color-mix(in srgb, var(--ss-text-inverse) 15%, transparent));
 }
 
 .systemsketch-propagation-focus label {
@@ -61,7 +66,7 @@
 
 .systemsketch-propagation-focus__label,
 .systemsketch-propagation-focus output {
-  color: color-mix(in srgb, var(--ss-text-inverse) 75%, transparent);
+  color: color-mix(in srgb, var(--systemsketch-pill-ink, var(--ss-text-inverse)) 75%, transparent);
   font-size: 10px;
 }
 
