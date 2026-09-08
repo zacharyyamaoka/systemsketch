@@ -110,7 +110,7 @@
   --systemsketch-pill-hover: #1a1d21;
   --systemsketch-pill-accent: #35c6e8;
   --systemsketch-pill-accent-radio: #35c6e8;
-  /* Ink that goes ON the accent, not on the surface — 10.4:1 on the cyan accent — white would be 2.02:1. */
+  /* Ink that goes ON the accent, not on the surface — 9.63:1 on the cyan accent — white would be 2.02:1. */
   --systemsketch-pill-accent-ink: #0b0d10;
   --systemsketch-pill-radius: 6px;
   --systemsketch-pill-trigger-radius: 4px;
