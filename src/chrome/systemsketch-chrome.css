@@ -869,59 +869,53 @@
  * in a dark theme the inverse surface flips light, the way tldraw's own
  * tooltip does.
  *
- * Codex code review (2026-09-07) caught the pill running past the right edge
- * of the viewport with no way to reach the clipped buttons — a wide
- * Excalidraw-parity selection (opacity + full arrange cluster + appearance)
- * measured ~935px, wider than a ~900px-wide window. Neither of tldraw's own
- * toolbar primitives is a free fit: `OverflowingToolbar` (the bottom tool
- * belt's mechanism) requires every item duplicated verbatim into a second
- * "overflow" copy keyed by matching DOM position, built for interchangeable
- * tool buttons — not this pill's handful of differently-shaped mini-menus.
- * Wrapping the pill onto a second row was the other stock option, but this
- * is FigJam's one-row pill (`docs/figjam-contextual-menu-spec-2026-09-01.
- * html`) and Excalidraw has no floating equivalent to borrow from either
- * (its Stats panel is CSS-docked, not selection-following) — two rows
- * changes what shape "the pill" is. `max-width` + a horizontal scroll
- * keeps the one-row shape and reuses the same clamp `floatingToolbarPlacement
- * .ts` already applies on X: the bar's own `getBoundingClientRect().width`
- * (measured by `SelectionContextualMenu.tsx`) is what the CSS constrains, so
- * `clampToViewportMargins` sees the CLAMPED width and keeps the whole pill
- * on screen instead of computing an inverted range from the unclamped one.
+ * Codex code review (2026-09-07, round 1) caught the pill running past the
+ * right edge of the viewport with no way to reach the clipped buttons — a
+ * wide Excalidraw-parity selection (opacity + full arrange cluster +
+ * appearance) measured ~935px, wider than a ~900px-wide window. The first
+ * attempt at a fix used `overflow-x: auto` instead of wrapping, reasoning
+ * that two rows would change what shape FigJam's one-row pill is
+ * (`docs/figjam-contextual-menu-spec-2026-09-01.html`) — round 2 of the same
+ * review caught that reasoning trading a layout preference for a real
+ * regression: `usePassThroughWheelEvents` (tldraw's own hook, which lets a
+ * wheel over the pill still pan the canvas) refuses to redispatch a wheel
+ * event through ANY scrollable descendant, checked by axis-agnostic
+ * `scrollWidth > clientWidth` — so the moment this bar actually needed its
+ * scrollbar, hovering it and turning an ordinary vertical mouse wheel did
+ * nothing at all, silently. `flex-wrap` below has no scrollable descendant
+ * by construction, so that hook's check never trips — canvas panning still
+ * works over an overflowed pill, at the cost of the two-row shape the first
+ * attempt was trying to avoid. `min-height` (not `height`) lets the bar grow
+ * to a second row; `SelectionContextualMenu.tsx`'s existing
+ * `getBoundingClientRect()` measurement already reports the taller box with
+ * no code change, and `placeSelectionMenu` already handles arbitrary
+ * `menu.h` the same way it does for a resized color-picker popover.
+ *
+ * Round 2 also caught the `max-width` itself: this bar sits inside
+ * `.systemsketch-selection-menu`, which applies `scale(--systemsketch-
+ * interface-scale)` — so a `max-width` written in `100vw` reads correctly at
+ * the 100% default but, at the 160% ceiling `src/settings/interfaceScale.ts`
+ * allows, a bar capped at (say) 860px paints at 860 * 1.6 = 1,376px on
+ * screen — wider than the 900px viewport the cap was supposed to guarantee.
+ * Dividing by the same scale variable before the transform re-multiplies it
+ * cancels that out at every scale, not just 100%. `selectionMenuMaxWidth()`
+ * in floatingToolbarPlacement.ts takes the same scale as a parameter so its
+ * test mirrors this formula instead of the pre-scale one Codex flagged as
+ * unverified.
  */
 .systemsketch-selection-menu__bar {
   display: flex;
-  height: var(--systemsketch-selection-menu-height);
+  flex-wrap: wrap;
+  min-height: var(--systemsketch-selection-menu-height);
   align-items: stretch;
-  max-width: calc(100vw - (var(--systemsketch-selection-menu-margin) * 2));
-  overflow-x: auto;
+  max-width: calc(
+    (100vw - (var(--systemsketch-selection-menu-margin) * 2)) / var(--systemsketch-interface-scale, 1)
+  );
   padding: 0 4px;
   border-radius: 13px;
   color: var(--ss-text-inverse);
   background: var(--ss-surface-inverse);
   box-shadow: var(--ss-shadow-2);
-  /* A themed thin scrollbar rather than the OS trough, matching `.ss-scroll`'s
-   * shape (`src/scroll/scroll-area.css`) but in the pill's own inverse
-   * palette — `--ss-border-strong` is tuned for a light panel and all but
-   * disappears against this dark surface. */
-  scrollbar-width: thin;
-  scrollbar-color: var(--ss-border-inverse) transparent;
-}
-
-.systemsketch-selection-menu__bar::-webkit-scrollbar {
-  height: 6px;
-}
-
-.systemsketch-selection-menu__bar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.systemsketch-selection-menu__bar::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: var(--ss-border-inverse);
-}
-
-.systemsketch-selection-menu__bar::-webkit-scrollbar-thumb:hover {
-  background: var(--ss-text-inverse);
 }
 
 /* The Block menu supplies its own surface when it stands alone; nested in the

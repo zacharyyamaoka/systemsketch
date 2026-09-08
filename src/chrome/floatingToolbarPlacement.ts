@@ -139,29 +139,35 @@ export function isSelectionOnScreen(selection: Rect, viewport: Size): boolean {
 export const SELECTION_MENU_MIN_WIDTH = 160
 
 /**
- * The pill's own width budget, in real (unscaled) viewport pixels.
+ * The pill's own width budget, in real (unscaled) viewport pixels — mirrors
+ * the `max-width` in `.systemsketch-selection-menu__bar` (systemsketch-chrome
+ * .css) so this stays unit-testable without a DOM, the same reasoning
+ * `isSelectionOnScreen` above documents for itself.
  *
- * Codex code review (2026-09-07) caught a selection needing ~935px of controls
- * — three selected shapes with the full appearance + opacity + arrange +
- * align/distribute + wrap cluster all rendering at once — pinned at a fixed
- * `x` in a ~900px-wide viewport with no wrapping or scroll: `clampToViewportMargins`
- * only ever clamps the pill's *position*, never its *size*, so once
- * `menu.w > viewport.w - 2 * SELECTION_MENU_MARGIN` the inverted clamp range
- * pins `x` to `SELECTION_MENU_MARGIN` while the pill keeps its full unclamped
- * width — the rightmost buttons (arrange, in Codex's repro) land off-screen
- * with no way to reach them.
+ * Codex code review round 1 (2026-09-07) caught a selection needing ~935px of
+ * controls — three selected shapes with the full appearance + opacity +
+ * arrange + align/distribute + wrap cluster all rendering at once — pinned at
+ * a fixed `x` in a ~900px-wide viewport with no wrapping or scroll:
+ * `clampToViewportMargins` only ever clamps the pill's *position*, never its
+ * *size*, so once `menu.w > viewport.w - 2 * SELECTION_MENU_MARGIN` the
+ * inverted clamp range pins `x` to `SELECTION_MENU_MARGIN` while the pill
+ * keeps its full unclamped width — the rightmost buttons land off-screen.
  *
- * `SelectionContextualMenu.tsx` writes this as a `max-width` custom property
- * on the pill *before* measuring it, so `.systemsketch-selection-menu__bar`'s
- * `flex-wrap: wrap` folds any overflow onto additional rows while the
- * measured width this function's caller feeds back into `placeSelectionMenu`
- * never exceeds the budget — the existing x-clamp above never inverts. Kept
- * as its own pure function (rather than inlined at the call site) so it is
- * unit-testable without a DOM, the same reasoning `isSelectionOnScreen` above
- * documents for itself.
+ * Round 2 caught two problems with that first fix, both now folded into this
+ * formula: an `overflow-x: auto` scrollbar made the bar a scroll container,
+ * and tldraw's `usePassThroughWheelEvents` refuses to redispatch a wheel
+ * through ANY scrollable descendant — canvas panning silently stopped
+ * working while hovering an overflowed pill. The CSS now wraps instead
+ * (no scroll container, so that hook never trips). Separately, the CSS
+ * `max-width` sits inside `.systemsketch-selection-menu`'s
+ * `scale(--systemsketch-interface-scale)` transform, so a cap written in raw
+ * `100vw` re-inflates by the scale factor once painted — correct at the 100%
+ * default, wrong at the 160% ceiling `interfaceScale.ts` allows. Dividing by
+ * `scale` before the transform re-multiplies it cancels that out, which is
+ * why this function now takes `scale` as a parameter instead of assuming 1.
  */
-export function selectionMenuMaxWidth(viewport: Size): number {
-  return Math.max(SELECTION_MENU_MIN_WIDTH, viewport.w - 2 * SELECTION_MENU_MARGIN)
+export function selectionMenuMaxWidth(viewport: Size, scale = 1): number {
+  return Math.max(SELECTION_MENU_MIN_WIDTH, (viewport.w - 2 * SELECTION_MENU_MARGIN) / scale)
 }
 
 /**

@@ -220,4 +220,18 @@ describe('selectionMenuMaxWidth', () => {
     const tiny: Size = { w: 200, h: 400 }
     expect(selectionMenuMaxWidth(tiny)).toBe(SELECTION_MENU_MIN_WIDTH)
   })
+
+  it('divides by scale so a bar painted through .systemsketch-selection-menu\'s scale() transform still fits — Codex round 2', () => {
+    // Codex's round-2 repro: an 860px cap (900 - 2*20) at the 160% ceiling
+    // interfaceScale.ts allows re-inflates to 860 * 1.6 = 1,376px once the
+    // transform applies — wider than the 900px viewport it was meant to fit.
+    // Dividing the raw cap by scale first cancels that back out.
+    const viewport: Size = { w: 900, h: 650 }
+    const unscaled = selectionMenuMaxWidth(viewport, 1)
+    const scaled = selectionMenuMaxWidth(viewport, 1.6)
+    expect(unscaled).toBe(860)
+    expect(scaled * 1.6).toBeCloseTo(unscaled, 5)
+    // What actually paints on screen, at every scale, stays within budget.
+    expect(scaled * 1.6).toBeLessThanOrEqual(viewport.w - 2 * SELECTION_MENU_MARGIN + 0.001)
+  })
 })
