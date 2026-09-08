@@ -96,9 +96,11 @@ export function AppearanceControls() {
   const edges = useEdgeValues(editor)
   const presentation = usePillPresentation()
   // WHY gated on `compare`: a `layout` left over from a previous lab session
-  // must never silently change the shipped, judge-passed pill on an ordinary
-  // day — see `pillPresentation.ts`.
-  const layout = presentation.compare ? presentation.layout : 'default'
+  // must never silently change the shipped pill on an ordinary day — see
+  // `pillPresentation.ts`. V3 "Figma Segmented" is that shipped pill as of
+  // 2026-09-08 (Zach: "please set v3 to the default"); `'default'` now names
+  // the pre-lab Phase 1 layout, kept reachable only through Pill lab compare.
+  const layout = presentation.compare ? presentation.layout : 'v3'
 
   const appearance = buildAppearanceControls(styles, hasText, selectedArrowRouting)
     .map((control) => withEdgeValues(control, edges))

@@ -88,7 +88,10 @@ const FIGJAM = {
   picker: { w: 184, h: 310 }, fontSizes: { s: 12, m: 13, l: 14, xl: 16 },
 }
 
-const EMPTY_CANVAS = { x: 200, y: 820 }
+// Kept clear of the Pill lab chip this file now arms (bottom-left, roughly
+// x<310 y>800 at the harness's 1440x960 viewport) so a deselect click never
+// lands on the chip's own <select> elements instead of empty canvas.
+const EMPTY_CANVAS = { x: 1200, y: 700 }
 
 async function readMenu(page) {
   return JSON.parse(await evaluate(page, `(() => {
@@ -306,6 +309,25 @@ async function main() {
     await waitFor(page,
       `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`,
       'full SystemSketch product canvas')
+    // This whole file is a FigJam-parity proof of the ORIGINAL shape/connector
+    // recipe (identity/paint/type/alignment groups, exact FigJam geometry) —
+    // real, still-shipped functionality reachable through Pill lab's "Original
+    // pill" option, just no longer what a fresh session renders by default
+    // since V3 "Figma Segmented" became the default (Zach, 2026-09-08). Pin
+    // that recipe here via the same localStorage contract `pillPresentation.ts`
+    // reads and reload, so the module hydrates from it fresh — `usePillPresentation`
+    // is already read once (by `App.tsx`) before this shape ever gets drawn, so
+    // writing localStorage without reloading would land after that first,
+    // sticky hydration and be silently ignored.
+    await evaluate(page, `(() => {
+      localStorage.setItem('systemsketch.pill-presentation.v1',
+        JSON.stringify({ version: 1, layout: 'default', skin: 'default', compare: true }))
+      return 'ok'
+    })()`)
+    await page.send('Page.reload')
+    await waitFor(page,
+      `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`,
+      'product canvas after the Pill lab reload')
     await delay(800)
 
     // 1a. A fresh shape with no text yet gets only what it is and how it's

@@ -7,9 +7,9 @@ import {
 import './pill-presentation-chip.css'
 
 const LAYOUT_OPTIONS: readonly { value: PillLayout; label: string }[] = [
-  { value: 'default', label: 'Current pill' },
+  { value: 'default', label: 'Original pill (pre-2026-09-08)' },
   { value: 'v1', label: 'V1 · Excalidraw Compact' },
-  { value: 'v3', label: 'V3 · Figma Segmented' },
+  { value: 'v3', label: 'V3 · Figma Segmented (current default)' },
 ]
 
 const SKIN_OPTIONS: readonly { value: PillSkin; label: string }[] = [

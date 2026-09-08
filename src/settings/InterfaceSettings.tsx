@@ -450,9 +450,10 @@ function PillLabSettingsPanel() {
           <h2 id="pill-lab-title">Pill lab</h2>
           <p>
             The Phase 2 ink-pass comparison: two real structural layouts for the
-            selection pill (Excalidraw Compact, Figma Segmented) and five style
-            skins, built on the real pill so you can select an actual shape and
-            try every combination.
+            selection pill (Figma Segmented — shipped as the default since
+            2026-09-08 — and Excalidraw Compact) and five style skins, built on
+            the real pill so you can select an actual shape and try every
+            combination.
           </p>
         </div>
       </div>
@@ -462,7 +463,7 @@ function PillLabSettingsPanel() {
           <p>
             Shows a small switcher in the bottom-left corner of the canvas with
             a Layout and a Style picker. Off by default — the selection pill
-            renders exactly as shipped until this is on.
+            renders exactly as shipped (V3 · Figma Segmented) until this is on.
           </p>
         </div>
         <button
