@@ -908,8 +908,12 @@
   flex-wrap: wrap;
   min-height: var(--systemsketch-selection-menu-height);
   align-items: stretch;
-  max-width: calc(
-    (100vw - (var(--systemsketch-selection-menu-margin) * 2)) / var(--systemsketch-interface-scale, 1)
+  /* The 160px floor matches SELECTION_MENU_MIN_WIDTH in floatingToolbarPlacement.ts —
+   * Codex round 3 caught the two drifting apart at extreme small viewports,
+   * where the unfloored calc could go below what still reads as one pill. */
+  max-width: max(
+    160px,
+    calc((100vw - (var(--systemsketch-selection-menu-margin) * 2)) / var(--systemsketch-interface-scale, 1))
   );
   padding: 0 4px;
   border-radius: 13px;
@@ -978,6 +982,15 @@
  * is this stylesheet's job, not the component's. */
 .systemsketch-arrange {
   display: flex;
+  /* Codex round 3: the outer bar's `flex-wrap` (systemsketch-selection-menu
+   * __bar) only wraps its OWN direct children — this whole cluster was one
+   * of those children, so once its z-order + align + distribute buttons
+   * (up to ~410px at 3+ selected shapes) exceeded the row's remaining
+   * width, the cluster overflowed as one unbreakable block instead of
+   * folding, reproducing the exact clipped-button bug the wrap was meant
+   * to fix. Wrapping here too lets the buttons themselves fold onto a new
+   * line within the pill, the same policy one level up. */
+  flex-wrap: wrap;
   align-items: center;
   padding: 3px;
   border-left: 1px solid var(--ss-border-inverse);
