@@ -363,9 +363,11 @@ async function main() {
     assert.equal(colorOpen.panel.mode, 'above')
     assert.equal(colorOpen.panel.background, 'rgb(30, 30, 30)')
     assert.equal(colorOpen.panel.radius, '13px')
-    // FigJam's three fills, in FigJam's order, and only those three: tldraw's
-    // `fill`, `pattern` and `lined-fill` are a different product's vocabulary.
-    assert.deepEqual(colorOpen.panel.modeRow.map((c) => c.value), ['solid', 'semi', 'none'])
+    // FigJam's three fills, plus Hatched (`pattern`) — the Excalidraw-parity
+    // track (2026-09-07) deliberately added this fourth option on top of the
+    // FigJam-only vocabulary this test used to assert exactly three against;
+    // `lined-fill` is still a different product's vocabulary and stays out.
+    assert.deepEqual(colorOpen.panel.modeRow.map((c) => c.value), ['solid', 'pattern', 'semi', 'none'])
     const gap = colorOpen.pill.y - (colorOpen.panel.y + colorOpen.panel.h)
     assert.ok(near(gap, 8), `popover should sit 8px above the pill, was ${gap}`)
     // 24px discs on a 32px pitch, inset 4px: the grid FigJam's 368px panel holds.
@@ -398,9 +400,9 @@ async function main() {
     await pickOption(page, 'color', 'solid')
     const filled = await readMenu(page)
     assert.ok(filled.panel, 'the popover stays open after a pick')
-    assert.equal(filled.panel.modeRow.length, 3)
-    // FigJam's own order: most paint first.
-    assert.deepEqual(filled.panel.modeRow.map((c) => c.value), ['solid', 'semi', 'none'])
+    assert.equal(filled.panel.modeRow.length, 4)
+    // FigJam's own order: most paint first, Hatched (Excalidraw parity) beside it.
+    assert.deepEqual(filled.panel.modeRow.map((c) => c.value), ['solid', 'pattern', 'semi', 'none'])
     assert.equal(filled.panel.modeRow.find((c) => c.value === 'solid').background, FIGJAM.chipChosen)
     assert.equal(filled.labels.color, 'Color, blue', 'filling must not disturb the colour')
     assert.equal(filled.stroke, paintedBefore, 'filling must not change the stroke either')
@@ -532,7 +534,7 @@ async function main() {
     assert.equal(stroke.panel.layout, 'swatches')
     assert.equal(stroke.panel.mode, 'above')
     assert.deepEqual(stroke.panel.modeSections.lineStyle.map((c) => c.value),
-      ['solid', 'dashed', 'dotted', 'async', 'none'])
+      ['draw', 'solid', 'dashed', 'dotted', 'async', 'none'])
     assert.ok(stroke.panel.modeSections.lineStyle.find((c) => c.value === 'solid').checked,
       'a freshly drawn shape is seeded solid, so the menu must show it as chosen')
     // ...with the thickness rungs stacked above those again: three sections in
