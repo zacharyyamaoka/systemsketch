@@ -272,8 +272,8 @@ CSS = """
 SOURCES = [
     "Daily Note - Sep 7 2026 (vault, Created by Me) — the ask, the two candidate repos, the stack table, and the earlier same-day realisation: “instead of starting with screenshots I want to start with open source code”",
     "github.com/open-pencil/open-pencil — MIT, 8,210 stars, last commit 2026-09-07; shallow clone read 2026-09-07: package.json (vue 3.5.41, reka-ui 2.10.3, tailwindcss 4.3.3, tailwind-variants 3.3.1, nanostores 1.5.0, canvaskit-wasm 0.41.1, yoga-layout, vite 8.1.4, bun workspaces); src/components/DesignPanel.vue, src/components/properties/ (4,927 lines), ui/panel/PanelSection.vue, PanelGrid.vue, PanelFieldGroup.vue, PropertyListRoot.vue, inputs/NumberField.vue (sensitivity drag-scrub), src/app.css @theme",
-    "github.com/onlook-dev/onlook — Apache-2.0, partial clone read 2026-09-07, last public commit 423e2e92 (2026-07-21): apps/web/client/src/app/project/[id]/_components/main.tsx mounts the top `editor-bar` (48 files, 9,732 lines); right-panel/ holds only chat-tab/; git -S finds no right-side styles panel in any commit; stack Next.js 16, React 19.2, @radix-ui/* (~40), Tailwind 4.0/4.1, mobx, Bun; InputRange (169 lines, hand-rolled scrub), ColorPickerContent (795 lines, hand-rolled)",
-    "Zach's own screenshot of the hosted Onlook app (Pasted image 20260907170607.png) shows a Chat | Styles tab pair in the right panel — that Styles tab does not exist in the public repository as of its last commit",
+    "github.com/onlook-dev/onlook — Apache-2.0, FULL clone (1,640 commits, 169 tags) re-read 2026-09-07 after the first read used a depth-1 shallow clone: last public commit 423e2e92 (2026-07-21) has right-panel/ holding only chat-tab/ (33 files, 3,283 lines) and the styling in the top `editor-bar` (56 files, 5,800 lines); stack Next.js 16, React 19.2, @radix-ui/* (~40), Tailwind 4.0/4.1, mobx, Bun. The right-side styles panel DID exist and was deleted by f7a8060c \u2018Migrate to web version (#1837)\u2019 on 2025-05-14; the last commit on main carrying it is f05a4640 (2025-05-04), tag v0.2.29",
+    "Zach's screenshots of Onlook's right panel (Pasted image 20260907170607.png, 20260907185243.png) are the open-source ELECTRON DESKTOP app, not a hosted product: the section headings \u2018Tailwind Classes\u2019 / \u2018Position & Dimensions\u2019 / \u2018Flexbox & Layout\u2019 are verbatim apps/studio/src/locales/en/translation.json under editor.panels.edit.tabs.styles.groups, and the Styles-before-Chat(beta) tab order in the 1852 shot only ever shipped at v0.1.10 (2024-12-30) and earlier",
     "ui.shadcn.com/docs/changelog/2026-07-base-ui-default — Base UI is the default primitive library for `npx shadcn init` since July 2026; Radix remains supported; shadcn CLI version measured by the probe",
     "ui.shadcn.com/docs/registry, /docs/registry/registry-item-json, /docs/registry/getting-started — item types registry:ui / block / component / hook / lib / page / file / style / theme / font / item / base; items carry dependencies, devDependencies, registryDependencies, cssVars, css; `shadcn build` emits registry.json + per-item JSON; consumed with `npx shadcn add <url>` or a namespaced registry in components.json; no local-path or git-URL install documented — the registry must be HTTP-served",
     "registry.npmjs.org/@base-ui/react — MIT; base-ui.com/react/overview/releases — 1.0.0 stable 2025-12-11, package renamed from @base-ui-components/react; base-ui.com/react/components/number-field — ScrubArea with Pointer Lock and edge teleport, pixelSensitivity default 2",
@@ -289,6 +289,7 @@ SOURCES = [
     "github.com/excalidraw/excalidraw packages/excalidraw/components/Stats/DragInput.tsx (MIT) — the whiteboard-native drag-input pattern: label carries the drag, `value: number | 'Mixed'`, sensitivity in px per step",
     "tweakcn.com (jnsahaj/tweakcn, MIT) — visual theme editor for shadcn tokens; exports CSS, not a registry:theme item",
     "docs/tldraw-styling-lab-probe-2026-09-07.json (this repo) — the scratch-project measurements rendered in §3; written from the probe's RESULT.md, see the file for the exact commands",
+    "github.com/onlook-dev/desktop — the Electron app split out of onlook-dev/onlook after the web migration (\u2018update repo name\u2019 70d30ae2, \u2018refactor: remove web repo (#23)\u2019 2025-05-17); Apache-2.0, 227 stars, HEAD a3685a49 = v0.2.31 (2025-07-17), NOT archived but frozen since. Cloned to /home/bam/onlook-desktop 2026-09-07: apps/studio/src/routes/editor/EditPanel/ = the right panel (Chat | Styles | Props | Code tabs, ResizablePanel, 240px at Styles), StylesTab/ = 22 files / 3,856 lines, and apps/studio/src/lib/editor/styles/group.ts = 292 lines declaring 47 SingleStyleImpl fields in 7 CompoundStyleImpl clusters across 4 groups, typed by a 7-member StyleType enum (Text, Dimensions, Number, Select, Color, Image, Font). StylesTab is byte-identical between v0.2.29 and v0.2.33",
 ]
 
 
@@ -491,12 +492,13 @@ def build() -> str:
         ("Same problem shape", 30, "a closed prop set on a canvas selection, mixed values, undo — not arbitrary CSS"),
         ("Legible grammar", 25, "section / row / field primitives you can infer and rebuild"),
         ("Stack proximity", 20, "React · Base UI · shadcn · Tailwind v4 — how much lifts as-is"),
-        ("Panel is public code", 15, "the right panel must be readable source, not a screenshot of a hosted app"),
+        ("Panel is public code", 15, "the right panel must be readable source you can check out, not a screenshot"),
         ("Alive + licence", 10, "commits this quarter, MIT/Apache"),
     ]
     candidates = {
         "open-pencil": ([5, 5, 2, 5, 5], "grammar donor", "b1"),
-        "Onlook (public repo)": ([2, 3, 4, 1, 4], "top-bar donor only", "ref"),
+        "Onlook desktop (v0.2.29+)": ([2, 5, 4, 5, 2], "React grammar donor", "b2"),
+        "Onlook web (current main)": ([2, 3, 4, 1, 4], "top-bar donor only", "ref"),
         "Excalidraw Stats": ([5, 3, 2, 5, 5], "whiteboard semantics", "b2"),
         "Penpot": ([4, 2, 1, 5, 4], "IA reference", "ref"),
         "Webstudio": ([2, 4, 3, 5, 4], "CSS-shaped", "ref"),
@@ -585,7 +587,7 @@ def build() -> str:
   fragile is the hand-rolled view and its CSS — which is exactly the part shadcn replaces.</p>
   <div class="verdict"><b>Recommendation.</b>
     <ul>
-      <li><b>Reference: open-pencil's grammar, not its code.</b> It is Vue + Reka UI + Tailwind v4{cite(2)}; Reka is Radix's Vue port, so its PanelSection / PanelGrid / PanelFieldGroup / NumberField map onto Base UI one for one. Onlook's public repo has no right styles panel at all — its styling lives in a 9,732-line top editor-bar, and the Styles tab in your screenshot is the hosted app, not code you can read{cite(3, 4)}.</li>
+      <li><b>Reference: open-pencil's grammar, not its code.</b> It is Vue + Reka UI + Tailwind v4{cite(2)}; Reka is Radix's Vue port, so its PanelSection / PanelGrid / PanelFieldGroup / NumberField map onto Base UI one for one. <b>Correction to the first cut of this page:</b> Onlook <em>does</em> ship the right panel you screenshotted, as open source — in its Electron desktop app, which lives on after the web rewrite at <code>github.com/onlook-dev/desktop</code>{cite(20)}. It is React + Radix + Tailwind, and its <code>group.ts</code> declares 47 fields the same way your model does. Read it for the panel's <em>rhythm</em> alongside open-pencil — but its inputs were mined against M2 on the evening of the 7th and none of them transfers; two are places this lab is already ahead{cite(3, 4)}.</li>
       <li><b>Stack: Base UI + shadcn (Base UI track) + Tailwind v4 layers-only.</b> Base UI is already your decision and shadcn's default{cite(5, 15)}; the layer-only import never loads preflight and emits no global rule{cite(9, 11)}; the probe below measures the pixels. Kibo is Radix-only today — a gallery, not a dependency{cite(8)}.</li>
       <li><b>Keep the model, rebuild the view.</b> Port <code>primitiveInspectorModel.ts</code>, <code>primitiveOverrides.ts</code> and their tests into the new repo; draw every row with shadcn parts; ship the whole thing as a shadcn <em>registry</em> so SystemSketch installs it with one command{cite(6)}.</li>
       <li><b>Location: a new repo at <code>/home/bam/tldraw_styling_lab</code></b>, whose <code>package.json</code> is the proof of “stock tldraw + one thing”. Default if you say nothing.</li>
@@ -595,6 +597,14 @@ def build() -> str:
   SystemSketch, or rewrite the design-system report. Every number below is measured at build time
   from this tree and from <code>docs/tldraw-styling-lab-probe-2026-09-07.json</code>; every claim about
   a third party carries a source.</div>
+  <div class="quiet" style="border-left-color:var(--amber)"><b>Revised 7 September 2026, evening.</b>
+  The first cut of this page said Onlook's right-hand styles panel “does not exist in the public
+  repository” and that the panel in your screenshot was a hosted product. Both were wrong, and the
+  cause was mechanical: the reconnaissance clone was <code>--depth 1</code>, so the
+  <code>git&nbsp;-S</code> sweep that reported “no right-side styles panel in any commit” had exactly
+  one commit to search. The full clone is 1,640 commits and 169 tags. The panel is open source, it is
+  React, and it is still standing at <code>github.com/onlook-dev/desktop</code>. §2 is rewritten;
+  the scoring table now carries desktop and web as separate candidates{cite(3, 20)}.</div>
 </div>
 
 <section>
@@ -639,18 +649,20 @@ def build() -> str:
       <li>Tokens in a Tailwind v4 <code>@theme</code> block plus <code>tailwind-variants</code> — literally your target styling layer, minus the Vue.</li>
       <li>Alive today (last commit 2026-09-07), MIT, 8.2k stars.</li>
     </ul></div>
-    <div class="box warn"><h4>Onlook — a different problem, and the panel is not public</h4><ul>
-      <li>It styles arbitrary DOM with the whole CSS surface (padding, margin, display, typography). tldraw has a closed prop set — none of its schema logic transfers.</li>
-      <li>The public repo's right panel holds only the chat tab; the styling UI is the top <code>editor-bar</code> (48 files). Git history finds no move to the side{cite(3)}. Your screenshot's <em>Styles</em> tab is the hosted product{cite(4)}.</li>
-      <li>Both of its hard inputs are hand-rolled: a 169-line range scrub and a 795-line colour picker — the opposite of what you want.</li>
-      <li>Useful later, for one thing: the contextual top bar. SystemSketch already has a Figma-toolbar spike; Onlook's editor-bar is the right donor when that returns.</li>
+    <div class="box"><h4>Onlook <em>desktop</em> — the right panel, and it is readable source</h4><ul>
+      <li><b>Where it is.</b> <code>github.com/onlook-dev/desktop</code>, HEAD <code>a3685a49</code> = v0.2.31 (2025-07-17). In the main repo it is any tag up to <b>v0.2.29</b>, or sha <code>f05a4640</code> — the commit <code>f7a8060c</code> “Migrate to web version (#1837)” deleted it on 2025-05-14{cite(3, 20)}.</li>
+      <li><b>Declarative, like your model.</b> <code>lib/editor/styles/group.ts</code> is 292 lines that name 47 fields in 7 compound clusters over 4 groups, each a <code>SingleStyleImpl(cssKey, default, label, StyleType, opts)</code> — a 7-member type enum dispatched by one <code>SingleInput</code> switch{cite(20)}. That is the same separation your <code>primitiveInspectorModel.ts</code> already has.</li>
+      <li><b>Checked against M2, and nothing transfers — <span style="color:var(--amber)">this was mined and closed on the evening of 7 Sept</span>.</b> <code>NumberUnitInput</code> (167 lines) and <code>ColorInput/</code> (350+, hand-rolled) are both places the lab is <em>ahead</em>: <code>ScrubNumber</code> is on Base UI's <code>NumberField</code> with an expression parser, a real mixed state and a one-gesture-one-undo commit seam, and <code>ColorRow</code> is Base UI <code>Popover</code> + react-colorful with a clear-the-override empty field. <code>AutoLayoutInput</code>'s Fill/Hug and <code>NestedInputs</code>' four-side cross have no tldraw prop to bind to (no box model, one <code>cornerRadius</code> not four), and its 2-up grid is already the model's <code>paired</code> + shared <code>caption</code>. <code>DisplayInput</code>'s value-conditional disclosure is already declarative here — <code>bend</code> applies when <code>kind !== 'elbow'</code>, <code>elbowMidPoint</code> when it is. Verdict and evidence: <code>tldraw_styling_lab/docs/log.md</code>.</li>
+      <li><b>What still does not transfer.</b> It styles arbitrary DOM across the whole CSS surface; tldraw has a closed prop set, so none of the schema logic lifts — only the grammar. It is React 18 + MobX <code>observer</code>, not React 19 + a store, and the repo is frozen (no push since 2025-07-17). Its colour picker and scrub are hand-rolled, which is precisely what Base UI replaces.</li>
+      <li>Its successor, the current web app, is the <em>counter</em>-example: the same product moved styling into a 56-file top <code>editor-bar</code> and left only chat on the right{cite(3)}. Useful later as the contextual-top-bar donor.</li>
     </ul></div>
   </div>
   <div class="gallery">
     {img('open-pencil-panel-crop.png', '<b>open-pencil</b>, from its own README screenshot: Instance / Position / Layout / Auto layout / Alignment / Appearance. Light theme, 2-up fields, glyph-in-field. This is the rhythm to rebuild in shadcn.', True)}
     {img('open-pencil-panel-zach-paste.png', '<b>Your paste of the same panel</b> — kept for the record.', True)}
     {img('penpot-design-panel.png', '<b>Penpot</b> — same IA, ClojureScript, AGPL: read it, never lift it.', True)}
-    {img('onlook-right-panel-hosted.png', '<b>Onlook hosted app</b> — the Chat | Styles tabs you saw. Not in the public repository.', True)}
+    {img('onlook-right-panel-hosted.png', '<b>Onlook desktop</b>, whole window — the Chat | Styles tab pair, in the open-source Electron app.', True)}
+    {img('onlook-desktop-styles-panel.png', '<b>The Styles tab itself</b> — every heading here is a verbatim key under <code>editor.panels.edit.tabs.styles</code>; Width/Height carry Fill/Hug, Margin and Padding the four-side cross. This is the panel to read.', True)}
     {img('dify-node-settings.jpg', '<b>Dify</b>, your counter-example: a node editor\'s settings panel is a form, not an inspector. You were right to exclude the node editors.')}
   </div>
   <p>Excalidraw's Stats panel scores nearly as high as open-pencil and is the one reference that
@@ -773,6 +785,7 @@ def build() -> str:
     <li><b>Not merged, not moved.</b> The worktree stays where it is; nothing was installed into this repo; the design-system report was not edited — a scoped reversal gets a superseding PEP at merge, per <code>docs/peps/README.md</code>.</li>
     <li><b>Not a second canvas.</b> No shape types beyond the corner-radius geo; no re-implemented drag, resize or z-order; the lab's only tldraw seams are the three named in §4.</li>
     <li><b>Onlook's editor-bar not mined.</b> It is the right donor for a contextual top bar, which is a different feature with its own spike already in this repo.</li>
+    <li><b>Onlook desktop not run.</b> The clone at <code>/home/bam/onlook-desktop</code> was read, not launched — it is an Electron app that wants a Next.js project and a sign-in. The screenshot is matched to the source by its i18n keys and tab order, not by a run of my own{cite(4, 20)}.</li>
   </ul>
   <h3>The opening move</h3>
   <pre><code>mkdir -p /home/bam/tldraw_styling_lab &amp;&amp; cd /home/bam/tldraw_styling_lab &amp;&amp; git init &amp;&amp; npm create vite@latest . -- --template react-ts</code></pre>
