@@ -47,6 +47,8 @@ MEDIA_DIR = Path(
 )
 PROBE = ROOT / "docs" / "tldraw-styling-lab-probe-2026-09-07.json"
 WORKTREE = ROOT / ".claude" / "worktrees" / "tldraw-inspector-panel-cf524c"
+# The donor branch's head when this plan was written (claude/tldraw-inspector-panel-cf524c).
+DONOR_SHA = "77907974"
 MEDIA_REL = "media/tldraw-styling-lab-plan"
 # WHY: the retained review runtime reruns this builder inside a pinned worktree that may
 # carry no node_modules of its own; the pinned tldraw is the same version, so reading the
@@ -116,9 +118,16 @@ def measure() -> dict[str, str]:
         m["stock_pickers"] = "?"
         m["stock_picker_names"] = "?"
 
-    model = WORKTREE / "src" / "inspector" / "primitiveInspectorModel.ts"
-    if model.exists():
-        src = model.read_text(encoding="utf-8")
+    # WHY a pinned commit and not the worktree path: the retained review runtime reruns
+    # this builder inside its own pinned checkout, where .claude/worktrees/ does not exist,
+    # and the donor worktree itself is slated to be swept once the lab lands its port. The
+    # branch's commits live in the shared object store, so `git show <sha>:<path>` measures
+    # the same bytes from any checkout, forever.
+    def branch_file(path: str) -> str:
+        return sh(f"git show {DONOR_SHA}:{path}")
+
+    src = branch_file("src/inspector/primitiveInspectorModel.ts")
+    if src:
         paint = len(re.findall(r"^\s*paintField\(", src, re.M))
         style = len(re.findall(r"^\s*styleField\(", src, re.M))
         prop = len(re.findall(r"^\s*propField\(", src, re.M))
@@ -134,36 +143,32 @@ def measure() -> dict[str, str]:
     else:
         for k in ("fields_paint", "fields_style", "fields_prop", "fields_inline", "fields_total", "model_ss_imports"):
             m[k] = "?"
-    m["lines_model"] = count_lines(model)
-    m["lines_overrides"] = count_lines(WORKTREE / "src" / "inspector" / "primitiveOverrides.ts")
-    m["lines_view"] = count_lines(WORKTREE / "src" / "inspector" / "PrimitiveInspector.tsx")
-    m["lines_css"] = count_lines(WORKTREE / "src" / "inspector" / "primitive-inspector.css")
-    m["lines_scrub"] = count_lines(WORKTREE / "src" / "inspector" / "ScrubNumber.tsx")
-    m["lines_tests"] = "?"
-    if WORKTREE.exists():
-        tests = [
-            WORKTREE / "src" / "inspector" / "primitiveInspectorModel.test.ts",
-            WORKTREE / "src" / "inspector" / "primitiveOverrides.test.ts",
-            WORKTREE / "src" / "inspector" / "ScrubNumber.test.ts",
-        ]
-        total = 0
-        for t in tests:
-            try:
-                total += sum(1 for _ in t.open(encoding="utf-8"))
-            except OSError:
-                pass
-        m["lines_tests"] = f"{total:,}"
-        m["wt_head"] = sh("git rev-parse --short HEAD", WORKTREE) or "?"
-        m["wt_ahead"] = sh("git rev-list --count main..HEAD", WORKTREE) or "?"
-        m["wt_stat"] = sh("git diff --shortstat main...HEAD", WORKTREE) or "?"
-        m["wt_merged"] = "yes" if sh("git branch --contains HEAD --format='%(refname:short)' | grep -x main", WORKTREE) else "no"
-        m["baseui"] = sh(
-            "node -e \"console.log(require('./node_modules/@base-ui/react/package.json').version)\"",
-            WORKTREE,
-        ) or "?"
-    else:
-        for k in ("wt_head", "wt_ahead", "wt_stat", "wt_merged", "baseui"):
-            m[k] = "?"
+
+    def branch_lines(path: str) -> str:
+        text = branch_file(path)
+        return f"{text.count(chr(10)) + 1:,}" if text else "?"
+
+    m["lines_model"] = branch_lines("src/inspector/primitiveInspectorModel.ts")
+    m["lines_overrides"] = branch_lines("src/inspector/primitiveOverrides.ts")
+    m["lines_view"] = branch_lines("src/inspector/PrimitiveInspector.tsx")
+    m["lines_css"] = branch_lines("src/inspector/primitive-inspector.css")
+    m["lines_scrub"] = branch_lines("src/inspector/ScrubNumber.tsx")
+    test_total = 0
+    for t in (
+        "src/inspector/primitiveInspectorModel.test.ts",
+        "src/inspector/primitiveOverrides.test.ts",
+        "src/inspector/ScrubNumber.test.ts",
+    ):
+        text = branch_file(t)
+        test_total += text.count(chr(10)) + 1 if text else 0
+    m["lines_tests"] = f"{test_total:,}" if test_total else "?"
+    m["wt_head"] = DONOR_SHA
+    m["wt_ahead"] = sh(f"git rev-list --count main..{DONOR_SHA}") or "?"
+    m["wt_stat"] = sh(f"git diff --shortstat main...{DONOR_SHA}") or "?"
+    m["wt_merged"] = "yes" if sh(f"git merge-base --is-ancestor {DONOR_SHA} main && echo yes") else "no"
+    pkg_text = branch_file("package.json")
+    base_match = re.search(r'"@base-ui/react":\s*"([^"]+)"', pkg_text)
+    m["baseui"] = base_match.group(1).lstrip("^~") if base_match else "?"
     m["ss_tokens"] = sh("grep -oE -- '--ss-[a-z0-9-]+' src/theme/tokens.css | sort -u | wc -l") or "?"
     m["main_head"] = sh("git rev-parse --short HEAD") or "?"
     return m
@@ -780,7 +785,7 @@ def build() -> str:
 </section>
 
 <footer>
-  <span>Built by <code>docs/build_tldraw_styling_lab_plan.py</code> at <code>{esc(m['main_head'])}</code>; branch measurements from <code>{esc(str(WORKTREE.relative_to(ROOT)))}</code>@{esc(m['wt_head'])}; probe numbers from <code>docs/tldraw-styling-lab-probe-2026-09-07.json</code>.</span>
+  <span>Built by <code>docs/build_tldraw_styling_lab_plan.py</code> at <code>{esc(m['main_head'])}</code>; branch measurements from <code>claude/tldraw-inspector-panel-cf524c</code> at <code>{esc(m['wt_head'])}</code> via <code>git show</code>; probe numbers from <code>docs/tldraw-styling-lab-probe-2026-09-07.json</code>.</span>
   <span>Reference stills live in ignored <code>reports/media/tldraw-styling-lab-plan/</code>, served by the retained review runtime.</span>
 </footer>
 </main></body></html>
