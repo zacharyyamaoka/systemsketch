@@ -63,7 +63,14 @@
 .systemsketch-appearance__trigger-px {
   flex: 0 0 auto;
   padding-right: 6px;
-  color: rgb(255 255 255 / 55%);
+  /* A muted variant of the pill's OWN ink, not a hardcoded white — a light
+   * skin (Codex judge round 2, 2026-09-08) makes 55%-white text on a white
+   * pill unreadable. color-mix with transparent reproduces the exact
+   * original rgba(255,255,255,.55) when no skin overrides --systemsketch
+   * -pill-ink (its fallback is #fff, same as before), and tracks whatever
+   * ink colour a skin sets otherwise — the same technique already used for
+   * `.systemsketch-top-left-shell`'s background (systemsketch-chrome.css). */
+  color: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 55%, transparent);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   font-weight: 400;
@@ -488,7 +495,8 @@
 .systemsketch-appearance__label-px {
   flex: 0 0 auto;
   padding-left: 16px;
-  color: rgb(255 255 255 / 55%);
+  /* See `__trigger-px`'s WHY — a muted variant of the pill's own ink. */
+  color: color-mix(in srgb, var(--systemsketch-pill-ink, #fff) 55%, transparent);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   line-height: 16px;

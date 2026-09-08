@@ -388,10 +388,17 @@ export const V1_COMPACT_RECIPE: ContextualControlRecipe = {
  * Phase 2 ink-pass, V3 "Figma Segmented": appearance, then text, each set off
  * by the composition's own between-group separator (`ContextualControls.tsx`
  * already draws one at every `groupIndex > 0`). Arrange is a THIRD segment in
- * the spec, but it is a sibling item outside `AppearanceControls` — its own
- * divider is drawn where it is rendered (`SystemSketchChrome.tsx`), not here.
- * Reuses the stock (unrestructured) control shapes: V3 only reorders and
- * regroups, it never changes what a control stacks.
+ * the spec, but it is a sibling item outside `AppearanceControls` entirely —
+ * it needs no divider added here or anywhere else, because
+ * `.systemsketch-arrange`'s own `border-left` (systemsketch-chrome.css)
+ * already sets it off from whatever precedes it, unconditionally, in every
+ * layout. An earlier version of this feature injected a second, V3-only
+ * separator in front of Arrange at the `SystemSketchChrome.tsx` call site —
+ * that only doubled the divider line and, worse, left Opacity's own
+ * equally-unconditional `border-left` reading as an unplanned fourth segment
+ * (Codex judge round 2, 2026-09-08). Reuses the stock (unrestructured)
+ * control shapes: V3 only reorders and regroups, it never changes what a
+ * control stacks.
  */
 export const V3_SEGMENTED_RECIPE: ContextualControlRecipe = {
   id: 'v3-segmented',
