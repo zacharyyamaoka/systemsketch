@@ -66,6 +66,17 @@ async function setSelectValue(page, testId, value) {
   })()`)
 }
 
+async function elementCenter(page, selector) {
+  const rect = JSON.parse(await evaluate(page, `(() => {
+    const el = document.querySelector(${JSON.stringify(selector)})
+    if (!el) return 'null'
+    const r = el.getBoundingClientRect()
+    return JSON.stringify({ x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) })
+  })()`))
+  assert.ok(rect, `missing ${selector}`)
+  return rect
+}
+
 const { checks, pass } = makeChecklist()
 
 async function main() {
@@ -116,6 +127,23 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.visible === 'true'`, 'the pill after re-selecting')
     pass('Settings -> Pill lab arms the on-canvas switcher chip')
 
+    // 2b. A real pointer click must be able to reach the chip's own controls
+    // — Codex judge round 1 caught the chip mounted under
+    // `.systemsketch-surface-host` (`pointer-events: none`) with no local
+    // override, so every click on its selects fell through to the canvas
+    // beneath. `document.elementFromPoint` is the browser's own hit-test —
+    // the exact function a real click's target resolution goes through —
+    // checked here without actually opening the native <select> popup, which
+    // is unreliable to drive and dismiss over CDP and was never the point:
+    // the point is whether the click would land on the control at all.
+    const layoutSelectCenter = await elementCenter(page, '[data-testid="systemsketch-pill-chip-layout"]')
+    const hitTarget = await evaluate(page, `document
+      .elementFromPoint(${layoutSelectCenter.x}, ${layoutSelectCenter.y})
+      ?.getAttribute('data-testid')`)
+    assert.equal(hitTarget, 'systemsketch-pill-chip-layout',
+      `a click at the chip's own select must hit that select, not pass through to the canvas — hit ${hitTarget}`)
+    pass('a real pointer click reaches the chip\'s own controls, not the canvas beneath it')
+
     // 3. V1 Excalidraw Compact: one flat recipe, no group separators inside it.
     await setSelectValue(page, 'systemsketch-pill-chip-layout', 'v1')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.ssPillLayout === 'v1'`,
@@ -123,6 +151,38 @@ async function main() {
     assert.equal(await pillRecipe(page), 'v1-compact', 'V1 must compose through the v1-compact recipe')
     await screenshot(page, '2-v1-compact.png')
     pass('picking V1 in the chip switches the live pill to the v1-compact recipe')
+
+    // 3b. V1 must not silently drop a connector-only control. Codex judge
+    // round 1 caught `V1_COMPACT_RECIPE` omitting `lineShape` (a connector's
+    // elbow/curve/straight routing) — `restructureForV1Cluster` passes it
+    // through untouched, same as the default pill, but a recipe that never
+    // names a kind makes `composeContextualControls` drop it silently.
+    await key(page, 'a', 'KeyA')
+    // Drawn away from the chip's fixed bottom-left position, not just below
+    // the rectangle — the two must never overlap on screen.
+    await drag(page, { x: 900, y: 200 }, { x: 1100, y: 260 })
+    await delay(200)
+    const arrowId = await evaluate(page, `window.__systemsketch.editor.getOnlySelectedShape()?.id`)
+    assert.ok(arrowId, 'drawing the arrow should select it')
+    // Unlike a rectangle, drawing an arrow opens no text editor to escape
+    // out of (arrow_drawing_smoke.mjs's own ARROW-2a) — the tool already
+    // hands back to select.idle with the arrow selected, so no Escape here.
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.visible === 'true'`,
+      'the pill over the newly drawn arrow')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.ssPillLayout === 'v1'`,
+      'the arrow\'s pill to still report layout v1')
+    assert.equal(await pillRecipe(page), 'v1-compact', 'a connector selection under V1 must still compose through v1-compact')
+    const lineShapePresent = await evaluate(page,
+      `Boolean(document.querySelector('[data-testid="systemsketch-appearance"] [data-control="lineShape"]'))`)
+    assert.equal(lineShapePresent, true,
+      'V1 must still show the connector\'s Line shape (routing) control, not silently drop it')
+    await screenshot(page, '2b-v1-connector-lineshape.png')
+    pass('V1 keeps a connector\'s Line shape control instead of silently dropping it')
+
+    // Back to the rectangle for the remaining layout/skin checks.
+    await clickAt(page, (RECT.from.x + RECT.to.x) / 2, (RECT.from.y + RECT.to.y) / 2)
+    await waitFor(page, `window.__systemsketch.editor.getOnlySelectedShape()?.id === ${JSON.stringify(rectId)}`,
+      're-selecting the rectangle')
 
     // 4. V3 Figma Segmented: Arrange peels off behind its own divider.
     assert.equal(await arrangeIsDivided(page), false, 'V1 must not draw a divider before Arrange')

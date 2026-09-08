@@ -358,13 +358,19 @@ export const BLOCK_TITLE_CONTEXTUAL_RECIPE: ContextualControlRecipe = {
  *
  * A single group by design — the variant's whole thesis is density, so no
  * separator interrupts it. `appearanceModel.ts`'s `restructureForV1Cluster`
- * is what makes this recipe's items actually exist as candidates: it un-stacks
- * `color`→fill and `strokeColor`→lineStyle→strokeWidth into independent
- * top-level controls first (`fill`, `lineStyle`), and folds the two arrowhead
- * controls into one (`arrowheadStart` carries `arrowheadEnd` as its stacked
- * mode) — so this list names every kind that can result, once, in reading
- * order, and lets `composeContextualControls` silently drop whatever a given
- * selection does not produce.
+ * is what makes some of these items exist as top-level candidates: it
+ * un-stacks `color`→fill and `strokeColor`→lineStyle→strokeWidth into
+ * independent top-level controls (`fill`, `lineStyle`), and folds the two
+ * arrowhead controls into one (`arrowheadStart` carries `arrowheadEnd` as its
+ * stacked mode). Everything else — including `lineShape`, a connector's
+ * unrestructured elbow/curve/straight routing control — passes through
+ * `buildAppearanceControls` untouched, same as the default pill. This list
+ * must therefore name every kind EITHER path can produce, not only the
+ * restructured ones: a candidate this recipe omits is silently dropped by
+ * `composeContextualControls`, which is exactly how a first pass here lost
+ * `lineShape` for every connector selection (Codex judge round 1,
+ * 2026-09-08) — caught only because a connector fixture was actually
+ * selected under V1, not by reasoning about the list.
  */
 export const V1_COMPACT_RECIPE: ContextualControlRecipe = {
   id: 'v1-compact',
@@ -373,7 +379,7 @@ export const V1_COMPACT_RECIPE: ContextualControlRecipe = {
     items: [
       'geo', 'color', 'strokeColor', 'fill', 'lineStyle',
       'codeLanguage', 'font', 'size', 'align', 'verticalAlign',
-      'arrowheadStart', 'addText',
+      'lineShape', 'arrowheadStart', 'addText',
     ],
   }],
 }

@@ -1,7 +1,17 @@
 /* The Pill lab switcher: a small fixed chip in the bottom-left corner, never
  * anchored to the selection pill so both stay visible together. Styled with
  * the app's own live theme tokens — this is a real, permanent control, not
- * one of the ink-pass skins it switches between. */
+ * one of the ink-pass skins it switches between.
+ *
+ * WHY `pointer-events: auto`: this mounts inside `SystemSketchSurfaceHost`,
+ * under `.systemsketch-surface-host`, which sets `pointer-events: none` on
+ * itself so the empty space around its floating panels still reaches the
+ * canvas — every other interactive child in that host (the pill itself,
+ * popouts) re-enables it locally. Without this override every click on the
+ * chip's own selects fell through to the canvas underneath: a real pointer
+ * click never reached them, only this repo's own `evaluate()`-driven test
+ * helpers did (Codex judge round 1, 2026-09-08).
+ */
 .systemsketch-pill-chip {
   position: fixed;
   left: var(--systemsketch-chrome-inset, 14px);
@@ -16,6 +26,7 @@
   color: var(--ss-text);
   box-shadow: var(--ss-shadow-2);
   font-size: 12px;
+  pointer-events: auto;
 }
 
 .systemsketch-pill-chip__title {
