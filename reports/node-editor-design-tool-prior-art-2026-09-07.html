@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SystemSketch · Node-editor &amp; design-tool prior art</title>
+<style>
+  :root { color-scheme:light; --ink:#1c2027; --muted:#5c636e; --line:#d9dee6; --paper:#f2f4f8;
+    --card:#fff; --blue:#3061e6; --blue-soft:#e9f0fe; --green:#1f8a5a; --red:#c8453a; --amber:#c47b1b;
+    --violet:#7048c8; }
+  * { box-sizing:border-box }
+  body { margin:0; color:var(--ink); background:radial-gradient(circle at 82% -4%,#e5edfb 0,transparent 40%),var(--paper);
+    font:16px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif }
+  main { width:min(1120px,calc(100% - 32px)); margin:auto; padding:40px 0 72px }
+  code { font:0.86em ui-monospace,SFMono-Regular,Menlo,monospace; background:#eef1f6; padding:1px 5px; border-radius:5px }
+  a { color:var(--blue); text-decoration:none } a:hover { text-decoration:underline }
+  sup.c { font:600 10.5px/1 ui-monospace,monospace; color:var(--blue); letter-spacing:.02em }
+  sup.c a { color:inherit }
+  .hero { padding:42px; border:1px solid #d5dde8; border-radius:24px; background:#ffffffe8; box-shadow:0 22px 60px #22344c14 }
+  .eyebrow { color:var(--blue); font-size:12px; font-weight:800; letter-spacing:.13em; text-transform:uppercase }
+  h1 { margin:10px 0 14px; font-size:clamp(30px,4.6vw,48px); line-height:1.06; letter-spacing:-.04em; max-width:26ch }
+  .lead { max-width:74ch; margin:0; color:var(--muted); font-size:17.5px }
+  .lead b { color:var(--ink) }
+  .verdict { margin-top:22px; padding:18px 20px; border:1px solid #cfe6da; border-left:4px solid var(--green);
+    border-radius:12px; background:#f1faf5; font-size:15px; line-height:1.6 }
+  .verdict b { color:var(--green) }
+  .quiet { margin-top:16px; padding:16px 20px; border:1px solid var(--line); border-left:4px solid var(--amber);
+    border-radius:12px; background:#fdf8ef; font-size:13.8px; color:#4a4438; line-height:1.6 }
+  .quiet b { color:var(--amber) }
+  section { margin-top:22px; padding:30px; border:1px solid var(--line); border-radius:20px; background:#fffffff2;
+    box-shadow:0 12px 36px #22344c0d }
+  h2 { margin:0 0 6px; font-size:24px; letter-spacing:-.03em }
+  h3 { margin:22px 0 8px; font-size:16.5px; letter-spacing:-.01em }
+  h4 { margin:18px 0 6px; font-size:14px; letter-spacing:-.005em; color:#2a2f38 }
+  section > p, .prose p { margin:0 0 14px; color:#3a404a; max-width:80ch }
+  table { width:100%; border-collapse:collapse; font-size:13.3px; margin:10px 0 4px }
+  th, td { padding:10px 12px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line) }
+  thead th { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted) }
+  tbody th { font-weight:650; min-width:120px }
+  td small, th small { display:block; margin-top:3px; color:var(--muted); font-size:11.5px; line-height:1.45; font-weight:400 }
+  .tag { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; letter-spacing:.03em }
+  .tag.keep { background:#e9f7f0; color:var(--green) }
+  .tag.ref { background:#fdf3e4; color:var(--amber) }
+  .cand { margin-top:18px; padding:22px; border:1px solid var(--line); border-radius:14px; background:#fafbfd }
+  .cand h3 { margin:0 0 2px; font-size:18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+  .cand .what { margin:2px 0 12px; font-size:12.5px; color:var(--muted) }
+  .cand p { margin:0 0 10px; font-size:14px; color:#3a404a; max-width:82ch }
+  .cand p.local { padding:12px 14px; border:1px solid #cfe6da; border-left:3px solid var(--green); border-radius:10px; background:#f1faf5 }
+  .cand table { font-size:12.8px }
+  .conf { font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:1px 7px; border-radius:6px }
+  .conf.high { background:#e9f7f0; color:var(--green) }
+  .conf.mid { background:#fdf3e4; color:var(--amber) }
+  .conf.low { background:#fdeeec; color:var(--red) }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px }
+  @media (max-width:840px){ .cols { grid-template-columns:1fr } }
+  .box { padding:18px; border:1px solid var(--line); border-radius:13px; background:#fff }
+  .box h4 { margin:0 0 8px; font-size:13.5px }
+  .box.free h4 { color:var(--green) } .box.cost h4 { color:var(--violet) }
+  .box p { margin:0; color:#4a5057; font-size:13px }
+  .schema-svg { width:100%; height:auto; display:block; margin:16px 0 4px }
+  ol.srcs { margin:8px 0 0; padding-left:26px; font-size:12.5px; color:var(--muted); columns:2; column-gap:28px }
+  ol.srcs li { margin:4px 0; break-inside:avoid; overflow-wrap:anywhere; word-break:break-word }
+  table { table-layout:fixed }
+  td, th { overflow-wrap:anywhere; word-break:break-word }
+  tbody th { width:15% }
+  .cand table tbody th { width:16% }
+  footer { margin-top:26px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px }
+</style>
+</head>
+<body>
+<main>
+
+<div class="hero">
+  <div class="eyebrow">Research pass 2 of 2 · no code changed · 2026-09-07</div>
+  <h1>Property panels, node editors, and Figma-likes — what's actually reusable, and where the schema comes from</h1>
+  <p class="lead">Report 1 answered "which headless kit for behavior, which system for the
+  visual layer." This one asks the question underneath it: <b>is there a real sub-assembly
+  anywhere for the property rail, the sliders, the inspector chrome around a canvas</b> — and
+  once Zach reweighted the question mid-research, <b>where does the schema those panels
+  render actually come from</b>. Two research passes, twelve real codebases, read from
+  primary source.</p>
+  
+<div class="quiet"><b>Where report 1 left off:</b> <a href="ui-design-system-strategy-2026-09-07.html">
+ui-design-system-strategy-2026-09-07.html</a> split the chrome problem into two axes and
+answered them separately — <b>Axis 1</b> (headless behavior primitives: focus traps,
+dismissal, ARIA) converge on Base UI, one file at a time, never big-bang; <b>Axis 2</b>
+(the visual system: semantic color roles, scheme invariance) keep the shipped
+<code>--ss-*</code> token layer, because the dark/light bugs were palette-derivation math
+inside it, not a missing library<sup class="c"><a href="#s1">1</a></sup>. <b>Correction in flight on that report:</b> its
+central Axis-1 argument — that Base UI's outside-press dismissal is an unconditional
+capture-phase listener, "structurally immune" to the <code>stopPropagation</code>-starvation
+bug class in <code>docs/bugs/0002</code> — did not survive independent adversarial
+verification; Base UI's actual outside-press handling turned out to be conditional, not
+unconditional<sup class="c"><a href="#s2">2</a></sup>. This report doesn't re-argue that point; it just doesn't repeat it. What
+follows is orthogonal to both axes: not which headless kit to standardize on, but whether a
+reusable <i>property-panel</i> — the sliders, typed fields and inspector chrome sitting on
+top of whichever kit — exists anywhere to build from, and, once Zach reweighted the question
+mid-research, where the schema those panels render even comes from.</div>
+
+  
+  <div class="verdict"><b>Verdict, in one breath:</b> no importable property-panel exists
+  anywhere in either survey — <b>every actively maintained node editor and every actively
+  maintained design tool hand-assembles its own</b>, on top of a headless-primitives library
+  used narrowly for popovers/menus/dialogs. But the pattern converges hard: a typed
+  field-spec union plus one small dispatcher, which is exactly the shape SystemSketch's own
+  51-entry <code>FieldSpec</code> already has<sup class="c"><a href="#s35">35</a></sup>. The deeper, more valuable finding is
+  Zach's own reweighting: the interesting variance across twelve real codebases isn't in the
+  widget-dispatch layer, it's in <b>where the schema itself comes from</b> — hand-maintained
+  (the majority), introspected at runtime from the real object (Langflow), or compiled at
+  build time directly off the parameter's own type declaration (Graphite) — and that last one
+  is a genuinely different mechanism worth a real look, not a recommendation to switch to
+  today.</div>
+
+</div>
+
+<section>
+  <h2>Pass 1 — node/flow editor property chrome</h2>
+  <p>The canvas/graph substrate itself (React Flow, LiteGraph, custom SVG) is already covered
+  by the vault's July 2026 note on this space; this pass is specifically what that note didn't
+  cover — the property chrome around the graph. Seven apps, sparse-cloned and read from real
+  source (not landing pages), clones deleted after.</p>
+  
+<table>
+  <thead><tr><th>App</th><th>Chrome stack</th><th>Dispatch mechanism</th><th>Takeaway</th></tr></thead>
+  <tbody>
+    <tr>
+      <th>ComfyUI<br><small>Comfy-Org/ComfyUI_frontend</small></th>
+      <td>Vue 3 + PrimeVue + <b>reka-ui</b> (Radix for Vue) + Tailwind + vee-validate/zod<br>
+        <small>pnpm-catalog pins in <code>package.json</code>, versions not literal in that file<sup class="c"><a href="#s3">3</a></sup></small></td>
+      <td>Flat <code>Map&lt;string,Component&gt;</code> of ~29 canonical widget types (incl.
+        legacy LiteGraph aliases: <code>STRING</code>, <code>INT</code>, <code>COMBO</code>)<sup class="c"><a href="#s4">4</a></sup>.
+        <b>One registry, two mount points</b> — the same lookup drives in-node DOM widgets
+        overlaid on the LiteGraph canvas<sup class="c"><a href="#s5">5</a></sup> and the standalone tabbed right-side
+        panel<sup class="c"><a href="#s6">6</a></sup>.</td>
+      <td>Cleanest "one dispatcher, two mounts" architecture of the seven.</td>
+    </tr>
+    <tr>
+      <th>Langflow<br><small>langflow-ai/langflow</small></th>
+      <td>React 19 + shadcn/Radix (~18 primitives) + Tailwind + react-hook-form/zod;
+        <code>@xyflow/react</code>+legacy <code>reactflow</code>, elkjs, zustand, Vite<sup class="c"><a href="#s7">7</a>,<a href="#s8">8</a></sup></td>
+      <td>One dispatcher function, <code>switch(templateData.type)</code>, ~25 field-type
+        components. <b>Backend-typed</b>: the Python component declares explicit
+        <code>Input</code> class attributes (<code>StrInput</code>, <code>DropdownInput</code>,
+        …), not bare type hints<sup class="c"><a href="#s9">9</a>,<a href="#s10">10</a></sup>.</td>
+      <td>Same registry shape as ComfyUI, backend-introspected rather than hand-typed on the
+        frontend — see §4.</td>
+    </tr>
+    <tr>
+      <th>n8n<br><small>n8n-io/n8n</small></th>
+      <td>Element Plus (legacy) + Tailwind, mid-migration to <b>reka-ui</b> for new v2
+        components<sup class="c"><a href="#s11">11</a>,<a href="#s12">12</a></sup></td>
+      <td>Type-<i>typed</i> but not type-<i>dispatched</i>: every parameter is a typed
+        <code>INodeProperties</code>, but the renderer is one 2,457-line Vue SFC with a long
+        <code>v-else-if</code> chain, not a lookup table<sup class="c"><a href="#s13">13</a></sup>.</td>
+      <td>The pattern degrades when it isn't factored as a dispatcher — same idea, worse
+        execution.</td>
+    </tr>
+    <tr>
+      <th>Dify<br><small>langgenius/dify</small></th>
+      <td><b>Base UI</b> (confirmed no Radix/Headless UI dep) + Tailwind + tanstack-form +
+        zod + jsonschema<sup class="c"><a href="#s14">14</a></sup></td>
+      <td>No unifying property-type schema. <code>PanelComponentMap[nodeData.type]</code> — one
+        hand-built Panel per ~25 node types, composed from a shared low-level field kit<sup class="c"><a href="#s15">15</a></sup>.</td>
+      <td>The one real exception: dispatch is per-node-type, not per-field-type.</td>
+    </tr>
+    <tr>
+      <th>Sim Studio<br><small>simstudioai/sim</small></th>
+      <td>Radix (~13 primitives) + Tailwind 4 + react-hook-form/zod + cmdk<sup class="c"><a href="#s16">16</a></sup></td>
+      <td>One declarative <code>SubBlockConfig[]</code> per block, one ~1,260-line component,
+        one <code>switch(config.type)</code> with <b>~40 cases</b> (incl. a second-level
+        <code>MODAL_REGISTRY</code>) — the entire config-panel path for every block in the
+        product<sup class="c"><a href="#s17">17</a></sup>.</td>
+      <td>The most exhaustive, most textbook "generic property-grid" found in either survey.</td>
+    </tr>
+    <tr>
+      <th>Activepieces<br><small>activepieces/activepieces</small></th>
+      <td>shadcn "new-york" + consolidated <code>radix-ui</code> 1.4.3 + Tailwind 4 +
+        react-hook-form/zod<sup class="c"><a href="#s18">18</a></sup></td>
+      <td>One dispatcher, <code>switch(PropertyType)</code>, driven by the same
+        piece-authoring SDK (<code>@activepieces/pieces-framework</code>) piece authors declare
+        their inputs with<sup class="c"><a href="#s19">19</a></sup>.</td>
+      <td>Same family as Sim Studio and Langflow — schema and rendering share one type
+        vocabulary end to end.</td>
+    </tr>
+    <tr>
+      <th>Node-RED</th>
+      <td>jQuery + jQuery UI, vendored static assets — no modern framework<sup class="c"><a href="#s20">20</a></sup></td>
+      <td>Not investigated further, per scope — confirmed and set aside.</td>
+      <td>The floor of the sample; everyone else moved well past it.</td>
+    </tr>
+  </tbody>
+</table>
+
+  
+<p><b>The meta-question — is there a shared property-panel subassembly? No cross-project
+library exists</b>; nobody <code>npm install</code>s a common "node-property-panel"
+package. But there is real convergence, in two layers. The <b>headless-primitive layer</b>
+is a shared kit, just a generic one: four of six modern apps sit on the Radix family
+(Langflow, Sim Studio, Activepieces on <code>@radix-ui/react-*</code>/<code>radix-ui</code>;
+ComfyUI and n8n's v2 layer on <code>reka-ui</code>, Radix's Vue port); Dify is the outlier on
+Base UI<sup class="c"><a href="#s3">3</a>,<a href="#s7">7</a>,<a href="#s11">11</a>,<a href="#s14">14</a>,<a href="#s16">16</a>,<a href="#s18">18</a></sup>. That layer knows nothing about "node properties" — it's just
+Select/Popover/Dialog/Slider. The <b>domain-dispatcher layer is where the real pattern
+lives, and every app except Dify hand-builds the identical shape</b>: a typed
+field-spec/parameter-type union, declared by whoever authors the node, fed through one small
+frontend dispatcher — a map literal (ComfyUI), a switch inside one function (Langflow,
+Activepieces), a switch inside one component's render method (Sim Studio, most exhaustive at
+~40 cases), or the same idea degraded into an unfactored conditional chain (n8n)<sup class="c"><a href="#s4">4</a>,<a href="#s9">9</a>,<a href="#s13">13</a>,<a href="#s17">17</a>,<a href="#s19">19</a></sup>.
+<b>Honest answer: the architecture is copied everywhere but Dify; the code implementing it is
+reinvented in every single repo.</b> The transferable thing for SystemSketch is the shape —
+one declarative field-type union, one dispatcher, built on a headless-primitives library —
+never a dependency to add.</p>
+
+</section>
+
+<section>
+  <h2>Pass 2 — Figma-like design tools</h2>
+  <p>The deep section. Penpot gets real space — it's the richest independent finding of
+  either pass. Graphite gets real space too — its Rust macro-attribute mechanism is the
+  standout for §4 below.</p>
+  
+<div class="cand">
+  <h3>Penpot <span class="tag ref">the richest single find</span></h3>
+  <div class="what">penpot/penpot · MPL-2.0 · tip <code>5b97fb9</code>, <code>package.json</code>
+    v2.17.0 · 680 <code>.cljs</code>/<code>.cljc</code> files + 294 <code>.scss</code> files
+    under <code>frontend/src</code> — a mature, large system, checked from primary source, not
+    a landing page<sup class="c"><a href="#s21">21</a></sup></div>
+
+  <h4>Still ClojureScript; the WASM renderer is real but opt-in</h4>
+  <p>Confirmed via <code>frontend/deps.edn</code> and <code>shadow-cljs.edn</code>: UI
+  components use <b>rumext</b> (a separate open-source React wrapper, same "funcool" authors
+  as Penpot's other core libraries), supplying the <code>mf/defc</code> component macro,
+  hooks, and a Malli-based prop-schema mechanism<sup class="c"><a href="#s22">22</a></sup>. <b>Canvas rendering is two engines
+  side by side, not a finished migration</b>: <code>render-wasm/</code> is a genuine Rust
+  crate on <code>rust-skia</code>, but <code>features.cljs:28-65</code> shows the rollout
+  priority — URL param &gt; user profile &gt; team flag — <b>defaulting to <code>:svg</code></b>,
+  the legacy ClojureScript/SVG-DOM renderer<sup class="c"><a href="#s23">23</a></sup>.</p>
+
+  <h4>The options/inspector panel</h4>
+  <p><code>frontend/src/app/main/ui/workspace/sidebar/options/</code>: ~24 reusable
+  widget-group files (<code>fill</code>, <code>stroke</code>, <code>shadow</code>,
+  <code>layout_container</code> — 61KB, Auto Layout — <code>typography</code> — 39KB —
+  <code>component</code> — 57KB), one file per shape type composing them<sup class="c"><a href="#s24">24</a></sup>. <b>No general
+  component library anywhere in the ClojureScript tree</b> — every widget is hand-built in
+  <code>ui/ds/</code>. One real exception: a brand-new, separate React+TypeScript package
+  (<code>@penpot/ui</code>) on <b>react-aria-components</b> — but it exports exactly one
+  component (<code>Modal</code>) as of this checkout, not yet used to replace the
+  ClojureScript controls<sup class="c"><a href="#s25">25</a></sup>.</p>
+
+  <h4>Numeric drag-scrub, color picker, combobox — all fully custom, no library</h4>
+  <p><code>ds/controls/numeric_input.cljs</code> (863 lines): a Pointer-Events state machine
+  (<code>:idle → :maybe-dragging → :dragging</code>), native
+  <code>setPointerCapture</code>/<code>releasePointerCapture</code>, a <b>3px movement
+  threshold</b> separating click-to-focus from drag-to-scrub, modifier-scaled step (drag
+  Shift=×10/Ctrl=×0.1; keyboard Shift=×10/Alt=×0.1 — a real inconsistency between the two
+  modes worth noting before copying it), and the <b>whole scrub gesture wrapped in one undo
+  transaction</b><sup class="c"><a href="#s26">26</a></sup>. The color picker (~2,000 lines) and the select/combobox listboxes
+  (manual <code>getBoundingClientRect</code> positioning — <b>no floating-ui/popper anywhere
+  in the repo</b>) are equally hand-rolled<sup class="c"><a href="#s27">27</a>,<a href="#s28">28</a></sup>.</p>
+
+  <h4>The internal design system admits it's incomplete</h4>
+  <p><code>ds/_sizes.scss:8</code> carries the literal comment <code>// TODO: create actual
+  tokens once we have them from design</code> — even Penpot's own chrome DS is hand-authored
+  Sass, not fed by Penpot's own token-generation product feature. The tip commit checked was
+  literally <code>"Migrate editable-select to DS icon* and design tokens (#11500)"</code> —
+  an active, ongoing migration<sup class="c"><a href="#s29">29</a></sup>. Drag-to-reorder in the layers panel is hand-rolled too,
+  despite <code>react-virtualized</code> being a real dependency — it's used exactly once, for
+  a font list, not the layer tree<sup class="c"><a href="#s30">30</a></sup>.</p>
+
+  <h4>Dispatch: a hand-assembled <code>case</code>, not a declarative field-spec</h4>
+  <p><code>single-shape-options*</code> is a <code>case shape-type</code> over
+  <code>:frame</code>/<code>:group</code>/<code>:text</code>/<code>:rect</code>/<code>:circle</code>/<code>:path</code>/<code>:svg-raw</code>/<code>:bool</code>;
+  multi-selection is a <b>separate branch</b>, not a generic N-shapes-to-generic-diff-UI
+  layer<sup class="c"><a href="#s31">31</a></sup>.</p>
+
+  <h4>The mixed-value fold — a direct, independent validation of SystemSketch's own mechanism</h4>
+  <p>This is the most reusable idea in the whole survey, and it lines up with code
+  SystemSketch already shipped. <code>multiple.cljs</code> defines a
+  <code>type→read-mode</code> table (shape-type × attribute-group → how to source that
+  attribute) and folds every selected shape's values through
+  <code>app.common.attrs/get-attrs-multi</code> — <b>fully framework-agnostic, plain
+  Clojure, no React/DOM</b>: walk every shape per attribute; agreement keeps the value,
+  disagreement collapses to the sentinel keyword <code>:multiple</code>; a missing attribute
+  is skipped, not treated as a mismatch. Numeric comparison uses epsilon-tolerant equality
+  specifically to stop floating-point jitter from falsely flagging "different." Domain-specific
+  equality functions are plugged in per attribute group where naive equality is wrong (shadow
+  and blur lists strip their own <code>:id</code>s before comparing, so
+  structurally-different-but-visually-identical still counts as "same")<sup class="c"><a href="#s32">32</a></sup>. The sentinel
+  flows down as a <b>real typed value, not a UI flag</b> — <code>numeric_input.cljs</code>'s
+  own prop schema types its value as
+  <code>[:maybe [:or :int :float :string [:= :multiple]]]</code>, and each leaf widget
+  independently decides how to render "Mixed"<sup class="c"><a href="#s33">33</a></sup>.</p>
+  <p class="local"><b>Independent validation, confirmed by reading the file at build time
+  (not pasted from the leg): SystemSketch's own <code>property-rows-mature</code> worktree
+  arrived at the identical shape from a completely different substrate.</b>
+  <code>src/uiEditor/tabs/systemPrimitivesModel.ts:398</code> currently reads
+  <code><code>export interface PropertyRowDef&lt;State&gt; {</code></code> — <code>PropertyRowDef.get</code> returns tldraw's own
+  <code>SharedStyle&lt;RowValue&gt;</code>, a <code>{{type:'shared'|'mixed'}}</code>
+  discriminated union rather than a bare string sentinel. Its own WHY comment (confirmed
+  present, confirmed) names <b>Penpot's string-sentinel approach as the rejected
+  alternative</b> — reasoning that a magic <code>'mixed'</code> string type-checks fine
+  wherever a real value was expected, so a widget that forgets to check it reads the sentinel
+  as data instead of failing to compile; the wrapper type makes every read site
+  exhaustive-checkable instead<sup class="c"><a href="#s34">34</a></sup>. Two mature tools, two different languages, arriving at
+  "compute mixedness once as a pure fold, let each widget render the sentinel" independently —
+  and one of them already named the other's approach and chose not to repeat it.</p>
+
+  <h4>Design tokens — the product feature and the app's own chrome are separate pipelines</h4>
+  <p>The user-facing DTCG feature is real and substantial (real <code>style-dictionary</code>
+  and <code>@tokens-studio/sd-transforms</code> deps, plus a computed-token expression
+  language). Penpot's <i>own</i> chrome theming is separate hand-authored CSS custom
+  properties compiled from Sass — the two pipelines don't share code; Penpot's UI does not
+  dogfood its own tokens product<sup class="c"><a href="#s34">34</a></sup>.</p>
+
+  <h4>Honest reusability assessment</h4>
+  <p>Nothing is directly importable — ClojureScript/shadow-cljs, no published npm package of
+  the DS widgets; <code>@penpot/ui</code>'s bet on react-aria-components is a real technology
+  signal, but the package itself (one component) is too immature to depend on. What's worth
+  copying directly: the shape-type <code>case</code> dispatcher, <b>the mixed-value fold as a
+  pure domain function</b>, the numeric-input drag-scrub state machine, and the
+  <code>type→read-mode</code> sourcing table. Not worth copying: the hand-rolled listbox
+  positioning code — Penpot's own newer package already abandoned that in favor of
+  react-aria.</p>
+</div>
+
+  
+<div class="cand">
+  <h3>Comparables sweep <span class="tag ref">Open Pencil · open-design.ai · Excalidraw · Graphite · tldraw · AFFiNE · Webstudio</span></h3>
+
+  <table>
+    <thead><tr><th>Project</th><th>Confirmed facts</th><th>Property-panel architecture</th></tr></thead>
+    <tbody>
+      <tr>
+        <th>Open Pencil<br><small>open-pencil/open-pencil</small></th>
+        <td>8,206 stars, 793 forks, created 2026-02-27, pushed same day researched; 32
+          contributors, concentrated (top contributor 2,334 vs next-highest 117) — young
+          (~7 months), not a toy<sup class="c"><a href="#s36">36</a></sup></td>
+        <td>Vue 3 + <b>Reka UI</b> + Tailwind 4; Skia/CanvasKit WASM + Yoga WASM layout +
+          Tauri v2. One hand-written <code>*Section.vue</code> per property group
+          (<code>FillSection</code>, <code>StrokeSection</code>, <code>TypographySection</code>,
+          …), several importing <code>reka-ui</code> directly<sup class="c"><a href="#s37">37</a></sup>.</td>
+      </tr>
+      <tr>
+        <th>open-design.ai<br><small>nexu-io/open-design</small></th>
+        <td>Apache-2.0. <b>Star count flagged, honestly, without a verdict either way:</b>
+          94,638 stars / 10,944 forks / 976 open issues on a repo created 2026-04-28 — roughly
+          four months old, with marketing-heavy "best X / alternative to Y" copy — a pattern
+          sometimes associated with inauthentic-star campaigns. Could not pull the growth-curve
+          shape to confirm or rule it out. Against that: 180 real, distinct contributors with a
+          plausible distributed commit spread (top four: 493/204/178/121), which reads as
+          genuine development activity<sup class="c"><a href="#s38">38</a></sup>.</td>
+        <td><b>Not relevant to this survey</b> — it's an AI-agent-driven generative desktop
+          tool wiring local coding-agent CLIs into a "vibe design workspace," not a canvas app
+          with a hand-built property panel. No UI chrome comparison applies.</td>
+      </tr>
+      <tr>
+        <th>flow.vyuh.tech</th>
+        <td colspan="2">Vyuh Node Flow — a Flutter/Dart native-widget package for embedding a
+          node-graph editor in Flutter apps. Unrelated to web canvas/design tooling;
+          dismissed<sup class="c"><a href="#s39">39</a></sup>.</td>
+      </tr>
+      <tr>
+        <th>Excalidraw<br><small>excalidraw/excalidraw</small></th>
+        <td>131,326 stars, pushed same day researched<sup class="c"><a href="#s40">40</a></sup></td>
+        <td><code>"radix-ui": "1.4.3"</code>, used narrowly — the base panel container
+          (<code>Island.tsx</code>) is plain CSS, but <code>PropertiesPopover.tsx</code> and
+          <code>ColorPicker.tsx</code> both <code>import { Popover } from "radix-ui"</code>,
+          plus dropdown menus, sidebar tabs and dialog tabs<sup class="c"><a href="#s41">41</a></sup>. Dispatch is
+          <code>actionProperties.tsx</code>'s <code>register&lt;T&gt;({{name, label, perform,
+          PanelComponent}})</code> — <b>one hand-written JSX render function per action</b>, no
+          schema loop at all<sup class="c"><a href="#s42">42</a></sup>.</td>
+      </tr>
+      <tr>
+        <th>Graphite <span class="tag keep">standout</span><br><small>GraphiteEditor/Graphite</small></th>
+        <td>27,155 stars; Rust core → WASM, Svelte 5 frontend via message-passing, pushed same
+          day researched<sup class="c"><a href="#s43">43</a></sup></td>
+        <td>See dedicated section below — the one genuinely different mechanism in either
+          survey.</td>
+      </tr>
+      <tr>
+        <th>tldraw's own StylePanel</th>
+        <td><code>"radix-ui": "^1.4.2"</code> is a direct dependency of the <code>@tldraw/tldraw</code>
+          SDK package itself — shipped inside the engine, not bolted on by an app<sup class="c"><a href="#s49">49</a></sup></td>
+        <td><code>DefaultStylePanelContent.tsx</code> reads shared style values by
+          <code>StyleProp</code> key (<code>styles.get(DefaultColorStyle)</code>) and hides a
+          picker when the value is <code>undefined</code> for the selection — StyleProp-driven
+          for <i>visibility</i>, but panel <b>composition is a fixed, hand-written JSX list</b>,
+          not a loop over every registered StyleProp. Same shape as Excalidraw's action
+          system<sup class="c"><a href="#s48">48</a></sup>.</td>
+      </tr>
+      <tr>
+        <th>AFFiNE / BlockSuite</th>
+        <td>BlockSuite (edgeless-editor engine): 6,003 stars. Shipped chrome lives in AFFiNE
+          itself: 72,270 stars, 453MB repo<sup class="c"><a href="#s50">50</a></sup></td>
+        <td>~15 <code>@radix-ui/react-*</code> packages (avatar, dialog, dropdown-menu, popover,
+          radio-group, scroll-area, slider, tabs, toast, …) + Emotion — the fourth independent
+          codebase confirmed on "Radix primitives + hand-rolled design system," after Excalidraw,
+          tldraw, and (below) Webstudio<sup class="c"><a href="#s50">50</a></sup>.</td>
+      </tr>
+      <tr>
+        <th>Webstudio <span class="tag ref">described only, AGPL-3.0</span><br><small>webstudio-is/webstudio</small></th>
+        <td>Described from public source only; nothing copied, per its license<sup class="c"><a href="#s51">51</a></sup></td>
+        <td><b>23</b> separate <code>@radix-ui/*</code> dependencies in
+          <code>packages/design-system</code> — the deepest Radix commitment found in either
+          survey. Style Panel is purpose-built sections over Webstudio's own internal typed
+          style-value model, which later compiles to plain CSS with zero runtime dependency on
+          the builder<sup class="c"><a href="#s51">51</a></sup>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Graphite's macro-attribute mechanism — the standout finding</h4>
+  <p>Graphite's properties panel (<code>Properties.svelte</code>) renders a generic
+  <code>WidgetLayout.svelte</code> fed by a <code>propertiesPanelLayout</code> store — <b>zero
+  per-node-type UI code on the Svelte side</b><sup class="c"><a href="#s44">44</a></sup>. That layout is built in Rust:
+  <code>node_properties.rs</code> (2,985 lines) is a library of generic, type-keyed widget
+  builders (<code>number_widget</code>, <code>color_widget</code>, <code>vec2_widget</code>,
+  <code>font_widget</code>, <code>blend_mode_widget</code>, <code>bool_widget</code>…)<sup class="c"><a href="#s45">45</a></sup>.
+  <b>The widget choice is declared as a macro attribute directly on the node's own parameter,
+  in the node's own definition file</b> — <code>extract_xy.rs:26</code> →
+  <code>#[widget(Radio)]</code>; <code>adjustments.rs:42</code> → <code>#[widget(Dropdown)]</code>;
+  a text node → <code>#[widget(ParsedWidgetOverride::Custom = "text_area")]</code>; a blend node
+  → <code>#[widget(ParsedWidgetOverride::Hidden)]</code><sup class="c"><a href="#s46">46</a></sup>. A proc macro
+  (<code>node-macro/src/lib.rs:23</code>, <code>codegen.rs:158-232</code>) turns that attribute
+  into compile-time per-parameter metadata; at runtime an overrides map layers in
+  <code>min</code>/<code>max</code>/<code>step</code>/<code>unit</code>/<code>mode</code>, with
+  a small (~20-node) hand-written escape hatch for composite panels a single-widget-per-parameter
+  model can't express (curve editors, multi-field color grading)<sup class="c"><a href="#s47">47</a></sup>. <b>This is a genuinely
+  different mechanism than "generate a form from a JSON schema"</b> — the schema lives as an
+  attribute on the parameter, next to the node's real logic, so the widget hint can never drift
+  out of sync with the node's real signature. See §4 for what this means for SystemSketch.</p>
+
+  <h4>Cross-cutting pattern across the comparables</h4>
+  <p>Across every actively maintained example — Excalidraw, tldraw, Open Pencil, AFFiNE,
+  Webstudio — the property/style panel is <b>hand-assembled per property/action, on a headless
+  primitives library used narrowly for popovers/menus/dialogs, never schema-generated.</b>
+  Graphite is the one clear counter-example, and it earns that architecture because its
+  property data comes from a compiled Rust type system with a real proc-macro attaching UI
+  hints at the parameter's declaration site — SystemSketch has no equivalent today (Python
+  dataclasses could theoretically play that role; no macro/decorator does yet). The realistic
+  near-term precedent for SystemSketch is the Excalidraw/tldraw/Open Pencil shape it's already
+  converging on, not Graphite's, unless a dataclass-driven widget-hint mechanism becomes a
+  deliberate goal.</p>
+</div>
+
+  
+<div class="cand">
+  <h3>Intrinsic Flowstate &amp; MoveIt Pro <span class="tag ref">public-only check — no source access</span></h3>
+  <div class="what">Web search, docs sites, GitHub orgs, and job postings only. No login
+    attempted, no authenticated URL fetched — Roboflow's UI is excluded from this whole
+    survey for the same reason, see §7.</div>
+
+  <h4>Intrinsic Flowstate</h4>
+  <p><span class="conf high">Confirmed:</span> it's a web app (browser-chrome screenshots show
+  <code>intrinsic.ai/beta</code> and <code>portal.intrinsic.ai/projects/…</code>); the GitHub
+  org <code>intrinsic-ai</code> publishes only Python/C++/ROS SDK surface, no frontend
+  code<sup class="c"><a href="#s51">51</a></sup>. <span class="conf low">Weak signal (job-posting search-index snapshots, treat
+  with caution):</span> Angular <i>and</i> React both hired across different frontend roles;
+  TypeScript + Three.js for 3D; gRPC/Protobuf backend — the one posting that commits to a
+  single framework (Angular + Three.js) is for customer-facing HMI apps, not confirmed as
+  Flowstate's own process editor<sup class="c"><a href="#s52">52</a></sup>. <span class="conf mid">Visual observation, from real
+  launch-blog screenshots:</span> a classic three-pane IDE layout — left, a <b>tabbed
+  "Properties" inspector</b> (Details/Controls/Settings tabs) with grouped collapsible
+  sections and dense, grid-aligned typed-field-per-row forms (a Transform 3×2 numeric grid,
+  Joints 2-col grid, Physics checkboxes+numeric); center, a process/behavior editor with small
+  rounded node boxes nested inside larger frame-like task containers (frame-nested, not flat);
+  right, a Scene/Assets tree + live 3D viewport. A reference-picker pattern recurs: "Choose…"
+  fields pop a scrollable, searchable typed-object list rather than free text<sup class="c"><a href="#s53">53</a></sup>.</p>
+
+  <h4>MoveIt Pro (PickNik)</h4>
+  <p><span class="conf high">Confirmed:</span> a native-feeling desktop-style web app per
+  real docs.picknik.ai tutorial captures; GitHub org <code>PickNikRobotics</code> is
+  real/active but the actual frontend is not open-sourced<sup class="c"><a href="#s54">54</a></sup>. <span class="conf
+  low">Weak signal (job posting, direct fetch 403'd):</span> TypeScript + React, TanStack
+  Query + Router, Vite, Vitest + React Testing Library — the most concrete stack signal found
+  for either company<sup class="c"><a href="#s55">55</a></sup>. <span class="conf mid">Visual observation:</span> a 4-pane
+  dockable layout (Objectives sidebar; 3D Visualization + Scene Camera; a Blackboard Editor
+  table — Name/Type/Value, searchable — beside a Behavior Tree pane). <b>Key structural
+  difference from Flowstate: no separate property side-panel for node parameters</b> — each
+  node box on the canvas carries its editable ports inline, a labeled <code>IN</code> badge
+  per input with the bound value shown as an editable field/token directly inside the node
+  body, ports hidden by default to keep nodes compact (progressive disclosure)<sup class="c"><a href="#s56">56</a></sup>.</p>
+
+  <p><b>Net design contrast, visual observation only:</b> Flowstate centralizes parameter
+  editing into one dedicated, tabbed, schema-shaped Inspector (Unity/Blender-shaped) with
+  canvas nodes staying collapsed; MoveIt Pro pushes port/parameter editing directly onto node
+  bodies inside the graph canvas, with a separate dockable table for named variables, and no
+  equivalent single "properties panel" for tree nodes. Neither company's actual implementation
+  is verifiable beyond these public artifacts — both findings are labeled by confidence level
+  above rather than presented as equally certain.</p>
+</div>
+
+</section>
+
+<section>
+  <h2>The deeper layer — where does the schema come from</h2>
+  
+<p><b>Zach's reweighting, mid-research:</b> <i>"we can also measure the back end
+implementation of how they manage all the different values and properties — that may even be
+a bigger learning point."</i> He's right that this is the deeper question. Every project
+above answers "which component renders a slider" — that's the shallow half, and §2/§3 show
+it converges on the same shape everywhere but Dify. The harder, more valuable question is
+<b>where the property schema itself originates, and whether it can drift from the real
+underlying object it describes.</b> The survey turned up three real positions, plus one
+worth its own mention as a middle case.</p>
+
+
+<svg class="schema-svg" viewBox="0 0 980 300" role="img" aria-label="Four positions on where a property schema comes from, from hand-maintained to compiled from the type's own declaration">
+  <defs>
+    <style>
+      .lane { fill:#fafbfd; stroke:#d9dee6 }
+      .lane-title { font:700 13.5px Inter,sans-serif; fill:#1c2027 }
+      .pill { rx:10 }
+      .pl { font:600 12px Inter,sans-serif; fill:#fff; text-anchor:middle }
+      .pn { font:400 10.5px Inter,sans-serif; fill:#5c636e; text-anchor:middle }
+      .arrow { stroke:#b7c0cd; stroke-width:2; marker-end:url(#ah) }
+    </style>
+    <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#b7c0cd"/>
+    </marker>
+  </defs>
+
+  <rect class="lane" x="10" y="10" width="960" height="270" rx="16"/>
+  <text class="lane-title" x="32" y="38">Where does the widget/field schema actually live?</text>
+
+  <line class="arrow" x1="70" y1="150" x2="900" y2="150"/>
+  <text class="pn" x="70" y="170" text-anchor="start">schema is a separate artifact</text>
+  <text class="pn" x="900" y="170" text-anchor="end">schema IS the type declaration</text>
+
+  <rect class="pill" x="40" y="60" width="230" height="34" fill="#8a93a3"/>
+  <text class="pl" x="155" y="82">1 · Hand-maintained (majority)</text>
+  <text class="pn" x="155" y="112">SystemSketch FieldSpec · Foxglove ·</text>
+  <text class="pn" x="155" y="126">Sim Studio · n8n · Activepieces</text>
+
+  <rect class="pill" x="300" y="60" width="230" height="34" fill="#c47b1b"/>
+  <text class="pl" x="415" y="82">1.5 · Runtime-introspected</text>
+  <text class="pn" x="415" y="112">Langflow — backend reads the</text>
+  <text class="pn" x="415" y="126">component's own Input attrs</text>
+
+  <rect class="pill" x="560" y="60" width="220" height="34" fill="#7048c8"/>
+  <text class="pl" x="670" y="82">3 · Pure domain computation</text>
+  <text class="pn" x="670" y="112">Penpot get-attrs-multi — a fold</text>
+  <text class="pn" x="670" y="126">decoupled from any widget</text>
+
+  <rect class="pill" x="810" y="60" width="150" height="34" fill="#1f8a5a"/>
+  <text class="pl" x="885" y="82">2 · Type-site macro</text>
+  <text class="pn" x="885" y="112">Graphite — #[widget(F)]</text>
+  <text class="pn" x="885" y="126">on the parameter itself</text>
+
+  <text class="pn" x="490" y="230" text-anchor="middle" font-style="italic">Pyblocks today: pure function-signature inference — a cousin of position 1, no macro layer</text>
+  <text class="pn" x="490" y="252" text-anchor="middle" font-style="italic">Open question for SystemSketch: is FieldSpec (position 1) worth moving toward position 2 via Python dataclasses/typing?</text>
+</svg>
+
+
+<div class="cols">
+  <div class="box">
+    <h4>1 · Hand-maintained, separate from the object — the majority case</h4>
+    <p>A human writes the schema once, by hand, in a file distinct from the object it
+    describes. This is what almost everyone in this survey does: SystemSketch's own 51-entry
+    <code>FieldSpec</code><sup class="c"><a href="#s35">35</a></sup>; Foxglove/Lichtblick's <code>SettingsTreeEditor</code>
+    (cited in report 1)<sup class="c"><a href="#s1">1</a></sup>; Sim Studio's <code>SubBlockConfig[]</code><sup class="c"><a href="#s17">17</a></sup>; n8n's
+    <code>INodeProperties</code><sup class="c"><a href="#s13">13</a></sup>; Activepieces' <code>PropertyType</code>, itself from a
+    shared piece-authoring SDK<sup class="c"><a href="#s19">19</a></sup>. It works, and it's what's shipped everywhere — but the
+    schema and the object it describes are two files that can silently drift apart.</p>
+  </div>
+  <div class="box">
+    <h4>2 · Derived from the real type, at its declaration site — Graphite alone</h4>
+    <p>Graphite's <code>#[widget(Dropdown)]</code> Rust macro attribute lives directly ON the
+    node parameter's own type declaration, compiled at build time into per-parameter
+    metadata<sup class="c"><a href="#s46">46</a>,<a href="#s47">47</a></sup>. The widget hint literally cannot drift from the parameter's real type —
+    the compiler would reject a mismatch. Genuinely different from a JSON-schema-driven form;
+    no other project in either survey does this.</p>
+  </div>
+  <div class="box">
+    <h4>3 · Pure domain-level computation, decoupled from rendering — Penpot</h4>
+    <p>A related but distinct question: not "where does the field's type come from" but
+    "where does a computed <i>fact about a selection</i> (is this mixed?) come from." Penpot's
+    <code>get-attrs-multi</code> is a framework-agnostic fold with pluggable per-attribute
+    equality, completely separate from how any widget renders the resulting sentinel<sup class="c"><a href="#s32">32</a></sup> —
+    the same separation of concerns SystemSketch's own <code>SharedStyle</code>-typed
+    <code>get</code> already has<sup class="c"><a href="#s34">34</a></sup>. Worth naming alongside the other two because it's the
+    same underlying instinct — keep the truth outside the widget — applied to a different
+    layer of the problem.</p>
+  </div>
+  <div class="box">
+    <h4>1.5 · Runtime-introspected from the real object — Langflow, the middle case</h4>
+    <p>Langflow's schema is emitted at <b>runtime</b> by the backend introspecting the actual
+    Python component's declared <code>Input</code> class attributes
+    (<code>StrInput</code>, <code>IntInput</code>, <code>DropdownInput</code>, … — each
+    carrying <code>field_type</code>/<code>value</code>/<code>input_types</code>/<code>options</code>,
+    not a bare type hint)<sup class="c"><a href="#s9">9</a>,<a href="#s10">10</a></sup>. Not pure type-hint inference, and not a fully separate
+    hand-maintained frontend spec either — an explicit, parallel declaration layer the
+    component author writes alongside the class, richer than a signature but carrying its own
+    upkeep cost.</p>
+  </div>
+</div>
+
+<p><b>Directly relevant to Pyblocks:</b> Zach raised this three-way framing and will read for
+it. Pyblocks today infers a block's ports purely from its Python function signature — position
+2's cousin, but without a macro, so there's no compile-time metadata layer, just runtime
+reflection over the signature. The three positions above are the three directions that could
+take: <b>stay with pure function-signature inference</b> (current Pyblocks, cheapest, most
+constrained — a signature alone can't carry a widget hint, min/max, or a dropdown's options);
+<b>add an explicit parallel Input-declaration layer</b> (Langflow's way — richer, human-authored,
+can drift from the signature it sits beside); or <b>annotate the type at its declaration
+site</b> (Graphite's way — Python's own dataclass/typing machinery could plausibly carry this,
+via a decorator or metadata field on a dataclass field, though nothing in Pyblocks does this
+today).</p>
+
+<p><b>Verdict for SystemSketch, stated as an open question, not a recommendation:</b> its own
+<code>FieldSpec</code> architecture is already validated as the right <i>shape</i> by two
+independent convergences — Foxglove's <code>SettingsTreeEditor</code><sup class="c"><a href="#s1">1</a></sup>, and now this
+survey's majority (Sim Studio, n8n, Activepieces, and by extension ComfyUI/Langflow's
+frontend dispatchers). The genuinely open question this survey raises, which it does not
+answer either way: is it worth moving from hand-maintained toward type-site-derived
+(Graphite's model), given Python's own dataclass/typing machinery could plausibly play that
+role for SystemSketch's own Block parameters? This is a real, undecided architectural
+question to put in front of Zach — not a call this report makes for him.</p>
+
+</section>
+
+<section>
+  <h2>Cross-cutting synthesis, against the two original hypotheses</h2>
+  
+<p>The original brief carried two competing hypotheses. The evidence across both passes
+answers them cleanly, not by splitting the difference:</p>
+<div class="cols">
+  <div class="box free">
+    <h4>(a) Rich property panels are inherently custom-built everywhere, regardless of
+    headless-kit choice</h4>
+    <p><b>Confirmed strongly.</b> Every actively maintained app in both surveys — twelve
+    real codebases across two ecosystems (node/flow editors and Figma-likes) — hand-assembles
+    its own panel. Radix, Base UI, and Reka UI only ever supply the popover/dialog/slider
+    primitives underneath; not one of them supplies the panel itself. Even Graphite, the one
+    project with a compiled schema, still hand-writes ~20 whole-node overrides for panels a
+    generic model can't express<sup class="c"><a href="#s47">47</a></sup>.</p>
+  </div>
+  <div class="box cost">
+    <h4>(b) A real reusable panel architecture exists, worth studying structurally</h4>
+    <p><b>Also true</b> — but the valuable transferable thing is never an importable package;
+    it's the <b>architecture pattern</b>: a typed field-spec union plus one small dispatcher
+    (ten of twelve projects), or Graphite's type-site macro annotation (one project, a
+    structurally different and arguably stronger answer to the same problem).</p>
+  </div>
+</div>
+<p><b>Which hypothesis the evidence actually supports, stated plainly:</b> (a) is the
+operative finding — there is no sub-assembly to adopt, full stop. (b) is real but is a
+statement about <i>architecture</i>, not about a dependency; treating it as "go find the
+library" would send the wrong signal. SystemSketch is not behind for lacking one; it already
+independently built the same shape the majority of this survey converged on.</p>
+
+</section>
+
+
+<section>
+  <h2>Updated / reaffirmed recommendation</h2>
+  <p><b>No change to report 1's Axis 2 answer:</b> keep the <code>--ss-*</code> token layer.
+  Nothing in either pass here bears on scheme invariance or palette derivation — property
+  panels and design tokens are orthogonal concerns, confirmed again by every project surveyed
+  keeping them in separate systems (Penpot's own DTCG feature vs. its hand-authored chrome
+  Sass is the clearest example)<sup class="c"><a href="#s34">34</a></sup>.</p>
+  <p><b>Report 1's Axis 1 framing is being corrected separately</b> (the Base UI
+  "structurally immune" claim, per the recap above) — this report doesn't reopen that
+  question. What this report adds is a layer report 1 didn't cover at all: the
+  <b>property-panel architecture</b> sitting on top of whichever headless kit is chosen.</p>
+  <p><b>SystemSketch's own <code>FieldSpec</code> approach is validated as sound</b> — a
+  typed field-spec union plus one small dispatcher is the pattern ten of twelve surveyed
+  projects converge on, independently, from Foxglove's C++/TS substrate to Sim Studio's
+  TypeScript to Penpot's ClojureScript. Nothing here argues for replacing it. There is
+  <b>one live open architectural question, deliberately left undecided</b>: whether
+  SystemSketch's schema should eventually move from hand-maintained toward type-site-derived
+  (Graphite's model), using Python's own dataclass/typing machinery — flagged for Zach in §4,
+  not resolved here.</p>
+</section>
+
+
+
+<section>
+  <h2>What was deliberately not chased</h2>
+  <table>
+    <thead><tr><th>Skipped</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><th>Roboflow</th>
+        <td>Its workflow-builder UI sits behind Zach's own authenticated account. Not fetched —
+        this survey stayed on public sources only, the same boundary applied to Flowstate and
+        MoveIt Pro<sup class="c"><a href="#s51">51</a>,<a href="#s54">54</a></sup>.</td></tr>
+      <tr><th>Intrinsic Flowstate / MoveIt Pro source</th>
+        <td>No public source access to either. Findings above come from real screenshots, docs
+        and job postings only, each explicitly labeled by confidence — confirmed, weak signal,
+        or visual observation — never presented as more certain than that<sup class="c"><a href="#s51">51</a>,<a href="#s52">52</a>,<a href="#s53">53</a>,<a href="#s54">54</a>,<a href="#s55">55</a>,<a href="#s56">56</a></sup>.</td></tr>
+      <tr><th>Drawnix, Theatre.js</th>
+        <td>Explicitly stopped at the comparables already covered, per the leg's own scope
+        instruction not to pad the survey with weak matches once the pattern (headless
+        primitives + hand-assembled panel, Graphite as the one exception) was already
+        independently confirmed across seven other projects.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section>
+  <h2>Source index</h2>
+  <ol class="srcs">
+    <li id="s1">reports/ui-design-system-strategy-2026-09-07.html (this repo, main) — Axis 1: converge app chrome on Base UI, gradually; Axis 2: keep the --ss-* token layer, the dark/light bugs were palette-derivation math</li>
+    <li id="s2">Independent adversarial verification of report 1, relayed 2026-09-07 — Base UI's outside-press/dismissal handling found to be conditional, not an unconditional capture-phase listener as report 1 claimed; a correction is in flight on that report</li>
+    <li id="s3">Comfy-Org/ComfyUI_frontend package.json (shallow clone, 2026-09-07) — pnpm-catalog: vue, @primevue/core+forms+themes, reka-ui, tailwindcss, vee-validate+@vee-validate/zod, zod+zod-to-json-schema, pinia, vue-i18n, vuefire; versions are catalog pins, not literal in this file</li>
+    <li id="s4">ComfyUI src/renderer/extensions/vueNodes/widgets/registry/widgetRegistry.ts — coreWidgetDefinitions: flat array mapping ~29 canonical widget types (incl. legacy LiteGraph aliases STRING/INT/COMBO) to a Vue component + essential flag; getComponent(type) lookup</li>
+    <li id="s5">ComfyUI src/components/graph/DomWidgets.vue + shouldRenderAsVue() gate — DOM Vue widgets overlaid on the LiteGraph canvas, absolutely positioned and synced to lgCanvas.ds.offset/scale every frame; canvasOnly opt-out exists</li>
+    <li id="s6">ComfyUI src/components/rightSidePanel/RightSidePanel.vue + parameters/WidgetItem.vue:71 — tabbed inspector (parameters/settings/errors/info/subgraph tabs) calling the same getComponent(widget.type) registry as the in-node DOM widgets</li>
+    <li id="s7">langflow-ai/langflow src/frontend/package.json + src/frontend/src/components/ui/ (shallow clone, 2026-09-07) — @radix-ui/react-{accordion,checkbox,context-menu,dialog,dropdown-menu,form,label,popover,radio-group,select,separator,slider,slot,switch,tabs,tooltip}, tailwindcss 3.4.4, shadcn-ui 0.9.4 CLI marker, react-hook-form 7.52.0 + zod 3.23.8; literal shadcn-CLI-generated component filenames confirmed on disk</li>
+    <li id="s8">Langflow, independently re-verified live 2026-09-07 — MIT, 154,390 stars, pushed same day; React 19.2.1, @xyflow/react 12.3.6 + legacy reactflow 11.11.3 side by side, elkjs 0.9.3, Tailwind 3.4.4 + Emotion, zustand 4.5.2, Vite 7.3.1, Jest + Playwright + jest-axe</li>
+    <li id="s9">Langflow src/frontend/src/components/core/parameterRenderComponent/index.tsx — ParameterRenderComponent reads templateData.type; switch over ~25 field-type components (NestedDict, dict, bool, int/float, file, code, prompt, table, link, slider, tab, query, Any, mcp, …), each built on the shadcn/Radix primitives</li>
+    <li id="s10">Langflow backend Input mixin hierarchy (independently verified 2026-09-07) — StrInput/IntInput/DropdownInput/BoolInput/FileInput etc., all inheriting BaseInputMixin + specialized mixins (RangeMixin, ListableInputMixin, ToolModeMixin); each carries field_type/value/input_types/options as explicit class attributes, not bare type hints</li>
+    <li id="s11">n8n-io/n8n packages/frontend/editor-ui/package.json (shallow clone, 2026-09-07) — "element-plus": "catalog:frontend" (legacy layer); packages/frontend/editor-ui/tailwind.config.js and @n8n/design-system/tailwind.config.js both exist alongside Element Plus SCSS</li>
+    <li id="s12">n8n packages/frontend/@n8n/design-system/src/v2/components/Select/SelectItem.vue — imports SelectItem/SelectItemIndicator/SelectItemText from reka-ui directly, part of the in-progress v2 migration</li>
+    <li id="s13">n8n INodeProperties type (n8n-workflow package) + packages/frontend/editor-ui/src/features/ndv/parameters/components/ParameterInput.vue — 2,457-line single Vue SFC, long v-else-if chain over parameter.type; dedicated sub-components exist only for FixedCollection/ResourceMapper/ResourceLocator/AssignmentCollection/FilterConditions/Collection</li>
+    <li id="s14">langgenius/dify web/package.json + web/app/components/base/infotip/index.tsx:26 (shallow clone, 2026-09-07) — @base-ui/react (catalog:), confirmed no @headlessui/react or @radix-ui/* dependency exists; tailwindcss, class-variance-authority, @tanstack/react-form, zod, jsonschema; infotip comment cites base-ui.com/react/components/tooltip#infotips</li>
+    <li id="s15">Dify web/app/components/workflow/nodes/index.tsx + nodes/_base/components/ — PanelComponentMap[nodeData.type] maps ~25 node types to bespoke Panel components, composed from a shared low-level field kit (form-input-item.tsx, form-input-boolean.tsx, input-number-with-slider.tsx, memory-config.tsx)</li>
+    <li id="s16">simstudioai/sim apps/sim/package.json (shallow clone, 2026-09-07) — @radix-ui/react-{avatar,checkbox,collapsible,dialog,dropdown-menu,label,popover,progress,select,slider,slot,switch,tabs}, tailwindcss 4.3.3, react-hook-form 7.54.2 + zod 4.3.6, cmdk 1.0.0, input-otp 1.4.2; internal @sim/emcn package composition UNVERIFIED beyond app-level deps</li>
+    <li id="s17">Sim Studio apps/sim/app/workspace/[workspaceId]/w/[workflowId]/components/panel/components/editor/components/sub-block/sub-block.tsx — SubBlockConfig[] per block; renderInput() ~1,260-line component, ~40-case switch(config.type) incl. MODAL_REGISTRY[config.modalId] second-level registry, default fallback for unknown types</li>
+    <li id="s18">activepieces/activepieces packages/web/components.json + package.json (shallow clone, 2026-09-07) — shadcn CLI "new-york" style config; radix-ui 1.4.3 (consolidated package), tailwindcss 4.1.17, react-hook-form 7.71.2, zod 4.3.6, class-variance-authority 0.7.1, cmdk 1.1.1</li>
+    <li id="s19">Activepieces packages/web/src/app/builder/piece-properties/properties-utils.tsx — selectGenericFormComponentForProperty() switch(property.type) over PropertyType enum from @activepieces/pieces-framework SDK; GenericPropertiesForm via react-hook-form &lt;FormField&gt;, AutoFormFieldWrapper, shadcn primitives</li>
+    <li id="s20">Node-RED packages/node_modules/@node-red/editor-client/templates/index.mst — references vendor/jquery/css/base/jquery-ui.min.css; jQuery + jQuery UI vendored as static assets, no modern component/styling framework; confirmed, not investigated further per scope</li>
+    <li id="s21">penpot/penpot (shallow clone, tip 5b97fb9, 2026-09-07) — package.json v2.17.0, MPL-2.0, 680 .cljs/.cljc files + 294 .scss files under frontend/src</li>
+    <li id="s22">Penpot frontend/deps.edn + shadow-cljs.edn + rumext git dep (funcool/rumext v2.25) — still ClojureScript; rumext supplies mf/defc component macro, hooks (mf/use-state, mf/use-ref, mf/use-fn, mf/with-memo), Malli-based prop-schema mechanism</li>
+    <li id="s23">Penpot render-wasm/ (Rust, wasm32-unknown-emscripten, rust-skia 0.93.1) + frontend/src/app/main/features.cljs:28-65 — render-wasm/v1 feature flag chosen by URL param &gt; user profile &gt; team flag, defaulting to :svg; WASM/Skia real and working but not yet unconditional</li>
+    <li id="s24">Penpot frontend/src/app/main/ui/workspace/sidebar/options/ (options.cljs, menus/, shapes/, rows/) — ~24 reusable menu files incl. layout_container.cljs (61KB, Auto Layout), layout_item.cljs (35KB), typography.cljs (39KB), interactions.cljs (36KB), component.cljs (57KB)</li>
+    <li id="s25">Penpot frontend/packages/ui (@penpot/ui, React+TS, Vite + Storybook + React Compiler, react-aria-components ^1.20.0 as sole runtime dependency) — exports exactly one component (Modal) as of this checkout; introduction date unverified</li>
+    <li id="s26">Penpot frontend/src/app/main/ui/ds/controls/numeric_input.cljs (863 lines) — Pointer Events state machine idle/maybe-dragging/dragging, native setPointerCapture/releasePointerCapture, 3px movement threshold (line 582), drag step scaling Shift=×10/Ctrl=×0.1 (590-593), keyboard step scaling Shift=×10/Alt=×0.1 (499-502), dwu/start-undo-transaction and dwu/commit-undo-transaction bracket the whole scrub gesture</li>
+    <li id="s27">Penpot frontend/src/app/main/ui/workspace/colorpicker/ (~2,000 lines, no library; tinycolor2 used only for parsing/normalizing color strings in the design-tokens pipeline)</li>
+    <li id="s28">Penpot frontend/src/app/main/ui/ds/controls/select.cljs + combobox.cljs — fully custom listboxes, dropdown positioning computed manually via getBoundingClientRect + position:fixed; no floating-ui/popper dependency anywhere in the repo</li>
+    <li id="s29">Penpot frontend/src/app/main/ui/ds/_sizes.scss:8 ("// TODO: create actual tokens once we have them from design") + tip commit message "Migrate editable-select to DS icon* and design tokens (#11500)" — internal DS is hand-authored SCSS, not fed by Penpot's own token-generation pipeline; active ongoing migration</li>
+    <li id="s30">Penpot frontend/src/app/main/ui/workspace/sidebar/layers.cljs (886 lines) + layer_item.cljs (595 lines) — hand-rolled drag-to-reorder despite react-virtualized being a real dependency; react-virtualized used exactly once, for the font list in typography.cljs, not the layer tree</li>
+    <li id="s31">Penpot frontend/src/app/main/ui/workspace/sidebar/options/options.cljs:67-76 (single-shape-options*, case over :frame/:group/:text/:rect/:circle/:path/:svg-raw/:bool) + :78-94 (shape-options*, separate multi-selection branch)</li>
+    <li id="s32">Penpot frontend/src/app/main/ui/workspace/sidebar/options/shapes/multiple.cljs (type-&gt;read-mode table lines 44-169, group-&gt;attrs map) + common/src/app/common/attrs.cljc:87-119 (get-attrs-multi) — framework-agnostic fold over selected shapes per attribute, mth/close? epsilon-tolerant numeric equality, per-attribute pluggable equality/selector (shadow-eq/shadow-sel, blur-eq/blur-sel strip :id before comparing), :multiple sentinel for disagreement, missing attribute skipped not mismatched, weak/memoize + single-slot cache for perf</li>
+    <li id="s33">Penpot numeric_input.cljs prop schema [:maybe [:or :int :float :string [:= :multiple]]] + color_row.cljs — the :multiple sentinel flows as a typed value through props, not a UI flag; each leaf widget independently renders "Mixed" placeholder and disables drag-scrub/dropdown-open while mixed</li>
+    <li id="s34">Independent local verification, build-time, 2026-09-07 — .claude/worktrees/property-rows-mature/src/uiEditor/tabs/systemPrimitivesModel.ts:398 (PropertyRowDef interface start; get() at line 456 returns tldraw's SharedStyle&lt;RowValue&gt;) and its WHY comment (~lines 444-454) naming Penpot's 'mixed' string-sentinel approach as the rejected alternative, read fresh from the file at report build time</li>
+    <li id="s35">Penpot design tokens product feature (style-dictionary 5.5.2, @tokens-studio/sd-transforms 2.0.3, @penpot/tokenscript) vs. frontend/resources/styles/common/refactor/color-defs.scss (hand-authored Sass chrome vars, e.g. --df-secondary, --da-tertiary-10) — two separate pipelines; Penpot's own UI does not dogfood its DTCG tokens feature</li>
+    <li id="s36">open-pencil/open-pencil, verified live 2026-09-07 — 8,206 stars, 793 forks, 47 open issues, created 2026-02-27, pushed same day; 32 contributors, top contributor 2,334 commits vs next-highest 117</li>
+    <li id="s37">Open Pencil src/components/properties/{AppearanceSection,FillSection,StrokeSection,TypographySection,PositionSection,LayoutSection,...}.vue — Vue 3 + Reka UI + Tailwind CSS 4, several files importing reka-ui directly; also Skia/CanvasKit WASM rendering, Yoga WASM layout, Tauri v2 desktop shell</li>
+    <li id="s38">nexu-io/open-design ("open-design.ai"), verified live 2026-09-07 — Apache-2.0, desktop app wiring local coding-agent CLIs, no crypto/payment/scam signals on the site; 94,638 stars / 10,944 forks / 976 open issues on a repo created 2026-04-28 (~4 months old); 180 distinct contributors, top four 493/204/178/121/116 commits — plausible distributed spread; growth-curve shape not pulled, star-count authenticity not confirmed either way</li>
+    <li id="s39">vyuh-tech/vyuh_node_flow (flow.vyuh.tech) — Flutter/Dart native-widget node-graph package, unrelated to web canvas/design tooling; not investigated further</li>
+    <li id="s40">excalidraw/excalidraw packages/excalidraw/package.json, verified 2026-09-07 — "radix-ui": "1.4.3" (unified package); 131,326 stars, pushed same day</li>
+    <li id="s41">Excalidraw packages/excalidraw/components/PropertiesPopover.tsx + ColorPicker/ColorPicker.tsx (both import { Popover } from "radix-ui") + dropdownMenu/*, Sidebar/* tabs, FontPicker, ToolPopover, TTDDialog tabs — Radix used narrowly for overlay/menu patterns</li>
+    <li id="s42">Excalidraw packages/excalidraw/actions/actionProperties.tsx — register&lt;T&gt;({name, label, perform, PanelComponent}) per property; each action's PanelComponent is a hand-written JSX render function, no generic schema-loop layer</li>
+    <li id="s43">GraphiteEditor/Graphite frontend/package.json, verified 2026-09-07 — "svelte": "^5.55.1"; 27,155 stars, pushed same day; core is Rust compiled to WASM, driving the Svelte frontend via message-passing</li>
+    <li id="s44">Graphite frontend/src/components/panels/Properties.svelte + WidgetLayout.svelte + propertiesPanelLayout store — zero per-node-type UI code on the Svelte side</li>
+    <li id="s45">Graphite editor/src/messages/portfolio/document/node_graph/node_properties.rs (2,985 lines) — generic type-keyed widget builders: number_widget, color_widget, vec2_widget, font_widget, blend_mode_widget, bool_widget, etc.</li>
+    <li id="s46">Graphite node-graph/nodes/gcore/src/extract_xy.rs:26 (#[widget(Radio)]); node-graph/nodes/raster/src/adjustments.rs:42 (#[widget(Dropdown)]); node-graph/nodes/gstd/src/text.rs (#[widget(ParsedWidgetOverride::Custom = "text_area")]); node-graph/nodes/blending/src/lib.rs (#[widget(ParsedWidgetOverride::Hidden)]) — widget choice declared as a macro attribute directly on the node parameter's own type declaration</li>
+    <li id="s47">Graphite node-graph/node-macro/src/lib.rs:23 (#[widget(F)] semantics) + node-macro/src/codegen.rs:158-232 (compiled to per-parameter metadata) + document_node_definitions.rs INPUT_OVERRIDES map (min/max/step/unit/mode) + NODE_OVERRIDES map (~20 hand-written whole-node overrides for composite panels a single-widget-per-parameter model can't express)</li>
+    <li id="s48">tldraw packages/tldraw/src/lib/ui/components/StylePanel/DefaultStylePanelContent.tsx — reads shared style values by StyleProp key (styles.get(DefaultColorStyle)), hides a picker when undefined for the current selection; panel composition is a fixed hand-written JSX list, not a loop over all registered StyleProps</li>
+    <li id="s49">toeverything/blocksuite (edgeless-editor engine, 6,003 stars) + toeverything/AFFiNE (72,270 stars, 453MB repo) packages/frontend/component/package.json — ~15 @radix-ui/react-* packages (avatar, collapsible, context-menu, dialog, dropdown-menu, popover, progress, radio-group, scroll-area, slider, slot, tabs, toast, visually-hidden) + Emotion</li>
+    <li id="s50">webstudio-is/webstudio (AGPL-3.0, described from public source only, nothing copied) packages/design-system/package.json — 23 separate @radix-ui/* dependencies; Style Panel is purpose-built sections over Webstudio's own internal typed style-value model, compiling to plain CSS with no runtime dependency on the builder</li>
+    <li id="s51">Intrinsic Flowstate — browser-chrome screenshots showing intrinsic.ai/beta and portal.intrinsic.ai/projects/…; GitHub org intrinsic-ai publishes only Python/C++/ROS SDK surface (sdk, sdk-ros), no frontend code found</li>
+    <li id="s52">Intrinsic job postings (search-index snapshots, weak signal, treat with caution) — Angular and React both hired across different frontend roles; TypeScript + Three.js for 3D; gRPC/Protobuf backend; the one posting committing to a single framework (Angular + Three.js, "Frontend Robotics Engineer") is for customer-facing HMI apps, not confirmed to be Flowstate's own editor</li>
+    <li id="s53">Intrinsic Flowstate launch-blog screenshots (visual observation, real captures) — three-pane IDE layout: tabbed Properties inspector (Details/Controls/Settings) with grouped collapsible sections, dense grid-aligned typed-field-per-row forms; center frame-nested process/behavior editor; right Scene/Assets tree + 3D viewport; "Choose…" reference-picker pattern pops a searchable typed-object list</li>
+    <li id="s54">docs.picknik.ai tutorial screenshots (real captures, not renders) — 4-pane dockable layout; GitHub org PickNikRobotics real/active, actual frontend not open-sourced (SDK repo Python+C++ only)</li>
+    <li id="s55">MoveIt Pro job posting, "Front End Web Engineer" (search-index text, direct fetch 403'd, weak signal) — TypeScript + React, TanStack Query + Router, Vite, Vitest + React Testing Library</li>
+    <li id="s56">docs.picknik.ai visual observation — Objectives sidebar, 3D Visualization + Scene Camera panes, Blackboard Editor table (Name/Type/Value, searchable) + Behavior Tree pane; no separate node-property side panel — nodes carry editable ports inline (labeled IN badge per input, bound value as an editable field/token in the node body), ports hidden by default, color/icon-coded by type</li>
+  </ol>
+</section>
+
+<footer>
+  <div>Built by <code>docs/build_node_editor_design_tool_prior_art.py</code> · one locally
+    re-read citation (property-rows-mature worktree); everything else is a dated research
+    finding cited to its own source entry, not a build measurement</div>
+  <div>Companion: <a href="ui-design-system-strategy-2026-09-07.html">ui-design-system-strategy-2026-09-07.html</a>
+    (63,933 bytes) · 2026-09-07</div>
+</footer>
+
+</main>
+</body>
+</html>

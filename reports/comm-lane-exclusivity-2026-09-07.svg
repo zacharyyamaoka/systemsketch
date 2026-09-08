@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 700" width="980" height="700" font-family="ui-sans-serif,Inter,Helvetica,Arial,sans-serif">
+  <rect width="980" height="700" fill="#fbfbfc"/>
+  <text x="32" y="38" font-size="21" font-weight="700" fill="#18181b">Gesture ownership: exclusivity is a property of one ordering, not of a pairing</text>
+  <text x="32" y="60" font-size="13.5" fill="#6b7280">Measured by <tspan font-family="ui-monospace,monospace" font-size="12.5">tests/gesture_probe_smoke.mjs</tspan>. Two thresholds are in play, and they belong to different owners.</text>
+
+  <rect x="32" y="76" width="912" height="34" rx="8" fill="#f4f4f5" stroke="#e4e4e7"/>
+  <text x="46" y="98" font-size="12.5" fill="#3f3f46">tldraw <tspan font-family="ui-monospace,monospace">long_press</tspan> — a 500 ms timer, cleared only by travel over <tspan font-weight="700">4 px</tspan>   ·   dnd-kit (BT) — <tspan font-family="ui-monospace,monospace">{delay:500, tolerance:5}</tspan>, survives up to <tspan font-weight="700">5 px</tspan>. The probe's move beat is <tspan font-weight="700">3.61 px</tspan>, under both.</text>
+
+  <!-- A -->
+  <rect x="32" y="126" width="912" height="150" rx="10" fill="#fff" stroke="#e4e4e7"/>
+  <rect x="32" y="126" width="912" height="28" rx="10" fill="#fef2f2"/><rect x="32" y="144" width="912" height="10" fill="#fef2f2"/>
+  <text x="46" y="145" font-size="13" font-weight="700" fill="#b91c1c">A · native reorder + BT, dwell → move   ·   TWO owners</text>
+  <rect x="120" y="166" width="410" height="30" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="132" y="186" font-size="12" fill="#1e40af">native reorder armed by long_press at 500 ms</text>
+  <rect x="640" y="204" width="266" height="30" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="652" y="224" font-size="12" fill="#b91c1c">BT seizes at the 3.61 px move</text>
+  <path d="M640 219 L556 219" stroke="#dc2626" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+  <text x="240" y="223" font-size="11.5" fill="#dc2626">cancels the live reorder mid-drag</text>
+  <line x1="120" y1="252" x2="906" y2="252" stroke="#d4d4d8" stroke-width="1.5"/>
+  <g font-size="11" fill="#a1a1aa" text-anchor="middle">
+    <line x1="190" y1="247" x2="190" y2="257" stroke="#d4d4d8"/><text x="190" y="270">press</text>
+    <line x1="530" y1="247" x2="530" y2="257" stroke="#d4d4d8"/><text x="530" y="270">700 ms dwell</text>
+    <line x1="770" y1="247" x2="770" y2="257" stroke="#d4d4d8"/><text x="770" y="270">3.61 px move</text>
+  </g>
+
+  <!-- B -->
+  <rect x="32" y="292" width="912" height="150" rx="10" fill="#fff" stroke="#e4e4e7"/>
+  <rect x="32" y="292" width="912" height="28" rx="10" fill="#f0fdf4"/><rect x="32" y="310" width="912" height="10" fill="#f0fdf4"/>
+  <text x="46" y="311" font-size="13" font-weight="700" fill="#15803d">B · communication + BT, dwell → move   ·   ONE owner   (comm alone, bt:false at all three beats — measured)</text>
+  <rect x="120" y="332" width="786" height="30" rx="6" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="132" y="352" font-size="12" fill="#15803d">communication lane owns the gesture start to finish</text>
+  <rect x="176" y="370" width="248" height="28" rx="6" fill="#fafafa" stroke="#e4e4e7"/>
+  <text x="188" y="389" font-size="11.5" fill="#3f3f46">onLongPress fires → comm clones a pointerdown</text>
+  <path d="M424 384 L492 384" stroke="#a1a1aa" stroke-width="1.5" fill="none" marker-end="url(#ag)" stroke-dasharray="4 3"/>
+  <rect x="496" y="370" width="256" height="28" rx="6" fill="#fafafa" stroke="#e4e4e7" stroke-dasharray="4 3"/>
+  <text x="508" y="389" font-size="11.5" fill="#3f3f46">BT's second-pointer disarm — inferred</text>
+  <text x="762" y="389" font-size="11" fill="#a1a1aa">not observed</text>
+  <line x1="120" y1="418" x2="906" y2="418" stroke="#d4d4d8" stroke-width="1.5"/>
+  <g font-size="11" fill="#a1a1aa" text-anchor="middle">
+    <line x1="190" y1="413" x2="190" y2="423" stroke="#d4d4d8"/><text x="190" y="436">press</text>
+    <line x1="530" y1="413" x2="530" y2="423" stroke="#d4d4d8"/><text x="530" y="436">700 ms dwell</text>
+    <line x1="770" y1="413" x2="770" y2="423" stroke="#d4d4d8"/><text x="770" y="436">3.61 px move</text>
+  </g>
+
+  <!-- C -->
+  <rect x="32" y="458" width="912" height="150" rx="10" fill="#fff" stroke="#e4e4e7"/>
+  <rect x="32" y="458" width="912" height="28" rx="10" fill="#fef2f2"/><rect x="32" y="476" width="912" height="10" fill="#fef2f2"/>
+  <text x="46" y="477" font-size="13" font-weight="700" fill="#b91c1c">C · communication + BT, move → dwell   ·   SAME PAIRING, and BT takes it — and writes tree XML</text>
+  <rect x="120" y="498" width="786" height="30" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="132" y="518" font-size="12" fill="#b91c1c">[btDnd] at all three beats · wrote: tree XML (BT reorder)</text>
+  <rect x="120" y="536" width="786" height="28" rx="6" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="132" y="555" font-size="11.5" fill="#78350f">The clone lives in onLongPress. Move 3.61 px first and the state exits pointing_block_port before 500 ms — onLongPress never runs, so no clone is dispatched.</text>
+  <line x1="120" y1="584" x2="906" y2="584" stroke="#d4d4d8" stroke-width="1.5"/>
+  <g font-size="11" fill="#a1a1aa" text-anchor="middle">
+    <line x1="190" y1="579" x2="190" y2="589" stroke="#d4d4d8"/><text x="190" y="602">press</text>
+    <line x1="430" y1="579" x2="430" y2="589" stroke="#d4d4d8"/><text x="430" y="602">3.61 px move</text>
+    <line x1="770" y1="579" x2="770" y2="589" stroke="#d4d4d8"/><text x="770" y="602">700 ms dwell</text>
+  </g>
+
+  <rect x="32" y="624" width="912" height="60" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="46" y="646" font-size="13" font-weight="700" fill="#92400e">The point</text>
+  <text x="46" y="666" font-size="12.5" fill="#78350f">Nothing decided that comm and BT are exclusive, and they aren't — C is the same two lanes, reordered, and it double-claims. WHY B is safe is still open — the probe cannot separate 'the clone disarmed BT' from 'BT never armed'.</text>
+  <defs>
+    <marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#dc2626"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#a1a1aa"/></marker>
+  </defs>
+</svg>

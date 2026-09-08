@@ -135,6 +135,7 @@
     "test:toolbar": "node tests/toolbar_family_menu_smoke.mjs",
     "test:ellipse-shortcuts": "node tests/ellipse_shortcuts_smoke.mjs",
     "test:code-block": "node tests/code_block_primitive_smoke.mjs",
+    "test:code-legacy-migration": "node tests/code_shape_legacy_migration_smoke.mjs",
     "test:primitive-search": "node tests/primitive_search_smoke.mjs",
     "test:tool-aliases": "node tests/tool_aliases_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",

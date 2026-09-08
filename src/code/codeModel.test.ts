@@ -84,7 +84,7 @@ describe('code font scale', () => {
 		expect(width).toBeGreaterThan(widthFor(48, 'm', true))
 	})
 
-	it('defaults a pre-fontScale record to 1 via the v0->v1 migration', async () => {
+	it('defaults a current record missing only fontScale to 1 via the v0->v1 migration', async () => {
 		const { upgradeCodePropsV0ToV1, normalizeFontScale } = await import('./codeModel')
 		const legacy = { w: 500, h: 148, code: 'x', language: 'python', size: 'm', showLineNumbers: true, characterWidth: 48 }
 		expect(upgradeCodePropsV0ToV1(legacy)).toEqual({ ...legacy, fontScale: 1 })

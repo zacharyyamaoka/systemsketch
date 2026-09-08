@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Four-sided port labels — prior art</title><style>
+:root { --ink:#18212f; --muted:#647083; --line:#d8dee8; --paper:#f8fafc;
+  --surface:#ffffff; --blue:#2563eb; --green:#0f8a5f; --orange:#c95e0a; --purple:#7c3aed; }
+* { box-sizing:border-box }
+body { margin:0; background:var(--paper); color:var(--ink);
+  font:16px/1.58 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif; }
+main { width:min(1120px,calc(100% - 36px)); margin:auto; padding:46px 0 80px; }
+h1 { font-size:clamp(28px,5vw,42px); line-height:1.1; letter-spacing:-.035em; margin:0 0 14px; }
+h2 { font-size:22px; line-height:1.25; margin:50px 0 14px; padding-top:22px; border-top:1px solid var(--line); }
+h3 { font-size:16px; margin:16px 0 8px; }
+p { margin:0 0 14px; max-width:84ch; }
+a { color:#1555ca; }
+code { font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; background:#e9eef6; padding:2px 5px; border-radius:4px; }
+.lede { color:var(--muted); font-size:18px; max-width:74ch; }
+.decision { border-left:4px solid var(--blue); padding:17px 20px; margin:26px 0; background:var(--surface); }
+.decision strong { display:block; font-size:19px; margin-bottom:6px; }
+.grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.panel { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; }
+.panel p { font-size:14px; color:var(--muted); margin:0; }
+.diagram { width:100%; height:auto; display:block; }
+.rule { display:grid; grid-template-columns:34px 1fr; gap:12px; margin:17px 0; max-width:82ch; }
+.rule b { display:grid; place-items:center; align-self:start; width:30px; height:30px; border-radius:50%; color:white; background:var(--blue); font-size:14px; }
+.rule p { margin:0; }
+.source-table { width:100%; border-collapse:collapse; background:var(--surface); }
+.source-table th, .source-table td { padding:13px 14px; vertical-align:top; text-align:left; border-bottom:1px solid var(--line); }
+.source-table th { color:var(--muted); font-size:13px; font-weight:600; }
+.source-table td:first-child { width:22%; font-weight:650; }
+.source-table td:nth-child(2) { width:35%; }
+.source-table tr:last-child td { border-bottom:0; }
+.bad { color:#b42318; }
+.good { color:#08734f; }
+.small { color:var(--muted); font-size:13px; }
+footer { margin-top:54px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+@media (max-width:700px) { main { width:min(100% - 24px,1120px); padding-top:30px; } .grid { grid-template-columns:1fr; } .source-table { font-size:14px; } .source-table th, .source-table td { padding:10px; } .source-table td:first-child { width:25%; } }
+</style></head><body><main>
+<h1>Four-sided port labels: use an inward, horizontal rail</h1>
+<p class="lede">A four-sided node editor does not need four writing directions. The durable convention is to keep a port’s source-shaped label horizontal and put it just inside the face: <strong>below a top socket, above a bottom socket</strong>. That makes the socket-to-label relationship local while preserving the outer side for wires.</p>
+
+<div class="decision"><strong>Recommendation for SystemSketch</strong>Top and bottom labels remain horizontal monospace text, centred on their socket’s x-coordinate. A top label’s first baseline is below the dot; a bottom label’s last baseline is above it. Keep the face’s port order left-to-right on both rails. Do not rotate labels, place them outside the Block, or let them overlap one another.</div>
+
+<div class="grid"><section class="panel"><svg class="diagram" viewBox="0 0 410 300" role="img" aria-label="Recommended — horizontal names, drawn inward">
+<title>Recommended — horizontal names, drawn inward</title>
+<rect x="34" y="31" width="342" height="222" rx="12" fill="#fff" stroke="#aeb9c8" stroke-width="2"/>
+<path d="M132 0v31 M278 0v31 M132 253v47 M278 253v47" stroke="#2563eb" stroke-width="2" stroke-dasharray="4 4"/>
+<circle cx="132" cy="31" r="7" fill="#fff" stroke="#2563eb" stroke-width="3"/><circle cx="278" cy="31" r="7" fill="#fff" stroke="#2563eb" stroke-width="3"/>
+<circle cx="132" cy="253" r="7" fill="#fff" stroke="#2563eb" stroke-width="3"/><circle cx="278" cy="253" r="7" fill="#fff" stroke="#2563eb" stroke-width="3"/>
+<rect x="35" y="104" width="340" height="1" fill="#e1e6ee"/>
+<text x="205" y="140" text-anchor="middle" font-family="ui-monospace, monospace" font-size="19" fill="#18212f">localize(scan)</text>
+<text x="205" y="166" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#647083">Block body stays visually quiet</text>
+<text x="132" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">clock: Tick</text>
+<text x="278" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">reset: Event</text>
+<text x="132" y="214" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">result: Pose</text>
+<text x="278" y="214" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">status: State</text>
+<text x="205" y="287" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#647083">Top labels sit below sockets; bottom labels sit above. The outer cable corridors remain empty.</text>
+</svg><h3>One familiar reading rule</h3><p>Every label moves toward the Block’s centre: right of left-side ports, left of right-side ports, below top ports, above bottom ports.</p></section><section class="panel"><svg class="diagram" viewBox="0 0 410 300" role="img" aria-label="Do not adopt — rotated text shares the cable corridor">
+<title>Do not adopt — rotated text shares the cable corridor</title>
+<rect x="34" y="31" width="342" height="222" rx="12" fill="#fff" stroke="#aeb9c8" stroke-width="2"/>
+<path d="M132 0v31 M278 0v31 M132 253v47 M278 253v47" stroke="#b42318" stroke-width="2" stroke-dasharray="4 4"/>
+<circle cx="132" cy="31" r="7" fill="#fff" stroke="#b42318" stroke-width="3"/><circle cx="278" cy="31" r="7" fill="#fff" stroke="#b42318" stroke-width="3"/>
+<circle cx="132" cy="253" r="7" fill="#fff" stroke="#b42318" stroke-width="3"/><circle cx="278" cy="253" r="7" fill="#fff" stroke="#b42318" stroke-width="3"/>
+<rect x="35" y="104" width="340" height="1" fill="#e1e6ee"/>
+<text x="205" y="140" text-anchor="middle" font-family="ui-monospace, monospace" font-size="19" fill="#18212f">localize(scan)</text>
+<text x="205" y="166" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#647083">Block body stays visually quiet</text>
+<text x="120" y="53" transform="rotate(-90 120 53)" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">clock: Tick</text>
+<text x="290" y="53" transform="rotate(-90 290 53)" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">reset: Event</text>
+<text x="120" y="240" transform="rotate(-90 120 240)" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">result: Pose</text>
+<text x="290" y="240" transform="rotate(-90 290 240)" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#18212f">status: State</text>
+<text x="205" y="287" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#647083">Turning source-shaped identifiers makes them harder to scan and consumes the space cables need.</text>
+</svg><h3>Why not orient text with the edge?</h3><p>Rotation makes code-like names vertically scanned and puts the word in the exact external corridor a perpendicular wire uses.</p></section></div>
+
+<h2>Exact layout contract</h2>
+<div class="rule"><b>1</b><p><strong>One baseline direction.</strong> Keep <code>name: Type</code> horizontal at every side. SystemSketch’s typography rule treats port text as source-shaped material; rotating it changes how the reader has to decode the same identifier.</p></div>
+<div class="rule"><b>2</b><p><strong>Inward, never outward.</strong> Top: dot → 6px gap → label below. Bottom: label above → 6px gap → dot. This is the top/bottom equivalent of today’s inside left/right labels, and it keeps the cable’s departure zone clean.</p></div>
+<div class="rule"><b>3</b><p><strong>Centre label and dot on the same x-axis.</strong> The label is a compact single line such as <code>item: Iter</code>, using the normal port grammar—not a rotated side caption. On both horizontal faces, authored port order reads left-to-right.</p></div>
+<div class="rule"><b>4</b><p><strong>Reserve a rail; do not solve density by distortion.</strong> Top/bottom names need a dedicated inside band so they cannot collide with a title, footer, or child canvas. If a Block becomes too narrow for its authored labels plus a 12px gap, retain the sockets and use the existing compact/overflow affordance; do not shrink, stagger, rotate, or allow name overlap. This preserves the whiteboard’s authored order without turning one face into an unreadable many-port table.</p></div>
+
+<h2>What the prior art actually says</h2>
+<table class="source-table"><thead><tr><th>Reference</th><th>Observed rule</th><th>What carries into SystemSketch</th></tr></thead><tbody>
+<tr><td><a href="https://flow.vyuh.tech/docs/theming/port-labels">Vyuh Node Flow</a></td><td>Its all-four-sides demonstration explicitly puts a top-port label <em>below</em> the port and a bottom-port label <em>above</em> it; labels are always inside the node.</td><td><span class="good">Direct precedent.</span> Adopt this geometry as the default.</td></tr>
+<tr><td><a href="https://docs.jointjs.com/api/layout/PortLabel/">JointJS</a></td><td>It offers ordinary <code>inside</code>/<code>outside</code> port labels separately from opt-in <code>insideOriented</code>/<code>outsideOriented</code> layouts that rotate toward a centre.</td><td><span class="good">Keep ordinary text.</span> Rotation is a specialised alternative, not the baseline for code identifiers.</td></tr>
+<tr><td><a href="https://www.mathworks.com/help/simulink/ug/configure-model-layout.html">Simulink</a></td><td>Ports can be moved to every block side. Its default rotation policy keeps port order left-to-right on top/bottom and top-to-bottom on left/right to retain a readable diagram orientation.</td><td><span class="good">Adopt the ordering rule.</span> Treat the top and bottom as left-to-right rails, not as rotated side lists.</td></tr>
+<tr><td>SystemSketch today</td><td>The Loop item output already leaves a header’s bottom edge and deliberately places its label above the dot so the first downward cable cannot strike it through. The Block effect socket is already a top-edge port, currently unlabeled.</td><td><span class="good">Extend, do not replace.</span> Generalise the Loop’s inward/cable-clearance reasoning and give a future named top port the symmetric below-dot label.</td></tr>
+</tbody></table>
+
+<h2>How it fits the current canvas</h2>
+<p>The existing <code>Loop</code> is the useful local proof: its bottom-edge <code>item</code> port places its label above the dot specifically to prevent a downward wire crossing the words. The current generic Block similarly puts an effect port on its top edge, but intentionally gives it no label. This proposal is only a presentation rule for future named top/bottom ports; it does not derive sides, rename ports, or change wiring semantics.</p>
+<p class="small">Sources were checked 2026-09-06. The diagrams above are original schematics, not product screenshots. This is a research/design recommendation only; no <code>src/</code> behavior was changed.</p>
+<footer>SystemSketch prior-art record · generated by <code>docs/build_four_sided_port_labels_prior_art.py</code></footer>
+</main></body></html>

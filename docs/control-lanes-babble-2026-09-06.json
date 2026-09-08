@@ -1,0 +1,562 @@
+{
+  "schemaVersion": 3,
+  "title": "Control lanes behind Port view",
+  "kicker": "Babble & Prune · behavior-tree / dataflow layering",
+  "brief": "Use the already-derived behavior-tree rail topology as a low-contrast, branching control layer behind Port-view Blocks. Keep blue port-to-port values in the foreground, so one canvas can show both structure and data without making either impersonate the other.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Ghost roads is the clearest layering contract: a filled-but-translucent route says more than a rail alone, a fine seam retains ordered branching, and blue cables keep their established dataflow priority. It communicates the user's autonomous-path intuition without falsely presenting the canvas as runtime playback.",
+  "decisionHinge": "If ordinary work is dominated by editing one local branch at a time, move 8–10% of the weight from control reconstructability to default quietness: Selective wash becomes competitive. If the primary use is explaining a behavior tree in a static export, retain Ghost roads and consider borrowing Flow field's directional texture only for presentation mode.",
+  "invariants": [
+    "One canonical behavior-tree graph produces Tree, Process, and Port/dataflow lenses; the cyan layer is derived presentation, never an independent control model.",
+    "The shared fixture keeps the same fallback, rejoin, and parallel topology in every variant: MoveToObj → GraspValid, CorrectGrip on invalid, then CloseGrip and a two-child parallel outcome.",
+    "Blue strokes always mean declared typed port-to-port values; cyan/teal area or path treatment always means control topology.",
+    "Port cards, labels, dimensions, and every data cable remain fixed across variants and their interactive states."
+  ],
+  "boundary": "Concept-only HTML prototype. The hero validates visual layering and a single emphasis interaction; it does not yet mount SystemSketch, generate lanes from live layout data, support editing, or assert execution/runtime status.",
+  "axes": [
+    {
+      "name": "Control carrier",
+      "values": [
+        "continuous translucent corridor",
+        "paired banks",
+        "directional field",
+        "branch territory",
+        "selection-amplified wash"
+      ]
+    },
+    {
+      "name": "At-rest priority",
+      "values": [
+        "always legible structure",
+        "balanced route/data coexistence",
+        "nearly pure Port view until a branch is focused"
+      ]
+    },
+    {
+      "name": "Structural claim",
+      "values": [
+        "ordered path",
+        "route boundary",
+        "permitted movement",
+        "scope membership",
+        "local inspection"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "control",
+      "name": "Control remains reconstructable",
+      "weight": 30,
+      "why": "The background must still make order, fallback, fan-out, and rejoin recoverable; it cannot be a decorative underlay.",
+      "passCondition": "In the shared fixture, a reader identifies the invalid-only correction arm and the two-child parallel fan-out without treating a blue data cable as control.",
+      "anchors": {
+        "1": "Branches read as decoration or as extra data wires.",
+        "3": "A reader can recover the common route but needs a legend for special cases.",
+        "5": "The control shape is readable behind port cards without foregrounding it over data."
+      }
+    },
+    {
+      "id": "data",
+      "name": "Port-to-port values stay traceable",
+      "weight": 28,
+      "why": "The primary working lens is Port view. Typed values need to remain the clearest foreground relationship.",
+      "passCondition": "Every blue link can be followed from a labelled output to a labelled input at normal canvas scale, even where it rides within a control corridor.",
+      "anchors": {
+        "1": "Data and control are visually interchangeable.",
+        "3": "Most local values are readable, but forks make labels work too hard.",
+        "5": "A blue cable and its labelled ports remain unambiguous across every branch."
+      }
+    },
+    {
+      "id": "layers",
+      "name": "The two grammars separate without splitting the canvas",
+      "weight": 24,
+      "why": "The promise is one coherent projection: data in front, control behind, rather than two competing diagrams or a forced mode switch.",
+      "passCondition": "Control uses a distinct low-contrast area/route grammar while data uses one thin, saturated cable grammar in the identical topology.",
+      "anchors": {
+        "1": "The two systems need separate canvases to be understood.",
+        "3": "They coexist but compete at dense intersections.",
+        "5": "Foreground data and background control can be read together without a second key."
+      }
+    },
+    {
+      "id": "quiet",
+      "name": "Default Port view stays calm at scale",
+      "weight": 18,
+      "why": "This lens will often be used for editing a working board, not only explaining an execution trace.",
+      "passCondition": "The default state makes room for dense port cards and cable labels; stronger control emphasis is intentional rather than always-on noise.",
+      "anchors": {
+        "1": "Control texture dominates ordinary editing.",
+        "3": "The shared fixture is workable but becomes busy with more leaves.",
+        "5": "The control layer supplies orientation yet yields visual priority to values and cards."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "meaning",
+      "name": "No blue control wire",
+      "why": "Blue remains a declared typed port relationship; control must never borrow that semantic channel."
+    },
+    {
+      "id": "source",
+      "name": "One behavior tree, two reversible lenses",
+      "why": "A lane is derived from the canonical control graph, not a separately editable graph that can drift from the tree."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "01 · Ghost roads",
+      "thesis": "Translucent cyan corridors with one fine center seam make the control tree visible as terrain, while thin blue cables continue to read as port-to-port values.",
+      "accent": "#0b9d88",
+      "bestWhen": "The shared canvas must explain both branching control and real values at the same time.",
+      "losesWhen": "Runtime status needs to be the primary object; a trace or playback lens would be stronger.",
+      "decisions": [
+        {
+          "label": "Control carrier",
+          "value": "wide route + thin center seam"
+        },
+        {
+          "label": "Foreground contract",
+          "value": "blue, typed port-to-port cables"
+        },
+        {
+          "label": "Emphasis",
+          "value": "quiet by default; trace on demand"
+        }
+      ],
+      "keepParts": [
+        "the translucent route body",
+        "one precise center seam",
+        "control/data colour contract"
+      ],
+      "proof": [
+        "The direct control changes only the control-layer treatment; cards and every data cable remain in exactly the same place.",
+        "The manual walkthrough drives that same visible state instead of a prerecorded tour."
+      ],
+      "previewLabel": "interactive shared control/data fixture",
+      "story": {
+        "title": "Inspect the relationship between the layers",
+        "steps": [
+          {
+            "label": "Read Port view at rest",
+            "caption": "At rest, the control tree is a soft map under the Port view; data labels keep the foreground.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Reveal this treatment's strongest cue",
+            "caption": "The same corridors gain a crisp center trace for deliberate control inspection—without moving or recoloring any data cable.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "control": {
+          "score": 5,
+          "evidence": "The hero holds a labelled fallback/rejoin and a parallel fan-out in the same fixed topology.",
+          "confidence": "high"
+        },
+        "data": {
+          "score": 5,
+          "evidence": "Blue labelled links terminate at visible Port-view sockets, including two paths that share a control corridor.",
+          "confidence": "high"
+        },
+        "layers": {
+          "score": 5,
+          "evidence": "The exercised alternate state keeps the blue data geometry fixed while changing only the cyan control treatment.",
+          "confidence": "high"
+        },
+        "quiet": {
+          "score": 4,
+          "evidence": "The base state is the actual at-rest specimen; the alternate state exercises the variant's strongest available emphasis.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "meaning": {
+          "pass": true,
+          "evidence": "Every blue stroke in the fixture starts and ends at a named port. Cyan remains the only control carrier."
+        },
+        "source": {
+          "pass": true,
+          "evidence": "The exact same fallback and parallel topology is used for the tree lens and every control-lane rendering."
+        }
+      },
+      "preview": "<style>\n  .lane-stage { width: 1140px; padding: 20px; background: #f7fafc; color: #12253d; }\n  .lane-stage .stage-title { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin:0 0 10px; }\n  .lane-stage h4 { margin:0; font:750 15px/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }\n  .lane-stage p { margin:3px 0 0; color:#63778d; font:500 11px/1.4 ui-sans-serif,system-ui,sans-serif; }\n  .lane-stage .stage-kicker { color:#0c8976; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; text-transform:uppercase; white-space:nowrap; }\n  .lane-canvas { display:block; width:1140px; height:476px; overflow:visible; border:1px solid #d8e1e8; border-radius:14px; background:#fbfdff; }\n  .canvas-grid { stroke:#dce7ec; stroke-width:1; opacity:.58; }\n  .canvas-title { fill:#4e6679; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }\n  .control-key { fill:#0c8e7a; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .data-key { fill:#2367ad; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .block-face { fill:#ffffff; stroke:#b9c8d4; stroke-width:1.2; filter:url(#block-shadow); }\n  .block-name { fill:#142a44; font:750 12px/1 ui-monospace,SFMono-Regular,monospace; }\n  .block-rule { stroke:#e7eef2; stroke-width:1; }\n  .port { stroke-width:1.35; }\n  .input-port { fill:#e8f4ff; stroke:#1976d2; }\n  .output-port { fill:#1976d2; stroke:#12599e; }\n  .port-text { fill:#5b7082; font:600 8.5px/1 ui-monospace,SFMono-Regular,monospace; }\n  .data-wire { fill:none; stroke:#1976d2; stroke-width:2.35; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#data-arrow); }\n  .data-wire.secondary { stroke:#5f9bd8; stroke-width:1.75; }\n  .wire-label-back { fill:#fbfdff; stroke:#c8ddec; stroke-width:.8; }\n  .wire-label { fill:#2367ad; font:700 8.2px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-center { fill:none; stroke:#0fb79f; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.78; marker-end:url(#control-arrow); }\n  .lane-seam { fill:none; stroke:#0aa78f; stroke-width:.9; stroke-dasharray:2.8 4.8; opacity:.73; }\n  /* Open SVG routes default to a black fill. Control strokes must stay open;\n     only the explicitly fill-only territory shapes below are allowed to paint. */\n  .control-grammar path[stroke] { fill:none; }\n  .lane-label { fill:#087663; font:800 8px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }\n  .merge-dot { fill:#10b69e; stroke:#fff; stroke-width:1.5; }\n  .lane-button { margin-top:11px; padding:8px 11px; border:1px solid #86cfc3; border-radius:7px; background:#f1fffb; color:#087663; font:800 10px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-button:hover { background:#ddfff6; }\n  .lane-stage .alt-note { display:none; color:#087663; }\n  .prototype.is-alt .lane-stage .base-note { display:none; }\n  .prototype.is-alt .lane-stage .alt-note { display:block; }\n  .prototype.is-alt .lane-stage .lane-center { stroke-width:2.3; opacity:1; }\n  .prototype.is-alt .lane-stage .lane-seam { stroke-width:1.3; opacity:1; }\n  .prototype.is-alt .lane-stage .data-wire { stroke-width:2.65; }\n  .prototype.is-alt .lane-stage .lane-fill { opacity:1; }\n  .prototype.is-alt .lane-stage .lane-quiet { opacity:.28; }\n  .prototype.is-alt .lane-stage .lane-focus { opacity:1; }\n  .prototype.is-alt .lane-stage .field-mark { opacity:.92; }\n  .prototype.is-alt .lane-stage .region-outline { opacity:1; }\n</style><div class=\"lane-stage lane-ghost\">\n      <div class=\"stage-title\"><div><h4>01 · Ghost roads</h4><p class=\"base-note\">At rest, the control tree is a soft map under the Port view; data labels keep the foreground.</p><p class=\"alt-note\">The same corridors gain a crisp center trace for deliberate control inspection—without moving or recoloring any data cable.</p></div><span class=\"stage-kicker\">shared fixture · Port view</span></div>\n      <svg class=\"lane-canvas\" viewBox=\"0 0 1140 476\" role=\"img\" aria-label=\"01 · Ghost roads. The same behavior tree is shown as translucent cyan control grammar under blue data wires connecting port-view Blocks.\">\n        <defs>\n      <filter id=\"lane-ghost-shadow\" x=\"-12%\" y=\"-20%\" width=\"124%\" height=\"145%\">\n        <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"5\" flood-color=\"#112743\" flood-opacity=\".16\"/>\n      </filter>\n      <marker id=\"lane-ghost-data-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#1976d2\"/>\n      </marker>\n      <marker id=\"lane-ghost-control-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#12bfa3\"/>\n      </marker>\n      <linearGradient id=\"lane-ghost-lane-gradient\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n        <stop offset=\"0\" stop-color=\"#25d0b4\" stop-opacity=\".11\"/>\n        <stop offset=\".48\" stop-color=\"#32d8c3\" stop-opacity=\".30\"/>\n        <stop offset=\"1\" stop-color=\"#22bda8\" stop-opacity=\".12\"/>\n      </linearGradient>\n      <pattern id=\"lane-ghost-chevrons\" width=\"24\" height=\"18\" patternUnits=\"userSpaceOnUse\">\n        <path d=\"M4 3 L10 9 L4 15 M13 3 L19 9 L13 15\" fill=\"none\" stroke=\"#10ad95\" stroke-width=\"1.25\" opacity=\".58\"/>\n      </pattern>\n    </defs>\n        <g opacity=\".48\"><path class=\"canvas-grid\" d=\"M0 110 H1140 M0 180 H1140 M0 326 H1140 M0 396 H1140\"/></g>\n        <text x=\"28\" y=\"455\" class=\"canvas-title\">START</text><text x=\"438\" y=\"455\" class=\"canvas-title\">FALLBACK · INVALID ROUTE</text><text x=\"808\" y=\"455\" class=\"canvas-title\">PARALLEL · BOTH CHILDREN</text>\n        <g transform=\"translate(28 28)\">\n      <rect width=\"324\" height=\"42\" rx=\"9\" fill=\"#ffffff\" stroke=\"#d8e3e9\"/>\n      <path d=\"M15 15 H52\" stroke=\"#35d6bd\" stroke-width=\"15\" stroke-linecap=\"round\" opacity=\".40\"/>\n      <path d=\"M15 15 H52\" stroke=\"#0ab094\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"19\" class=\"control-key\">CONTROL · translucent route</text>\n      <path d=\"M15 31 H52\" stroke=\"#1976d2\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"35\" class=\"data-key\">DATA · typed port cable</text>\n    </g><g class=\"control-grammar\">\n          <path class=\"lane-fill\" d=\"M28 253 H1116\" stroke=\"url(#lane-gradient)\" stroke-width=\"43\" stroke-linecap=\"round\"/>\n          <path class=\"lane-fill\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" stroke=\"url(#lane-gradient)\" stroke-width=\"38\" stroke-linecap=\"round\"/>\n          <path class=\"lane-fill\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" stroke=\"url(#lane-gradient)\" stroke-width=\"38\" stroke-linecap=\"round\"/>\n          <path class=\"lane-fill\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" stroke=\"url(#lane-gradient)\" stroke-width=\"38\" stroke-linecap=\"round\"/>\n          <path class=\"lane-center\" d=\"M28 253 H1116\"/><path class=\"lane-center\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\"/><path class=\"lane-center\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\"/><path class=\"lane-center\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\"/>\n          <path class=\"lane-seam\" d=\"M28 253 H1116\"/><path class=\"lane-seam\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\"/><path class=\"lane-seam\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\"/><path class=\"lane-seam\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\"/>\n          <text x=\"486\" y=\"132\" class=\"lane-label\">FALLBACK · INVALID ONLY</text><text x=\"842\" y=\"132\" class=\"lane-label\">PARALLEL</text>\n        </g><g class=\"data-grammar\">\n      <path class=\"data-wire\" d=\"M250 252 H315\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"264\" y=\"227\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"270\" y=\"237\" class=\"wire-label\">approach</text></g>\n      <path class=\"data-wire secondary\" d=\"M460 264 C472 264 468 118 480 118\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"467\" y=\"164\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"473\" y=\"174\" class=\"wire-label\">candidate</text></g>\n      <path class=\"data-wire\" d=\"M460 264 C506 264 599 264 660 242\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"532\" y=\"239\" width=\"64\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"538\" y=\"249\" class=\"wire-label\">valid_grip</text></g>\n      <path class=\"data-wire\" d=\"M625 118 C643 118 637 277 660 264\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"640\" y=\"183\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"646\" y=\"193\" class=\"wire-label\">corrected</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 118 825 118\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"807\" y=\"167\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"177\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 408 825 408\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"807\" y=\"335\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"345\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 118 C990 118 984 260 1000 260\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"975\" y=\"169\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"179\" class=\"wire-label\">feedback</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 408 C990 408 984 280 1000 280\" marker-end=\"url(#lane-ghost-data-arrow)\"/><g><rect x=\"975\" y=\"336\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"346\" class=\"wire-label\">at_home</text></g>\n    </g><g filter=\"url(#lane-ghost-shadow)\">\n      <g class=\"port-block\">\n      <rect x=\"105\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"118\" y=\"240\" class=\"block-name\">MoveToObj</text>\n      <line x1=\"117\" y1=\"249\" x2=\"238\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"105\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"117\" y=\"244\" class=\"port-text\">target</text>\n      <circle cx=\"250\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"238\" y=\"266\" text-anchor=\"end\" class=\"port-text\">approach</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"315\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"328\" y=\"240\" class=\"block-name\">GraspValid</text>\n      <line x1=\"327\" y1=\"249\" x2=\"448\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"315\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"327\" y=\"244\" class=\"port-text\">approach</text>\n      <circle cx=\"460\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"448\" y=\"266\" text-anchor=\"end\" class=\"port-text\">candidate</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"480\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"493\" y=\"97\" class=\"block-name\">CorrectGrip</text>\n      <line x1=\"492\" y1=\"106\" x2=\"613\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"480\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"492\" y=\"101\" class=\"port-text\">candidate</text>\n      <circle cx=\"625\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"613\" y=\"123\" text-anchor=\"end\" class=\"port-text\">corrected</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"660\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"673\" y=\"240\" class=\"block-name\">CloseGrip</text>\n      <line x1=\"672\" y1=\"249\" x2=\"793\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"660\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"672\" y=\"244\" class=\"port-text\">grip φ</text>\n      <circle cx=\"805\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"793\" y=\"266\" text-anchor=\"end\" class=\"port-text\">state</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"97\" class=\"block-name\">Publish</text>\n      <line x1=\"837\" y1=\"106\" x2=\"958\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"101\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"123\" text-anchor=\"end\" class=\"port-text\">feedback</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"365\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"387\" class=\"block-name\">MoveHome</text>\n      <line x1=\"837\" y1=\"396\" x2=\"958\" y2=\"396\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"388\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"391\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"409\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"413\" text-anchor=\"end\" class=\"port-text\">at_home</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"1000\" y=\"218\" width=\"116\" height=\"76\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"1013\" y=\"240\" class=\"block-name\">Report</text>\n      <line x1=\"1012\" y1=\"250\" x2=\"1104\" y2=\"250\" class=\"block-rule\"/>\n      <circle cx=\"1000\" cy=\"260\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"264\" class=\"port-text\">feedback</text>\n      <circle cx=\"1000\" cy=\"280\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"284\" class=\"port-text\">home</text>\n      <circle cx=\"1116\" cy=\"272\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"1104\" y=\"276\" text-anchor=\"end\" class=\"port-text\">result</text>\n    </g>\n    </g>\n        <circle cx=\"28\" cy=\"253\" r=\"6\" class=\"merge-dot\"/><circle cx=\"460\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"660\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"805\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"1000\" cy=\"253\" r=\"5\" class=\"merge-dot\"/>\n      </svg>\n      <button class=\"lane-button\" type=\"button\" data-demo-toggle data-base-label=\"Trace control routes\" data-alt-label=\"Return to quiet lanes\">Trace control routes</button>\n    </div>",
+      "media": [
+        {
+          "label": "What this encoding asserts",
+          "caption": "A compact legend for the choice of control carrier. The data cable stays blue in all variants.",
+          "html": "<div style=\"width:1140px;padding:18px 20px;background:#fbfdff\"><svg width=\"1100\" height=\"110\" viewBox=\"0 0 1100 110\" role=\"img\" aria-label=\"Encoding note for filled corridor + center seam\">\n      <rect x=\"1\" y=\"1\" width=\"1098\" height=\"108\" rx=\"12\" fill=\"#f6fbfc\" stroke=\"#d9e6eb\"/>\n      <path d=\"M34 56 H278\" stroke=\"#36d6be\" stroke-width=\"30\" stroke-linecap=\"round\" opacity=\".23\"/>\n      <path d=\"M34 56 H278\" stroke=\"#0ba98f\" stroke-width=\"1.7\" stroke-linecap=\"round\"/>\n      <path d=\"M76 56 C141 56 160 29 219 29\" fill=\"none\" stroke=\"#1976d2\" stroke-width=\"2.6\"/>\n      <circle cx=\"76\" cy=\"56\" r=\"5\" fill=\"#1976d2\"/><circle cx=\"219\" cy=\"29\" r=\"5\" fill=\"#e8f4ff\" stroke=\"#1976d2\" stroke-width=\"2\"/>\n      <text x=\"322\" y=\"43\" style=\"font:800 10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.1em;fill:#087663\">FILLED CORRIDOR + CENTER SEAM</text>\n      <text x=\"322\" y=\"69\" style=\"font:600 13px ui-sans-serif,system-ui,sans-serif;fill:#304a60\">Translucent cyan corridors with one fine center seam make the control tree visible as terrain, while thin blue cables continue to read as port-to-port values.</text>\n      <text x=\"322\" y=\"91\" style=\"font:500 11px ui-sans-serif,system-ui,sans-serif;fill:#60778a\">The safest default: enough body to read as a route, little enough ink that the blue port edge owns the foreground.</text>\n    </svg></div>"
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "name": "02 · Two-bank ribbon",
+      "thesis": "Control becomes a pair of subtle route banks: it reads as infrastructure or a track, leaving a low-ink middle lane for the actual data cable.",
+      "accent": "#2e7a93",
+      "bestWhen": "A team already reads rails intuitively and wants the route boundary more explicit than a soft wash.",
+      "losesWhen": "The board carries many short adjacent cables; the paired outlines can begin to crowd their labels.",
+      "decisions": [
+        {
+          "label": "Control carrier",
+          "value": "two banks around a data-capable corridor"
+        },
+        {
+          "label": "Spatial claim",
+          "value": "control owns the route boundary, not its center"
+        },
+        {
+          "label": "Trade-off",
+          "value": "stronger structure, more line density"
+        }
+      ],
+      "keepParts": [
+        "track-like bank grammar",
+        "center space reserved for data",
+        "fork boundary cue"
+      ],
+      "proof": [
+        "The direct control changes only the control-layer treatment; cards and every data cable remain in exactly the same place.",
+        "The manual walkthrough drives that same visible state instead of a prerecorded tour."
+      ],
+      "previewLabel": "interactive shared control/data fixture",
+      "story": {
+        "title": "Inspect the relationship between the layers",
+        "steps": [
+          {
+            "label": "Read Port view at rest",
+            "caption": "The cyan banks frame the route instead of filling it; this is closest to a rail without returning to line-only control wires.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Reveal this treatment's strongest cue",
+            "caption": "Filling the banks confirms their shared corridor, but shows how much extra outline density this grammar creates around short links.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "control": {
+          "score": 4,
+          "evidence": "The hero holds a labelled fallback/rejoin and a parallel fan-out in the same fixed topology.",
+          "confidence": "medium"
+        },
+        "data": {
+          "score": 5,
+          "evidence": "Blue labelled links terminate at visible Port-view sockets, including two paths that share a control corridor.",
+          "confidence": "medium"
+        },
+        "layers": {
+          "score": 4,
+          "evidence": "The exercised alternate state keeps the blue data geometry fixed while changing only the cyan control treatment.",
+          "confidence": "medium"
+        },
+        "quiet": {
+          "score": 4,
+          "evidence": "The base state is the actual at-rest specimen; the alternate state exercises the variant's strongest available emphasis.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "meaning": {
+          "pass": true,
+          "evidence": "Every blue stroke in the fixture starts and ends at a named port. Cyan remains the only control carrier."
+        },
+        "source": {
+          "pass": true,
+          "evidence": "The exact same fallback and parallel topology is used for the tree lens and every control-lane rendering."
+        }
+      },
+      "preview": "<style>\n  .lane-stage { width: 1140px; padding: 20px; background: #f7fafc; color: #12253d; }\n  .lane-stage .stage-title { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin:0 0 10px; }\n  .lane-stage h4 { margin:0; font:750 15px/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }\n  .lane-stage p { margin:3px 0 0; color:#63778d; font:500 11px/1.4 ui-sans-serif,system-ui,sans-serif; }\n  .lane-stage .stage-kicker { color:#0c8976; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; text-transform:uppercase; white-space:nowrap; }\n  .lane-canvas { display:block; width:1140px; height:476px; overflow:visible; border:1px solid #d8e1e8; border-radius:14px; background:#fbfdff; }\n  .canvas-grid { stroke:#dce7ec; stroke-width:1; opacity:.58; }\n  .canvas-title { fill:#4e6679; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }\n  .control-key { fill:#0c8e7a; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .data-key { fill:#2367ad; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .block-face { fill:#ffffff; stroke:#b9c8d4; stroke-width:1.2; filter:url(#block-shadow); }\n  .block-name { fill:#142a44; font:750 12px/1 ui-monospace,SFMono-Regular,monospace; }\n  .block-rule { stroke:#e7eef2; stroke-width:1; }\n  .port { stroke-width:1.35; }\n  .input-port { fill:#e8f4ff; stroke:#1976d2; }\n  .output-port { fill:#1976d2; stroke:#12599e; }\n  .port-text { fill:#5b7082; font:600 8.5px/1 ui-monospace,SFMono-Regular,monospace; }\n  .data-wire { fill:none; stroke:#1976d2; stroke-width:2.35; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#data-arrow); }\n  .data-wire.secondary { stroke:#5f9bd8; stroke-width:1.75; }\n  .wire-label-back { fill:#fbfdff; stroke:#c8ddec; stroke-width:.8; }\n  .wire-label { fill:#2367ad; font:700 8.2px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-center { fill:none; stroke:#0fb79f; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.78; marker-end:url(#control-arrow); }\n  .lane-seam { fill:none; stroke:#0aa78f; stroke-width:.9; stroke-dasharray:2.8 4.8; opacity:.73; }\n  /* Open SVG routes default to a black fill. Control strokes must stay open;\n     only the explicitly fill-only territory shapes below are allowed to paint. */\n  .control-grammar path[stroke] { fill:none; }\n  .lane-label { fill:#087663; font:800 8px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }\n  .merge-dot { fill:#10b69e; stroke:#fff; stroke-width:1.5; }\n  .lane-button { margin-top:11px; padding:8px 11px; border:1px solid #86cfc3; border-radius:7px; background:#f1fffb; color:#087663; font:800 10px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-button:hover { background:#ddfff6; }\n  .lane-stage .alt-note { display:none; color:#087663; }\n  .prototype.is-alt .lane-stage .base-note { display:none; }\n  .prototype.is-alt .lane-stage .alt-note { display:block; }\n  .prototype.is-alt .lane-stage .lane-center { stroke-width:2.3; opacity:1; }\n  .prototype.is-alt .lane-stage .lane-seam { stroke-width:1.3; opacity:1; }\n  .prototype.is-alt .lane-stage .data-wire { stroke-width:2.65; }\n  .prototype.is-alt .lane-stage .lane-fill { opacity:1; }\n  .prototype.is-alt .lane-stage .lane-quiet { opacity:.28; }\n  .prototype.is-alt .lane-stage .lane-focus { opacity:1; }\n  .prototype.is-alt .lane-stage .field-mark { opacity:.92; }\n  .prototype.is-alt .lane-stage .region-outline { opacity:1; }\n</style><div class=\"lane-stage lane-banks\">\n      <div class=\"stage-title\"><div><h4>02 · Two-bank ribbon</h4><p class=\"base-note\">The cyan banks frame the route instead of filling it; this is closest to a rail without returning to line-only control wires.</p><p class=\"alt-note\">Filling the banks confirms their shared corridor, but shows how much extra outline density this grammar creates around short links.</p></div><span class=\"stage-kicker\">shared fixture · Port view</span></div>\n      <svg class=\"lane-canvas\" viewBox=\"0 0 1140 476\" role=\"img\" aria-label=\"02 · Two-bank ribbon. The same behavior tree is shown as translucent cyan control grammar under blue data wires connecting port-view Blocks.\">\n        <defs>\n      <filter id=\"lane-banks-shadow\" x=\"-12%\" y=\"-20%\" width=\"124%\" height=\"145%\">\n        <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"5\" flood-color=\"#112743\" flood-opacity=\".16\"/>\n      </filter>\n      <marker id=\"lane-banks-data-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#1976d2\"/>\n      </marker>\n      <marker id=\"lane-banks-control-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#12bfa3\"/>\n      </marker>\n      <linearGradient id=\"lane-banks-lane-gradient\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n        <stop offset=\"0\" stop-color=\"#25d0b4\" stop-opacity=\".11\"/>\n        <stop offset=\".48\" stop-color=\"#32d8c3\" stop-opacity=\".30\"/>\n        <stop offset=\"1\" stop-color=\"#22bda8\" stop-opacity=\".12\"/>\n      </linearGradient>\n      <pattern id=\"lane-banks-chevrons\" width=\"24\" height=\"18\" patternUnits=\"userSpaceOnUse\">\n        <path d=\"M4 3 L10 9 L4 15 M13 3 L19 9 L13 15\" fill=\"none\" stroke=\"#10ad95\" stroke-width=\"1.25\" opacity=\".58\"/>\n      </pattern>\n    </defs>\n        <g opacity=\".48\"><path class=\"canvas-grid\" d=\"M0 110 H1140 M0 180 H1140 M0 326 H1140 M0 396 H1140\"/></g>\n        <text x=\"28\" y=\"455\" class=\"canvas-title\">START</text><text x=\"438\" y=\"455\" class=\"canvas-title\">FALLBACK · INVALID ROUTE</text><text x=\"808\" y=\"455\" class=\"canvas-title\">PARALLEL · BOTH CHILDREN</text>\n        <g transform=\"translate(28 28)\">\n      <rect width=\"324\" height=\"42\" rx=\"9\" fill=\"#ffffff\" stroke=\"#d8e3e9\"/>\n      <path d=\"M15 15 H52\" stroke=\"#35d6bd\" stroke-width=\"15\" stroke-linecap=\"round\" opacity=\".40\"/>\n      <path d=\"M15 15 H52\" stroke=\"#0ab094\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"19\" class=\"control-key\">CONTROL · translucent route</text>\n      <path d=\"M15 31 H52\" stroke=\"#1976d2\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"35\" class=\"data-key\">DATA · typed port cable</text>\n    </g><g class=\"control-grammar banks\"><path class=\"lane-fill\" d=\"M28 253 H1116\" stroke=\"#7ce3d1\" stroke-opacity=\".13\" stroke-width=\"34\" stroke-linecap=\"round\"/>\n              <path class=\"lane-bank\" d=\"M28 253 H1116\" stroke=\"#12ad97\" stroke-opacity=\".58\" stroke-width=\"22\" stroke-linecap=\"round\" fill=\"none\"/>\n              <path class=\"lane-center\" d=\"M28 253 H1116\"/><path class=\"lane-fill\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" stroke=\"#7ce3d1\" stroke-opacity=\".13\" stroke-width=\"30\" stroke-linecap=\"round\"/>\n              <path class=\"lane-bank\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" stroke=\"#12ad97\" stroke-opacity=\".58\" stroke-width=\"18\" stroke-linecap=\"round\" fill=\"none\"/>\n              <path class=\"lane-center\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\"/><path class=\"lane-fill\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" stroke=\"#7ce3d1\" stroke-opacity=\".13\" stroke-width=\"30\" stroke-linecap=\"round\"/>\n              <path class=\"lane-bank\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" stroke=\"#12ad97\" stroke-opacity=\".58\" stroke-width=\"18\" stroke-linecap=\"round\" fill=\"none\"/>\n              <path class=\"lane-center\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\"/><path class=\"lane-fill\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" stroke=\"#7ce3d1\" stroke-opacity=\".13\" stroke-width=\"30\" stroke-linecap=\"round\"/>\n              <path class=\"lane-bank\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" stroke=\"#12ad97\" stroke-opacity=\".58\" stroke-width=\"18\" stroke-linecap=\"round\" fill=\"none\"/>\n              <path class=\"lane-center\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\"/>\n          <path class=\"lane-seam\" d=\"M28 253 H1116\"/><path class=\"lane-seam\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\"/><path class=\"lane-seam\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\"/><path class=\"lane-seam\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\"/>\n          <text x=\"484\" y=\"132\" class=\"lane-label\">FALLBACK · BETWEEN THE BANKS</text><text x=\"838\" y=\"132\" class=\"lane-label\">PARALLEL · TWO CHANNELS</text>\n        </g><g class=\"data-grammar\">\n      <path class=\"data-wire\" d=\"M250 252 H315\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"264\" y=\"227\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"270\" y=\"237\" class=\"wire-label\">approach</text></g>\n      <path class=\"data-wire secondary\" d=\"M460 264 C472 264 468 118 480 118\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"467\" y=\"164\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"473\" y=\"174\" class=\"wire-label\">candidate</text></g>\n      <path class=\"data-wire\" d=\"M460 264 C506 264 599 264 660 242\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"532\" y=\"239\" width=\"64\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"538\" y=\"249\" class=\"wire-label\">valid_grip</text></g>\n      <path class=\"data-wire\" d=\"M625 118 C643 118 637 277 660 264\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"640\" y=\"183\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"646\" y=\"193\" class=\"wire-label\">corrected</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 118 825 118\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"807\" y=\"167\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"177\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 408 825 408\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"807\" y=\"335\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"345\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 118 C990 118 984 260 1000 260\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"975\" y=\"169\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"179\" class=\"wire-label\">feedback</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 408 C990 408 984 280 1000 280\" marker-end=\"url(#lane-banks-data-arrow)\"/><g><rect x=\"975\" y=\"336\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"346\" class=\"wire-label\">at_home</text></g>\n    </g><g filter=\"url(#lane-banks-shadow)\">\n      <g class=\"port-block\">\n      <rect x=\"105\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"118\" y=\"240\" class=\"block-name\">MoveToObj</text>\n      <line x1=\"117\" y1=\"249\" x2=\"238\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"105\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"117\" y=\"244\" class=\"port-text\">target</text>\n      <circle cx=\"250\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"238\" y=\"266\" text-anchor=\"end\" class=\"port-text\">approach</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"315\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"328\" y=\"240\" class=\"block-name\">GraspValid</text>\n      <line x1=\"327\" y1=\"249\" x2=\"448\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"315\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"327\" y=\"244\" class=\"port-text\">approach</text>\n      <circle cx=\"460\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"448\" y=\"266\" text-anchor=\"end\" class=\"port-text\">candidate</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"480\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"493\" y=\"97\" class=\"block-name\">CorrectGrip</text>\n      <line x1=\"492\" y1=\"106\" x2=\"613\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"480\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"492\" y=\"101\" class=\"port-text\">candidate</text>\n      <circle cx=\"625\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"613\" y=\"123\" text-anchor=\"end\" class=\"port-text\">corrected</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"660\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"673\" y=\"240\" class=\"block-name\">CloseGrip</text>\n      <line x1=\"672\" y1=\"249\" x2=\"793\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"660\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"672\" y=\"244\" class=\"port-text\">grip φ</text>\n      <circle cx=\"805\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"793\" y=\"266\" text-anchor=\"end\" class=\"port-text\">state</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"97\" class=\"block-name\">Publish</text>\n      <line x1=\"837\" y1=\"106\" x2=\"958\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"101\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"123\" text-anchor=\"end\" class=\"port-text\">feedback</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"365\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"387\" class=\"block-name\">MoveHome</text>\n      <line x1=\"837\" y1=\"396\" x2=\"958\" y2=\"396\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"388\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"391\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"409\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"413\" text-anchor=\"end\" class=\"port-text\">at_home</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"1000\" y=\"218\" width=\"116\" height=\"76\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"1013\" y=\"240\" class=\"block-name\">Report</text>\n      <line x1=\"1012\" y1=\"250\" x2=\"1104\" y2=\"250\" class=\"block-rule\"/>\n      <circle cx=\"1000\" cy=\"260\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"264\" class=\"port-text\">feedback</text>\n      <circle cx=\"1000\" cy=\"280\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"284\" class=\"port-text\">home</text>\n      <circle cx=\"1116\" cy=\"272\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"1104\" y=\"276\" text-anchor=\"end\" class=\"port-text\">result</text>\n    </g>\n    </g>\n        <circle cx=\"28\" cy=\"253\" r=\"6\" class=\"merge-dot\"/><circle cx=\"460\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"660\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"805\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"1000\" cy=\"253\" r=\"5\" class=\"merge-dot\"/>\n      </svg>\n      <button class=\"lane-button\" type=\"button\" data-demo-toggle data-base-label=\"Fill route banks\" data-alt-label=\"Hide route fill\">Fill route banks</button>\n    </div>",
+      "media": [
+        {
+          "label": "What this encoding asserts",
+          "caption": "A compact legend for the choice of control carrier. The data cable stays blue in all variants.",
+          "html": "<div style=\"width:1140px;padding:18px 20px;background:#fbfdff\"><svg width=\"1100\" height=\"110\" viewBox=\"0 0 1100 110\" role=\"img\" aria-label=\"Encoding note for two route banks\">\n      <rect x=\"1\" y=\"1\" width=\"1098\" height=\"108\" rx=\"12\" fill=\"#f6fbfc\" stroke=\"#d9e6eb\"/>\n      <path d=\"M34 56 H278\" stroke=\"#36d6be\" stroke-width=\"30\" stroke-linecap=\"round\" opacity=\".23\"/>\n      <path d=\"M34 56 H278\" stroke=\"#0ba98f\" stroke-width=\"1.7\" stroke-linecap=\"round\"/>\n      <path d=\"M76 56 C141 56 160 29 219 29\" fill=\"none\" stroke=\"#1976d2\" stroke-width=\"2.6\"/>\n      <circle cx=\"76\" cy=\"56\" r=\"5\" fill=\"#1976d2\"/><circle cx=\"219\" cy=\"29\" r=\"5\" fill=\"#e8f4ff\" stroke=\"#1976d2\" stroke-width=\"2\"/>\n      <text x=\"322\" y=\"43\" style=\"font:800 10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.1em;fill:#087663\">TWO ROUTE BANKS</text>\n      <text x=\"322\" y=\"69\" style=\"font:600 13px ui-sans-serif,system-ui,sans-serif;fill:#304a60\">Control becomes a pair of subtle route banks: it reads as infrastructure or a track, leaving a low-ink middle lane for the actual data cable.</text>\n      <text x=\"322\" y=\"91\" style=\"font:500 11px ui-sans-serif,system-ui,sans-serif;fill:#60778a\">The route reads as infrastructure. It makes forks explicit, but competing outlines create a denser field around short cables.</text>\n    </svg></div>"
+        }
+      ]
+    },
+    {
+      "id": "v3",
+      "name": "03 · Flow field",
+      "thesis": "A wider transparent vector field makes the self-driving-car metaphor unmistakable: control feels like permitted motion through a branching space.",
+      "accent": "#609f7d",
+      "bestWhen": "The presentation is explaining a behavior-tree plan to a new reader and movement intuition is useful.",
+      "losesWhen": "The canvas is primarily an editor or an offline document; moving-looking texture risks overselling runtime evidence.",
+      "decisions": [
+        {
+          "label": "Control carrier",
+          "value": "wide directional field"
+        },
+        {
+          "label": "Metaphor",
+          "value": "drivable/allowed path"
+        },
+        {
+          "label": "Risk posture",
+          "value": "expressive explanation over neutral editing"
+        }
+      ],
+      "keepParts": [
+        "permitted-motion metaphor",
+        "chevrons only inside control",
+        "separate port cable colour"
+      ],
+      "proof": [
+        "The direct control changes only the control-layer treatment; cards and every data cable remain in exactly the same place.",
+        "The manual walkthrough drives that same visible state instead of a prerecorded tour."
+      ],
+      "previewLabel": "interactive shared control/data fixture",
+      "story": {
+        "title": "Inspect the relationship between the layers",
+        "steps": [
+          {
+            "label": "Read Port view at rest",
+            "caption": "Repeating chevrons make the cyan background feel directional, while blue cables stay attached to ports rather than to the field.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Reveal this treatment's strongest cue",
+            "caption": "The center trace raises the execution cue. It is compelling, but could falsely imply a live runtime when this is only a source projection.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "control": {
+          "score": 4,
+          "evidence": "The hero holds a labelled fallback/rejoin and a parallel fan-out in the same fixed topology.",
+          "confidence": "medium"
+        },
+        "data": {
+          "score": 4,
+          "evidence": "Blue labelled links terminate at visible Port-view sockets, including two paths that share a control corridor.",
+          "confidence": "medium"
+        },
+        "layers": {
+          "score": 4,
+          "evidence": "The exercised alternate state keeps the blue data geometry fixed while changing only the cyan control treatment.",
+          "confidence": "medium"
+        },
+        "quiet": {
+          "score": 3,
+          "evidence": "The base state is the actual at-rest specimen; the alternate state exercises the variant's strongest available emphasis.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "meaning": {
+          "pass": true,
+          "evidence": "Every blue stroke in the fixture starts and ends at a named port. Cyan remains the only control carrier."
+        },
+        "source": {
+          "pass": true,
+          "evidence": "The exact same fallback and parallel topology is used for the tree lens and every control-lane rendering."
+        }
+      },
+      "preview": "<style>\n  .lane-stage { width: 1140px; padding: 20px; background: #f7fafc; color: #12253d; }\n  .lane-stage .stage-title { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin:0 0 10px; }\n  .lane-stage h4 { margin:0; font:750 15px/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }\n  .lane-stage p { margin:3px 0 0; color:#63778d; font:500 11px/1.4 ui-sans-serif,system-ui,sans-serif; }\n  .lane-stage .stage-kicker { color:#0c8976; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; text-transform:uppercase; white-space:nowrap; }\n  .lane-canvas { display:block; width:1140px; height:476px; overflow:visible; border:1px solid #d8e1e8; border-radius:14px; background:#fbfdff; }\n  .canvas-grid { stroke:#dce7ec; stroke-width:1; opacity:.58; }\n  .canvas-title { fill:#4e6679; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }\n  .control-key { fill:#0c8e7a; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .data-key { fill:#2367ad; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .block-face { fill:#ffffff; stroke:#b9c8d4; stroke-width:1.2; filter:url(#block-shadow); }\n  .block-name { fill:#142a44; font:750 12px/1 ui-monospace,SFMono-Regular,monospace; }\n  .block-rule { stroke:#e7eef2; stroke-width:1; }\n  .port { stroke-width:1.35; }\n  .input-port { fill:#e8f4ff; stroke:#1976d2; }\n  .output-port { fill:#1976d2; stroke:#12599e; }\n  .port-text { fill:#5b7082; font:600 8.5px/1 ui-monospace,SFMono-Regular,monospace; }\n  .data-wire { fill:none; stroke:#1976d2; stroke-width:2.35; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#data-arrow); }\n  .data-wire.secondary { stroke:#5f9bd8; stroke-width:1.75; }\n  .wire-label-back { fill:#fbfdff; stroke:#c8ddec; stroke-width:.8; }\n  .wire-label { fill:#2367ad; font:700 8.2px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-center { fill:none; stroke:#0fb79f; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.78; marker-end:url(#control-arrow); }\n  .lane-seam { fill:none; stroke:#0aa78f; stroke-width:.9; stroke-dasharray:2.8 4.8; opacity:.73; }\n  /* Open SVG routes default to a black fill. Control strokes must stay open;\n     only the explicitly fill-only territory shapes below are allowed to paint. */\n  .control-grammar path[stroke] { fill:none; }\n  .lane-label { fill:#087663; font:800 8px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }\n  .merge-dot { fill:#10b69e; stroke:#fff; stroke-width:1.5; }\n  .lane-button { margin-top:11px; padding:8px 11px; border:1px solid #86cfc3; border-radius:7px; background:#f1fffb; color:#087663; font:800 10px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-button:hover { background:#ddfff6; }\n  .lane-stage .alt-note { display:none; color:#087663; }\n  .prototype.is-alt .lane-stage .base-note { display:none; }\n  .prototype.is-alt .lane-stage .alt-note { display:block; }\n  .prototype.is-alt .lane-stage .lane-center { stroke-width:2.3; opacity:1; }\n  .prototype.is-alt .lane-stage .lane-seam { stroke-width:1.3; opacity:1; }\n  .prototype.is-alt .lane-stage .data-wire { stroke-width:2.65; }\n  .prototype.is-alt .lane-stage .lane-fill { opacity:1; }\n  .prototype.is-alt .lane-stage .lane-quiet { opacity:.28; }\n  .prototype.is-alt .lane-stage .lane-focus { opacity:1; }\n  .prototype.is-alt .lane-stage .field-mark { opacity:.92; }\n  .prototype.is-alt .lane-stage .region-outline { opacity:1; }\n</style><div class=\"lane-stage lane-field\">\n      <div class=\"stage-title\"><div><h4>03 · Flow field</h4><p class=\"base-note\">Repeating chevrons make the cyan background feel directional, while blue cables stay attached to ports rather than to the field.</p><p class=\"alt-note\">The center trace raises the execution cue. It is compelling, but could falsely imply a live runtime when this is only a source projection.</p></div><span class=\"stage-kicker\">shared fixture · Port view</span></div>\n      <svg class=\"lane-canvas\" viewBox=\"0 0 1140 476\" role=\"img\" aria-label=\"03 · Flow field. The same behavior tree is shown as translucent cyan control grammar under blue data wires connecting port-view Blocks.\">\n        <defs>\n      <filter id=\"lane-field-shadow\" x=\"-12%\" y=\"-20%\" width=\"124%\" height=\"145%\">\n        <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"5\" flood-color=\"#112743\" flood-opacity=\".16\"/>\n      </filter>\n      <marker id=\"lane-field-data-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#1976d2\"/>\n      </marker>\n      <marker id=\"lane-field-control-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#12bfa3\"/>\n      </marker>\n      <linearGradient id=\"lane-field-lane-gradient\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n        <stop offset=\"0\" stop-color=\"#25d0b4\" stop-opacity=\".11\"/>\n        <stop offset=\".48\" stop-color=\"#32d8c3\" stop-opacity=\".30\"/>\n        <stop offset=\"1\" stop-color=\"#22bda8\" stop-opacity=\".12\"/>\n      </linearGradient>\n      <pattern id=\"lane-field-chevrons\" width=\"24\" height=\"18\" patternUnits=\"userSpaceOnUse\">\n        <path d=\"M4 3 L10 9 L4 15 M13 3 L19 9 L13 15\" fill=\"none\" stroke=\"#10ad95\" stroke-width=\"1.25\" opacity=\".58\"/>\n      </pattern>\n    </defs>\n        <g opacity=\".48\"><path class=\"canvas-grid\" d=\"M0 110 H1140 M0 180 H1140 M0 326 H1140 M0 396 H1140\"/></g>\n        <text x=\"28\" y=\"455\" class=\"canvas-title\">START</text><text x=\"438\" y=\"455\" class=\"canvas-title\">FALLBACK · INVALID ROUTE</text><text x=\"808\" y=\"455\" class=\"canvas-title\">PARALLEL · BOTH CHILDREN</text>\n        <g transform=\"translate(28 28)\">\n      <rect width=\"324\" height=\"42\" rx=\"9\" fill=\"#ffffff\" stroke=\"#d8e3e9\"/>\n      <path d=\"M15 15 H52\" stroke=\"#35d6bd\" stroke-width=\"15\" stroke-linecap=\"round\" opacity=\".40\"/>\n      <path d=\"M15 15 H52\" stroke=\"#0ab094\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"19\" class=\"control-key\">CONTROL · translucent route</text>\n      <path d=\"M15 31 H52\" stroke=\"#1976d2\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"35\" class=\"data-key\">DATA · typed port cable</text>\n    </g><g class=\"control-grammar fielded\">\n          <path class=\"lane-fill\" d=\"M28 253 H1116\" stroke=\"#5edcc9\" stroke-opacity=\".19\" stroke-width=\"62\" stroke-linecap=\"round\"/>\n          <path class=\"lane-fill\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" stroke=\"#5edcc9\" stroke-opacity=\".19\" stroke-width=\"58\" stroke-linecap=\"round\"/>\n          <path class=\"lane-fill\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" stroke=\"#5edcc9\" stroke-opacity=\".19\" stroke-width=\"58\" stroke-linecap=\"round\"/>\n          <path class=\"lane-fill\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" stroke=\"#5edcc9\" stroke-opacity=\".19\" stroke-width=\"58\" stroke-linecap=\"round\"/>\n          <path class=\"field-mark\" d=\"M28 253 H1116\" stroke=\"url(#chevrons)\" stroke-width=\"42\" stroke-linecap=\"round\" opacity=\".58\"/>\n          <path class=\"field-mark\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" stroke=\"url(#chevrons)\" stroke-width=\"38\" stroke-linecap=\"round\" opacity=\".58\"/>\n          <path class=\"field-mark\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" stroke=\"url(#chevrons)\" stroke-width=\"38\" stroke-linecap=\"round\" opacity=\".58\"/>\n          <path class=\"field-mark\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" stroke=\"url(#chevrons)\" stroke-width=\"38\" stroke-linecap=\"round\" opacity=\".58\"/>\n          <path class=\"lane-center\" d=\"M28 253 H1116\" opacity=\".42\"/><path class=\"lane-center\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" opacity=\".42\"/><path class=\"lane-center\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" opacity=\".42\"/><path class=\"lane-center\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" opacity=\".42\"/>\n          <text x=\"482\" y=\"132\" class=\"lane-label\">INVALID CURRENT · FLOW FIELD</text><text x=\"846\" y=\"132\" class=\"lane-label\">FAN-OUT</text>\n        </g><g class=\"data-grammar\">\n      <path class=\"data-wire\" d=\"M250 252 H315\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"264\" y=\"227\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"270\" y=\"237\" class=\"wire-label\">approach</text></g>\n      <path class=\"data-wire secondary\" d=\"M460 264 C472 264 468 118 480 118\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"467\" y=\"164\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"473\" y=\"174\" class=\"wire-label\">candidate</text></g>\n      <path class=\"data-wire\" d=\"M460 264 C506 264 599 264 660 242\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"532\" y=\"239\" width=\"64\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"538\" y=\"249\" class=\"wire-label\">valid_grip</text></g>\n      <path class=\"data-wire\" d=\"M625 118 C643 118 637 277 660 264\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"640\" y=\"183\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"646\" y=\"193\" class=\"wire-label\">corrected</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 118 825 118\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"807\" y=\"167\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"177\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 408 825 408\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"807\" y=\"335\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"345\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 118 C990 118 984 260 1000 260\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"975\" y=\"169\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"179\" class=\"wire-label\">feedback</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 408 C990 408 984 280 1000 280\" marker-end=\"url(#lane-field-data-arrow)\"/><g><rect x=\"975\" y=\"336\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"346\" class=\"wire-label\">at_home</text></g>\n    </g><g filter=\"url(#lane-field-shadow)\">\n      <g class=\"port-block\">\n      <rect x=\"105\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"118\" y=\"240\" class=\"block-name\">MoveToObj</text>\n      <line x1=\"117\" y1=\"249\" x2=\"238\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"105\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"117\" y=\"244\" class=\"port-text\">target</text>\n      <circle cx=\"250\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"238\" y=\"266\" text-anchor=\"end\" class=\"port-text\">approach</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"315\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"328\" y=\"240\" class=\"block-name\">GraspValid</text>\n      <line x1=\"327\" y1=\"249\" x2=\"448\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"315\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"327\" y=\"244\" class=\"port-text\">approach</text>\n      <circle cx=\"460\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"448\" y=\"266\" text-anchor=\"end\" class=\"port-text\">candidate</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"480\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"493\" y=\"97\" class=\"block-name\">CorrectGrip</text>\n      <line x1=\"492\" y1=\"106\" x2=\"613\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"480\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"492\" y=\"101\" class=\"port-text\">candidate</text>\n      <circle cx=\"625\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"613\" y=\"123\" text-anchor=\"end\" class=\"port-text\">corrected</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"660\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"673\" y=\"240\" class=\"block-name\">CloseGrip</text>\n      <line x1=\"672\" y1=\"249\" x2=\"793\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"660\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"672\" y=\"244\" class=\"port-text\">grip φ</text>\n      <circle cx=\"805\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"793\" y=\"266\" text-anchor=\"end\" class=\"port-text\">state</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"97\" class=\"block-name\">Publish</text>\n      <line x1=\"837\" y1=\"106\" x2=\"958\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"101\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"123\" text-anchor=\"end\" class=\"port-text\">feedback</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"365\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"387\" class=\"block-name\">MoveHome</text>\n      <line x1=\"837\" y1=\"396\" x2=\"958\" y2=\"396\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"388\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"391\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"409\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"413\" text-anchor=\"end\" class=\"port-text\">at_home</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"1000\" y=\"218\" width=\"116\" height=\"76\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"1013\" y=\"240\" class=\"block-name\">Report</text>\n      <line x1=\"1012\" y1=\"250\" x2=\"1104\" y2=\"250\" class=\"block-rule\"/>\n      <circle cx=\"1000\" cy=\"260\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"264\" class=\"port-text\">feedback</text>\n      <circle cx=\"1000\" cy=\"280\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"284\" class=\"port-text\">home</text>\n      <circle cx=\"1116\" cy=\"272\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"1104\" y=\"276\" text-anchor=\"end\" class=\"port-text\">result</text>\n    </g>\n    </g>\n        <circle cx=\"28\" cy=\"253\" r=\"6\" class=\"merge-dot\"/><circle cx=\"460\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"660\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"805\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"1000\" cy=\"253\" r=\"5\" class=\"merge-dot\"/>\n      </svg>\n      <button class=\"lane-button\" type=\"button\" data-demo-toggle data-base-label=\"Show route traces\" data-alt-label=\"Return to field only\">Show route traces</button>\n    </div>",
+      "media": [
+        {
+          "label": "What this encoding asserts",
+          "caption": "A compact legend for the choice of control carrier. The data cable stays blue in all variants.",
+          "html": "<div style=\"width:1140px;padding:18px 20px;background:#fbfdff\"><svg width=\"1100\" height=\"110\" viewBox=\"0 0 1100 110\" role=\"img\" aria-label=\"Encoding note for directional field\">\n      <rect x=\"1\" y=\"1\" width=\"1098\" height=\"108\" rx=\"12\" fill=\"#f6fbfc\" stroke=\"#d9e6eb\"/>\n      <path d=\"M34 56 H278\" stroke=\"#36d6be\" stroke-width=\"30\" stroke-linecap=\"round\" opacity=\".23\"/>\n      <path d=\"M34 56 H278\" stroke=\"#0ba98f\" stroke-width=\"1.7\" stroke-linecap=\"round\"/>\n      <path d=\"M76 56 C141 56 160 29 219 29\" fill=\"none\" stroke=\"#1976d2\" stroke-width=\"2.6\"/>\n      <circle cx=\"76\" cy=\"56\" r=\"5\" fill=\"#1976d2\"/><circle cx=\"219\" cy=\"29\" r=\"5\" fill=\"#e8f4ff\" stroke=\"#1976d2\" stroke-width=\"2\"/>\n      <text x=\"322\" y=\"43\" style=\"font:800 10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.1em;fill:#087663\">DIRECTIONAL FIELD</text>\n      <text x=\"322\" y=\"69\" style=\"font:600 13px ui-sans-serif,system-ui,sans-serif;fill:#304a60\">A wider transparent vector field makes the self-driving-car metaphor unmistakable: control feels like permitted motion through a branching space.</text>\n      <text x=\"322\" y=\"91\" style=\"font:500 11px ui-sans-serif,system-ui,sans-serif;fill:#60778a\">The car-path metaphor is strongest here; repeated chevrons make motion salient, so it risks claiming runtime activity in a static source view.</text>\n    </svg></div>"
+        }
+      ]
+    },
+    {
+      "id": "v4",
+      "name": "04 · Branch territories",
+      "thesis": "Fallback and parallel become softly bounded territories behind their member cards, while the trunk stays a minimal center route.",
+      "accent": "#7667c6",
+      "bestWhen": "The important question is which scope a block belongs to, especially around nested fallback and parallel groups.",
+      "losesWhen": "Ordered run order is the primary question; a continuous corridor carries sequence more honestly.",
+      "decisions": [
+        {
+          "label": "Control carrier",
+          "value": "scoped branch territory"
+        },
+        {
+          "label": "Strongest reading",
+          "value": "membership / policy"
+        },
+        {
+          "label": "Trade-off",
+          "value": "scope wins over continuous path"
+        }
+      ],
+      "keepParts": [
+        "soft policy territory",
+        "precise scope outline on demand",
+        "minimal trunk route"
+      ],
+      "proof": [
+        "The direct control changes only the control-layer treatment; cards and every data cable remain in exactly the same place.",
+        "The manual walkthrough drives that same visible state instead of a prerecorded tour."
+      ],
+      "previewLabel": "interactive shared control/data fixture",
+      "story": {
+        "title": "Inspect the relationship between the layers",
+        "steps": [
+          {
+            "label": "Read Port view at rest",
+            "caption": "This treats control scope as spatial terrain: the reader sees where an invalid-only alternative starts and where a parallel policy applies.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Reveal this treatment's strongest cue",
+            "caption": "Dashed region edges reveal the scope boundary precisely. They also make this the least path-like of the five directions.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "control": {
+          "score": 3,
+          "evidence": "The hero holds a labelled fallback/rejoin and a parallel fan-out in the same fixed topology.",
+          "confidence": "medium"
+        },
+        "data": {
+          "score": 5,
+          "evidence": "Blue labelled links terminate at visible Port-view sockets, including two paths that share a control corridor.",
+          "confidence": "medium"
+        },
+        "layers": {
+          "score": 4,
+          "evidence": "The exercised alternate state keeps the blue data geometry fixed while changing only the cyan control treatment.",
+          "confidence": "medium"
+        },
+        "quiet": {
+          "score": 5,
+          "evidence": "The base state is the actual at-rest specimen; the alternate state exercises the variant's strongest available emphasis.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "meaning": {
+          "pass": true,
+          "evidence": "Every blue stroke in the fixture starts and ends at a named port. Cyan remains the only control carrier."
+        },
+        "source": {
+          "pass": true,
+          "evidence": "The exact same fallback and parallel topology is used for the tree lens and every control-lane rendering."
+        }
+      },
+      "preview": "<style>\n  .lane-stage { width: 1140px; padding: 20px; background: #f7fafc; color: #12253d; }\n  .lane-stage .stage-title { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin:0 0 10px; }\n  .lane-stage h4 { margin:0; font:750 15px/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }\n  .lane-stage p { margin:3px 0 0; color:#63778d; font:500 11px/1.4 ui-sans-serif,system-ui,sans-serif; }\n  .lane-stage .stage-kicker { color:#0c8976; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; text-transform:uppercase; white-space:nowrap; }\n  .lane-canvas { display:block; width:1140px; height:476px; overflow:visible; border:1px solid #d8e1e8; border-radius:14px; background:#fbfdff; }\n  .canvas-grid { stroke:#dce7ec; stroke-width:1; opacity:.58; }\n  .canvas-title { fill:#4e6679; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }\n  .control-key { fill:#0c8e7a; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .data-key { fill:#2367ad; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .block-face { fill:#ffffff; stroke:#b9c8d4; stroke-width:1.2; filter:url(#block-shadow); }\n  .block-name { fill:#142a44; font:750 12px/1 ui-monospace,SFMono-Regular,monospace; }\n  .block-rule { stroke:#e7eef2; stroke-width:1; }\n  .port { stroke-width:1.35; }\n  .input-port { fill:#e8f4ff; stroke:#1976d2; }\n  .output-port { fill:#1976d2; stroke:#12599e; }\n  .port-text { fill:#5b7082; font:600 8.5px/1 ui-monospace,SFMono-Regular,monospace; }\n  .data-wire { fill:none; stroke:#1976d2; stroke-width:2.35; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#data-arrow); }\n  .data-wire.secondary { stroke:#5f9bd8; stroke-width:1.75; }\n  .wire-label-back { fill:#fbfdff; stroke:#c8ddec; stroke-width:.8; }\n  .wire-label { fill:#2367ad; font:700 8.2px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-center { fill:none; stroke:#0fb79f; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.78; marker-end:url(#control-arrow); }\n  .lane-seam { fill:none; stroke:#0aa78f; stroke-width:.9; stroke-dasharray:2.8 4.8; opacity:.73; }\n  /* Open SVG routes default to a black fill. Control strokes must stay open;\n     only the explicitly fill-only territory shapes below are allowed to paint. */\n  .control-grammar path[stroke] { fill:none; }\n  .lane-label { fill:#087663; font:800 8px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }\n  .merge-dot { fill:#10b69e; stroke:#fff; stroke-width:1.5; }\n  .lane-button { margin-top:11px; padding:8px 11px; border:1px solid #86cfc3; border-radius:7px; background:#f1fffb; color:#087663; font:800 10px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-button:hover { background:#ddfff6; }\n  .lane-stage .alt-note { display:none; color:#087663; }\n  .prototype.is-alt .lane-stage .base-note { display:none; }\n  .prototype.is-alt .lane-stage .alt-note { display:block; }\n  .prototype.is-alt .lane-stage .lane-center { stroke-width:2.3; opacity:1; }\n  .prototype.is-alt .lane-stage .lane-seam { stroke-width:1.3; opacity:1; }\n  .prototype.is-alt .lane-stage .data-wire { stroke-width:2.65; }\n  .prototype.is-alt .lane-stage .lane-fill { opacity:1; }\n  .prototype.is-alt .lane-stage .lane-quiet { opacity:.28; }\n  .prototype.is-alt .lane-stage .lane-focus { opacity:1; }\n  .prototype.is-alt .lane-stage .field-mark { opacity:.92; }\n  .prototype.is-alt .lane-stage .region-outline { opacity:1; }\n</style><div class=\"lane-stage lane-regions\">\n      <div class=\"stage-title\"><div><h4>04 · Branch territories</h4><p class=\"base-note\">This treats control scope as spatial terrain: the reader sees where an invalid-only alternative starts and where a parallel policy applies.</p><p class=\"alt-note\">Dashed region edges reveal the scope boundary precisely. They also make this the least path-like of the five directions.</p></div><span class=\"stage-kicker\">shared fixture · Port view</span></div>\n      <svg class=\"lane-canvas\" viewBox=\"0 0 1140 476\" role=\"img\" aria-label=\"04 · Branch territories. The same behavior tree is shown as translucent cyan control grammar under blue data wires connecting port-view Blocks.\">\n        <defs>\n      <filter id=\"lane-regions-shadow\" x=\"-12%\" y=\"-20%\" width=\"124%\" height=\"145%\">\n        <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"5\" flood-color=\"#112743\" flood-opacity=\".16\"/>\n      </filter>\n      <marker id=\"lane-regions-data-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#1976d2\"/>\n      </marker>\n      <marker id=\"lane-regions-control-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#12bfa3\"/>\n      </marker>\n      <linearGradient id=\"lane-regions-lane-gradient\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n        <stop offset=\"0\" stop-color=\"#25d0b4\" stop-opacity=\".11\"/>\n        <stop offset=\".48\" stop-color=\"#32d8c3\" stop-opacity=\".30\"/>\n        <stop offset=\"1\" stop-color=\"#22bda8\" stop-opacity=\".12\"/>\n      </linearGradient>\n      <pattern id=\"lane-regions-chevrons\" width=\"24\" height=\"18\" patternUnits=\"userSpaceOnUse\">\n        <path d=\"M4 3 L10 9 L4 15 M13 3 L19 9 L13 15\" fill=\"none\" stroke=\"#10ad95\" stroke-width=\"1.25\" opacity=\".58\"/>\n      </pattern>\n    </defs>\n        <g opacity=\".48\"><path class=\"canvas-grid\" d=\"M0 110 H1140 M0 180 H1140 M0 326 H1140 M0 396 H1140\"/></g>\n        <text x=\"28\" y=\"455\" class=\"canvas-title\">START</text><text x=\"438\" y=\"455\" class=\"canvas-title\">FALLBACK · INVALID ROUTE</text><text x=\"808\" y=\"455\" class=\"canvas-title\">PARALLEL · BOTH CHILDREN</text>\n        <g transform=\"translate(28 28)\">\n      <rect width=\"324\" height=\"42\" rx=\"9\" fill=\"#ffffff\" stroke=\"#d8e3e9\"/>\n      <path d=\"M15 15 H52\" stroke=\"#35d6bd\" stroke-width=\"15\" stroke-linecap=\"round\" opacity=\".40\"/>\n      <path d=\"M15 15 H52\" stroke=\"#0ab094\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"19\" class=\"control-key\">CONTROL · translucent route</text>\n      <path d=\"M15 31 H52\" stroke=\"#1976d2\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"35\" class=\"data-key\">DATA · typed port cable</text>\n    </g><g class=\"control-grammar regions\">\n          <path class=\"lane-fill\" d=\"M438 49 H647 Q678 49 678 79 V282 Q678 312 647 312 H438 Q407 312 407 282 V79 Q407 49 438 49Z\" fill=\"#46d7c2\" opacity=\".16\"/>\n          <path class=\"lane-fill\" d=\"M788 49 H986 Q1019 49 1019 82 V424 Q1019 451 986 451 H788 Q756 451 756 424 V82 Q756 49 788 49Z\" fill=\"#46d7c2\" opacity=\".16\"/>\n          <path class=\"region-outline\" d=\"M438 49 H647 Q678 49 678 79 V282 Q678 312 647 312 H438 Q407 312 407 282 V79 Q407 49 438 49Z\" fill=\"none\" stroke=\"#11ad95\" stroke-width=\"1.2\" stroke-dasharray=\"5 4\" opacity=\".42\"/>\n          <path class=\"region-outline\" d=\"M788 49 H986 Q1019 49 1019 82 V424 Q1019 451 986 451 H788 Q756 451 756 424 V82 Q756 49 788 49Z\" fill=\"none\" stroke=\"#11ad95\" stroke-width=\"1.2\" stroke-dasharray=\"5 4\" opacity=\".42\"/>\n          <path class=\"lane-center\" d=\"M28 253 H1116\"/><path class=\"lane-seam\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\"/><path class=\"lane-seam\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\"/><path class=\"lane-seam\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\"/>\n          <text x=\"426\" y=\"67\" class=\"lane-label\">FALLBACK REGION</text><text x=\"775\" y=\"67\" class=\"lane-label\">PARALLEL REGION</text>\n        </g><g class=\"data-grammar\">\n      <path class=\"data-wire\" d=\"M250 252 H315\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"264\" y=\"227\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"270\" y=\"237\" class=\"wire-label\">approach</text></g>\n      <path class=\"data-wire secondary\" d=\"M460 264 C472 264 468 118 480 118\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"467\" y=\"164\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"473\" y=\"174\" class=\"wire-label\">candidate</text></g>\n      <path class=\"data-wire\" d=\"M460 264 C506 264 599 264 660 242\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"532\" y=\"239\" width=\"64\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"538\" y=\"249\" class=\"wire-label\">valid_grip</text></g>\n      <path class=\"data-wire\" d=\"M625 118 C643 118 637 277 660 264\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"640\" y=\"183\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"646\" y=\"193\" class=\"wire-label\">corrected</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 118 825 118\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"807\" y=\"167\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"177\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 408 825 408\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"807\" y=\"335\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"345\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 118 C990 118 984 260 1000 260\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"975\" y=\"169\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"179\" class=\"wire-label\">feedback</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 408 C990 408 984 280 1000 280\" marker-end=\"url(#lane-regions-data-arrow)\"/><g><rect x=\"975\" y=\"336\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"346\" class=\"wire-label\">at_home</text></g>\n    </g><g filter=\"url(#lane-regions-shadow)\">\n      <g class=\"port-block\">\n      <rect x=\"105\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"118\" y=\"240\" class=\"block-name\">MoveToObj</text>\n      <line x1=\"117\" y1=\"249\" x2=\"238\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"105\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"117\" y=\"244\" class=\"port-text\">target</text>\n      <circle cx=\"250\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"238\" y=\"266\" text-anchor=\"end\" class=\"port-text\">approach</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"315\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"328\" y=\"240\" class=\"block-name\">GraspValid</text>\n      <line x1=\"327\" y1=\"249\" x2=\"448\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"315\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"327\" y=\"244\" class=\"port-text\">approach</text>\n      <circle cx=\"460\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"448\" y=\"266\" text-anchor=\"end\" class=\"port-text\">candidate</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"480\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"493\" y=\"97\" class=\"block-name\">CorrectGrip</text>\n      <line x1=\"492\" y1=\"106\" x2=\"613\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"480\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"492\" y=\"101\" class=\"port-text\">candidate</text>\n      <circle cx=\"625\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"613\" y=\"123\" text-anchor=\"end\" class=\"port-text\">corrected</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"660\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"673\" y=\"240\" class=\"block-name\">CloseGrip</text>\n      <line x1=\"672\" y1=\"249\" x2=\"793\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"660\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"672\" y=\"244\" class=\"port-text\">grip φ</text>\n      <circle cx=\"805\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"793\" y=\"266\" text-anchor=\"end\" class=\"port-text\">state</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"97\" class=\"block-name\">Publish</text>\n      <line x1=\"837\" y1=\"106\" x2=\"958\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"101\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"123\" text-anchor=\"end\" class=\"port-text\">feedback</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"365\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"387\" class=\"block-name\">MoveHome</text>\n      <line x1=\"837\" y1=\"396\" x2=\"958\" y2=\"396\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"388\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"391\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"409\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"413\" text-anchor=\"end\" class=\"port-text\">at_home</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"1000\" y=\"218\" width=\"116\" height=\"76\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"1013\" y=\"240\" class=\"block-name\">Report</text>\n      <line x1=\"1012\" y1=\"250\" x2=\"1104\" y2=\"250\" class=\"block-rule\"/>\n      <circle cx=\"1000\" cy=\"260\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"264\" class=\"port-text\">feedback</text>\n      <circle cx=\"1000\" cy=\"280\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"284\" class=\"port-text\">home</text>\n      <circle cx=\"1116\" cy=\"272\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"1104\" y=\"276\" text-anchor=\"end\" class=\"port-text\">result</text>\n    </g>\n    </g>\n        <circle cx=\"28\" cy=\"253\" r=\"6\" class=\"merge-dot\"/><circle cx=\"460\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"660\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"805\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"1000\" cy=\"253\" r=\"5\" class=\"merge-dot\"/>\n      </svg>\n      <button class=\"lane-button\" type=\"button\" data-demo-toggle data-base-label=\"Outline control territories\" data-alt-label=\"Return to soft territories\">Outline control territories</button>\n    </div>",
+      "media": [
+        {
+          "label": "What this encoding asserts",
+          "caption": "A compact legend for the choice of control carrier. The data cable stays blue in all variants.",
+          "html": "<div style=\"width:1140px;padding:18px 20px;background:#fbfdff\"><svg width=\"1100\" height=\"110\" viewBox=\"0 0 1100 110\" role=\"img\" aria-label=\"Encoding note for branch containers\">\n      <rect x=\"1\" y=\"1\" width=\"1098\" height=\"108\" rx=\"12\" fill=\"#f6fbfc\" stroke=\"#d9e6eb\"/>\n      <path d=\"M34 56 H278\" stroke=\"#36d6be\" stroke-width=\"30\" stroke-linecap=\"round\" opacity=\".23\"/>\n      <path d=\"M34 56 H278\" stroke=\"#0ba98f\" stroke-width=\"1.7\" stroke-linecap=\"round\"/>\n      <path d=\"M76 56 C141 56 160 29 219 29\" fill=\"none\" stroke=\"#1976d2\" stroke-width=\"2.6\"/>\n      <circle cx=\"76\" cy=\"56\" r=\"5\" fill=\"#1976d2\"/><circle cx=\"219\" cy=\"29\" r=\"5\" fill=\"#e8f4ff\" stroke=\"#1976d2\" stroke-width=\"2\"/>\n      <text x=\"322\" y=\"43\" style=\"font:800 10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.1em;fill:#087663\">BRANCH CONTAINERS</text>\n      <text x=\"322\" y=\"69\" style=\"font:600 13px ui-sans-serif,system-ui,sans-serif;fill:#304a60\">Fallback and parallel become softly bounded territories behind their member cards, while the trunk stays a minimal center route.</text>\n      <text x=\"322\" y=\"91\" style=\"font:500 11px ui-sans-serif,system-ui,sans-serif;fill:#60778a\">A fallback and parallel become calm spatial territories. The weak point is that long ordered sequences no longer feel like one path.</text>\n    </svg></div>"
+        }
+      ]
+    },
+    {
+      "id": "v5",
+      "name": "05 · Selective wash",
+      "thesis": "Port view stays almost entirely data-first until a branch is selected or hovered; then only that branch blooms into a high-clarity control corridor.",
+      "accent": "#c46b43",
+      "bestWhen": "The normal workflow is local wire editing or inspection, with occasional need to recover one control policy.",
+      "losesWhen": "A static share, screenshot, or classroom explanation must communicate the whole control tree without interaction.",
+      "decisions": [
+        {
+          "label": "Control carrier",
+          "value": "selection-amplified corridor"
+        },
+        {
+          "label": "Default priority",
+          "value": "data and ports"
+        },
+        {
+          "label": "Interaction",
+          "value": "inspect one control route on demand"
+        }
+      ],
+      "keepParts": [
+        "low-noise idle state",
+        "branch bloom interaction",
+        "unrelated routes fade away"
+      ],
+      "proof": [
+        "The direct control changes only the control-layer treatment; cards and every data cable remain in exactly the same place.",
+        "The manual walkthrough drives that same visible state instead of a prerecorded tour."
+      ],
+      "previewLabel": "interactive shared control/data fixture",
+      "story": {
+        "title": "Inspect the relationship between the layers",
+        "steps": [
+          {
+            "label": "Read Port view at rest",
+            "caption": "At rest, faint control gives just enough orientation to preserve the overall tree without taxing an editing view.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Reveal this treatment's strongest cue",
+            "caption": "The correction route blooms when selected, making a dense branch inspectable while all unrelated control stays muted.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "control": {
+          "score": 4,
+          "evidence": "The hero holds a labelled fallback/rejoin and a parallel fan-out in the same fixed topology.",
+          "confidence": "medium"
+        },
+        "data": {
+          "score": 3,
+          "evidence": "Blue labelled links terminate at visible Port-view sockets, including two paths that share a control corridor.",
+          "confidence": "medium"
+        },
+        "layers": {
+          "score": 5,
+          "evidence": "The exercised alternate state keeps the blue data geometry fixed while changing only the cyan control treatment.",
+          "confidence": "medium"
+        },
+        "quiet": {
+          "score": 5,
+          "evidence": "The base state is the actual at-rest specimen; the alternate state exercises the variant's strongest available emphasis.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "meaning": {
+          "pass": true,
+          "evidence": "Every blue stroke in the fixture starts and ends at a named port. Cyan remains the only control carrier."
+        },
+        "source": {
+          "pass": true,
+          "evidence": "The exact same fallback and parallel topology is used for the tree lens and every control-lane rendering."
+        }
+      },
+      "preview": "<style>\n  .lane-stage { width: 1140px; padding: 20px; background: #f7fafc; color: #12253d; }\n  .lane-stage .stage-title { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin:0 0 10px; }\n  .lane-stage h4 { margin:0; font:750 15px/1.2 ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }\n  .lane-stage p { margin:3px 0 0; color:#63778d; font:500 11px/1.4 ui-sans-serif,system-ui,sans-serif; }\n  .lane-stage .stage-kicker { color:#0c8976; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; text-transform:uppercase; white-space:nowrap; }\n  .lane-canvas { display:block; width:1140px; height:476px; overflow:visible; border:1px solid #d8e1e8; border-radius:14px; background:#fbfdff; }\n  .canvas-grid { stroke:#dce7ec; stroke-width:1; opacity:.58; }\n  .canvas-title { fill:#4e6679; font:800 9px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }\n  .control-key { fill:#0c8e7a; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .data-key { fill:#2367ad; font:700 10px/1.25 ui-sans-serif,system-ui,sans-serif; }\n  .block-face { fill:#ffffff; stroke:#b9c8d4; stroke-width:1.2; filter:url(#block-shadow); }\n  .block-name { fill:#142a44; font:750 12px/1 ui-monospace,SFMono-Regular,monospace; }\n  .block-rule { stroke:#e7eef2; stroke-width:1; }\n  .port { stroke-width:1.35; }\n  .input-port { fill:#e8f4ff; stroke:#1976d2; }\n  .output-port { fill:#1976d2; stroke:#12599e; }\n  .port-text { fill:#5b7082; font:600 8.5px/1 ui-monospace,SFMono-Regular,monospace; }\n  .data-wire { fill:none; stroke:#1976d2; stroke-width:2.35; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#data-arrow); }\n  .data-wire.secondary { stroke:#5f9bd8; stroke-width:1.75; }\n  .wire-label-back { fill:#fbfdff; stroke:#c8ddec; stroke-width:.8; }\n  .wire-label { fill:#2367ad; font:700 8.2px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-center { fill:none; stroke:#0fb79f; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.78; marker-end:url(#control-arrow); }\n  .lane-seam { fill:none; stroke:#0aa78f; stroke-width:.9; stroke-dasharray:2.8 4.8; opacity:.73; }\n  /* Open SVG routes default to a black fill. Control strokes must stay open;\n     only the explicitly fill-only territory shapes below are allowed to paint. */\n  .control-grammar path[stroke] { fill:none; }\n  .lane-label { fill:#087663; font:800 8px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }\n  .merge-dot { fill:#10b69e; stroke:#fff; stroke-width:1.5; }\n  .lane-button { margin-top:11px; padding:8px 11px; border:1px solid #86cfc3; border-radius:7px; background:#f1fffb; color:#087663; font:800 10px/1 ui-monospace,SFMono-Regular,monospace; }\n  .lane-button:hover { background:#ddfff6; }\n  .lane-stage .alt-note { display:none; color:#087663; }\n  .prototype.is-alt .lane-stage .base-note { display:none; }\n  .prototype.is-alt .lane-stage .alt-note { display:block; }\n  .prototype.is-alt .lane-stage .lane-center { stroke-width:2.3; opacity:1; }\n  .prototype.is-alt .lane-stage .lane-seam { stroke-width:1.3; opacity:1; }\n  .prototype.is-alt .lane-stage .data-wire { stroke-width:2.65; }\n  .prototype.is-alt .lane-stage .lane-fill { opacity:1; }\n  .prototype.is-alt .lane-stage .lane-quiet { opacity:.28; }\n  .prototype.is-alt .lane-stage .lane-focus { opacity:1; }\n  .prototype.is-alt .lane-stage .field-mark { opacity:.92; }\n  .prototype.is-alt .lane-stage .region-outline { opacity:1; }\n</style><div class=\"lane-stage lane-focus\">\n      <div class=\"stage-title\"><div><h4>05 · Selective wash</h4><p class=\"base-note\">At rest, faint control gives just enough orientation to preserve the overall tree without taxing an editing view.</p><p class=\"alt-note\">The correction route blooms when selected, making a dense branch inspectable while all unrelated control stays muted.</p></div><span class=\"stage-kicker\">shared fixture · Port view</span></div>\n      <svg class=\"lane-canvas\" viewBox=\"0 0 1140 476\" role=\"img\" aria-label=\"05 · Selective wash. The same behavior tree is shown as translucent cyan control grammar under blue data wires connecting port-view Blocks.\">\n        <defs>\n      <filter id=\"lane-focus-shadow\" x=\"-12%\" y=\"-20%\" width=\"124%\" height=\"145%\">\n        <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"5\" flood-color=\"#112743\" flood-opacity=\".16\"/>\n      </filter>\n      <marker id=\"lane-focus-data-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#1976d2\"/>\n      </marker>\n      <marker id=\"lane-focus-control-arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6.7\" refY=\"4\" orient=\"auto\">\n        <path d=\"M0,0 L7,4 L0,8Z\" fill=\"#12bfa3\"/>\n      </marker>\n      <linearGradient id=\"lane-focus-lane-gradient\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n        <stop offset=\"0\" stop-color=\"#25d0b4\" stop-opacity=\".11\"/>\n        <stop offset=\".48\" stop-color=\"#32d8c3\" stop-opacity=\".30\"/>\n        <stop offset=\"1\" stop-color=\"#22bda8\" stop-opacity=\".12\"/>\n      </linearGradient>\n      <pattern id=\"lane-focus-chevrons\" width=\"24\" height=\"18\" patternUnits=\"userSpaceOnUse\">\n        <path d=\"M4 3 L10 9 L4 15 M13 3 L19 9 L13 15\" fill=\"none\" stroke=\"#10ad95\" stroke-width=\"1.25\" opacity=\".58\"/>\n      </pattern>\n    </defs>\n        <g opacity=\".48\"><path class=\"canvas-grid\" d=\"M0 110 H1140 M0 180 H1140 M0 326 H1140 M0 396 H1140\"/></g>\n        <text x=\"28\" y=\"455\" class=\"canvas-title\">START</text><text x=\"438\" y=\"455\" class=\"canvas-title\">FALLBACK · INVALID ROUTE</text><text x=\"808\" y=\"455\" class=\"canvas-title\">PARALLEL · BOTH CHILDREN</text>\n        <g transform=\"translate(28 28)\">\n      <rect width=\"324\" height=\"42\" rx=\"9\" fill=\"#ffffff\" stroke=\"#d8e3e9\"/>\n      <path d=\"M15 15 H52\" stroke=\"#35d6bd\" stroke-width=\"15\" stroke-linecap=\"round\" opacity=\".40\"/>\n      <path d=\"M15 15 H52\" stroke=\"#0ab094\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"19\" class=\"control-key\">CONTROL · translucent route</text>\n      <path d=\"M15 31 H52\" stroke=\"#1976d2\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n      <text x=\"64\" y=\"35\" class=\"data-key\">DATA · typed port cable</text>\n    </g><g class=\"control-grammar focus-lanes\">\n          <path class=\"lane-fill lane-quiet\" d=\"M28 253 H1116\" stroke=\"#48ddc8\" stroke-width=\"35\" stroke-linecap=\"round\" opacity=\".25\"/>\n          <path class=\"lane-fill lane-focus\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" stroke=\"#36d2ba\" stroke-width=\"44\" stroke-linecap=\"round\" opacity=\".16\"/>\n          <path class=\"lane-fill lane-quiet\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" stroke=\"#48ddc8\" stroke-width=\"35\" stroke-linecap=\"round\" opacity=\".25\"/>\n          <path class=\"lane-fill lane-quiet\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" stroke=\"#48ddc8\" stroke-width=\"35\" stroke-linecap=\"round\" opacity=\".25\"/>\n          <path class=\"lane-center lane-quiet\" d=\"M28 253 H1116\" opacity=\".35\"/><path class=\"lane-center lane-focus\" d=\"M460 253 C477 253 469 108 480 108 H625 C642 108 643 253 660 253\" opacity=\".42\"/><path class=\"lane-center lane-quiet\" d=\"M805 253 C823 253 814 108 825 108 H970 C987 108 984 253 1000 253\" opacity=\".35\"/><path class=\"lane-center lane-quiet\" d=\"M805 253 C823 253 814 398 825 398 H970 C987 398 984 276 1000 276\" opacity=\".35\"/>\n          <text x=\"484\" y=\"132\" class=\"lane-label\">HOVER / SELECT TO INSPECT</text><text x=\"844\" y=\"132\" class=\"lane-label\">QUIET AT REST</text>\n        </g><g class=\"data-grammar\">\n      <path class=\"data-wire\" d=\"M250 252 H315\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"264\" y=\"227\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"270\" y=\"237\" class=\"wire-label\">approach</text></g>\n      <path class=\"data-wire secondary\" d=\"M460 264 C472 264 468 118 480 118\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"467\" y=\"164\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"473\" y=\"174\" class=\"wire-label\">candidate</text></g>\n      <path class=\"data-wire\" d=\"M460 264 C506 264 599 264 660 242\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"532\" y=\"239\" width=\"64\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"538\" y=\"249\" class=\"wire-label\">valid_grip</text></g>\n      <path class=\"data-wire\" d=\"M625 118 C643 118 637 277 660 264\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"640\" y=\"183\" width=\"63\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"646\" y=\"193\" class=\"wire-label\">corrected</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 118 825 118\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"807\" y=\"167\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"177\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire\" d=\"M805 264 C816 264 813 408 825 408\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"807\" y=\"335\" width=\"39\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"813\" y=\"345\" class=\"wire-label\">state</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 118 C990 118 984 260 1000 260\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"975\" y=\"169\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"179\" class=\"wire-label\">feedback</text></g>\n      <path class=\"data-wire secondary\" d=\"M970 408 C990 408 984 280 1000 280\" marker-end=\"url(#lane-focus-data-arrow)\"/><g><rect x=\"975\" y=\"336\" width=\"57\" height=\"15\" rx=\"4\" class=\"wire-label-back\"/>\n      <text x=\"981\" y=\"346\" class=\"wire-label\">at_home</text></g>\n    </g><g filter=\"url(#lane-focus-shadow)\">\n      <g class=\"port-block\">\n      <rect x=\"105\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"118\" y=\"240\" class=\"block-name\">MoveToObj</text>\n      <line x1=\"117\" y1=\"249\" x2=\"238\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"105\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"117\" y=\"244\" class=\"port-text\">target</text>\n      <circle cx=\"250\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"238\" y=\"266\" text-anchor=\"end\" class=\"port-text\">approach</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"315\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"328\" y=\"240\" class=\"block-name\">GraspValid</text>\n      <line x1=\"327\" y1=\"249\" x2=\"448\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"315\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"327\" y=\"244\" class=\"port-text\">approach</text>\n      <circle cx=\"460\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"448\" y=\"266\" text-anchor=\"end\" class=\"port-text\">candidate</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"480\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"493\" y=\"97\" class=\"block-name\">CorrectGrip</text>\n      <line x1=\"492\" y1=\"106\" x2=\"613\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"480\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"492\" y=\"101\" class=\"port-text\">candidate</text>\n      <circle cx=\"625\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"613\" y=\"123\" text-anchor=\"end\" class=\"port-text\">corrected</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"660\" y=\"218\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"673\" y=\"240\" class=\"block-name\">CloseGrip</text>\n      <line x1=\"672\" y1=\"249\" x2=\"793\" y2=\"249\" class=\"block-rule\"/>\n      <circle cx=\"660\" cy=\"241\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"672\" y=\"244\" class=\"port-text\">grip φ</text>\n      <circle cx=\"805\" cy=\"262\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"793\" y=\"266\" text-anchor=\"end\" class=\"port-text\">state</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"75\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"97\" class=\"block-name\">Publish</text>\n      <line x1=\"837\" y1=\"106\" x2=\"958\" y2=\"106\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"98\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"101\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"119\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"123\" text-anchor=\"end\" class=\"port-text\">feedback</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"825\" y=\"365\" width=\"145\" height=\"66\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"838\" y=\"387\" class=\"block-name\">MoveHome</text>\n      <line x1=\"837\" y1=\"396\" x2=\"958\" y2=\"396\" class=\"block-rule\"/>\n      <circle cx=\"825\" cy=\"388\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"837\" y=\"391\" class=\"port-text\">state</text>\n      <circle cx=\"970\" cy=\"409\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"958\" y=\"413\" text-anchor=\"end\" class=\"port-text\">at_home</text>\n    </g>\n      <g class=\"port-block\">\n      <rect x=\"1000\" y=\"218\" width=\"116\" height=\"76\" rx=\"10\" class=\"block-face\"/>\n      <text x=\"1013\" y=\"240\" class=\"block-name\">Report</text>\n      <line x1=\"1012\" y1=\"250\" x2=\"1104\" y2=\"250\" class=\"block-rule\"/>\n      <circle cx=\"1000\" cy=\"260\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"264\" class=\"port-text\">feedback</text>\n      <circle cx=\"1000\" cy=\"280\" r=\"4.3\" class=\"port input-port\"/>\n      <text x=\"1012\" y=\"284\" class=\"port-text\">home</text>\n      <circle cx=\"1116\" cy=\"272\" r=\"4.3\" class=\"port output-port\"/>\n      <text x=\"1104\" y=\"276\" text-anchor=\"end\" class=\"port-text\">result</text>\n    </g>\n    </g>\n        <circle cx=\"28\" cy=\"253\" r=\"6\" class=\"merge-dot\"/><circle cx=\"460\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"660\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"805\" cy=\"253\" r=\"5\" class=\"merge-dot\"/><circle cx=\"1000\" cy=\"253\" r=\"5\" class=\"merge-dot\"/>\n      </svg>\n      <button class=\"lane-button\" type=\"button\" data-demo-toggle data-base-label=\"Focus correction branch\" data-alt-label=\"Clear branch focus\">Focus correction branch</button>\n    </div>",
+      "media": [
+        {
+          "label": "What this encoding asserts",
+          "caption": "A compact legend for the choice of control carrier. The data cable stays blue in all variants.",
+          "html": "<div style=\"width:1140px;padding:18px 20px;background:#fbfdff\"><svg width=\"1100\" height=\"110\" viewBox=\"0 0 1100 110\" role=\"img\" aria-label=\"Encoding note for focus-dependent route\">\n      <rect x=\"1\" y=\"1\" width=\"1098\" height=\"108\" rx=\"12\" fill=\"#f6fbfc\" stroke=\"#d9e6eb\"/>\n      <path d=\"M34 56 H278\" stroke=\"#36d6be\" stroke-width=\"30\" stroke-linecap=\"round\" opacity=\".23\"/>\n      <path d=\"M34 56 H278\" stroke=\"#0ba98f\" stroke-width=\"1.7\" stroke-linecap=\"round\"/>\n      <path d=\"M76 56 C141 56 160 29 219 29\" fill=\"none\" stroke=\"#1976d2\" stroke-width=\"2.6\"/>\n      <circle cx=\"76\" cy=\"56\" r=\"5\" fill=\"#1976d2\"/><circle cx=\"219\" cy=\"29\" r=\"5\" fill=\"#e8f4ff\" stroke=\"#1976d2\" stroke-width=\"2\"/>\n      <text x=\"322\" y=\"43\" style=\"font:800 10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.1em;fill:#087663\">FOCUS-DEPENDENT ROUTE</text>\n      <text x=\"322\" y=\"69\" style=\"font:600 13px ui-sans-serif,system-ui,sans-serif;fill:#304a60\">Port view stays almost entirely data-first until a branch is selected or hovered; then only that branch blooms into a high-clarity control corridor.</text>\n      <text x=\"322\" y=\"91\" style=\"font:500 11px ui-sans-serif,system-ui,sans-serif;fill:#60778a\">Port view stays exceptionally quiet until selection. It is excellent for editing but less self-explanatory in a screenshot or an overview.</text>\n    </svg></div>"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    "Exactly five structurally distinct treatments share one behavior-tree topology and one Port-view data fixture.",
+    "Every live hero has a manual two-step walkthrough synchronized with its direct control.",
+    "Blue data geometry never changes when the cyan control emphasis changes.",
+    "All directions preserve the control/data semantic colour contract."
+  ]
+}

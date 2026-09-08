@@ -6,18 +6,28 @@ alternatives that lost and why, and the consequences accepted. "PEP" is the name
 for first (after Python Enhancement Proposals); the format underneath is ADR's, not PEP's —
 there's no proposal-and-consensus process here, just a dated record of what already shipped.
 
-This is not a requirements/spec corpus. It doesn't describe current behavior (the code does
-that), so it can't drift out of sync with it — it describes why a past decision was made, and
-it is never edited to match later code. A decision that gets reversed gets a *new* entry; the
-old one is marked superseded.
+This is not a requirements/spec corpus. The code and the running app describe current
+behaviour; a PEP records why a past choice seemed right at the time. Treat it as useful
+historical evidence, not a rule that can overrule fresh evidence. If a PEP and an experiment
+disagree, the experiment wins.
+
+Keep the historical account intact. When a decision is reversed or its reasoning no longer
+holds, write a new PEP, mark the old one as superseded, and link the two. That preserves both
+what was believed and what later evidence changed.
 
 ## When to write one
 
-This is for **architecture**, not bugs. A PEP records a genuine fork — more than one
-defensible approach existed, and one was picked for reasons a future rewrite must not
-silently re-litigate. It does not record fixing a mistake, restoring behavior that should
-have worked all along, or anything with one obviously correct answer — however many files it
-touched, or however satisfying the fix.
+This is for a **decision**: architecture, process, or another durable engineering choice. A
+PEP records a genuine fork — more than one defensible approach existed, and one was picked for
+reasons a future rewrite should understand before changing it.
+
+It does not record fixing a mistake, restoring behaviour that should have worked all along, or
+anything with one obvious answer — however many files it touched. Those belong in
+[`docs/bugs/`](../bugs/README.md) when the correction carries a reusable lesson. The quick test
+is simple:
+
+- “We chose X over Y because…” is a PEP.
+- “It was supposed to do X and did Y” is a bug.
 
 Most decisions don't clear that bar. They get an inline `WHY:` comment where they live (see
 `src/workspace/*`) and nothing more. Promote to a numbered PEP only when the fork was real
@@ -27,6 +37,13 @@ or it's visual/comparative enough to deserve the rich-media treatment below.
 **Write it at merge time to `main`, never before — and stay sparing.** A PEP describes what
 shipped, not what's still being argued about in a branch or worktree. A PEP nobody will ever
 need to re-read because the call was obvious is noise, not signal.
+
+## Check the thing, not only the record
+
+Do not reject or preserve a design merely because a PEP says so. Re-derive the claim from the
+primary source. For a behavioural question, that is normally the running app: make the smallest
+experiment that answers the question. Source code and a PEP can explain a result, but neither
+beats an observed result.
 
 ## How
 
@@ -47,7 +64,7 @@ need to re-read because the call was obvious is noise, not signal.
    # array doesn't — see docs/peps/0002-branch-region-port-host.md
    ```
 
-4. If a rendered comparison already exists for this decision (this repo generates a lot of
+4. If a rendered comparison or focused experiment already exists for this decision (this repo generates a lot of
    dated `docs/<name>-<date>.html` galleries via `docs/build_<name>.py` — see the repo
    README), link it from the PEP's References section as evidence. The gallery stays what
    the README already calls it, a **temporary review surface**; the PEP is the part meant to
@@ -60,18 +77,19 @@ need to re-read because the call was obvious is noise, not signal.
 ## Status lifecycle
 
 `Proposed` (rare — only if written ahead of a merge that hasn't landed yet) → `Accepted` (the
-normal end state for a merged decision) → `Superseded by NNNN` (a later PEP reversed this one
-— leave the old file in place, just update its Status line) → `Deprecated` (the decision no
-longer applies and nothing replaced it).
+normal end state for a merged decision) → `Superseded by NNNN` (a later record replaced or
+corrected the decision — keep the old account and add the forward pointer) → `Deprecated` (the
+decision no longer applies and nothing replaced it).
 
 ## Staying in sync
 
-`tests/test_pep_links.py` runs as part of `npm run check` and fails if:
+`tests/test_pep_links.py` is a small link smoke alarm run by `npm run check`. It fails if:
 
 - a `WHY:` comment points at a `docs/peps/NNNN-slug.md` file that doesn't exist (renamed,
   deleted, or typo'd), or
 - two PEPs claim the same number (a merge collision that needs a rename), or
 - a PEP file is missing one of the template's required sections.
 
-That's the mechanism that keeps a record living in a separate file from going stale silently
-— the thing a plain comment-only convention can't catch on its own.
+It does not decide whether a PEP's reasoning is true, whether the product behaves as described,
+or whether a future design is allowed. Those are engineering questions to answer from code and,
+when possible, the running system.

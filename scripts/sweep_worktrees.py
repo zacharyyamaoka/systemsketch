@@ -126,6 +126,8 @@ def leftovers(path: Path) -> tuple[list[str], list[str]]:
     """(things that would be lost, expendable leftovers) in a worktree."""
     lost: list[str] = []
     spent: list[str] = []
+    if not path.is_dir():
+        return lost, spent
     for line in git_raw("status", "--porcelain", cwd=path).splitlines():
         status, _, name = line[:2], line[2], line[3:]
         if status == "??" and name in EXPENDABLE_UNTRACKED:
@@ -184,6 +186,13 @@ def verdict(tree: dict, self_path: Path) -> tuple[bool, str]:
         return False, f"retained review lease {lease!r}; retire it through review_runtime.py"
     if not is_merged(tree["head"]):
         return False, "has commits main does not"
+    # WHY: a worktree whose directory is gone (a swept tmpdir, a deleted checkout) still has a
+    # registration in .git/worktrees. Every git call against it raises FileNotFoundError, which
+    # used to abort the whole sweep mid-list and silently truncate the report — so the trees
+    # after it were never judged at all. It is also not SPENT: the cure is `git worktree prune`,
+    # not `git worktree remove`, so it must never fall through to the removal gate.
+    if not path.is_dir():
+        return False, "worktree path is gone; run `git worktree prune`"
     lost, _ = leftovers(path)
     if lost:
         shown = ", ".join(lost[:3]) + (f" +{len(lost) - 3} more" if len(lost) > 3 else "")

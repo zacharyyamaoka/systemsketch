@@ -14,6 +14,9 @@ discussion understands why a decision was even needed.
 
 What we actually did. One or two paragraphs, plain language, no hedging.
 
+State the choice as a choice, not as a permanent law. A later record may supersede this one if
+new evidence shows that its reasoning no longer holds.
+
 ## Alternatives considered
 
 - **Option A** — what it was, and the concrete reason it lost.
@@ -29,6 +32,6 @@ decision blocks or makes harder on purpose, if anything.
 
 ## References
 
-- Code: `path/to/file.ts:123` — the `WHY:` comment that points back here
-- Evidence: `docs/<gallery>-YYYY-MM-DD.html` (if a rendered comparison drove this)
+- Code: `path/to/file.ts` — the `WHY:` comment or symbol that points back here
+- Evidence: `docs/<gallery>-YYYY-MM-DD.html` or a focused experiment (if one drove this)
 - Related: `docs/peps/NNNN-slug.md` (supersedes / superseded-by / depends-on)

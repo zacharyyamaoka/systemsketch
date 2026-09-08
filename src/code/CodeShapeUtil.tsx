@@ -16,6 +16,7 @@ import {
 	codeFontPixels,
 	codePropsForPresentation,
 	codePropsForResize,
+	downgradeCodePropsV1ToV0,
 	getDefaultCodeProps,
 	upgradeCodePropsV0ToV1,
 	type CodeShape,
@@ -49,7 +50,7 @@ function CodeExportSvg({ shape }: { shape: CodeShape }) {
 }
 
 const codeVersions = createShapePropsMigrationIds(CODE_SHAPE_TYPE, {
-	AddFontScale: 1,
+	MigrateFontSizeToSharedSize: 1,
 })
 
 /**
@@ -64,13 +65,9 @@ export class CodeShapeUtil extends BaseBoxShapeUtil<CodeShape> {
 	static override migrations = createShapePropsMigrationSequence({
 		sequence: [
 			{
-				id: codeVersions.AddFontScale,
+				id: codeVersions.MigrateFontSizeToSharedSize,
 				up: upgradeCodePropsV0ToV1,
-				// Dropping the prop is the faithful downgrade: an older build
-				// renders the rung size, which is the custom size's anchor.
-				down: (props) => {
-					delete (props as Record<string, unknown>).fontScale
-				},
+				down: downgradeCodePropsV1ToV0,
 			},
 		],
 	})

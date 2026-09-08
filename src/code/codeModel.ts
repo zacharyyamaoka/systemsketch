@@ -55,6 +55,7 @@ export const CodeLanguageStyle = StyleProp.defineEnum('systemsketch:codeLanguage
  */
 export const CODE_FONT_SIZES = { s: 12, m: 16, l: 20, xl: 24 } as const
 export type CodeSizeRung = keyof typeof CODE_FONT_SIZES
+const LEGACY_CODE_FONT_SIZES = [12, 14, 16, 18, 20, 24] as const
 
 /**
  * The Code block's analogue of stock tldraw's per-shape `scale`: rendered
@@ -159,6 +160,34 @@ export function normalizeFontScale(fontScale: unknown): number {
 		: CODE_DEFAULT_FONT_SCALE
 }
 
+/**
+ * Code's first shipped format stored one of its own pixel sizes. The shared
+ * Font-size menu replaced that with tldraw's `size` rung plus a per-shape
+ * scale, so migrate both fields as one atomic presentation change.
+ *
+ * WHY: selecting an adjacent rung and keeping the exact pixel value in
+ * `fontScale` preserves the appearance of 14px and 18px legacy snippets
+ * without reviving a Code-only font-size vocabulary. More importantly, every
+ * old record receives the required stock `size` prop before validation.
+ */
+function codeSizeForLegacyFontPixels(fontSize: unknown): CodeSizeRung {
+	if (typeof fontSize !== 'number' || !Number.isFinite(fontSize)) return 'm'
+	const rungs = Object.entries(CODE_FONT_SIZES) as [CodeSizeRung, number][]
+	return rungs.reduce((closest, candidate) => (
+		Math.abs(candidate[1] - fontSize) <= Math.abs(closest[1] - fontSize) ? candidate : closest
+	))[0]
+}
+
+function legacyFontPixelsForCodePresentation(size: unknown, fontScale: unknown): number {
+	const rung = typeof size === 'string' && size in CODE_FONT_SIZES
+		? size as CodeSizeRung
+		: 'm'
+	const pixels = CODE_FONT_SIZES[rung] * normalizeFontScale(fontScale)
+	return LEGACY_CODE_FONT_SIZES.reduce((closest, candidate) => (
+		Math.abs(candidate - pixels) < Math.abs(closest - pixels) ? candidate : closest
+	))
+}
+
 /** The mono-cell approximation used by the canvas and the resize readout. */
 export function codeCharacterPixels(size: CodeSizeRung, fontScale = 1): number {
 	return Math.max(1, codeFontPixels(size, fontScale) * 0.61)
@@ -253,10 +282,37 @@ export function codePropsForResize(
 }
 
 /**
- * v0 -> v1: seed `fontScale` on Code records stored before the custom font
- * size landed. Exported (like `blockShapeMigrations`' upgrades) so the test
- * exercises the transform without constructing an editor.
+ * v0 -> v1: Code's first release used a Code-specific `fontSize` and had no
+ * stock `size` prop. Convert it before tldraw validates the loaded record;
+ * otherwise old documents fail open with “props.size … got undefined”.
+ * Exported (like `blockShapeMigrations`' upgrades) so the transformation is
+ * independently testable without constructing an editor.
  */
 export function upgradeCodePropsV0ToV1(props: Record<string, unknown>): Record<string, unknown> {
-	return { ...props, fontScale: normalizeFontScale(props.fontScale) }
+	const { fontSize, ...withoutLegacyFontSize } = props
+	const size = typeof props.size === 'string' && props.size in CODE_FONT_SIZES
+		? props.size as CodeSizeRung
+		: codeSizeForLegacyFontPixels(fontSize)
+	const migratedLegacyScale = typeof fontSize === 'number' && Number.isFinite(fontSize)
+		? fontSize / CODE_FONT_SIZES[size]
+		: CODE_DEFAULT_FONT_SCALE
+	return {
+		...withoutLegacyFontSize,
+		size,
+		fontScale: normalizeFontScale(props.fontScale ?? migratedLegacyScale),
+	}
+}
+
+/**
+ * V1 -> V0 supplies the first release's required prop again. A V1 value that
+ * originated in V0 round-trips exactly (notably 14px and 18px); a newer
+ * arbitrary custom scale picks the closest value that the older validator can
+ * represent rather than producing an unreadable legacy snapshot.
+ */
+export function downgradeCodePropsV1ToV0(props: Record<string, unknown>): Record<string, unknown> {
+	const { size, fontScale, ...withoutCurrentPresentation } = props
+	return {
+		...withoutCurrentPresentation,
+		fontSize: legacyFontPixelsForCodePresentation(size, fontScale),
+	}
 }

@@ -203,13 +203,23 @@ Two constraints on the file itself:
 
 Full rule: [`skills/review-hub`](skills/review-hub/SKILL.md).
 
-## Decisions that outlive the diff go in `docs/peps/`
+## Decisions go in `docs/peps/`; corrections go in `docs/bugs/`
 
-This is for **architecture, not bugs**. A hard-won decision — a genuine fork where more than
-one approach was defensible, and code a future rewrite must not silently re-litigate — gets a
-durable record in `docs/peps/NNNN-slug.md`, built from `docs/peps/TEMPLATE.md`. Fixing a
-mistake or restoring behavior that should have worked all along is not a PEP, no matter how
-many files it touched. Full workflow, numbering, and status lifecycle: `docs/peps/README.md`.
+Keep the two kinds of record distinct:
+
+- A PEP records a real engineering choice: “we chose X over Y because…”. It can cover
+  architecture, process, or another decision future work should understand.
+- A bug record explains a correction: “it was supposed to do X and did Y”. It names how the
+  failure escaped, the sibling paths swept, and the proof that protects the fix.
+
+Most work needs neither record. Use a local `WHY:` comment for reasoning that belongs at one
+code seam. Full workflows: `docs/peps/README.md` and `docs/bugs/README.md`.
+
+**A PEP is history, not law.** Do not accept or reject a design because a numbered record says
+so. Re-derive the claim from the primary source; for behavioural questions, run the smallest
+useful experiment against the real app. Observed behaviour beats code archaeology, and both beat
+the PEP's prose. If new evidence reverses a merged decision, write a new PEP and mark the old
+one `Superseded by NNNN`; never silently rewrite what was believed at the time.
 
 **Write it at merge time, not before, and stay sparing.** A PEP describes what actually
 landed on `main`, not a branch's or worktree's intermediate churn — don't create one for work
@@ -219,9 +229,9 @@ fork was real and it's cross-cutting or visual/comparative enough to deserve the
 treatment. High signal beats complete — a PEP nobody will ever need is noise.
 
 When a decision does get a PEP, leave the `WHY:` comment anyway and add one clause pointing at
-it: `// WHY: <one line> — see docs/peps/0001-slug.md`. `tests/test_pep_links.py` fails the
-build the moment that pointer goes stale (renamed file, colliding number) — it's part of
-`npm run check`, not optional housekeeping.
+it: `// WHY: <one line> — see docs/peps/0001-slug.md`. `tests/test_pep_links.py` is a small
+documentation smoke alarm: it catches missing links, duplicate numbers, and malformed PEP
+shape. It does not prove the PEP true or make the decision binding.
 
 **Say so when you write one.** One line in your handoff — "Per `docs/peps/README.md`, also
 wrote `docs/peps/0007-slug.md` and linked it at `file:line`." A PEP that lands silently in a

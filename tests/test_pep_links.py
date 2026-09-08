@@ -34,7 +34,9 @@ SOURCE_GLOBS = (
     "scripts/**/*.mjs",
     "vscode-systemsketch/src/**/*.ts",
 )
-EXCLUDED_DIR_PARTS = {"node_modules", ".git", "dist", "build", "docs"}
+# `.claude/worktrees` contains other checkouts. They are not source for this checkout,
+# and their PEP links may legitimately name records that have not landed here yet.
+EXCLUDED_DIR_PARTS = {"node_modules", ".git", ".claude", "dist", "build", "docs"}
 
 
 def _iter_source_files():
