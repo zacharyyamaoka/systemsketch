@@ -45,10 +45,13 @@ async function pillLayoutAttr(page) {
 
 /**
  * Separators drawn INSIDE the appearance controls themselves (between its
- * own composition groups) — not `.systemsketch-arrange`'s own unconditional
- * `border-left`, which divides it from whatever precedes it in every layout
- * already and needs no per-layout help (Codex judge round 2, 2026-09-08,
- * caught an earlier version of this file asserting the opposite).
+ * own composition groups) — not `.systemsketch-arrange-slot`'s own
+ * unconditional `border-left`, which divides Arrange from whatever precedes it
+ * in every layout already and needs no per-layout help (Codex judge round 2,
+ * 2026-09-08, caught an earlier version of this file asserting the opposite).
+ * That border moved from `.systemsketch-arrange` to the slot later the same
+ * day, when the cluster went behind a trigger and only the slot stayed in the
+ * pill's row; the reasoning is unchanged, the element carrying it is not.
  */
 async function internalSeparatorCount(page) {
   return evaluate(page,

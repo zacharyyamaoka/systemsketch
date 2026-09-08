@@ -978,6 +978,18 @@
   stroke: none;
 }
 
+/* The Arrange segment as it appears IN the pill since 2026-09-08: one trigger,
+ * nothing else. The `border-left` lives here rather than on the cluster itself
+ * because the cluster moved into a popover — the line that sets Arrange off
+ * from Opacity has to stay behind in the pill's row, unconditionally, in every
+ * layout (see the V3 reasoning in `pill_lab_smoke.mjs`). */
+.systemsketch-arrange-slot {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-left: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
+}
+
 /* Arrange: z-order + align/distribute, same 33x32 grid-button shape as
  * `.systemsketch-selection-layout-action` above so every row in the pill
  * reads as one family. `ArrangeControls.tsx` renders plain buttons (it lives
@@ -996,7 +1008,16 @@
   flex-wrap: wrap;
   align-items: center;
   padding: 3px;
-  border-left: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
+}
+
+/* Inside the Arrange popover: one group per line, so the panel is as wide as
+ * its widest group (6 x 33px = 198px) instead of the 423px a single row of all
+ * twelve would need. `align-items: start` keeps a 2-button distribute row from
+ * stretching to the panel's width. */
+.systemsketch-arrange[data-layout='stack'] {
+  flex-direction: column;
+  align-items: start;
+  padding: 0;
 }
 
 .systemsketch-arrange__group {
@@ -1057,6 +1078,49 @@
   flex: 0 0 auto;
   margin: 0 3px;
   background: var(--systemsketch-pill-divider, var(--ss-border-inverse));
+}
+
+/* Stacked, the rule between two groups runs the other way — see the matching
+ * `aria-orientation` swap in `ArrangeControls.tsx`. */
+.systemsketch-arrange[data-layout='stack'] .systemsketch-arrange__divider {
+  width: 100%;
+  height: 1px;
+  margin: 4px 0;
+}
+
+/* The trigger that now stands for the whole cluster. Same 32px-tall grid cell
+ * as `.systemsketch-arrange__button` so it lines up with the pill's other
+ * controls, but wide enough for the glyph plus the chevron every other popover
+ * trigger in this pill carries (`.systemsketch-appearance__trigger`). */
+.systemsketch-arrange__trigger {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  padding: 0 4px 0 6px;
+  border: 0;
+  border-radius: var(--systemsketch-pill-trigger-radius, 7px);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
+  background: transparent;
+  cursor: pointer;
+  gap: 2px;
+}
+
+.systemsketch-arrange__trigger:hover,
+.systemsketch-arrange__trigger[data-state='open'] {
+  background: var(--systemsketch-pill-hover, var(--ss-surface-inverse-hover));
+}
+
+.systemsketch-arrange__trigger:focus-visible {
+  outline: 2px solid var(--systemsketch-pill-accent, var(--ss-accent));
+  outline-offset: -2px;
+}
+
+.systemsketch-arrange__chevron {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: currentcolor;
 }
 
 /* Opacity: Excalidraw-parity 0-100 slider, in the pill's own inverse palette.

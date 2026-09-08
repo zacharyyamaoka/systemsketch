@@ -29,7 +29,8 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../appearance/excalidrawIcons/icons'
-import { ArrangeControls, type ArrangeAction, type ArrangeActionGroup } from '../contextualMenus/ArrangeControls'
+import { ArrangeControls, ArrangeTrigger, type ArrangeAction, type ArrangeActionGroup } from '../contextualMenus/ArrangeControls'
+import { ContextualPopover } from '../contextualMenus/ContextualControls'
 import { OpacityControl } from '../contextualMenus/OpacityControl'
 import { CompareTrigger } from '../compare'
 import { PillPresentationChip } from './PillPresentationChip'
@@ -344,6 +345,18 @@ const ARRANGE_DISTRIBUTE: readonly ArrangeAction[] = [
   { id: 'distribute-vertical', label: 'Distribute vertically', icon: excalidrawIcon(DistributeVerticallyIcon) },
 ]
 
+/**
+ * The Arrange trigger's face.
+ *
+ * Reuses the vendored Excalidraw align-left glyph rather than importing a new
+ * icon set (Zach, 2026-09-08: "keep the current excalidraw vendored icons").
+ * Excalidraw itself ships no "arrange" glyph — its own arrange actions are
+ * always expanded in a side panel and never collapse behind anything — so
+ * there is no upstream face to vendor here. Align-left is the glyph every
+ * design tool that DOES collapse this control uses for it.
+ */
+const ARRANGE_TRIGGER_ICON = excalidrawIcon(AlignLeftIcon)
+
 const ARRANGE_ALIGN_OPS = ['left', 'right', 'top', 'bottom', 'center-horizontal', 'center-vertical'] as const
 type ArrangeAlignOp = (typeof ARRANGE_ALIGN_OPS)[number]
 function isArrangeAlignOp(id: string): id is ArrangeAlignOp {
@@ -364,6 +377,17 @@ const ARRANGE_Z_ORDER_HANDLERS: Readonly<Record<string, (editor: Editor, ids: TL
  * (`sendToBack`/`sendBackward`/`bringForward`/`bringToFront`/`alignShapes`/
  * `distributeShapes`), no new value model. `ArrangeControls` itself holds no
  * selection-count logic; this adapter is where that policy lives.
+ *
+ * WHY one trigger and not four inline z-order buttons plus a trigger for the
+ * rest: Zach, 2026-09-08 — "instead of being visible on the floating toolbar I
+ * want them hidden behind a icon". Splitting would leave a single-shape
+ * selection, the commonest case by far, looking exactly as it does today,
+ * because z-order is all such a selection ever showed. It would also break the
+ * pill's one real rule — one family, one trigger: Color hides fifteen swatches
+ * behind one face, Font size four rungs plus a custom field. Arrange is one
+ * family. c0f0eb12's segmenting is not lost, it moved: the four groups and the
+ * three rules between them still render, now stacked inside the panel, where
+ * they read better than they ever did crammed into the pill's row.
  */
 function ArrangeAdapter() {
   const editor = useEditor()
@@ -391,7 +415,37 @@ function ArrangeAdapter() {
     if (id === 'distribute-horizontal') { editor.distributeShapes(ids, 'horizontal'); return }
     if (id === 'distribute-vertical') { editor.distributeShapes(ids, 'vertical') }
   }
-  return <ArrangeControls groups={groups} onAction={onAction} />
+  return (
+    // The slot, not the panel, carries the `border-left` that sets Arrange off
+    // from whatever precedes it in the pill — the divider has to stay in the
+    // pill's row now that the buttons have left it. `pill_lab_smoke.mjs`
+    // depends on that line existing unconditionally in every layout.
+    <div className="systemsketch-arrange-slot">
+      <ContextualPopover
+        id="systemsketch-contextual-arrange"
+        // Always `selection`: this cluster is gated on `getEditingShapeId() ===
+        // null` by `SelectionMiniMenu`, so it never renders over a live text
+        // editor and never needs the Radix branch that exists for that case.
+        mode="selection"
+        side="top"
+        trigger={<ArrangeTrigger icon={ARRANGE_TRIGGER_ICON} label="Arrange" />}
+      >
+        <div
+          className="systemsketch-appearance__panel"
+          role="group"
+          aria-label="Arrange"
+          data-testid="systemsketch-arrange-panel"
+        >
+          {/* WHY no auto-close on click: the pill's other popovers stay open
+              after a choice (proven by `floating_toolbar_excalidraw_smoke.mjs`,
+              which has to re-click each trigger to shut it), and align-then-
+              distribute is the normal two-step. Closing here would be the one
+              popover in the pill that behaves differently. */}
+          <ArrangeControls layout="stack" groups={groups} onAction={onAction} />
+        </div>
+      </ContextualPopover>
+    </div>
+  )
 }
 
 /**

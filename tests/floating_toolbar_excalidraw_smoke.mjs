@@ -47,9 +47,27 @@ const FRAMES = {
   opacity: join(MEDIA_DIR, '3-opacity-30.png'),
   fillHatched: join(MEDIA_DIR, '4-fill-hatched.png'),
   dashHandDrawn: join(MEDIA_DIR, '5-dash-hand-drawn.png'),
-  bringToFront: join(MEDIA_DIR, '6-bring-to-front.png'),
-  alignTop: join(MEDIA_DIR, '7-align-top.png'),
-  flippedBelow: join(MEDIA_DIR, '8-flipped-below.png'),
+  arrangePopover: join(MEDIA_DIR, '6-arrange-popover.png'),
+  bringToFront: join(MEDIA_DIR, '7-bring-to-front.png'),
+  alignTop: join(MEDIA_DIR, '8-align-top.png'),
+  flippedBelow: join(MEDIA_DIR, '9-flipped-below.png'),
+}
+
+const ARRANGE_TRIGGER = '[data-testid="systemsketch-arrange-trigger"]'
+const ARRANGE_PANEL = '[data-testid="systemsketch-arrange-panel"]'
+
+/**
+ * Open the Arrange popover and wait for its panel.
+ *
+ * Since 2026-09-08 the twelve z-order/align/distribute buttons live behind one
+ * trigger instead of inline on the pill, so every arrange assertion below has
+ * to disclose them first — the same two-step every other popover control in
+ * this pill already needed.
+ */
+async function openArrange(page) {
+  await clickSelector(page, ARRANGE_TRIGGER)
+  await waitFor(page, `document.querySelector('${ARRANGE_PANEL}')`, 'the Arrange popover')
+  await delay(160)
 }
 
 /**
@@ -300,12 +318,37 @@ async function main() {
     await waitFor(page, `!document.querySelector('[data-testid="systemsketch-appearance-panel-strokeColor"]')`, 'the Line style popover to close')
     pass('clicking Line style -> Hand-drawn writes stock tldraw\'s draw dash')
 
-    // 7. NEW CONTROL (d): with the BACK rectangle selected, Bring to front
+    // 7. DISCLOSURE: the Arrange cluster is behind one trigger, not spilled
+    // across the pill's own row (Zach, 2026-09-08). Prove the closed state
+    // first — a passing click below would say nothing about whether the
+    // buttons were hidden to begin with.
+    const closed = await evaluate(page, `(() => JSON.stringify({
+      trigger: Boolean(document.querySelector('${ARRANGE_TRIGGER}')),
+      cluster: Boolean(document.querySelector('[data-testid="systemsketch-arrange"]')),
+      buttons: document.querySelectorAll('.systemsketch-arrange__button').length,
+    }))()`)
+    const closedState = JSON.parse(closed)
+    assert.ok(closedState.trigger, 'the Arrange trigger must be on the pill')
+    assert.equal(closedState.cluster, false,
+      'the Arrange cluster must NOT be in the DOM while its popover is closed')
+    assert.equal(closedState.buttons, 0,
+      `no arrange button may render in the pill's own row, found ${closedState.buttons}`)
+    pass('the Arrange cluster is hidden behind one trigger instead of inline on the pill')
+
+    // 8. NEW CONTROL (d): with the BACK rectangle selected, Bring to front
     // must sort it above the front rectangle.
     const beforeOrder = await evaluate(page,
       `window.__systemsketch.editor.getSortedChildIdsForParent(window.__systemsketch.editor.getCurrentPageId())`)
     assert.ok(beforeOrder.indexOf(rectA) < beforeOrder.indexOf(rectB),
       'rectangle A (drawn first) should start behind rectangle B')
+    await openArrange(page)
+    // A one-shape selection discloses z-order alone: align needs 2+, distribute
+    // 3+, and that gating did not move when the cluster did.
+    const oneShapeGroups = await evaluate(page,
+      `[...document.querySelectorAll('${ARRANGE_PANEL} [data-testid^="systemsketch-arrange-group-"]')].map((el) => el.dataset.testid)`)
+    assert.deepEqual(oneShapeGroups, ['systemsketch-arrange-group-z-order'],
+      `one selected shape should disclose z-order only, got ${JSON.stringify(oneShapeGroups)}`)
+    await saveScreenshot(page, FRAMES.arrangePopover)
     await clickSelector(page, '[data-testid="systemsketch-arrange-bringToFront"]')
     await delay(250)
     const afterOrder = await evaluate(page,
@@ -315,7 +358,19 @@ async function main() {
     await saveScreenshot(page, FRAMES.bringToFront)
     pass('Bring to front sorts the back rectangle above its sibling (getSortedChildIdsForParent order)')
 
-    // 8. NEW CONTROL (e): select both rectangles and Align top.
+    // The popover survives the choice and closes on a second trigger click —
+    // the same toggle the Fill and Line style steps above use. Closing it here
+    // is not tidiness: an open tldraw menu suppresses canvas gestures
+    // (`editor.menus`), so the marquee in the next step would be spent
+    // dismissing this popover instead of selecting anything. Every other
+    // popover step above closes itself for exactly that reason.
+    await waitFor(page, `document.querySelector('${ARRANGE_PANEL}')`,
+      'the Arrange popover to still be open after choosing Bring to front')
+    await clickSelector(page, ARRANGE_TRIGGER)
+    await waitFor(page, `!document.querySelector('${ARRANGE_PANEL}')`, 'the Arrange popover to close')
+    pass('the Arrange popover survives a choice and closes on a second trigger click')
+
+    // 9. NEW CONTROL (e): select both rectangles and Align top.
     await selectByMarquee(page, MARQUEE_BOTH)
     await waitFor(page, `window.__systemsketch.editor.getSelectedShapeIds().length === 2`, 'both rectangles selected again')
     const beforeAlign = await evaluate(page, `(() => {
@@ -326,6 +381,16 @@ async function main() {
       })
     })()`)
     assert.notEqual(JSON.parse(beforeAlign).a, JSON.parse(beforeAlign).b, 'the two rectangles must start at different y, or Align top proves nothing')
+    // Marquee-selecting clicked the empty canvas, which closes the popover the
+    // way an outside click closes every Radix popover — so disclose it again.
+    await openArrange(page)
+    const twoShapeGroups = await evaluate(page,
+      `[...document.querySelectorAll('${ARRANGE_PANEL} [data-testid^="systemsketch-arrange-group-"]')].map((el) => el.dataset.testid)`)
+    assert.deepEqual(
+      twoShapeGroups,
+      ['systemsketch-arrange-group-z-order', 'systemsketch-arrange-group-align-horizontal', 'systemsketch-arrange-group-align-vertical'],
+      `two selected shapes should disclose z-order + both align groups and no distribute, got ${JSON.stringify(twoShapeGroups)}`,
+    )
     await clickSelector(page, '[data-testid="systemsketch-arrange-top"]')
     await delay(250)
     const afterAlign = JSON.parse(await evaluate(page, `(() => {
@@ -339,7 +404,10 @@ async function main() {
     await saveScreenshot(page, FRAMES.alignTop)
     pass('Align top leaves both selected rectangles at the same page y')
 
-    // 9. Placement-engine regression: select one shape, drag it near the top
+    await clickSelector(page, ARRANGE_TRIGGER)
+    await waitFor(page, `!document.querySelector('${ARRANGE_PANEL}')`, 'the Arrange popover to close')
+
+    // 10. Placement-engine regression: select one shape, drag it near the top
     // edge, and the pill must flip to data-side="below" — the exact FigJam
     // semantic the @floating-ui/core swap (floatingToolbarPlacement.ts) had
     // to preserve, proven here against the real DOM rather than only the

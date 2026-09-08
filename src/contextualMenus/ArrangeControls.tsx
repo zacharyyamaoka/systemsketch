@@ -1,4 +1,6 @@
-import { Fragment, type ComponentType, type ReactElement } from 'react'
+import { Fragment, forwardRef, type ButtonHTMLAttributes, type ComponentType, type ReactElement } from 'react'
+
+import { CHEVRON_PATH, CHEVRON_VIEWBOX } from '../appearance/figjamTokens'
 
 export interface ArrangeAction {
   /** Stable id — also the editor call the wave-2 binder dispatches on `onAction`. */
@@ -29,6 +31,15 @@ export interface ArrangeControlsProps {
   onAction(id: string): void
   /** Action ids to render disabled, e.g. sendToBack when already at the back. */
   disabled?: ReadonlySet<string>
+  /**
+   * `row` lays the groups out left-to-right with vertical dividers — the shape
+   * this cluster had while it lived inline on the pill. `stack` puts one group
+   * per line with horizontal rules between them, which is what a disclosure
+   * popover wants: twelve buttons in a single row would be a 423px-wide panel
+   * and would simply move the pill's width problem behind the trigger.
+   * Defaults to `row` so the component still composes into a toolbar.
+   */
+  layout?: 'row' | 'stack'
 }
 
 function ArrangeGroup({
@@ -65,8 +76,13 @@ function ArrangeGroup({
 /**
  * Pure z-order + align/distribute button cluster for the selection pill.
  *
+ * Since 2026-09-08 the binder mounts this inside the pill's Arrange popover
+ * rather than in the pill's own row — see {@link ArrangeTrigger}. Nothing here
+ * knows that: it is still one list of grouped buttons, and `layout` is the
+ * only concession the disclosure asked for.
+ *
  * Plain `<button type="button">` elements, not `TldrawUiToolbarButton` — the
- * wave-2 binder mounts this inside the pill's own `TldrawUiToolbar` (see
+ * binder mounts this inside the pill's own `TldrawUiToolbar` (see
  * `SelectionContextualMenu.tsx`), which already supplies toolbar semantics
  * (grouping, roving tabindex) to whatever children it wraps. Duplicating that
  * here would fight the surrounding toolbar rather than compose with it.
@@ -74,17 +90,25 @@ function ArrangeGroup({
  * No `editor` import, no selection-count logic: every action this renders
  * comes in as data, and every click just reports the id back up.
  */
-export function ArrangeControls({ groups, onAction, disabled }: ArrangeControlsProps): ReactElement {
+export function ArrangeControls({
+  groups,
+  onAction,
+  disabled,
+  layout = 'row',
+}: ArrangeControlsProps): ReactElement {
   const visible = groups.filter((group) => group.actions.length > 0)
   return (
-    <div className="systemsketch-arrange" data-testid="systemsketch-arrange">
+    <div className="systemsketch-arrange" data-layout={layout} data-testid="systemsketch-arrange">
       {visible.map((group, index) => (
         <Fragment key={group.id}>
           {index > 0 ? (
             <div
               className="systemsketch-arrange__divider"
               role="separator"
-              aria-orientation="vertical"
+              // A stacked panel's groups sit one above the next, so the rule
+              // between them runs the other way. Announcing the vertical
+              // orientation regardless would describe a line that is not there.
+              aria-orientation={layout === 'stack' ? 'horizontal' : 'vertical'}
               data-testid="systemsketch-arrange-divider"
             />
           ) : null}
@@ -94,3 +118,49 @@ export function ArrangeControls({ groups, onAction, disabled }: ArrangeControlsP
     </div>
   )
 }
+
+export interface ArrangeTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** The trigger's face — an Excalidraw-vendored glyph, supplied by the binder. */
+  icon: ComponentType<{ className?: string }>
+  /** Accessible name and tooltip, e.g. "Arrange". */
+  label: string
+}
+
+/**
+ * The one button that stands in for the whole Arrange cluster on the pill.
+ *
+ * WHY this exists at all: every other control in the selection pill — Color,
+ * Fill, Line style, Font size — is a small trigger that opens a popover, and
+ * Arrange was the single exception, spilling all twelve of its buttons into
+ * the pill's own row (Zach, 2026-09-08: "instead of being visible on the
+ * floating toolbar I want them hidden behind a icon"). The face stays a
+ * vendored Excalidraw glyph and the chevron is the pill's own
+ * (`figjamTokens`), so the new trigger reads as one of the family rather than
+ * as a new kind of control.
+ *
+ * WHY forwardRef + prop spread: `TldrawUiPopoverTrigger` is Radix's
+ * `Popover.Trigger asChild`, which injects its handlers, its ref and the
+ * `aria-expanded` / `data-state` it manages into this element. Swallowing
+ * either would leave a button that opens nothing. Same contract
+ * `ContextualControls.tsx`'s `ControlTrigger` honours.
+ */
+export const ArrangeTrigger = forwardRef<HTMLButtonElement, ArrangeTriggerProps>(
+  function ArrangeTrigger({ icon: Icon, label, className, ...buttonProps }, ref) {
+    return (
+      <button
+        {...buttonProps}
+        ref={ref}
+        type="button"
+        className={['systemsketch-arrange__trigger', className].filter(Boolean).join(' ')}
+        data-testid="systemsketch-arrange-trigger"
+        title={label}
+        aria-label={label}
+      >
+        <Icon className="systemsketch-arrange__icon" />
+        <svg className="systemsketch-arrange__chevron" viewBox={CHEVRON_VIEWBOX} aria-hidden="true">
+          <path d={CHEVRON_PATH} />
+        </svg>
+      </button>
+    )
+  },
+)

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
-import { ArrangeControls, type ArrangeAction, type ArrangeActionGroup } from './ArrangeControls'
+import { ArrangeControls, ArrangeTrigger, type ArrangeAction, type ArrangeActionGroup } from './ArrangeControls'
 
 function icon(name: string) {
   function Icon({ className }: { className?: string }) {
@@ -110,5 +110,78 @@ describe('ArrangeControls', () => {
     expect(html).toContain('title="Send to back"')
     expect(html).toContain('aria-label="Send to back"')
     expect(html).toContain('systemsketch-arrange__button')
+  })
+
+  it('defaults to the row layout with vertical dividers', () => {
+    const html = renderToStaticMarkup(
+      <ArrangeControls
+        groups={[Z_ORDER_GROUP, { id: 'distribute', actions: DISTRIBUTE }]}
+        onAction={vi.fn()}
+      />,
+    )
+    expect(html).toContain('data-layout="row"')
+    expect(html).toContain('aria-orientation="vertical"')
+    expect(html).not.toContain('aria-orientation="horizontal"')
+  })
+
+  it('stacks for the popover panel, turning every divider horizontal', () => {
+    const html = renderToStaticMarkup(
+      <ArrangeControls
+        layout="stack"
+        groups={[
+          Z_ORDER_GROUP,
+          { id: 'align-horizontal', actions: ALIGN_HORIZONTAL },
+          { id: 'distribute', actions: DISTRIBUTE },
+        ]}
+        onAction={vi.fn()}
+      />,
+    )
+    expect(html).toContain('data-layout="stack"')
+    // Two rules for three stacked groups, and every one of them announced the
+    // way it is actually drawn — a stacked panel has no vertical rules.
+    expect(html.split('aria-orientation="horizontal"').length - 1).toBe(2)
+    expect(html).not.toContain('aria-orientation="vertical"')
+    // The disclosure changes the layout and nothing else: the same twelve
+    // actions still render, still grouped, still in order.
+    for (const action of [...Z_ORDER, ...ALIGN_HORIZONTAL, ...DISTRIBUTE]) {
+      expect(html).toContain(`data-testid="systemsketch-arrange-${action.id}"`)
+    }
+  })
+})
+
+describe('ArrangeTrigger', () => {
+  it('renders one labelled button carrying the supplied glyph and the pill chevron', () => {
+    const html = renderToStaticMarkup(
+      <ArrangeTrigger icon={icon('align-left')} label="Arrange" />,
+    )
+    expect(html).toContain('data-testid="systemsketch-arrange-trigger"')
+    expect(html).toContain('type="button"')
+    expect(html).toContain('title="Arrange"')
+    expect(html).toContain('aria-label="Arrange"')
+    expect(html).toContain('data-icon="align-left"')
+    expect(html).toContain('systemsketch-arrange__chevron')
+    // The whole point of the change: the cluster's own buttons are NOT in the
+    // pill's row beside the trigger.
+    expect(html).not.toContain('systemsketch-arrange__button')
+  })
+
+  it('spreads the props Radix injects through TldrawUiPopoverTrigger asChild', () => {
+    // Not decoration: `TldrawUiPopoverTrigger` is `Popover.Trigger asChild`, so
+    // the trigger opens nothing at all if this component swallows what Radix
+    // hands it. Static markup can see the ARIA half of that contract.
+    const html = renderToStaticMarkup(
+      <ArrangeTrigger
+        icon={icon('align-left')}
+        label="Arrange"
+        aria-expanded={false}
+        aria-haspopup="dialog"
+        data-state="closed"
+        className="extra-class"
+      />,
+    )
+    expect(html).toContain('aria-expanded="false"')
+    expect(html).toContain('aria-haspopup="dialog"')
+    expect(html).toContain('data-state="closed"')
+    expect(html).toContain('systemsketch-arrange__trigger extra-class')
   })
 })
