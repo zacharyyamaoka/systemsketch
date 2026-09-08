@@ -10,6 +10,8 @@ export type ContextualSurfaceItemId =
   | 'behavior-tree-actions'
   | 'block-actions'
   | 'appearance'
+  | 'opacity'
+  | 'arrange'
   | 'code-actions'
   | 'wrap'
   | 'layout'
@@ -31,8 +33,10 @@ export const CONTEXTUAL_SURFACE_REGISTRY: Readonly<
 > = {
   'branch-selection': ['branch-actions'],
   'behavior-tree-selection': ['behavior-tree-actions'],
-  'block-selection': ['block-actions', 'appearance', 'code-actions', 'wrap', 'layout', 'propagation-focus'],
-  'shape-selection': ['appearance', 'code-actions', 'wrap', 'layout', 'propagation-focus'],
+  'block-selection': [
+    'block-actions', 'appearance', 'opacity', 'arrange', 'code-actions', 'wrap', 'layout', 'propagation-focus',
+  ],
+  'shape-selection': ['appearance', 'opacity', 'arrange', 'code-actions', 'wrap', 'layout', 'propagation-focus'],
   'block-title-editing': ['title-formatting'],
 }
 

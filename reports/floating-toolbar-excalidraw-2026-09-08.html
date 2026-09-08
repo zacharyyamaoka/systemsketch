@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Floating toolbar — Excalidraw controls · SystemSketch</title>
+<style>
+  :root { color-scheme:light; --ink:#1c2027; --muted:#5c636e; --line:#d9dee6; --paper:#f2f4f8;
+    --card:#fff; --violet:#7048c8; --green:#1f8a5a; --orange:#c47b1b; --blue:#3061e6; }
+  * { box-sizing:border-box }
+  body { margin:0; color:var(--ink); background:radial-gradient(circle at 82% -4%,#efe9fb 0,transparent 40%),var(--paper);
+    font:16px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif }
+  main { width:min(1120px,calc(100% - 32px)); margin:auto; padding:40px 0 72px }
+  code { font:0.86em ui-monospace,SFMono-Regular,Menlo,monospace; background:#eef1f6; padding:1px 5px; border-radius:5px }
+  a { color:var(--violet); text-decoration:none } a:hover { text-decoration:underline }
+  .hero { padding:42px; border:1px solid #d5dde8; border-radius:24px; background:#ffffffe8; box-shadow:0 22px 60px #22344c14 }
+  .eyebrow { color:var(--violet); font-size:12px; font-weight:800; letter-spacing:.13em; text-transform:uppercase }
+  h1 { margin:10px 0 14px; font-size:clamp(30px,4.6vw,48px); line-height:1.06; letter-spacing:-.04em; max-width:26ch }
+  .lead { max-width:78ch; margin:0; color:var(--muted); font-size:17px }
+  .lead b { color:var(--ink) }
+  .quote { margin-top:16px; padding:14px 18px; border-left:4px solid var(--violet); background:#f6f3fd; border-radius:0 12px 12px 0;
+    font-size:14.5px; color:#3a404a; font-style:italic }
+  section { margin-top:22px; padding:30px; border:1px solid var(--line); border-radius:20px; background:#fffffff2;
+    box-shadow:0 12px 36px #22344c0d }
+  h2 { margin:0 0 6px; font-size:23px; letter-spacing:-.03em }
+  h3 { margin:20px 0 8px; font-size:16px; letter-spacing:-.01em }
+  section > p { margin:0 0 12px; color:#3a404a; max-width:80ch }
+  section > ul { margin:0 0 12px; padding-left:22px; color:#3a404a; max-width:80ch }
+  section li { margin:5px 0 }
+  .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0 6px }
+  @media (max-width:840px){ .metrics { grid-template-columns:repeat(2,1fr) } }
+  .metric { padding:15px; border:1px solid var(--line); border-radius:12px; background:#fafbfd }
+  .metric strong { display:block; font-size:22px; letter-spacing:-.03em }
+  .metric span { color:var(--muted); font-size:11px; line-height:1.4; display:block; margin-top:2px }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin-top:8px }
+  th, td { padding:9px 11px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line) }
+  thead th { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted) }
+  tbody th { font-weight:650; min-width:120px }
+  .tag { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; letter-spacing:.03em }
+  .tag.yes { background:#e9f7f0; color:var(--green) }
+  .tag.no { background:#fdeeec; color:#c8453a }
+  .tag.new { background:#f0eafd; color:var(--violet) }
+  .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; margin:16px 0 6px }
+  figure { margin:0; border:1px solid var(--line); border-radius:12px; background:#fafbfd; padding:10px; display:flex; flex-direction:column }
+  figure img { width:100%; height:auto; display:block; border-radius:8px; border:1px solid #e3e8ef; background:#fff }
+  figure .missing { padding:40px 10px; text-align:center; color:#c8453a; font-size:13px; background:#fdeeec; border-radius:8px }
+  figcaption { font-size:12.5px; color:var(--muted); margin-top:9px; line-height:1.45 }
+  figcaption b { color:var(--ink) }
+  .checklist { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px }
+  .checklist li { padding:9px 12px; border-radius:9px; background:#f1faf5; border:1px solid #cfe6da; font-size:13.5px; color:#1f4d38 }
+  .checklist li::before { content:"✓ "; color:var(--green); font-weight:800 }
+  .excluded { padding:14px 16px; border-radius:12px; background:#f7f8fb; border:1px solid var(--line); font-size:13.5px; color:var(--muted) }
+  footer { margin-top:26px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px }
+</style></head><body><main>
+
+<div class="hero">
+  <div class="eyebrow">SystemSketch · track/floating-toolbar-excalidraw · 8 September 2026</div>
+  <h1>The floating selection pill now formats at Excalidraw's depth.</h1>
+  <p class="lead">FigJam and stock tldraw show too little; Figma is too much for a pop-up pill. This track brought the
+  pill's formatting depth up to <b>exactly Excalidraw's own control surface</b> — 48 of its own
+  vendored SVG glyphs, a stock <code>pattern</code> fill and <code>draw</code> dash, a real Opacity slider, and a full
+  z-order/align/distribute Arrange cluster — all reading and writing through tldraw's own StyleProps and editor APIs.
+  No new value model, no Figma-depth scrub inputs (that is the parallel inspector-panel track's job).</p>
+  <div class="quote">"figjam and stock tldraw give too little, excalidraw is just right, figma is too much for the toolbar,
+  we use the side inspector for that" — "use the excalidraw icons exactly for showing things like line styling, line
+  thickness, etc, so we don't need to reinvent another visual icon grammar."</div>
+  <div class="metrics">
+    <div class="metric"><strong>48</strong><span>vendored Excalidraw glyphs (39 static + 9 flip-aware components)</span></div>
+    <div class="metric"><strong>4</strong><span>fill options (was 3, Hatched added)</span></div>
+    <div class="metric"><strong>5</strong><span>line styles (was 5, Hand-drawn added)</span></div>
+    <div class="metric"><strong>^1.8.0</strong><span>@floating-ui/core replacing the hand-rolled flip math</span></div>
+  </div>
+</div>
+
+<section>
+  <h2>Real-browser proof</h2>
+  <p>Driven end-to-end in headless Chrome against the track's own dev stack
+  (<code>tests/floating_toolbar_excalidraw_smoke.mjs</code>, 10 checks, green twice in a
+  row) — real pointer gestures draw two overlapping rectangles and a text shape, then five of the new/vendored controls
+  are driven and the result read back from the live editor, never just the DOM.</p>
+  <ul class="checklist">
+    <li>Two overlapping rectangles and a text shape drawn with real Input.dispatchMouseEvent gestures</li><li>Selecting one rectangle shows the pill (data-testid=systemsketch-selection-menu, data-visible=true)</li><li>The stroke-width radio's live DOM path matches StrokeWidthBoldIcon's d, read straight from icons.tsx</li><li>Dragging Opacity to 30% sets every selected shape's opacity to 0.3 (getSharedOpacity / setOpacityForSelectedShapes)</li><li>Clicking Fill → Hatched writes stock tldraw's pattern fill</li><li>Clicking Line style → Hand-drawn writes stock tldraw's draw dash</li><li>Bring to front sorts the back rectangle above its sibling (getSortedChildIdsForParent order)</li><li>Align top leaves both selected rectangles at the same page y (alignShapes)</li><li>Dragging a selection to the top edge still flips the pill to data-side="below" (floatingToolbarPlacement.ts)</li><li>Zero local console errors across the whole journey</li>
+  </ul>
+  <h3>Screenshots, captured by the journey itself</h3>
+  <div class="gallery">
+    <figure><img src='media/floating-toolbar-excalidraw/1-pill-appears.png' alt='The pill appears the moment one rectangle is selected.'><figcaption>The pill appears the moment one rectangle is selected.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/2-vendored-stroke-width-icons.png' alt='The Line style popover's stroke-width row draws Excalidraw's own StrokeWidthBase/Bold/ExtraBold glyphs, in white on the pill's dark ink — not black-on-dark.'><figcaption>The Line style popover's stroke-width row draws Excalidraw's own StrokeWidthBase/Bold/ExtraBold glyphs, in white on the pill's dark ink — not black-on-dark.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/3-opacity-30.png' alt='The new Opacity slider at 30%; the right-panel Inspector (a parallel, untouched surface) confirms the same 30% written through setOpacityForSelectedShapes.'><figcaption>The new Opacity slider at 30%; the right-panel Inspector (a parallel, untouched surface) confirms the same 30% written through setOpacityForSelectedShapes.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/4-fill-hatched.png' alt='Fill → Hatched: stock tldraw's own hatch rendering on the shape, drawn from the vendored FillHachureIcon in the popover.'><figcaption>Fill → Hatched: stock tldraw's own hatch rendering on the shape, drawn from the vendored FillHachureIcon in the popover.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/5-dash-hand-drawn.png' alt='Line style → Hand-drawn: stock tldraw's sketchy stroke, selected via the vendored SloppinessArtistIcon.'><figcaption>Line style → Hand-drawn: stock tldraw's sketchy stroke, selected via the vendored SloppinessArtistIcon.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/6-bring-to-front.png' alt='Bring to front: the back rectangle now paints above its sibling.'><figcaption>Bring to front: the back rectangle now paints above its sibling.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/7-align-top.png' alt='Align top: both rectangles share one page y after one Arrange click.'><figcaption>Align top: both rectangles share one page y after one Arrange click.</figcaption></figure>
+    <figure><img src='media/floating-toolbar-excalidraw/8-flipped-below.png' alt='Placement-engine regression check: pinned near the top edge, the pill still flips to data-side="below".'><figcaption>Placement-engine regression check: pinned near the top edge, the pill still flips to data-side="below".</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Fill and Line style, extended in tldraw's own vocabulary</h2>
+  <p>Both additions are <b>stock tldraw enum values</b> already known to <code>DefaultFillStyle</code> /
+  <code>DefaultDashStyle</code> — nothing in the shape renderer changed, only which values this menu now offers.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div><h3>Fill (4)</h3><table><tbody><tr><th>solid</th><td>existing</td></tr><tr><th>pattern</th><td><span class="tag new">NEW</span> stock DefaultFillStyle value</td></tr><tr><th>semi</th><td>existing</td></tr><tr><th>none</th><td>existing</td></tr></tbody></table></div>
+    <div><h3>Line style (5)</h3><table><tbody><tr><th>draw</th><td><span class="tag new">NEW</span> stock DefaultDashStyle default, now offered</td></tr><tr><th>solid</th><td>existing</td></tr><tr><th>dashed</th><td>existing</td></tr><tr><th>dotted</th><td>existing</td></tr><tr><th>none</th><td>existing</td></tr></tbody></table></div>
+  </div>
+</section>
+
+<section>
+  <h2>Vendored icons, not a reinvented grammar</h2>
+  <p><code>src/appearance/excalidrawIcons/</code> ports 48 glyphs verbatim from
+  <code>excalidraw/excalidraw</code>'s own <code>components/icons.tsx</code> — fill, stroke width, stroke style,
+  sloppiness, arrowheads (as flip-aware components), font size, text align, z-order, and align/distribute. Every
+  <code>var(--icon-fill-color)</code> became <code>currentColor</code>, so a glyph inherits the pill's own ink in both
+  themes instead of painting black-on-dark. <code>AppearanceGlyph.tsx</code>'s <code>EXCALIDRAW_GLYPHS</code> /
+  <code>EXCALIDRAW_ARROWHEADS</code> lookup (7 families,
+  6 arrowhead values) outranks FigJam's traced icon exactly for these
+  value/family pairs; a value with no Excalidraw analogue (tldraw's <code>semi</code>/<code>none</code> fill, the
+  <code>async</code> dash, <code>inverted</code>/<code>square</code>/<code>pipe</code> arrowheads) keeps its existing
+  app-drawn glyph rather than an invented one.</p>
+  <p>Attribution: <code>NOTICE.md</code> names all three real upstreams —
+  <span class="tag yes">Excalidraw MIT</span>
+  <span class="tag yes">Font Awesome</span>
+  <span class="tag yes">Tabler Icons</span>
+  — corrected during Wave 1 verification after the task prompt's "Excalidraw alone is sufficient" turned out to be wrong
+  (Excalidraw's own icon file credits all three).</p>
+  <p style="color:var(--muted);font-size:13px">Sample of the vendored set: <code>FillZigZagIcon, FillHachureIcon, FillCrossHatchIcon, FillSolidIcon, StrokeWidthBaseIcon, StrokeWidthBoldIcon, StrokeWidthExtraBoldIcon, StrokeStyleDashedIcon … +31 more</code></p>
+</section>
+
+<section>
+  <h2>Opacity and Arrange — new, and entirely stock <code>Editor</code> calls</h2>
+  <p>Both new pill items are registered as <code>opacity</code> and
+  <code>arrange</code> in <code>contextualSurfaceRegistry.ts</code>, so
+  <code>BlockContextMenu.tsx</code> (the right-click menu) can consume them later at its own merge — that 760-line file
+  itself was not touched in this track.</p>
+  <table>
+    <thead><tr><th>Control</th><th>Reads</th><th>Writes</th></tr></thead>
+    <tbody>
+      <tr><th>Opacity</th><td><code>editor.getSharedOpacity()</code></td><td><code>editor.setOpacityForSelectedShapes(opacity)</code>, one <code>markHistoryStoppingPoint</code> per drag</td></tr>
+      <tr><th>Arrange · z-order</th><td>—</td><td><code>sendToBack</code> / <code>sendBackward</code> / <code>bringForward</code> / <code>bringToFront</code> (any selection)</td></tr>
+      <tr><th>Arrange · align</th><td>—</td><td><code>editor.alignShapes(ids, op)</code> (2+ shapes)</td></tr>
+      <tr><th>Arrange · distribute</th><td>—</td><td><code>editor.distributeShapes(ids, axis)</code> (3+ shapes)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>The placement engine moved to Floating UI — same policy, proven twice</h2>
+  <p>The hand-rolled FigJam flip math in the old <code>selectionMenuPlacement.ts</code> is gone; the pill now positions
+  through <code>@floating-ui/core@^1.8.0</code> with three custom middleware carrying the
+  FigJam-specific semantics stock middleware doesn't have (vertical flip-then-pin-then-below, viewport-margin clamping,
+  and a floor above the bottom tool belt). A frozen, embedded copy of the OLD math is diffed against the new engine
+  across <b>4,608</b> generated cases in <code>floatingToolbarPlacement.test.ts</code> — every
+  one matches. The real-browser journey above re-proves the one semantic most likely to regress in a swap like this: a
+  selection dragged to the top edge still flips the pill to <code>data-side="below"</code> rather than clamping onto the
+  shape (screenshot 8).</p>
+  <p style="color:var(--muted);font-size:13px">This placement-engine swap is a genuine architecture fork with real
+  alternatives — per <code>docs/peps/README.md</code> it is written up as a numbered PEP at merge time, once it actually
+  lands on <code>main</code>, not before.</p>
+</section>
+
+<section>
+  <h2>Deliberately excluded</h2>
+  <p>Kept out on purpose, so this track does not duplicate the parallel inspector-panel or workbench efforts, or fork a
+  stock tldraw primitive it doesn't own:</p>
+  <div class="excluded"><ul><li>Numeric/scrub inputs of any kind (exact px stroke, exact radius, typed opacity) — inspector-panel scope, a parallel worktree</li><li>Property tree / per-shape schema browsing — same inspector-panel boundary</li><li>Excalidraw's Edges (sharp/round) for geo shapes — tldraw@5.3.2 geo has no roundness prop; honoring it would fork GeoShapeUtil</li><li>Excalidraw's 3-level sloppiness — tldraw has exactly one 'draw' mode, so this maps to one option, not three</li><li>Zigzag-fill Alt-click easter egg, freedraw pressure, custom FontPicker, hyperlink/crop/line-editor actions</li><li>The bottom tool belt and BlockContextMenu.tsx — both explicit out-of-scope exceptions, untouched</li></ul></div>
+</section>
+
+<footer>
+  <span>Built by <code>docs/build_floating_toolbar_excalidraw.py</code> — every count above measured from the live tree,
+  not hardcoded.</span>
+  <span>Screenshots served relatively from ignored <code>reports/media/floating-toolbar-excalidraw/</code> by the
+  retained review runtime.</span>
+</footer>
+</main></body></html>

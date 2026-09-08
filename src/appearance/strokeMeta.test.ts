@@ -196,7 +196,7 @@ describe('applying an edge', () => {
 })
 
 describe('the dash a fresh shape is drawn with', () => {
-	it('seeds solid, because the menu no longer offers tldraw\'s sketchy default', () => {
+	it('seeds solid — a house style now, not a menu-vocabulary gap', () => {
 		const { editor, styleWrites } = fakeEditor([])
 		seedDefaultLineStyle(editor)
 		expect(styleWrites).toEqual([{ scope: 'next', value: 'solid' }])

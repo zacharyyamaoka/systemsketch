@@ -435,6 +435,24 @@
   stroke: none;
 }
 
+/* A vendored Excalidraw glyph (`AppearanceGlyph.tsx`'s `ExcalidrawGlyph`
+ * wrapper): the icon carries its own stroke/fill from `createIcon.tsx`
+ * (already `currentColor`), so this only sizes the box `createIcon` itself
+ * never sets a width/height for. `display:flex` + the child `svg` at 100%
+ * lets a non-square source (the 40x20 arrowhead preview strip) letterbox
+ * inside the square cell via the SVG's own default `preserveAspectRatio`,
+ * instead of stretching or overflowing it. */
+.systemsketch-appearance__glyph--excalidraw {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.systemsketch-appearance__glyph--excalidraw svg {
+  width: 100%;
+  height: 100%;
+}
+
 .systemsketch-appearance__glyph [data-role='solid'] {
   fill: currentcolor;
   stroke: none;

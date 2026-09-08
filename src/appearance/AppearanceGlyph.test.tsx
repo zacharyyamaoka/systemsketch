@@ -48,10 +48,11 @@ describe('glyph dispatch is the registry field, not the kind', () => {
     const stacked = control('strokeWidth', { layout: 'row' })
     const beside = control('strokeWidth', { layout: 'row', id: 'connectorThickness' })
     expect(markup(stacked, 'thick')).toBe(markup(beside, 'thick'))
-    // Each rung is drawn at the width it paints: 2 / 3.5 / 7 scene units in a
-    // 20-unit box shown at 24px.
-    expect(markup(stacked, 'thin')).toContain('height="1.6666666666666667"')
-    expect(markup(stacked, 'thick')).toContain('height="5.833333333333334"')
+    // Excalidraw's own three stroke-width glyphs draw the ladder now (Base,
+    // Bold, ExtraBold) — each a rule at its own weight, distinguished here by
+    // the vendored path's own stroke width rather than a drawn bar's height.
+    expect(markup(stacked, 'thin')).toContain('stroke-width="1.25"')
+    expect(markup(stacked, 'thick')).toContain('stroke-width="3.75"')
   })
 
   it('swapping a control\'s family swaps its drawing, kind untouched', () => {
@@ -71,7 +72,19 @@ describe('glyph dispatch is the registry field, not the kind', () => {
   })
 
   it('FigJam\'s traced icon still substitutes for a value it draws', () => {
-    expect(markup(control('lineShape'), 'curve')).toContain('line-shape/Curved')
+    // `fill`'s `semi` (Transparent) has no Excalidraw analog in the vendored
+    // set — only `solid` and `pattern` were remapped — so it still falls
+    // through to FigJam's own traced icon, exactly as before.
+    expect(markup(control('fill'), 'semi')).toContain('fill/Transparent')
+  })
+
+  it('Excalidraw\'s vendored glyph outranks FigJam\'s traced icon where the plan remaps it', () => {
+    // `lineShape`'s `curve` used to fall to FigJam's traced icon; Zach's ask
+    // ("use the excalidraw icons exactly...") remaps it to the vendored
+    // `roundArrowIcon` instead, which must now win.
+    const rendered = markup(control('lineShape'), 'curve')
+    expect(rendered).not.toContain('line-shape/Curved')
+    expect(rendered).toContain('M16,12L20,9L16,6')
   })
 
   it('an own-drawing family beats a traced icon: the typeface list stays Aa', () => {

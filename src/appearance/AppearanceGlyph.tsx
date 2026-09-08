@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ComponentType, ReactElement, ReactNode } from 'react'
 import { useValue, type Editor } from 'tldraw'
 
 import type {
@@ -9,6 +9,36 @@ import type {
 import { FIGJAM_ICONS } from './figjamIcons'
 import { STROKE_WIDTH_PX, strokeWidthPxForRung } from './strokeMeta'
 import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
+import {
+  ArrowheadArrowIcon,
+  ArrowheadBarIcon,
+  ArrowheadCircleIcon,
+  ArrowheadDiamondIcon,
+  ArrowheadNoneIcon,
+  ArrowheadTriangleIcon,
+  elbowArrowIcon,
+  FillHachureIcon,
+  FillSolidIcon,
+  FontSizeExtraLargeIcon,
+  FontSizeLargeIcon,
+  FontSizeMediumIcon,
+  FontSizeSmallIcon,
+  roundArrowIcon,
+  sharpArrowIcon,
+  SloppinessArtistIcon,
+  StrokeStyleDashedIcon,
+  StrokeStyleDottedIcon,
+  StrokeStyleSolidIcon,
+  StrokeWidthBaseIcon,
+  StrokeWidthBoldIcon,
+  StrokeWidthExtraBoldIcon,
+  TextAlignBottomIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignMiddleIcon,
+  TextAlignRightIcon,
+  TextAlignTopIcon,
+} from './excalidrawIcons/icons'
 
 interface GlyphFamilyRenderer {
   /**
@@ -46,6 +76,114 @@ const GLYPH_FAMILIES: Record<ContextualGlyphFamily, GlyphFamilyRenderer> = {
 }
 
 /**
+ * Excalidraw's vendored glyphs, exactly where Zach asked for them: "use the
+ * excalidraw icons exactly for showing things like line styling, line
+ * thickness, etc, so we don't need to reinvent another visual icon grammar."
+ *
+ * This is a SECOND lookup layer, keyed the same way `GLYPH_FAMILIES` is (by
+ * `ContextualGlyphFamily`), but narrower on purpose: only the value/family
+ * combinations named in the icon-vendoring plan get a vendored glyph. Every
+ * value absent from a family's map here keeps whatever it already drew —
+ * FigJam's traced icon where one exists, or this file's own drawn glyph
+ * otherwise — because inventing an Excalidraw-styled glyph for a state
+ * Excalidraw has no icon for (tldraw's `semi`/`none` fill, `inverted`/
+ * `square`/`pipe` arrowheads, `async`) would be worse than the honest
+ * mismatch the truthful-rendering rule already accepts elsewhere in this
+ * file. `size` is looked up too, but only reached outside the Font size
+ * LIST layout below — the list's rows stay glyph-free on purpose (each row
+ * previews itself at its own size; see the dispatcher).
+ */
+const EXCALIDRAW_GLYPHS: Partial<Record<ContextualGlyphFamily, Readonly<Record<string, ReactNode>>>> = {
+  fill: { solid: FillSolidIcon, pattern: FillHachureIcon },
+  dash: {
+    draw: SloppinessArtistIcon,
+    solid: StrokeStyleSolidIcon,
+    dashed: StrokeStyleDashedIcon,
+    dotted: StrokeStyleDottedIcon,
+  },
+  strokeWidth: {
+    thin: StrokeWidthBaseIcon,
+    medium: StrokeWidthBoldIcon,
+    thick: StrokeWidthExtraBoldIcon,
+  },
+  size: {
+    s: FontSizeSmallIcon,
+    m: FontSizeMediumIcon,
+    l: FontSizeLargeIcon,
+    xl: FontSizeExtraLargeIcon,
+  },
+  align: {
+    start: TextAlignLeftIcon,
+    middle: TextAlignCenterIcon,
+    end: TextAlignRightIcon,
+  },
+  verticalAlign: {
+    start: TextAlignTopIcon,
+    middle: TextAlignMiddleIcon,
+    end: TextAlignBottomIcon,
+  },
+  lineShape: {
+    elbow: elbowArrowIcon,
+    curve: roundArrowIcon,
+    straight: sharpArrowIcon,
+  },
+}
+
+/**
+ * The arrowhead values Excalidraw draws, as flip-aware components rather than
+ * fixed nodes — `flip` mirrors the glyph for the start side, matching
+ * `createIcon.tsx`'s `ArrowheadIconProps` contract. `inverted`, `square` and
+ * `pipe` have no Excalidraw analog (the plan's own exclusion list) and are
+ * left out, so they fall through to FigJam's traced icon or this file's drawn
+ * `ArrowheadGlyph`, exactly as before.
+ */
+const EXCALIDRAW_ARROWHEADS: Readonly<Record<string, ComponentType<{ flip?: boolean }>>> = {
+  none: ArrowheadNoneIcon,
+  arrow: ArrowheadArrowIcon,
+  triangle: ArrowheadTriangleIcon,
+  diamond: ArrowheadDiamondIcon,
+  dot: ArrowheadCircleIcon,
+  bar: ArrowheadBarIcon,
+}
+
+/**
+ * A vendored icon wrapped for this app's 24px option-cell grid.
+ *
+ * `createIcon` never sets a `width`/`height` DOM attribute (only a `viewBox`
+ * — see `createIcon.tsx`), so an unstyled vendored `<svg>` renders at the
+ * browser's intrinsic default and blows out the pill. This class-only wrapper
+ * gives it the same box every drawn glyph already sits in
+ * (`.systemsketch-appearance__glyph`), sized in `appearance.css`; a
+ * non-square source (the 40x20 arrowhead preview strip) letterboxes inside
+ * the square cell via the SVG's own default `preserveAspectRatio`, rather
+ * than stretching.
+ */
+function ExcalidrawGlyph({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="systemsketch-appearance__glyph systemsketch-appearance__glyph--excalidraw"
+      aria-hidden="true"
+    >
+      {children}
+    </span>
+  )
+}
+
+/** The vendored glyph for an ordinary (non-arrowhead) family/value pair, if one is mapped. */
+function excalidrawGlyphFor(
+  family: ContextualGlyphFamily | undefined,
+  value: string | undefined,
+): ReactNode | undefined {
+  if (!family || value === undefined) return undefined
+  return EXCALIDRAW_GLYPHS[family]?.[value]
+}
+
+/** The vendored, flip-aware arrowhead component for a value, if one is mapped. */
+function excalidrawArrowheadFor(value: string | undefined): ComponentType<{ flip?: boolean }> | undefined {
+  return value === undefined ? undefined : EXCALIDRAW_ARROWHEADS[value]
+}
+
+/**
  * What an appearance option looks like.
  *
  * FigJam previews the value rather than naming it — the size list is drawn at
@@ -67,6 +205,23 @@ export function AppearanceGlyph({
   // own size, and the label carries that. (The same `size` family still draws
   // its bars where the layout is a compact row — the connector's weight.)
   if (control.glyph === 'size' && control.layout === 'list') return null
+  // Excalidraw's own vendored glyph, wherever the icon-vendoring plan names
+  // one for this family/value — see `EXCALIDRAW_GLYPHS` and
+  // `EXCALIDRAW_ARROWHEADS` above for exactly which values these are. This
+  // OUTRANKS FigJam's traced icon below: Zach's explicit ask is Excalidraw's
+  // own glyphs for these controls, not FigJam's redrawn ones.
+  if (control.glyph === 'arrowheadStart' || control.glyph === 'arrowheadEnd') {
+    const ArrowheadIcon = excalidrawArrowheadFor(value)
+    if (ArrowheadIcon) {
+      // Excalidraw draws one arrowhead set pointing at its terminal (unflipped)
+      // side; the start control mirrors it, same convention as FigJam's own
+      // traced pair below.
+      return <ExcalidrawGlyph><ArrowheadIcon flip={control.glyph === 'arrowheadStart'} /></ExcalidrawGlyph>
+    }
+  } else {
+    const excalidraw = excalidrawGlyphFor(control.glyph, value)
+    if (excalidraw) return <ExcalidrawGlyph>{excalidraw}</ExcalidrawGlyph>
+  }
   // FigJam's own icon wherever FigJam draws this value. The drawn families
   // below stay for the states tldraw has and FigJam does not.
   const figjam = figjamIconName(control.kind as AppearanceControlId, value)

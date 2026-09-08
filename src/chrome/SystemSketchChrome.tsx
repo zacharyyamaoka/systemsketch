@@ -10,9 +10,27 @@ import {
   useToasts,
   useValue,
   type Editor,
+  type TLShapeId,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { cloneElement, isValidElement, useCallback, useEffect, useMemo, useRef } from 'react'
+import type { ComponentType, ReactElement, ReactNode } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
+import {
+  AlignBottomIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  AlignTopIcon,
+  BringForwardIcon,
+  BringToFrontIcon,
+  CenterHorizontallyIcon,
+  CenterVerticallyIcon,
+  DistributeHorizontallyIcon,
+  DistributeVerticallyIcon,
+  SendBackwardIcon,
+  SendToBackIcon,
+} from '../appearance/excalidrawIcons/icons'
+import { ArrangeControls, type ArrangeAction } from '../contextualMenus/ArrangeControls'
+import { OpacityControl } from '../contextualMenus/OpacityControl'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
 import { canWrapSelection } from '../frames/wrapSelection'
@@ -283,6 +301,126 @@ function InspectorEmptyState() {
   )
 }
 
+/**
+ * Wrap a vendored Excalidraw glyph (a pre-built `<svg>` element — see
+ * `createIcon.tsx`) as the `ComponentType<{ className }>` `ArrangeControls`
+ * expects for its `icon` prop. `AppearanceGlyph.tsx` solves the same "a
+ * `createIcon` result carries no width/height of its own" problem with a
+ * wrapping `<span>`; this clones the class directly onto the vendored `<svg>`
+ * instead, since `ArrangeControls` already owns the button's own layout and
+ * only needs the icon to size itself.
+ */
+function excalidrawIcon(node: ReactNode): ComponentType<{ className?: string }> {
+  return function ExcalidrawArrangeIcon({ className }: { className?: string }) {
+    return isValidElement(node) ? cloneElement(node as ReactElement<{ className?: string }>, { className }) : null
+  }
+}
+
+const ARRANGE_Z_ORDER: readonly ArrangeAction[] = [
+  { id: 'sendToBack', label: 'Send to back', icon: excalidrawIcon(SendToBackIcon) },
+  { id: 'sendBackward', label: 'Send backward', icon: excalidrawIcon(SendBackwardIcon) },
+  { id: 'bringForward', label: 'Bring forward', icon: excalidrawIcon(BringForwardIcon) },
+  { id: 'bringToFront', label: 'Bring to front', icon: excalidrawIcon(BringToFrontIcon) },
+]
+
+const ARRANGE_ALIGN: readonly ArrangeAction[] = [
+  { id: 'left', label: 'Align left', icon: excalidrawIcon(AlignLeftIcon) },
+  { id: 'center-horizontal', label: 'Align horizontal centers', icon: excalidrawIcon(CenterHorizontallyIcon) },
+  { id: 'right', label: 'Align right', icon: excalidrawIcon(AlignRightIcon) },
+  { id: 'top', label: 'Align top', icon: excalidrawIcon(AlignTopIcon) },
+  { id: 'center-vertical', label: 'Align vertical centers', icon: excalidrawIcon(CenterVerticallyIcon) },
+  { id: 'bottom', label: 'Align bottom', icon: excalidrawIcon(AlignBottomIcon) },
+]
+
+const ARRANGE_DISTRIBUTE: readonly ArrangeAction[] = [
+  { id: 'distribute-horizontal', label: 'Distribute horizontally', icon: excalidrawIcon(DistributeHorizontallyIcon) },
+  { id: 'distribute-vertical', label: 'Distribute vertically', icon: excalidrawIcon(DistributeVerticallyIcon) },
+]
+
+const ARRANGE_ALIGN_OPS = ['left', 'right', 'top', 'bottom', 'center-horizontal', 'center-vertical'] as const
+type ArrangeAlignOp = (typeof ARRANGE_ALIGN_OPS)[number]
+function isArrangeAlignOp(id: string): id is ArrangeAlignOp {
+  return (ARRANGE_ALIGN_OPS as readonly string[]).includes(id)
+}
+
+/** Every z-order action a selection of any size can take, keyed by its id. */
+const ARRANGE_Z_ORDER_HANDLERS: Readonly<Record<string, (editor: Editor, ids: TLShapeId[]) => void>> = {
+  sendToBack: (editor, ids) => { editor.sendToBack(ids) },
+  sendBackward: (editor, ids) => { editor.sendBackward(ids) },
+  bringForward: (editor, ids) => { editor.bringForward(ids) },
+  bringToFront: (editor, ids) => { editor.bringToFront(ids) },
+}
+
+/**
+ * The Arrange cluster: z-order for any selection, align once 2+ shapes are
+ * selected, distribute once 3+ are — exactly stock `Editor` calls
+ * (`sendToBack`/`sendBackward`/`bringForward`/`bringToFront`/`alignShapes`/
+ * `distributeShapes`), no new value model. `ArrangeControls` itself holds no
+ * selection-count logic; this adapter is where that policy lives.
+ */
+function ArrangeAdapter() {
+  const editor = useEditor()
+  const selectionCount = useValue(
+    'systemsketch arrange selection count',
+    () => editor.getSelectedShapeIds().length,
+    [editor],
+  )
+  if (selectionCount === 0) return null
+  const align = selectionCount >= 2
+    ? (selectionCount >= 3 ? [...ARRANGE_ALIGN, ...ARRANGE_DISTRIBUTE] : ARRANGE_ALIGN)
+    : undefined
+  const onAction = (id: string) => {
+    const ids = editor.getSelectedShapeIds()
+    if (ids.length === 0) return
+    editor.markHistoryStoppingPoint('arrange')
+    const zOrder = ARRANGE_Z_ORDER_HANDLERS[id]
+    if (zOrder) { zOrder(editor, ids); return }
+    if (isArrangeAlignOp(id)) { editor.alignShapes(ids, id); return }
+    if (id === 'distribute-horizontal') { editor.distributeShapes(ids, 'horizontal'); return }
+    if (id === 'distribute-vertical') { editor.distributeShapes(ids, 'vertical') }
+  }
+  return <ArrangeControls zOrder={ARRANGE_Z_ORDER} align={align} onAction={onAction} />
+}
+
+/**
+ * The opacity slider: Excalidraw-parity 0-100 percent, read through
+ * `editor.getSharedOpacity()` and written through
+ * `editor.setOpacityForSelectedShapes()` — stock tldraw's own shared-style
+ * plumbing, mapped onto the 0-100 scale `OpacityControl` speaks (see that
+ * component's own doc for why the split).
+ */
+function OpacityAdapter() {
+  const editor = useEditor()
+  const hasSelection = useValue(
+    'systemsketch opacity has selection',
+    () => editor.getSelectedShapeIds().length > 0,
+    [editor],
+  )
+  const shared = useValue('systemsketch opacity shared', () => editor.getSharedOpacity(), [editor])
+  const value: number | 'mixed' | null = !hasSelection
+    ? null
+    : shared.type === 'mixed' ? 'mixed' : Math.round(shared.value * 100)
+  // WHY a ref rather than marking a stopping point on every call: a slider
+  // drag fires many `continuous` writes in one gesture (see
+  // `OpacityControl.tsx`), and marking on each would make every tick its own
+  // undo step. Marking ONCE at drag start — then not again until the next
+  // gesture — is what coalesces the whole drag, continuous ticks and the
+  // final settle alike, into one step a single undo reverts.
+  const draggingRef = useRef(false)
+  const handleChange = (percent: number, options?: { continuous?: boolean }) => {
+    if (options?.continuous) {
+      if (!draggingRef.current) {
+        draggingRef.current = true
+        editor.markHistoryStoppingPoint('opacity')
+      }
+    } else {
+      draggingRef.current = false
+    }
+    editor.setOpacityForSelectedShapes(percent / 100)
+  }
+  return <OpacityControl value={value} onChange={handleChange} label="Opacity" />
+}
+
 function SelectionMiniMenu() {
   const editor = useEditor()
   const { addToast } = useToasts()
@@ -379,6 +517,11 @@ function SelectionMiniMenu() {
     || hasBlockMiniMenu
     || hasCode
     || hasAppearance
+    // Arrange's z-order actions (send to back / bring to front, etc.) apply
+    // to ANY non-empty selection, so once `canShow` is true there is always
+    // something the pill can show — a selection with no appearance controls,
+    // no Block actions and nothing to wrap no longer hides it.
+    || canShow
     || canWrap
     || propagationSeed !== null
     || layoutActions.tidyEdges
@@ -422,6 +565,8 @@ function SelectionMiniMenu() {
     'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
     'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
     appearance: <AppearanceControls />,
+    opacity: <OpacityAdapter />,
+    arrange: <ArrangeAdapter />,
     // Code contributes ONLY what is unique to it (line numbers, the character
     // width) into this same pill — its language and text size are already
     // ordinary appearance rows above. One menu, never a second floating surface.

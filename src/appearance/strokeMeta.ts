@@ -473,11 +473,14 @@ export function installStrokeWidthDefault(editor: Editor): () => void {
 /**
  * Seed the dash a fresh shape is drawn with.
  *
- * WHY: tldraw's own default is `draw` — the sketchy Excalidraw-ish outline the
- * Line style popover no longer offers, since SystemSketch's vocabulary is
- * FigJam's. Left alone, every new rectangle would land in a state its own menu
- * cannot express. Seeded only when the instance has no dash of its own, so a
- * choice made on the canvas still survives.
+ * WHY: tldraw's own default is `draw`, the sketchy Excalidraw-ish outline.
+ * The Line style popover offers it too now ("Hand-drawn", the excalidraw
+ * icon vendoring's `SloppinessArtistIcon` — see `contextualControlRegistry.ts`
+ * and `AppearanceGlyph.tsx`), so this is no longer a menu-vocabulary gap this
+ * seed papers over — it is SystemSketch's own house style: new shapes still
+ * start crisp, and Hand-drawn is something a person opts into rather than the
+ * shape they get by default. Seeded only when the instance has no dash of its
+ * own, so a choice made on the canvas still survives.
  */
 export function seedDefaultLineStyle(editor: Editor): void {
 	const stored = editor.getInstanceState().stylesForNextShape[DefaultDashStyle.id]

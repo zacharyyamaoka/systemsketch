@@ -156,9 +156,9 @@ describe('appearance controls', () => {
       .toEqual(['Thin', 'Medium', 'Thick'])
     expect(lineStyle.modeControl?.options.map((option) => option.value))
       .toEqual(['thin', 'medium', 'thick'])
-    // `draw` is no longer offered, and a shape that still stores it is named
-    // by its stored token rather than called mixed.
-    expect(triggerLabel(lineStyle)).toBe('Line style, draw')
+    // `draw` is offered now too, as "Hand-drawn" — the excalidraw-vendored
+    // sloppiness glyph joining the vocabulary (see `AppearanceGlyph.tsx`).
+    expect(triggerLabel(lineStyle)).toBe('Line style, hand-drawn')
   })
 
   it('names both halves of the stacked Line style trigger, since its icon shows neither', () => {
@@ -189,7 +189,7 @@ describe('appearance controls', () => {
     expect(stroke.modeControl?.layout).toBe('chips')
     expect(stroke.modeControl?.meta).toBe('pattern')
     expect(stroke.modeControl?.options.map((option) => option.label))
-      .toEqual(['Solid', 'Dashed', 'Dotted', 'Async', 'None'])
+      .toEqual(['Hand-drawn', 'Solid', 'Dashed', 'Dotted', 'Async', 'None'])
     // ...and the thickness rungs above those again, the same `above` link one
     // more time rather than a second kind of relationship.
     expect(stroke.modeControl?.modePlacement).toBe('above')
@@ -225,7 +225,7 @@ describe('appearance controls', () => {
     // freehand stroke has a width like every other edge.
     expect(control.modeControl?.id).toBe('strokeWidth')
     expect(control.options.map((option) => option.value))
-      .toEqual(['solid', 'dashed', 'dotted', 'async', 'none'])
+      .toEqual(['draw', 'solid', 'dashed', 'dotted', 'async', 'none'])
   })
 
   it('gives a connector the shape\'s own line styles with the labels turned off', () => {
@@ -359,10 +359,11 @@ describe('appearance controls', () => {
     const color = buildAppearanceControls(SHAPE_WITH_TEXT, true).find((c) => c.id === 'color')!
     expect(color.modeControl?.style).toBe(DefaultFillStyle)
     expect(color.modePlacement).toBe('above')
-    // Three fills, not tldraw's six, and in FigJam's own order: most paint
-    // first. The vocabulary and its direction are both FigJam's.
+    // Four fills, not tldraw's six (`fill` and `lined-fill` are migrated
+    // legacy values `fillPaint.ts` still repaints, never offered here): most
+    // opaque first, `pattern` beside its Solid sibling, most transparent last.
     expect(color.modeControl?.options.map((option) => option.label)).toEqual([
-      'Solid', 'Transparent', 'No fill',
+      'Solid', 'Hatched', 'Transparent', 'No fill',
     ])
   })
 
@@ -382,13 +383,13 @@ describe('appearance controls', () => {
   it('offers every value the style accepts, so the menu can show any document state', () => {
     const controls = buildAppearanceControls(SHAPE_WITH_TEXT, true)
     const byId = Object.fromEntries(controls.map((control) => [control.id, control]))
-    // `draw` is gone — it was the sketchy option that made the pill read as
-    // three products at once — and `seedDefaultLineStyle` is what keeps a
-    // freshly drawn shape out of it. `async` is ours rather than tldraw's.
+    // `draw` (Excalidraw-parity "Hand-drawn") is back, leading the vocabulary
+    // — `seedDefaultLineStyle` is what keeps a freshly drawn shape off it by
+    // default regardless. `async` is ours rather than tldraw's.
     expect(byId.strokeColor.modeControl?.options.map((option) => option.value))
-      .toEqual(['solid', 'dashed', 'dotted', 'async', 'none'])
+      .toEqual(['draw', 'solid', 'dashed', 'dotted', 'async', 'none'])
     expect(byId.color.modeControl?.options.map((option) => option.value))
-      .toEqual(['solid', 'semi', 'none'])
+      .toEqual(['solid', 'pattern', 'semi', 'none'])
     expect(byId.size.options.map((option) => option.value)).toEqual(['s', 'm', 'l', 'xl'])
     expect(byId.font.options.map((option) => option.value)).toEqual(['sans', 'serif', 'mono', 'draw'])
     expect(byId.color.options.map((option) => option.value)).toEqual([...APPEARANCE_COLORS])
@@ -416,23 +417,31 @@ describe('appearance controls', () => {
   })
 
   it('names a stored value the menu no longer offers, rather than calling it mixed', () => {
-    // A rectangle drawn before the vocabulary closed still holds `draw`, and a
-    // single shape with one definite value is not mixed. The pill says what
+    // `lined-fill` is one of the two legacy fill values `fillPaint.ts` still
+    // migrates real boards through (see `fillPaint.test.ts`) — genuinely
+    // absent from FILL_OPTIONS even after `pattern` joined it as "Hatched".
+    // A single shape with one definite value is not mixed: the pill says what
     // the shape is; the panel stays honest that nothing in it is chosen.
     const legacy = styleMap([
       [GeoShapeGeoStyle, shared('rectangle')],
       [DefaultColorStyle, shared('blue')],
-      [DefaultFillStyle, shared('pattern')],
+      [DefaultFillStyle, shared('lined-fill')],
       [DefaultDashStyle, shared('draw')],
     ])
     const controls = buildAppearanceControls(legacy, false)
     const fill = controls.find((c) => c.id === 'color')!.modeControl!
     expect(selectedOption(fill)).toBeUndefined()
-    expect(unofferedValue(fill)).toBe('pattern')
-    expect(triggerLabel(fill)).toBe('Fill, pattern')
+    expect(unofferedValue(fill)).toBe('lined-fill')
+    expect(triggerLabel(fill)).toBe('Fill, lined-fill')
 
+    // Every stock dash value (including `draw`) is offered now — there is no
+    // real leftover value left to stand in for "the menu no longer offers
+    // this", so the mechanism is exercised with a value tldraw itself never
+    // stores (a stand-in for whatever a future stock addition might be).
     const chips = controls.find((c) => c.id === 'strokeColor')!.modeControl!
-    expect(unofferedValue(chips)).toBe('draw')
+    expect(unofferedValue(chips)).toBeUndefined()
+    const chipsWithUnknown = withEdgeValues(chips, { color: null, pattern: 'wobbly', width: null })
+    expect(unofferedValue(chipsWithUnknown)).toBe('wobbly')
   })
 
   it('names typefaces the way FigJam does, so the reference app transfers', () => {
