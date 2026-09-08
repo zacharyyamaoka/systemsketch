@@ -1,0 +1,111 @@
+/* ss-content: Phase 2 ink-pass comparison lab — five real, non-shipping
+ * visual directions for the selection pill's own chrome, deliberately kept
+ * out of the app's live `--ss-*` theme vocabulary (tokens.css) since none of
+ * these is a decision yet, only something to look at side by side. Zach's
+ * pick, if any, becomes a PEP and a real token later — this file is scoped
+ * to stay reversible until then.
+ *
+ * Scope: the pill's own surface, dividers, triggers, popovers and the
+ * arrange/opacity chrome that shares its inverse polarity. The "Custom
+ * colour" picker sub-dialog (the hex field, hue/alpha sliders, the
+ * saturation square) keeps its fixed FigJam-dark styling in every skin —
+ * it is a rarely-opened secondary surface, not what a side-by-side
+ * comparison is judging.
+ *
+ * Mechanism: every `--systemsketch-pill-*` name here is read ONLY by the pill's own
+ * stylesheets (appearance.css, systemsketch-chrome.css), each as
+ * `var(--systemsketch-pill-x, <its existing literal or token>)` — so with no skin
+ * active every declaration resolves to exactly what shipped before this
+ * file existed. Scoped on `.systemsketch-app[data-ss-pill-skin]` (the app
+ * root — see `App.tsx`) rather than the pill's own wrapper, because a
+ * control's popover panel portals out of the pill's DOM subtree entirely
+ * (tldraw's `useContainer()`); the app root is the nearest ancestor both the
+ * bar and its portaled popovers share.
+ */
+
+/* 1 — Ink Mono: flat off-white paper, black ink, minimal shadow, tight
+ * sharp corners. The utilitarian, no-chrome baseline of the five. */
+.systemsketch-app[data-ss-pill-skin='1'] {
+  --systemsketch-pill-surface: #f5f4f1;
+  --systemsketch-pill-ink: #1a1a1a;
+  --systemsketch-pill-divider: #d8d5cf;
+  --systemsketch-pill-hover: #ece9e3;
+  --systemsketch-pill-accent: #1a1a1a;
+  --systemsketch-pill-accent-radio: #1a1a1a;
+  --systemsketch-pill-radius: 4px;
+  --systemsketch-pill-trigger-radius: 3px;
+  --systemsketch-pill-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  --systemsketch-pill-bar-pad: 0 3px;
+  --systemsketch-pill-trigger-pad: 0 6px;
+  --systemsketch-pill-divider-margin: 0 3px;
+}
+
+/* 2 — Soft Elevation: warm-white card, soft diffuse shadow, generous
+ * radius, a lavender accent. The "elevated card" direction. */
+.systemsketch-app[data-ss-pill-skin='2'] {
+  --systemsketch-pill-surface: #fbfaf8;
+  --systemsketch-pill-ink: #2b2a28;
+  --systemsketch-pill-divider: #e7e2d8;
+  --systemsketch-pill-hover: #f1ede4;
+  --systemsketch-pill-accent: #7c6fd1;
+  --systemsketch-pill-accent-radio: #6a5cc4;
+  --systemsketch-pill-radius: 20px;
+  --systemsketch-pill-trigger-radius: 12px;
+  --systemsketch-pill-shadow: 0 8px 24px rgb(60 50 30 / 14%), 0 2px 6px rgb(60 50 30 / 10%);
+  --systemsketch-pill-bar-pad: 0 8px;
+  --systemsketch-pill-trigger-pad: 0 12px;
+  --systemsketch-pill-divider-margin: 0 8px;
+}
+
+/* 3 — High Contrast Outline: pure white, sharp corners, a solid ring stands
+ * in for a shadow (see the shadow value below), a bold accent. */
+.systemsketch-app[data-ss-pill-skin='3'] {
+  --systemsketch-pill-surface: #ffffff;
+  --systemsketch-pill-ink: #000000;
+  --systemsketch-pill-divider: #000000;
+  --systemsketch-pill-hover: #ececec;
+  --systemsketch-pill-accent: #e34d2b;
+  --systemsketch-pill-accent-radio: #e34d2b;
+  --systemsketch-pill-radius: 0px;
+  --systemsketch-pill-trigger-radius: 0px;
+  /* A 2px solid ring, drawn as a box-shadow rather than a border so no
+   * layout declaration has to change per skin — reads as an outline. */
+  --systemsketch-pill-shadow: 0 0 0 2px #000000;
+  --systemsketch-pill-bar-pad: 0 2px;
+  --systemsketch-pill-trigger-pad: 0 6px;
+  --systemsketch-pill-divider-margin: 0 2px;
+}
+
+/* 4 — Warm Paper: the cream/paper tone Zach's own written reports use,
+ * a warm divider, soft shadow, medium radius, a terracotta accent. */
+.systemsketch-app[data-ss-pill-skin='4'] {
+  --systemsketch-pill-surface: #f4f0e8;
+  --systemsketch-pill-ink: #2b2620;
+  --systemsketch-pill-divider: #ddd2bd;
+  --systemsketch-pill-hover: #ece4d3;
+  --systemsketch-pill-accent: #c1602f;
+  --systemsketch-pill-accent-radio: #a94f24;
+  --systemsketch-pill-radius: 12px;
+  --systemsketch-pill-trigger-radius: 8px;
+  --systemsketch-pill-shadow: 0 10px 24px rgb(80 60 30 / 12%), 0 2px 6px rgb(80 60 30 / 10%);
+  --systemsketch-pill-bar-pad: 0 6px;
+  --systemsketch-pill-trigger-pad: 0 10px;
+  --systemsketch-pill-divider-margin: 0 6px;
+}
+
+/* 5 — Dark Compact: near-black, the tightest spacing of the five, minimal
+ * radius, a crisp cyan accent. The "dense pro tool" direction. */
+.systemsketch-app[data-ss-pill-skin='5'] {
+  --systemsketch-pill-surface: #0b0d10;
+  --systemsketch-pill-ink: #e8ebee;
+  --systemsketch-pill-divider: #23272c;
+  --systemsketch-pill-hover: #1a1d21;
+  --systemsketch-pill-accent: #35c6e8;
+  --systemsketch-pill-accent-radio: #35c6e8;
+  --systemsketch-pill-radius: 6px;
+  --systemsketch-pill-trigger-radius: 4px;
+  --systemsketch-pill-shadow: 0 4px 14px rgb(0 0 0 / 45%);
+  --systemsketch-pill-bar-pad: 0 2px;
+  --systemsketch-pill-trigger-pad: 0 5px;
+  --systemsketch-pill-divider-margin: 0 2px;
+}

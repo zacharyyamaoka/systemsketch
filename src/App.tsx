@@ -68,6 +68,8 @@ import {
   useLocalWorkspace,
 } from './workspace/LocalWorkspace'
 import { interfaceScaleCssValues, useInterfaceScale } from './settings/interfaceScale'
+import { usePillPresentation } from './settings/pillPresentation'
+import './appearance/pillSkins.css'
 import { installArrowClickToPlace } from './arrowClickToPlace'
 import { installBoardTheme, releasePrepaintTheme, useAppliedTheme } from './theme/themeStore'
 import { ThemePortalContext } from './theme/ThemePortal'
@@ -162,6 +164,16 @@ function SystemSketchCanvas() {
   const { attachEditor, isDraftMode } = useDrafts()
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
+  const pillPresentation = usePillPresentation()
+  // WHY stamped at the app root rather than on the pill itself: a control's
+  // popover panel portals out of the pill's own DOM subtree entirely
+  // (tldraw's `useContainer()`), so a CSS custom-property scope has to sit
+  // somewhere both the pill bar and its portaled popovers descend from.
+  // `--ss-pill-*` (pillSkins.css) is a namespace nothing else in the app
+  // reads, so scoping it this broadly cannot leak into any other surface.
+  const pillSkin = pillPresentation.compare && pillPresentation.skin !== 'default'
+    ? pillPresentation.skin
+    : undefined
   const [store] = useState(createSystemSketchStore)
   const [mountedEditor, setMountedEditor] = useState<Editor | null>(null)
   useEffect(() => () => store.dispose(), [store])
@@ -225,6 +237,7 @@ function SystemSketchCanvas() {
       className="systemsketch-app"
       data-testid="systemsketch-app"
       data-interface-scale={interfaceScale}
+      data-ss-pill-skin={pillSkin}
       style={{
         '--systemsketch-interface-scale': scaleCss.scale,
         '--systemsketch-interface-scale-inverse': scaleCss.inverse,

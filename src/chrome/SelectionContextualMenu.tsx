@@ -15,6 +15,7 @@ import {
   type SelectionMenuSide,
 } from './floatingToolbarPlacement'
 import { useInterfaceScale } from '../settings/interfaceScale'
+import { usePillPresentation } from '../settings/pillPresentation'
 
 /**
  * Select-tool states in which the pointer is manipulating the selection.
@@ -96,6 +97,7 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
   const editor = useEditor()
   const ref = useRef<HTMLDivElement>(null)
   usePassThroughWheelEvents(ref)
+  const presentation = usePillPresentation()
 
   // Content changes the menu's width, which changes where its centre lands.
   // A resize is not a signal, so bump one the position reactor can subscribe to.
@@ -192,12 +194,23 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
     [editor, sizeEpoch],
   )
 
+  // A plain test/inspection hook — the skin itself is a CSS custom-property
+  // scope stamped at the app root (`App.tsx`), not here, because a control's
+  // popover panel portals out of this element entirely (`useContainer()`)
+  // and would not inherit a property scoped only to this local wrapper.
+  // WHY only stamped while `compare` is on: an attribute selector with no
+  // value never matches, so leaving it off entirely when Zach is not
+  // actively comparing is part of what keeps the shipped pill byte-identical
+  // to before this feature existed — see `pillPresentation.ts`.
+  const pillLayout = presentation.compare && presentation.layout !== 'default' ? presentation.layout : undefined
+
   return (
     <div
       ref={ref}
       className={className}
       data-testid="systemsketch-selection-menu"
       data-visible="false"
+      data-ss-pill-layout={pillLayout}
       onPointerDown={editor.markEventAsHandled}
     >
       <TldrawUiToolbar

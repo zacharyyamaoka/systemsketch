@@ -1,0 +1,44 @@
+/* The Pill lab switcher: a small fixed chip in the bottom-left corner, never
+ * anchored to the selection pill so both stay visible together. Styled with
+ * the app's own live theme tokens — this is a real, permanent control, not
+ * one of the ink-pass skins it switches between. */
+.systemsketch-pill-chip {
+  position: fixed;
+  left: var(--systemsketch-chrome-inset, 14px);
+  bottom: calc(var(--systemsketch-bottom-clearance, 68px) + var(--systemsketch-chrome-inset, 14px));
+  z-index: var(--tl-layer-menus, 400);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
+  box-shadow: var(--ss-shadow-2);
+  font-size: 12px;
+}
+
+.systemsketch-pill-chip__title {
+  font-weight: 600;
+  color: var(--ss-text-muted);
+  white-space: nowrap;
+}
+
+.systemsketch-pill-chip__field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.systemsketch-pill-chip__field span {
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-pill-chip__field select {
+  padding: 2px 4px;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text);
+  font: inherit;
+}

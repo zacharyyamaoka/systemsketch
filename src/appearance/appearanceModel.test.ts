@@ -18,10 +18,12 @@ import {
 import { describe, expect, it } from 'vitest'
 
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import type { ContextualControl, ContextualControlKind } from '../contextualMenus/contextualControlRegistry'
 import {
   APPEARANCE_COLORS,
   buildAppearanceControls,
   colorLabel,
+  restructureForV1Cluster,
   selectedOption,
   triggerLabel,
   unofferedValue,
@@ -483,5 +485,70 @@ describe('appearance controls', () => {
   it('presents each stored colour token without changing its characters', () => {
     expect(colorLabel('dark-gray')).toBe('dark-gray')
     expect(colorLabel('light-teal')).toBe('light-teal')
+  })
+})
+
+/** A minimal stand-in — `restructureForV1Cluster` only reads `kind`, `modeControl` and `modePlacement`. */
+function fakeControl(kind: ContextualControlKind, overrides: Partial<ContextualControl> = {}): ContextualControl {
+  return {
+    kind,
+    label: kind,
+    options: [],
+    layout: 'row',
+    trigger: 'value',
+    id: kind,
+    value: { type: 'shared', value: 'x' },
+    onSelect: () => {},
+    ...overrides,
+  }
+}
+
+describe('restructureForV1Cluster (Phase 2 ink-pass, V1 Excalidraw Compact)', () => {
+  it('un-stacks a stacked colour into two independent top-level controls', () => {
+    const fill = fakeControl('fill')
+    const color = fakeControl('color', { modeControl: fill, modePlacement: 'above' })
+    const result = restructureForV1Cluster([color, fakeControl('font')])
+
+    expect(result.map((c) => c.kind)).toEqual(['color', 'fill', 'font'])
+    expect(result[0].modeControl).toBeUndefined()
+    expect(result[0].modePlacement).toBeUndefined()
+    expect(result[1]).toBe(fill)
+  })
+
+  it('un-stacks strokeColor, keeping its own nested chain (lineStyle→strokeWidth) intact', () => {
+    const strokeWidth = fakeControl('strokeWidth')
+    const lineStyle = fakeControl('lineStyle', { modeControl: strokeWidth, modePlacement: 'above' })
+    const strokeColor = fakeControl('strokeColor', { modeControl: lineStyle, modePlacement: 'above' })
+    const result = restructureForV1Cluster([strokeColor])
+
+    expect(result.map((c) => c.kind)).toEqual(['strokeColor', 'lineStyle'])
+    expect(result[0].modeControl).toBeUndefined()
+    // The promoted cluster keeps its OWN stack — thickness still lives one
+    // trigger deep, exactly what "collapse to one trigger button" means.
+    expect(result[1].modeControl).toBe(strokeWidth)
+    expect(result[1].modePlacement).toBe('above')
+  })
+
+  it('folds arrowheadEnd into arrowheadStart as one combined trigger', () => {
+    const start = fakeControl('arrowheadStart')
+    const end = fakeControl('arrowheadEnd')
+    const result = restructureForV1Cluster([start, fakeControl('lineShape'), end])
+
+    expect(result.map((c) => c.kind)).toEqual(['arrowheadStart', 'lineShape'])
+    expect(result[0].modeControl).toBe(end)
+    expect(result[0].modePlacement).toBe('above')
+  })
+
+  it('leaves an un-stacked colour and an arrowhead with no partner untouched', () => {
+    const color = fakeControl('color')
+    const start = fakeControl('arrowheadStart')
+    const result = restructureForV1Cluster([color, start])
+
+    expect(result).toEqual([color, start])
+  })
+
+  it('passes through controls it has no opinion about, in order', () => {
+    const controls = [fakeControl('geo'), fakeControl('font'), fakeControl('size'), fakeControl('align')]
+    expect(restructureForV1Cluster(controls)).toEqual(controls)
   })
 })

@@ -58,6 +58,7 @@ import {
   useToolAliases,
 } from '../library/toolAliases'
 import { MenuLabPanel } from '../prototypes/menuLab/ContextualMenuLab'
+import { updatePillPresentation, usePillPresentation } from './pillPresentation'
 import { readFileAccessSettings, writeFileAccessSettings } from '../workspace/workspaceClient'
 import {
   applyEdgePolicyPreset,
@@ -86,7 +87,7 @@ function CategoryIcon({ children }: { children: ReactNode }) {
   )
 }
 
-type SettingsCategoryId = 'general' | 'canvas' | 'connections' | 'appearance' | 'interface' | 'shortcuts' | 'menu-lab' | 'about'
+type SettingsCategoryId = 'general' | 'canvas' | 'connections' | 'appearance' | 'interface' | 'shortcuts' | 'menu-lab' | 'pill-lab' | 'about'
 
 const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; icon: ReactNode }[] = [
   {
@@ -127,13 +128,19 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
     icon: <CategoryIcon><path d="M4 6h5M13 6h3M4 10h9M17 10h-1M4 14h3M11 14h5" /><circle cx="11" cy="6" r="1.6" /><circle cx="15" cy="10" r="1.6" /><circle cx="9" cy="14" r="1.6" /></CategoryIcon>,
   },
   {
+    id: 'pill-lab',
+    label: 'Pill lab',
+    // Two side-by-side pills, standing for the structural A/B comparison.
+    icon: <CategoryIcon><rect x="2.5" y="7.5" width="7" height="5" rx="2.5" /><rect x="10.5" y="7.5" width="7" height="5" rx="2.5" /></CategoryIcon>,
+  },
+  {
     id: 'about',
     label: 'About',
     icon: <CategoryIcon><circle cx="10" cy="10" r="6.5" /><path d="M10 9v4M10 6.7h.01" /></CategoryIcon>,
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'connections', 'interface', 'shortcuts', 'menu-lab']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['general', 'appearance', 'canvas', 'connections', 'interface', 'shortcuts', 'menu-lab', 'pill-lab']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -192,6 +199,8 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
           ? <ToolAliasesPanel />
           : category === 'menu-lab'
           ? <MenuLabSettingsPanel />
+          : category === 'pill-lab'
+          ? <PillLabSettingsPanel />
           : <InterfacePanel />}
       </TldrawUiDialogBody>
     </div>
@@ -416,6 +425,67 @@ function MenuLabSettingsPanel() {
       </div>
       <div className="menu-lab__container">
         <MenuLabPanel />
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Settings → Pill lab. One switch, not the picks themselves.
+ *
+ * WHY the layout/skin selects live on-canvas (`PillPresentationChip.tsx`)
+ * rather than here: this dialog sits above `InFrontOfTheCanvas` in tldraw's
+ * own stacking order (measured in `ContextualMenuLab.tsx`'s own WHY), so
+ * opening Settings to change a pick would cover the very pill being judged.
+ * This switch only arms the on-canvas chip; the chip stays out of the way
+ * once it appears.
+ */
+function PillLabSettingsPanel() {
+  const presentation = usePillPresentation()
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="pill-lab-title" data-testid="systemsketch-pill-lab-panel">
+      <div className="systemsketch-settings__eyebrow">Pill lab</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="pill-lab-title">Pill lab</h2>
+          <p>
+            The Phase 2 ink-pass comparison: two real structural layouts for the
+            selection pill (Excalidraw Compact, Figma Segmented) and five style
+            skins, built on the real pill so you can select an actual shape and
+            try every combination.
+          </p>
+        </div>
+      </div>
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="pill-lab-compare-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="pill-lab-compare-title">Compare toolbar layouts</h3>
+          <p>
+            Shows a small switcher in the bottom-left corner of the canvas with
+            a Layout and a Style picker. Off by default — the selection pill
+            renders exactly as shipped until this is on.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={presentation.compare}
+          data-testid="systemsketch-pill-lab-compare"
+          onClick={() => updatePillPresentation({ compare: !presentation.compare })}
+        >
+          <span>
+            <strong>Compare toolbar layouts</strong>
+            <small>Off by default. Takes effect immediately.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
+      <div className="systemsketch-settings__note">
+        <span className="systemsketch-settings__saved-dot" aria-hidden="true" />
+        <div>
+          <strong>Saved on this computer</strong>
+          <p>A comparison preference, not board content — every viewer of a board keeps their own pick.</p>
+        </div>
       </div>
     </section>
   )

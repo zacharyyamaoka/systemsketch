@@ -353,6 +353,48 @@ export const BLOCK_TITLE_CONTEXTUAL_RECIPE: ContextualControlRecipe = {
   ],
 }
 
+/**
+ * Phase 2 ink-pass, V1 "Excalidraw Compact": one dense, undivided row.
+ *
+ * A single group by design — the variant's whole thesis is density, so no
+ * separator interrupts it. `appearanceModel.ts`'s `restructureForV1Cluster`
+ * is what makes this recipe's items actually exist as candidates: it un-stacks
+ * `color`→fill and `strokeColor`→lineStyle→strokeWidth into independent
+ * top-level controls first (`fill`, `lineStyle`), and folds the two arrowhead
+ * controls into one (`arrowheadStart` carries `arrowheadEnd` as its stacked
+ * mode) — so this list names every kind that can result, once, in reading
+ * order, and lets `composeContextualControls` silently drop whatever a given
+ * selection does not produce.
+ */
+export const V1_COMPACT_RECIPE: ContextualControlRecipe = {
+  id: 'v1-compact',
+  groups: [{
+    id: 'compact',
+    items: [
+      'geo', 'color', 'strokeColor', 'fill', 'lineStyle',
+      'codeLanguage', 'font', 'size', 'align', 'verticalAlign',
+      'arrowheadStart', 'addText',
+    ],
+  }],
+}
+
+/**
+ * Phase 2 ink-pass, V3 "Figma Segmented": appearance, then text, each set off
+ * by the composition's own between-group separator (`ContextualControls.tsx`
+ * already draws one at every `groupIndex > 0`). Arrange is a THIRD segment in
+ * the spec, but it is a sibling item outside `AppearanceControls` — its own
+ * divider is drawn where it is rendered (`SystemSketchChrome.tsx`), not here.
+ * Reuses the stock (unrestructured) control shapes: V3 only reorders and
+ * regroups, it never changes what a control stacks.
+ */
+export const V3_SEGMENTED_RECIPE: ContextualControlRecipe = {
+  id: 'v3-segmented',
+  groups: [
+    { id: 'appearance', items: ['geo', 'color', 'strokeColor', 'lineStyle', 'arrowheadStart', 'lineShape', 'arrowheadEnd'] },
+    { id: 'text', items: ['codeLanguage', 'font', 'size', 'align', 'verticalAlign', 'addText'] },
+  ],
+}
+
 export function bindContextualControl(
   kind: ContextualControlKind,
   binding: Pick<ContextualControl, 'id' | 'value' | 'onSelect'>

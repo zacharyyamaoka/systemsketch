@@ -918,11 +918,11 @@
   max-width: calc(
     max(160px, 100vw - (var(--systemsketch-selection-menu-margin) * 2)) / var(--systemsketch-interface-scale, 1)
   );
-  padding: 0 4px;
-  border-radius: 13px;
-  color: var(--ss-text-inverse);
-  background: var(--ss-surface-inverse);
-  box-shadow: var(--ss-shadow-2);
+  padding: var(--systemsketch-pill-bar-pad, 0 4px);
+  border-radius: var(--systemsketch-pill-radius, 13px);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
+  background: var(--systemsketch-pill-surface, var(--ss-surface-inverse));
+  box-shadow: var(--systemsketch-pill-shadow, var(--ss-shadow-2));
 }
 
 /* The Block menu supplies its own surface when it stands alone; nested in the
@@ -938,7 +938,7 @@
   display: flex;
   align-items: center;
   padding: 3px;
-  border-left: 1px solid var(--ss-border-inverse);
+  border-left: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
 }
 
 .systemsketch-selection-layout-action {
@@ -948,8 +948,8 @@
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 7px;
-  color: var(--ss-text-inverse);
+  border-radius: var(--systemsketch-pill-trigger-radius, 7px);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
   background: transparent;
 }
 
@@ -996,7 +996,7 @@
   flex-wrap: wrap;
   align-items: center;
   padding: 3px;
-  border-left: 1px solid var(--ss-border-inverse);
+  border-left: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
 }
 
 .systemsketch-arrange__group {
@@ -1017,23 +1017,23 @@
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 7px;
-  color: var(--ss-text-inverse);
+  border-radius: var(--systemsketch-pill-trigger-radius, 7px);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
   background: transparent;
   cursor: pointer;
 }
 
 .systemsketch-arrange__button:hover {
-  background: var(--ss-surface-inverse-hover);
+  background: var(--systemsketch-pill-hover, var(--ss-surface-inverse-hover));
 }
 
 .systemsketch-arrange__button:focus-visible {
-  outline: 2px solid var(--ss-accent);
+  outline: 2px solid var(--systemsketch-pill-accent, var(--ss-accent));
   outline-offset: -2px;
 }
 
 .systemsketch-arrange__button:disabled {
-  color: var(--ss-text-inverse);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
   opacity: .4;
   cursor: default;
 }
@@ -1056,7 +1056,7 @@
   height: 20px;
   flex: 0 0 auto;
   margin: 0 3px;
-  background: var(--ss-border-inverse);
+  background: var(--systemsketch-pill-divider, var(--ss-border-inverse));
 }
 
 /* Opacity: Excalidraw-parity 0-100 slider, in the pill's own inverse palette.
@@ -1067,8 +1067,8 @@
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  border-left: 1px solid var(--ss-border-inverse);
-  color: var(--ss-text-inverse);
+  border-left: 1px solid var(--systemsketch-pill-divider, var(--ss-border-inverse));
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
 }
 
 .systemsketch-opacity__label {
@@ -1086,7 +1086,7 @@
 .systemsketch-opacity__slider {
   width: 72px;
   height: 32px;
-  accent-color: var(--ss-accent);
+  accent-color: var(--systemsketch-pill-accent, var(--ss-accent));
   cursor: pointer;
 }
 
@@ -1096,7 +1096,7 @@
 
 .systemsketch-opacity__value {
   min-width: 30px;
-  color: var(--ss-text-inverse);
+  color: var(--systemsketch-pill-ink, var(--ss-text-inverse));
   opacity: .75;
   font-variant-numeric: tabular-nums;
   font-size: 11px;

@@ -34,7 +34,9 @@ import {
   MIXED_LABEL,
   SHAPE_CONTEXTUAL_RECIPE,
   type AppearanceControlId,
+  type ContextualControl,
   type ContextualControlDefinition,
+  type ContextualControlKind,
   type ContextualControlLayout,
   type ContextualControlOption,
   type ContextualControlTrigger,
@@ -401,4 +403,65 @@ export function triggerLabel(control: AppearanceControl): string {
   }
   const value = [...stack, control].map(valueName).join(' ')
   return `${control.label}, ${value}`
+}
+
+/**
+ * Phase 2 ink-pass, V1 "Excalidraw Compact": un-stack the default pill's
+ * combined popovers into independent single-purpose triggers, then re-fold
+ * only the two arrowhead controls into one.
+ *
+ * WHY a post-process over the default bound candidates rather than a
+ * parallel build function: `buildAppearanceControls` already carries every
+ * edge case this needs to inherit for free (freehand shapes, Block-title,
+ * connector typography suppression, the Code language slot). Duplicating it
+ * risks the V1 view silently drifting from what the default pill actually
+ * renders for some selection this function was never tested against.
+ * Restructuring by `kind` after the fact means V1 can only ever show a
+ * control the default pill would also show — never a different value, never
+ * a different write path.
+ *
+ * `color` and `strokeColor` bind the identical `DefaultColorStyle` value
+ * under two different labels/companions (`buildAppearanceControls`'s own
+ * design) — Excalidraw's reference UI genuinely has two independent colours
+ * (stroke, background); SystemSketch's default pill already approximates
+ * that by giving each swatch a different popover companion (Fill under
+ * Color; thickness+dash under strokeColor's "Line style"). V1 asks for
+ * "a stroke-color ring AND a fill-color ring" as two undecorated swatches —
+ * this keeps both rings, un-stacks their companions into their own clusters,
+ * and accepts that the two rings will always show the same colour, which is
+ * a data-model constraint of this app, not a bug this function could fix.
+ */
+export function restructureForV1Cluster(
+  controls: readonly ContextualControl[],
+): ContextualControl[] {
+  const byKind = new Map(controls.map((control) => [control.kind, control] as const))
+  const consumed = new Set<ContextualControlKind>()
+  const result: ContextualControl[] = []
+
+  for (const control of controls) {
+    if (consumed.has(control.kind)) continue
+    consumed.add(control.kind)
+
+    if ((control.kind === 'color' || control.kind === 'strokeColor') && control.modeControl) {
+      // Un-stack: the ring keeps only its own options; whatever it carried
+      // stacked "above" (fill; the lineStyle→strokeWidth chain) becomes its
+      // own top-level cluster, wherever this control's position falls.
+      result.push({ ...control, modeControl: undefined, modePlacement: undefined })
+      result.push(control.modeControl)
+      continue
+    }
+
+    if (control.kind === 'arrowheadStart') {
+      const end = byKind.get('arrowheadEnd')
+      if (end) {
+        consumed.add('arrowheadEnd')
+        result.push({ ...control, modeControl: end, modePlacement: 'above' })
+        continue
+      }
+    }
+
+    result.push(control)
+  }
+
+  return result
 }

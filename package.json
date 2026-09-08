@@ -41,6 +41,7 @@
     "test:selection-count": "node tests/selection_count_removal_smoke.mjs",
     "test:appearance": "node tests/appearance_menu_smoke.mjs",
     "test:floating-toolbar": "node tests/floating_toolbar_excalidraw_smoke.mjs",
+    "test:pill-lab": "node tests/pill_lab_smoke.mjs",
     "test:font-size": "node tests/custom_font_size_smoke.mjs",
     "test:type-source": "node tests/type_source_interactions_smoke.mjs",
     "test:arrows": "node tests/arrow_drawing_smoke.mjs",

@@ -32,10 +32,10 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 0 8px;
+  padding: var(--systemsketch-pill-trigger-pad, 0 8px);
   border: 0;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: var(--systemsketch-pill-trigger-radius, 5px);
+  color: var(--systemsketch-pill-ink, #fff);
   background: transparent;
   cursor: pointer;
 }
@@ -76,13 +76,13 @@
   width: 1px;
   height: 40px;
   flex: 0 0 auto;
-  margin: 0 4px;
-  background: #383838;
+  margin: var(--systemsketch-pill-divider-margin, 0 4px);
+  background: var(--systemsketch-pill-divider, #383838);
 }
 
 .systemsketch-appearance__trigger:hover,
 .systemsketch-appearance__trigger[data-state='open'] {
-  background: #383838;
+  background: var(--systemsketch-pill-hover, #383838);
 }
 
 .systemsketch-appearance__toggle {
@@ -138,13 +138,13 @@
   min-width: 0;
   flex-direction: column;
   padding: 8px;
-  border-radius: 13px;
-  color: #fff;
-  background: #1e1e1e;
-  box-shadow:
+  border-radius: var(--systemsketch-pill-radius, 13px);
+  color: var(--systemsketch-pill-ink, #fff);
+  background: var(--systemsketch-pill-surface, #1e1e1e);
+  box-shadow: var(--systemsketch-pill-shadow,
     0 0 .5px rgb(0 0 0 / 12%),
     0 10px 16px rgb(0 0 0 / 12%),
-    0 2px 5px rgb(0 0 0 / 15%);
+    0 2px 5px rgb(0 0 0 / 15%));
 }
 
 /* An icon row: 24px cells on a 32px pitch, so Start point's seven cells make
@@ -163,8 +163,8 @@
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: var(--systemsketch-pill-trigger-radius, 5px);
+  color: var(--systemsketch-pill-ink, #fff);
   background: transparent;
   cursor: pointer;
   font-size: 11px;
@@ -178,7 +178,7 @@
 
 /* An icon-only cell is chosen in FigJam's deeper purple. */
 .systemsketch-appearance__option[aria-checked='true'] {
-  background: #8a38f5;
+  background: var(--systemsketch-pill-accent-radio, #8a38f5);
 }
 
 /* A connector's Line style: weight beside dash, one hairline between them,
@@ -207,7 +207,7 @@
   flex: 0 0 auto;
   align-self: stretch;
   margin: -8px 0;
-  background: #383838;
+  background: var(--systemsketch-pill-divider, #383838);
 }
 
 /* Chips: a labelled row. FigJam has two chip styles and this keeps both.
@@ -221,7 +221,7 @@
   gap: 8px;
   margin: 0 -8px 8px;
   padding: 4px 12px 12px;
-  border-bottom: 1px solid #383838;
+  border-bottom: 1px solid var(--systemsketch-pill-divider, #383838);
 }
 
 /* A labelled section widens its cells around the name; an icon-only one (the
@@ -234,7 +234,7 @@
 }
 
 .systemsketch-appearance__mode .systemsketch-appearance__option[aria-checked='true'] {
-  background: #9747ff;
+  background: var(--systemsketch-pill-accent, #9747ff);
 }
 
 /* A shape's Line style row: a 16px icon in a 24px slot, 4px before it and
@@ -372,7 +372,7 @@
  * then 2px of the deeper purple. */
 .systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options
   .systemsketch-appearance__option[aria-checked='true'] .systemsketch-appearance__swatch {
-  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #8a38f5;
+  box-shadow: 0 0 0 2px var(--systemsketch-pill-surface, #1e1e1e), 0 0 0 4px var(--systemsketch-pill-accent-radio, #8a38f5);
 }
 
 /* The 22nd cell: a 32px box on the same pitch, overhanging its slot by 4px. */
