@@ -910,10 +910,13 @@
   align-items: stretch;
   /* The 160px floor matches SELECTION_MENU_MIN_WIDTH in floatingToolbarPlacement.ts —
    * Codex round 3 caught the two drifting apart at extreme small viewports,
-   * where the unfloored calc could go below what still reads as one pill. */
-  max-width: max(
-    160px,
-    calc((100vw - (var(--systemsketch-selection-menu-margin) * 2)) / var(--systemsketch-interface-scale, 1))
+   * where the unfloored calc could go below what still reads as one pill.
+   * Round 4 caught the floor itself re-inflating: dividing by scale AFTER
+   * taking the max (rather than putting an unscaled 160px inside the max)
+   * means the floor also shrinks pre-transform, so it still paints at
+   * exactly 160px post-transform instead of 160px * scale. */
+  max-width: calc(
+    max(160px, 100vw - (var(--systemsketch-selection-menu-margin) * 2)) / var(--systemsketch-interface-scale, 1)
   );
   padding: 0 4px;
   border-radius: 13px;
@@ -998,6 +1001,11 @@
 
 .systemsketch-arrange__group {
   display: flex;
+  /* Codex round 4: the parent .systemsketch-arrange wraps as a whole, but a
+   * SINGLE group (align alone is up to 6 buttons, 198px; 3+-selection
+   * align+distribute is 264px) is still one unwrapped flex child of it, so
+   * it could overflow on its own even once the cluster around it folds. */
+  flex-wrap: wrap;
   align-items: center;
 }
 

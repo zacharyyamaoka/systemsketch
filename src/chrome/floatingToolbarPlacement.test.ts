@@ -221,6 +221,21 @@ describe('selectionMenuMaxWidth', () => {
     expect(selectionMenuMaxWidth(tiny)).toBe(SELECTION_MENU_MIN_WIDTH)
   })
 
+  it('divides the floor by scale too, so it still paints at exactly the floor size — Codex round 4', () => {
+    // Codex's round-4 repro: at a 240px viewport and 160% scale, the old
+    // `max(FLOOR, (viewport - margin) / scale)` returned the unscaled 160px
+    // floor verbatim, which then painted at 160 * 1.6 = 256px — 56px past
+    // the 200px (240 - 2*20) the viewport actually allows. Dividing the
+    // whole max() by scale (equivalent to flooring in painted pixels
+    // directly, since max(a,b)/s === max(a/s,b/s) for s>0) fixes both
+    // terms at once.
+    const viewport: Size = { w: 240, h: 400 }
+    const scale = 1.6
+    const capped = selectionMenuMaxWidth(viewport, scale)
+    const painted = capped * scale
+    expect(painted).toBeLessThanOrEqual(viewport.w - 2 * SELECTION_MENU_MARGIN + 0.001)
+  })
+
   it('divides by scale so a bar painted through .systemsketch-selection-menu\'s scale() transform still fits — Codex round 2', () => {
     // Codex's round-2 repro: an 860px cap (900 - 2*20) at the 160% ceiling
     // interfaceScale.ts allows re-inflates to 860 * 1.6 = 1,376px once the

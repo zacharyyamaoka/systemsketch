@@ -8,11 +8,18 @@
  */
 .systemsketch-appearance {
   display: flex;
+  /* Codex round 4: a text selection's fixed-width triggers (four 56px
+   * triggers plus the 144px font-size trigger, ~386px with separators) is
+   * an unwrapped flex child of the pill bar (systemsketch-selection-menu
+   * __bar, which wraps but only its own direct children) — the same
+   * failure mode round 3 found in the Arrange cluster, one component over. */
+  flex-wrap: wrap;
   align-items: stretch;
 }
 
 .systemsketch-contextual-controls__group {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
 }
 

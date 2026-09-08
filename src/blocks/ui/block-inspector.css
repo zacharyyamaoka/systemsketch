@@ -1116,8 +1116,15 @@
    pill it usually rides in. */
 .block-mini-menu {
   display: flex;
+  /* Codex round 4: this menu (and BehaviorTreeSelectionMiniMenu, which
+   * shares these classes) is a fixed-width flex row nested inside the
+   * selection pill bar — the same unwrapped-child overflow round 3 fixed
+   * for Arrange and round 4 also found in Appearance. `overflow: hidden`
+   * used to just clip whatever didn't fit; wrapping needs it relaxed so a
+   * folded second row is visible instead of cropped. */
+  flex-wrap: wrap;
   align-items: stretch;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 10px;
   color: var(--ss-text-inverse);
   background: var(--ss-surface-inverse);
@@ -1126,6 +1133,7 @@
 
 .block-mini-menu__views {
   display: flex;
+  flex-wrap: wrap;
   padding: 3px;
 }
 

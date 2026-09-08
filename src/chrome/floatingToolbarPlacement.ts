@@ -167,7 +167,14 @@ export const SELECTION_MENU_MIN_WIDTH = 160
  * why this function now takes `scale` as a parameter instead of assuming 1.
  */
 export function selectionMenuMaxWidth(viewport: Size, scale = 1): number {
-  return Math.max(SELECTION_MENU_MIN_WIDTH, (viewport.w - 2 * SELECTION_MENU_MARGIN) / scale)
+  // Codex round 4: the floor has to divide by scale too, not just the
+  // viewport term — a floor left in raw local pixels re-inflates by `scale`
+  // once the transform paints it (160px floor at 160% scale painted at
+  // 256px, not 160px), the exact bug this whole formula exists to prevent
+  // for the viewport term. `max(a, b) / s === max(a / s, b / s)` for s > 0,
+  // so dividing the whole expression is equivalent to flooring in painted
+  // pixels directly.
+  return Math.max(SELECTION_MENU_MIN_WIDTH, viewport.w - 2 * SELECTION_MENU_MARGIN) / scale
 }
 
 /**
