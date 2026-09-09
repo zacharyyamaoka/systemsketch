@@ -7,6 +7,8 @@ import {
 	getOnlySelectedFloatingPort,
 	type FloatingPortShape,
 } from './floatingPortModel'
+import { PortSignatureField } from '../blocks/ui/PortSignatureField'
+import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 import './floating-port.css'
 
 function updatePort(editor: Editor, shape: FloatingPortShape, props: Partial<FloatingPortShape['props']>) {
@@ -53,28 +55,22 @@ export function FloatingPortInspector({ editor }: { editor: Editor }) {
 		<section className="FloatingPortInspector" aria-label="Port inspector" data-testid="floating-port-inspector">
 			<div className="FloatingPortInspector-eyebrow">PORT</div>
 			<label>
-				<span>Name</span>
-				<input
-					aria-label="Port name"
-					value={shape.props.name}
-					onChange={(event) => updatePort(editor, shape, { name: event.target.value })}
-				/>
-			</label>
-			<label>
-				<span>Type</span>
-				<input
-					aria-label="Port type"
-					value={shape.props.type}
-					onChange={(event) => updatePort(editor, shape, { type: event.target.value })}
-				/>
-			</label>
-			<label>
-				<span>Value</span>
-				<input
-					aria-label="Port value"
-					placeholder="Optional value"
-					value={shape.props.value}
-					onChange={(event) => updatePort(editor, shape, { value: event.target.value })}
+				<span>Port</span>
+				{/* WHY one line: a free Port is the same declaration a Block port is —
+				    `name: type = value` — so it gets the same code text box, the same
+				    grammar and the same completions, not three boxes of its own. */}
+				<PortSignatureField
+					editor={editor}
+					port={{ id: shape.id, name: shape.props.name, type: shape.props.type, defaultValue: shape.props.value || undefined }}
+					ariaLabel="Port signature"
+					testId="floating-port-signature"
+					placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
+					beginEdit={() => editor.markHistoryStoppingPoint('edit floating port')}
+					onPatch={(patch) => updatePort(editor, shape, {
+						...(patch.name !== undefined ? { name: patch.name } : {}),
+						...(patch.type !== undefined ? { type: patch.type } : {}),
+						...('defaultValue' in patch ? { value: patch.defaultValue ?? '' } : {}),
+					})}
 				/>
 			</label>
 			<div className="FloatingPortInspector-row">

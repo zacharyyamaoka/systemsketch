@@ -1,6 +1,8 @@
 /**
- * The small, deliberately forgiving Python-shaped grammar used by *canvas*
- * text entry. The inspector remains a raw editor: it never calls this module.
+ * The small, deliberately forgiving Python-shaped grammar of a *capsule*
+ * (literal pill) typed on the canvas. A Block port's line is a different
+ * grammar — `portSignature.ts` — because a pill must be allowed to start as
+ * a bare `{"a": 1}` while a port line never is.
  *
  *   pose: Pose = 2
  *   raw: bytes = 2.0
@@ -10,7 +12,7 @@
  * assignment `=` have structure. We split a single assignment token rather
  * than trying to parse Python, so literals and type expressions stay opaque.
  */
-import type { BlockPort, BlockPortSide, BlockShapeProps } from './blockModel'
+import type { BlockPort, BlockShapeProps } from './blockModel'
 import { inferLiteralType, valueBlockInlet, valueBlockName, valueBlockOutlet } from './valueBlock'
 
 export interface CanvasPythonSignature {
@@ -99,25 +101,4 @@ export function applyCanvasPillSignature(
 		inputs: [{ ...(inlet ?? { id: 'in_1', visible: true }), name, type }],
 		outputs: [{ ...(outlet ?? { id: 'out_1', visible: true }), name, type }],
 	}
-}
-
-/**
- * Finish a canvas edit of a normal Block port's name. Input ports have an
- * ordinary definition default, so their `= value` part fills it; outputs keep
- * their existing value-less contract. A bare name has already been written as
- * the person types and needs no second mutation.
- */
-export function canvasPortSignaturePatch(
-	port: BlockPort,
-	side: BlockPortSide,
-	source: string,
-): Partial<Omit<BlockPort, 'id'>> | null {
-	const signature = parseCanvasPythonSignature(source)
-	if (!signature.hasAnnotation && !signature.hasAssignment) return null
-	const patch: Partial<Omit<BlockPort, 'id'>> = {
-		name: signature.name,
-		...(signature.hasAnnotation ? { type: signature.type } : {}),
-	}
-	if (side === 'inputs' && signature.hasAssignment) patch.defaultValue = signature.value
-	return patch
 }

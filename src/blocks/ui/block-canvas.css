@@ -117,6 +117,25 @@
   overflow: auto;
 }
 
+/* The port line on the canvas is the code text box itself, dressed as the
+ * inline editor: it takes the editor's accent frame and the port label's
+ * 17px, and lets its own grammar colours show through. */
+.systemsketch-block-canvas .BlockNode-inlineEditor--port.ss-code-field {
+  display: block;
+  padding: 3px 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--port .cm-scroller {
+  font-size: inherit;
+  line-height: 1.2;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--port .cm-content {
+  padding: 0;
+}
+
 /* Port and Expanded share the old white heading band. Expanded still names
  * the semantic type; the renderer never substitutes a literal "EXPANDED". */
 .systemsketch-block-canvas .NodeShape-heading {

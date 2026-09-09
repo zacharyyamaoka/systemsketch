@@ -355,11 +355,13 @@ async function main() {
     await waitFor(page,
       `document.querySelector('[data-testid="block-inline-port-name-inputs-in_1"]')`,
       'self name editor')
-    await evaluate(page, `(() => {
-      const field = document.querySelector('[data-testid="block-inline-port-name-inputs-in_1"]')
-      if (field) { field.value = ''; field.dispatchEvent(new Event('input', { bubbles: true })) }
-    })()`)
-    await page.send('Input.insertText', { text: '?' })
+    // The canvas editor is now one CodeMirror line, opened with the whole
+    // line selected: select-all + insertText replaces it exactly the way a
+    // person would, and keeping the type in the typed text (`?: Client`
+    // rather than bare `?`) is what preserves it, since replacing the whole
+    // line necessarily replaces its type along with its name.
+    await shortcut(page, 'a', 'KeyA', 2)
+    await page.send('Input.insertText', { text: '?: Client' })
     await key(page, 'Enter', 'Enter')
     await delay(400)
     const hacked = await blockById(page, SEND)

@@ -101,7 +101,12 @@ async function main() {
     if (requestedPrototype === '1') {
       await openInspector(app.page, app, board, '1')
       await waitFor(app.page, "document.querySelector('[data-testid=\"inspector-link-variant-1\"]')", 'V1 range-pick controls')
+      // Same below-the-fold layout shift as the V2 seam control below.
+      await evaluate(app.page, `document.querySelector('[data-testid="inspector-link-select-inputs-base"]')?.scrollIntoView({ block: 'center' })`)
+      await delay(120)
       await clickElement(app.page, '[data-testid="inspector-link-select-inputs-base"]')
+      await evaluate(app.page, `document.querySelector('[data-testid="inspector-link-select-inputs-overlays"]')?.scrollIntoView({ block: 'center' })`)
+      await delay(120)
       await clickElement(app.page, '[data-testid="inspector-link-select-inputs-overlays"]')
       await waitFor(app.page, "document.querySelector('[data-testid=\"inspector-link-selection-apply\"]:not(:disabled)')", 'V1 contiguous selection')
       await capture(app.page, join(ROOT, 'docs', 'assets', 'port-linking-inspector-v1.png'))
@@ -112,11 +117,20 @@ async function main() {
       await openInspector(app.page, app, board, '2')
       await waitFor(app.page, "document.querySelectorAll('[data-testid^=\"inspector-link-seam-inputs-\"]').length === 5", 'V2 seam controls')
       await capture(app.page, join(ROOT, 'docs', 'assets', 'port-linking-inspector-v2.png'))
+      // The signature field's one-row-per-port layout can still leave a seam
+      // control below the fold at this viewport — scroll it in first.
+      await evaluate(app.page, `document.querySelector('[data-testid="inspector-link-seam-inputs-labels-opacity"]')?.scrollIntoView({ block: 'center' })`)
+      await delay(120)
       await clickElement(app.page, '[data-testid="inspector-link-seam-inputs-labels-opacity"]')
       await waitFor(app.page, "document.querySelector('i[aria-label=\"Unsaved\"], i[aria-label=\"Saving\"]')", 'V2 autosave starts')
       await waitFor(app.page, "document.querySelector('[data-testid=\"port-link-run-overlays\"]')?.dataset.portLinkMembers === '4'", 'V2 joined slot')
       const v2Facts = JSON.parse(await evaluate(app.page, `JSON.stringify({
-        names: Array.from(document.querySelectorAll('[data-inspector-section="Inputs"] .block-inspector__port-name')).map((node) => node.value),
+        names: Array.from(document.querySelectorAll('[data-inspector-section="Inputs"] .ss-code-field .cm-content')).map((content) => {
+          const text = content.textContent ?? ''
+          const stops = [text.indexOf(':'), text.indexOf('=')].filter((index) => index !== -1)
+          const cut = stops.length ? Math.min(...stops) : -1
+          return (cut === -1 ? text : text.slice(0, cut)).trim()
+        }),
         dotCenters: ['overlays', 'layer', 'labels', 'opacity'].map((id) => {
           const rect = document.querySelector('[data-block-port-id="' + id + '"]')?.getBoundingClientRect()
           return rect ? rect.left + rect.width / 2 : null
@@ -140,6 +154,8 @@ async function main() {
       await openInspector(app.page, app, board, '3')
       await waitFor(app.page, "document.querySelector('[data-testid=\"inspector-link-variant-3\"]')", 'V3 endpoint controls')
       await capture(app.page, join(ROOT, 'docs', 'assets', 'port-linking-inspector-v3.png'))
+      await evaluate(app.page, `document.querySelector('[data-testid="inspector-link-range-apply"]')?.scrollIntoView({ block: 'center' })`)
+      await delay(120)
       await clickElement(app.page, '[data-testid="inspector-link-range-apply"]')
       await waitFor(app.page, "document.querySelector('[data-testid=\"port-link-run-base\"]')?.dataset.portLinkMembers === '6'", 'V3 endpoint range action')
       pass('V3 offers a real explicit start/end range and links that contiguous authored interval')

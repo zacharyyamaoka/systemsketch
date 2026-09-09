@@ -50,26 +50,43 @@ async function fieldText(page, ariaLabel) {
   return evaluate(page, `document.querySelector('[aria-label=${JSON.stringify(ariaLabel)}]')?.querySelector('.cm-content')?.textContent ?? null`)
 }
 
+/**
+ * A port signature field's full state, read off its `.ss-code-field-frame`
+ * wrapper. `text` strips the live-resolved `.ss-sig-resolved` widget CodeMirror
+ * paints inside `.cm-content` after the default slot — that widget is a reader
+ * aid, not part of the stored line, so it must not leak into the text a test
+ * compares against the authored `name: Type = default` line.
+ */
 async function fieldState(page, ariaLabel) {
   return JSON.parse(await evaluate(page, `JSON.stringify((() => {
     const el = document.querySelector('[aria-label=${JSON.stringify(ariaLabel)}]')
     if (!el) return null
-    const wrapper = el.closest('.ss-expr-field')
+    const wrapper = el.closest('.ss-code-field-frame')
+    const content = el.querySelector('.cm-content')
+    const clone = content?.cloneNode(true)
+    clone?.querySelectorAll('.ss-sig-resolved, .cm-placeholder').forEach((node) => node.remove())
     return {
-      text: el.querySelector('.cm-content')?.textContent ?? null,
-      html: el.querySelector('.cm-content')?.innerHTML ?? null,
-      expanded: wrapper.classList.contains('is-expanded'),
-      dataError: wrapper.getAttribute('data-error'),
-      help: wrapper.querySelector('.ss-expr-field__help')?.textContent ?? null,
-      warning: Boolean(wrapper.querySelector('.ss-expr-field__warning')),
+      text: clone?.textContent ?? null,
+      html: content?.innerHTML ?? null,
+      dataError: wrapper?.getAttribute('data-error') ?? null,
+      help: wrapper?.querySelector('.ss-code-field-frame__help')?.textContent ?? null,
+      warning: Boolean(wrapper?.querySelector('.ss-code-field-frame__warning')),
+      resolved: wrapper?.querySelector('.ss-sig-resolved')?.textContent ?? null,
     }
   })())`))
 }
 
+/**
+ * Focus a field and wait for real focus-within, the way a person's click
+ * lands: no `is-expanded` state exists for a port row any more, only the
+ * board-wide Variables panel's plain expression fields still carry it, and
+ * this check works for either since it reads focus off the field itself.
+ */
 async function focusField(page, ariaLabel) {
-  const box = await elementBox(page, `[aria-label=${JSON.stringify(ariaLabel)}]`)
-  await clickElement(page, `[aria-label=${JSON.stringify(ariaLabel)}]`)
-  await waitFor(page, `document.querySelector('[aria-label=${JSON.stringify(ariaLabel)}]')?.closest('.ss-expr-field').classList.contains('is-expanded')`, `${ariaLabel} expanded`)
+  const selector = `[aria-label=${JSON.stringify(ariaLabel)}]`
+  const box = await elementBox(page, selector)
+  await clickElement(page, selector)
+  await waitFor(page, `document.querySelector(${JSON.stringify(selector)})?.contains(document.activeElement)`, `${ariaLabel} focused`)
   return box
 }
 
@@ -106,22 +123,22 @@ async function main() {
       editor.select('shape:wheel')
       return true
     })()`)
-    await waitFor(app.page, `document.querySelector('[aria-label="Default value for radius"]')`, 'radius field mounted')
+    await waitFor(app.page, `document.querySelector('[aria-label="inputs in_1 signature"]')`, 'radius field mounted')
 
     // 1. A plain literal: today's behaviour, unchanged, but for real syntax
     //    highlighting under it — even collapsed, even with no variable at all.
-    const literalState = await fieldState(app.page, 'Default value for radius')
-    assert.equal(literalState.text, '0.1', 'plain literal shows exactly as stored')
+    const literalState = await fieldState(app.page, 'inputs in_1 signature')
+    assert.equal(literalState.text, 'radius: float = 0.1', 'plain literal shows as one name: Type = default line')
     assert.equal(literalState.dataError, null, 'a plain literal is never an error')
     assert.match(literalState.html, /tok-number/, 'a bare literal still gets real Python token coloring, collapsed')
 
     // 2. Type an expression referencing an undefined name.
-    await focusField(app.page, 'Default value for radius')
-    await shortcut(app.page, 'a', 'KeyA', 2) // Ctrl+A: replace the literal outright
-    await typeSlowly(app.page, 'chassis_width / 4')
-    await waitFor(app.page, `document.querySelector('[aria-label="Default value for radius"]')?.closest('.ss-expr-field').getAttribute('data-error') === 'true'`, 'undefined-name error')
-    const undefinedState = await fieldState(app.page, 'Default value for radius')
-    assert.equal(undefinedState.text, 'chassis_width / 4', 'the formula itself is preserved verbatim while broken')
+    await focusField(app.page, 'inputs in_1 signature')
+    await shortcut(app.page, 'a', 'KeyA', 2) // Ctrl+A: replace the whole line outright
+    await typeSlowly(app.page, 'radius: float = chassis_width / 4')
+    await waitFor(app.page, `document.querySelector('[aria-label="inputs in_1 signature"]')?.closest('.ss-code-field-frame')?.getAttribute('data-error') === 'true'`, 'undefined-name error')
+    const undefinedState = await fieldState(app.page, 'inputs in_1 signature')
+    assert.equal(undefinedState.text, 'radius: float = chassis_width / 4', 'the whole line is preserved verbatim while the default is broken')
     assert.match(undefinedState.help, /chassis_width.*not defined/, 'the exact Python NameError surfaces in the tooltip')
     assert.match(undefinedState.html, /ss-expr-squiggle/, 'the undefined name gets a real wavy underline')
     assert.match(undefinedState.html, /tok-variableName/, 'the reference itself is still real, colored Python syntax')
@@ -136,9 +153,9 @@ async function main() {
     await focusField(app.page, 'Global value for chassis_width')
     await typeSlowly(app.page, '0.42')
     await blurByTab(app.page)
-    await waitFor(app.page, `document.querySelector('[aria-label="Default value for radius"]')?.closest('.ss-expr-field').getAttribute('data-error') !== 'true'`, 'radius resolves once chassis_width exists')
-    const resolvedState = await fieldState(app.page, 'Default value for radius')
-    assert.equal(resolvedState.text, '0.105', 'chassis_width / 4 resolves once the variable is defined')
+    await waitFor(app.page, `document.querySelector('[aria-label="inputs in_1 signature"]')?.closest('.ss-code-field-frame')?.getAttribute('data-error') !== 'true'`, 'radius resolves once chassis_width exists')
+    const resolvedState = await fieldState(app.page, 'inputs in_1 signature')
+    assert.equal(resolvedState.resolved, '⇢ 0.105', 'chassis_width / 4 resolves once the variable is defined, painted after the formula')
     assert.equal(resolvedState.dataError, null)
 
     // 4. The board-wide Variables panel edits the SAME variable — and every
@@ -166,13 +183,15 @@ async function main() {
     await typeSlowly(app.page, 'Show inspector')
     await waitFor(app.page, `document.querySelector('[data-command-id="show-inspector"]')`, 'Show inspector command listed')
     await clickElement(app.page, '[data-command-id="show-inspector"]')
-    await waitFor(app.page, `document.querySelector('[aria-label="Default value for radius"]')`, 'inspector back open')
-    await waitFor(app.page, `document.querySelector('[aria-label="Default value for radius"]')?.querySelector('.cm-content')?.textContent === '0.125'`, 'radius updates live from the registry, untouched')
+    await waitFor(app.page, `document.querySelector('[aria-label="inputs in_1 signature"]')`, 'inspector back open')
+    await waitFor(app.page,
+      `document.querySelector('[aria-label="inputs in_1 signature"]')?.closest('.ss-code-field-frame')?.querySelector('.ss-sig-resolved')?.textContent === '⇢ 0.125'`,
+      'radius updates live from the registry, untouched')
 
     // 5. A legacy, non-Python-safe literal (the real bytes-port fixture) never
     //    breaks — it falls back to its own raw text with a quiet warning.
-    const packetState = await fieldState(app.page, 'Default value for packet')
-    assert.equal(packetState.text, 'raw', 'a legacy bare-word value displays completely unchanged')
+    const packetState = await fieldState(app.page, 'inputs in_2 signature')
+    assert.equal(packetState.text, 'packet: bytes = raw', 'a legacy bare-word value displays completely unchanged, in its full line')
     assert.equal(packetState.dataError, 'true')
     assert.equal(packetState.warning, true, 'the passive warning glyph, not an intrusive dialog')
     assert.match(packetState.help, /'raw' is not defined/)
@@ -182,7 +201,7 @@ async function main() {
     if (REFRESH_SCREENSHOT) {
       await mkdir(join(ROOT, 'docs', 'assets'), { recursive: true })
       await evaluate(app.page, `(() => { window.__systemsketch.editor.select('shape:wheel'); return true })()`)
-      await focusField(app.page, 'Default value for radius')
+      await focusField(app.page, 'inputs in_1 signature')
       await shoot(app.page, SHOT)
       await blurByTab(app.page)
     }

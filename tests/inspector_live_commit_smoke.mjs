@@ -20,13 +20,11 @@ import {
   clickElement,
   delay,
   drag,
-  elementBox,
   ensureDir,
   evaluate,
   key,
   localConsoleErrors,
   makeChecklist,
-  mouse,
   openApp,
   shortcut,
   startApp,
@@ -51,7 +49,7 @@ const JOURNEY = [
 ]
 const JOURNEY_CLIP = { x: 445, y: 258, width: 995, height: 620, scale: 1 }
 const EMPTY_CANVAS = { x: 260, y: 800 }
-const PORT_NAME_FIELD = `${PANEL} [aria-label="outputs out_1 name"]`
+const PORT_NAME_FIELD = `${PANEL} [aria-label="outputs out_1 signature"]`
 const TITLE_FIELD = `${PANEL} [aria-label="Block title"]`
 const ADD_OUTPUT_BUTTON = `${PANEL} [aria-label="Add output port"]`
 const OTHER_TAB = `${PANEL} [role="tab"][aria-selected="false"]`
@@ -60,30 +58,43 @@ const PORT_LAYOUT_BUTTON = `${PANEL} [aria-label="Port layout"] button`
 const { checks, pass } = makeChecklist()
 
 /**
- * Focus a field and select its whole value the way a person does: triple-click.
- * Focus is then asserted, because `Input.insertText` silently goes nowhere if
- * the element has not actually taken focus yet.
+ * Focus a field and select its whole value the way a person does: click, then
+ * select all. The port name field is now a CodeMirror code field — focus and
+ * selection live on its inner `.cm-content`, not the field's own root — so
+ * select-all is a keyboard shortcut here rather than a triple-click, matching
+ * how every other code field in this app is driven.
  */
 async function selectFieldText(page, selector) {
   const found = JSON.stringify(selector)
   await waitFor(page, `document.querySelector(${found})`, selector)
-  const box = await elementBox(page, selector)
-  const x = box.x + box.width / 2
-  const y = box.y + box.height / 2
-  await mouse(page, 'mouseMoved', x, y)
-  for (const clickCount of [1, 2, 3]) {
-    await mouse(page, 'mousePressed', x, y, { buttons: 1, clickCount })
-    await mouse(page, 'mouseReleased', x, y, { clickCount })
-  }
-  await waitFor(page, `document.activeElement === document.querySelector(${found})`,
+  // The signature field's help/warning rows can leave a port row below the
+  // fold at this viewport, same as the Outputs add button above.
+  await evaluate(page, `document.querySelector(${found})?.scrollIntoView({ block: 'center' })`)
+  await delay(120)
+  await clickElement(page, selector)
+  await waitFor(page, `document.querySelector(${found})?.contains(document.activeElement)`,
     `focus to land on ${selector}`, 5000)
+  await shortcut(page, 'a', 'KeyA', 2)
+}
+
+/** A field's live text, whichever kind it is: a plain `<input>` or a CodeMirror code field. */
+async function readFieldText(page, selector) {
+  return evaluate(page, `(() => {
+    const el = document.querySelector(${JSON.stringify(selector)})
+    if (!el) return null
+    return 'value' in el ? el.value : (el.querySelector('.cm-content')?.textContent ?? null)
+  })()`)
 }
 
 async function typeInto(page, selector, text) {
   await selectFieldText(page, selector)
   await page.send('Input.insertText', { text })
-  await waitFor(page, `document.querySelector(${JSON.stringify(selector)})?.value === ${JSON.stringify(text)}`,
-    `${selector} to hold ${JSON.stringify(text)}`, 5000)
+  await waitFor(page, `(() => {
+    const el = document.querySelector(${JSON.stringify(selector)})
+    if (!el) return false
+    const value = 'value' in el ? el.value : el.querySelector('.cm-content')?.textContent
+    return value === ${JSON.stringify(text)}
+  })()`, `${selector} to hold ${JSON.stringify(text)}`, 5000)
 }
 
 async function captureJourney(page, path) {
@@ -92,7 +103,7 @@ async function captureJourney(page, path) {
 }
 
 async function fieldValue(page, selector) {
-  return evaluate(page, `document.querySelector(${JSON.stringify(selector)})?.value ?? null`)
+  return readFieldText(page, selector)
 }
 
 async function portLabels(page) {
@@ -146,6 +157,11 @@ async function main() {
     await key(page, 'Enter', 'Enter')
     await waitFor(page, `document.querySelector('${PANEL}')`, 'inspector')
 
+    // The signature field's extra help/warning rows push the Outputs section's
+    // own add button below the fold at this viewport — scroll it into view the
+    // way a person would before clicking it.
+    await evaluate(page, `document.querySelector(${JSON.stringify(ADD_OUTPUT_BUTTON)})?.scrollIntoView({ block: 'center' })`)
+    await delay(120)
     await clickElement(page, ADD_OUTPUT_BUTTON)
     await waitFor(page, `document.querySelector('${PORT_NAME_FIELD}')`, 'output port row')
     await delay(200)

@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps } from './blockModel'
 import {
 	applyCanvasPillSignature,
-	canvasPortSignaturePatch,
 	parseCanvasPythonSignature,
 } from './canvasPython'
 import { createValueBlockProps } from './valueBlock'
@@ -40,14 +39,5 @@ describe('canvas Python signatures', () => {
 		const next = applyCanvasPillSignature(pill, 'scale')
 		expect(next.title).toBe('2.0')
 		expect(next.outputs[0]).toMatchObject({ name: 'scale', type: 'float' })
-	})
-
-	it('uses the same declaration shell for a new input port and its default', () => {
-		const patch = canvasPortSignaturePatch(
-			{ id: 'in_1', name: 'in_1', type: '', visible: true },
-			'inputs',
-			'raw: bytes = 2.0',
-		)
-		expect(patch).toEqual({ name: 'raw', type: 'bytes', defaultValue: '2.0' })
 	})
 })

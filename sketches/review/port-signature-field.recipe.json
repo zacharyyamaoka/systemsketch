@@ -1,0 +1,108 @@
+{
+  "feature": "Port signature field \u2014 a port is one line of code",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "shapes": [
+    {
+      "id": "pose-type",
+      "type": "block",
+      "x": 120,
+      "y": 300,
+      "props": {
+        "title": "Pose",
+        "blockType": "type",
+        "icon": "Braces",
+        "view": "port",
+        "w": 300,
+        "h": 200,
+        "attributeSource": "x: float\ny: float\nyaw: float",
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 700,
+      "y": 300,
+      "props": {
+        "title": "estimate",
+        "description": "",
+        "blockType": "",
+        "view": "port",
+        "w": 380,
+        "h": 220,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Select estimate. In the inspector, the Inputs row is ONE field: frame: Frame. Click it, select all, type   window: int = 5   \u2014 watch the Block paint name, type and the = 5 chip as you type",
+      "x": 560,
+      "y": 40,
+      "w": 660,
+      "h": 150,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 In that same field type   pose: P   \u2014 the moment you pass the colon, the board's Types appear (Pose is the Type Block on the left). Enter accepts it.",
+      "x": 1180,
+      "y": 300,
+      "w": 380,
+      "h": 200,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "right"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 On the canvas, click the input's name (or its type) \u2014 the same one-line editor opens over the port. Press End, type   = None   and Enter. Then type two plain words in it: no suggestions, just a name.",
+      "x": 560,
+      "y": 620,
+      "w": 660,
+      "h": 150,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "bottom",
+        "dx": -40
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 There is one text field per port everywhere (inspector row, canvas editor, free Port panel); a colon offers Types, an equals sign offers variables, a bare name offers nothing; and the Block always paints what the line says.",
+      "x": 40,
+      "y": 620,
+      "w": 470,
+      "h": 200
+    }
+  ]
+}

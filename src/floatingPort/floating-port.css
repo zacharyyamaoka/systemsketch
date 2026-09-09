@@ -102,6 +102,21 @@
   box-shadow: var(--ss-focus-ring);
 }
 
+/* The Port's declaration is the same code text box a Block's port row uses,
+ * sized to the panel's own input rhythm. */
+.FloatingPortInspector .ss-code-field {
+  min-height: 30px;
+  padding: 6px 8px;
+  border-color: var(--ss-border);
+  border-radius: 7px;
+  background: var(--ss-surface-sunken);
+}
+
+.FloatingPortInspector .ss-code-field .cm-scroller {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
 .FloatingPortInspector-choice {
   display: grid;
   grid-auto-columns: 1fr;

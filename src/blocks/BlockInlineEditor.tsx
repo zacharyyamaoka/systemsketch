@@ -1,4 +1,5 @@
-import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react'
+import type { EditorView } from '@codemirror/view'
+import { useEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from 'react'
 import { useEditor, useValue } from 'tldraw'
 
 import { isBlockShape, type BlockShape, type BlockShapeProps } from './blockModel'
@@ -9,8 +10,12 @@ import {
 	type BlockInlineField,
 } from './inlineBlockEditing'
 import { VALUE_FONT_PX } from './layoutBlock'
+import { formatPortSignature, portSignaturePatch } from './portSignature'
 import { blockTitleAppearance } from './titleAppearance'
 import { BLOCK_ICONS } from './ui/blockIcons'
+import { portSignatureExtensions } from './ui/PortSignatureField'
+import { useVariableRegistry } from '../expression/useVariableRegistry'
+import { CodeField } from '../fields/CodeField'
 import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
@@ -45,7 +50,11 @@ function valueFor(props: BlockShapeProps, field: BlockInlineField): string {
 		case 'portName':
 		case 'portType': {
 			const port = props[field.side].find((candidate) => candidate.id === field.portId)
-			return port?.[field.kind === 'portName' ? 'name' : 'type'] ?? ''
+			if (!port) return ''
+			// A capsule still edits its name and literal as two spans; a Block's
+			// port is one line of code whichever span was clicked.
+			if (props.view === 'value') return port[field.kind === 'portName' ? 'name' : 'type']
+			return formatPortSignature(port)
 		}
 	}
 }
@@ -71,8 +80,16 @@ function updateField(
 				// Through the shared patch, not a private one: an accessor typed on
 				// the canvas has to be spelled the way the inspector and the menu
 				// spell it, and that rule lives in patchBlockPortProps.
-				const key = field.kind === 'portName' ? 'name' : 'type'
-				return patchBlockPortProps(props, field.side, field.portId, { [key]: value })
+				if (props.view === 'value') {
+					const key = field.kind === 'portName' ? 'name' : 'type'
+					return patchBlockPortProps(props, field.side, field.portId, { [key]: value })
+				}
+				// WHY live, not at commit: the whole line is parsed on every
+				// keystroke so the canvas paints name, type hint and default chip
+				// as they are typed — the Block itself is the syntax highlighting.
+				const port = props[field.side].find((candidate) => candidate.id === field.portId)
+				const patch = port ? portSignaturePatch(port, value) : null
+				return patch ? patchBlockPortProps(props, field.side, field.portId, patch) : props
 			}
 		}
 	})
@@ -88,14 +105,19 @@ function editorStyle(
 	const titleAppearance = field.kind === 'title'
 		? blockTitleAppearance(editor, props)
 		: null
+	const isPortLine = field.kind.startsWith('port') && props.view !== 'value'
 	const minimumWidth = field.kind === 'icon'
 		? 170
 		: field.kind === 'description'
 			? 150
 			: field.kind === 'title'
 				? 112
-				: 84
-	const width = Math.max(minimumWidth, box.w)
+				: isPortLine
+					? 220
+					: 84
+	// A port line grows past its painted label: `name: Type = default` is
+	// longer than the name and type the label shows, and the caret needs room.
+	const width = Math.max(minimumWidth, isPortLine ? box.w + 96 : box.w)
 	const height = Math.max(field.kind === 'description' ? 48 : 30, box.h)
 	let left = box.x
 	if (align === 'right') left = box.x + box.w - width
@@ -130,13 +152,15 @@ function placeholderFor(props: BlockShapeProps, field: BlockInlineField): string
 		? EMPTY_FIELD_GUIDANCE.block.title
 		: field.kind === 'blockType'
 			? EMPTY_FIELD_GUIDANCE.block.type
-			: field.kind === 'portName'
-				? EMPTY_FIELD_GUIDANCE.block.portName
-				: EMPTY_FIELD_GUIDANCE.block.portType
+			: EMPTY_FIELD_GUIDANCE.block.portSignature
 }
 
-function testIdFor(field: BlockInlineField): string {
+function testIdFor(props: BlockShapeProps, field: BlockInlineField): string {
 	if (field.kind === 'portName' || field.kind === 'portType') {
+		// A Block port's editor is one line whichever span opened it, and it
+		// keeps the `port-name` id: that is the id every journey waits for, and
+		// the name is the span the line is opened from.
+		if (props.view !== 'value') return `block-inline-port-name-${field.side}-${field.portId}`
 		return `block-inline-${field.kind === 'portName' ? 'port-name' : 'port-type'}-${field.side}-${field.portId}`
 	}
 	return `block-inline-${field.kind === 'blockType' ? 'type' : field.kind}`
@@ -153,7 +177,16 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	)
 	const placement = blockInlineEditorPlacement(shape.props, field)
 	const editorRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null)
+	const codeViewRef = useRef<EditorView | null>(null)
 	const markedSession = useRef<string | null>(null)
+	// The same grammar the inspector row speaks: types after `:`, the board's
+	// variables after `=`, nothing while a name is typed.
+	const { registryMap } = useVariableRegistry(editor)
+	const registryKey = Object.keys(registryMap).join(' ')
+	const portExtensions = useMemo(
+		() => portSignatureExtensions({ editor, excludeBlockId: shape.id, registryNames: registryKey ? registryKey.split(' ') : [] }),
+		[editor, shape.id, registryKey],
+	)
 
 	/**
 	 * Writing every keystroke straight into the shape is what makes on-canvas
@@ -163,7 +196,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	 * the first character so simply opening the editor leaves no history.
 	 */
 	const writeField = (value: string) => {
-		const session = `${shape.id}:${testIdFor(field)}`
+		const session = `${shape.id}:${testIdFor(shape.props, field)}`
 		if (markedSession.current !== session) {
 			markedSession.current = session
 			editor.markHistoryStoppingPoint(`edit block ${field.kind}`)
@@ -173,10 +206,24 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 
 	useEffect(() => {
 		markedSession.current = null
+		// Twice — now and on the next frame — because tldraw's own editing
+		// transition can take focus back after the first attempt. The port line
+		// is a CodeMirror view and needs exactly the same two tries; its own
+		// mount-time focus is the first, this effect is the retry when the
+		// editor MOVES from one field to another while already open.
 		const input = editorRef.current
-		if (!input) return
+		const view = codeViewRef.current
+		if (!input && !view) return
 		const focusAndSelect = () => {
 			if (editor.getEditingShapeId() !== shape.id) return
+			if (view) {
+				if (!view.hasFocus) {
+					view.focus()
+					view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } })
+				}
+				return
+			}
+			if (!input) return
 			input.focus({ preventScroll: true })
 			if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) input.select()
 		}
@@ -188,6 +235,29 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	if (!placement) return null
 	const value = valueFor(shape.props, field)
 	const style = editorStyle(editor, shape.props, field, placement.box, placement.align)
+
+	if ((field.kind === 'portName' || field.kind === 'portType') && shape.props.view !== 'value') {
+		// The port line is the code text box itself, keyed per port so moving
+		// the editor to another port remounts it with a fresh selection.
+		return (
+			<CodeField
+				key={`${field.side}:${field.portId}`}
+				className="BlockNode-inlineEditor BlockNode-inlineEditor--port"
+				style={style}
+				value={value}
+				placeholder={placeholderFor(shape.props, field)}
+				ariaLabel="Edit port"
+				testId={testIdFor(shape.props, field)}
+				autoFocus="select"
+				onViewReady={(view) => { codeViewRef.current = view }}
+				extensions={portExtensions}
+				onWrite={writeField}
+				onEnter={() => editor.complete()}
+				onEscape={() => editor.cancel()}
+			/>
+		)
+	}
+
 	const common = {
 		ref: editorRef as never,
 		className: `BlockNode-inlineEditor BlockNode-inlineEditor--${field.kind}${
@@ -195,7 +265,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 		}`,
 		style,
 		value,
-		'data-testid': testIdFor(field),
+		'data-testid': testIdFor(shape.props, field),
 		onPointerDown: (event: React.PointerEvent) => event.stopPropagation(),
 		onClick: (event: React.MouseEvent) => event.stopPropagation(),
 		onDoubleClick: (event: React.MouseEvent) => event.stopPropagation(),

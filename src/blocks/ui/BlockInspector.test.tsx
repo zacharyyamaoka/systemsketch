@@ -112,10 +112,12 @@ describe('Block inspector content', () => {
 		expect(html).toMatch(/aria-expanded="false" aria-controls="inspector-semantic-tags-inputs" aria-label="Show Inputs semantic tags"/)
 		expect(html).toMatch(/aria-expanded="false" aria-controls="inspector-semantic-tags-outputs" aria-label="Show Outputs semantic tags"/)
     expect(html).toContain('Icon: SquareFunction. Change icon')
-    // The default-value field is now an ExpandingExpressionField, which mounts
+    // A port row is one code text field (`name: Type = default`), which mounts
     // CodeMirror imperatively (useLayoutEffect) — static markup can't show its
     // content, only its identity, the way it could for a plain `<input>`.
-    expect(html).toContain('aria-label="Default value for packet"')
+    expect(html).toContain('aria-label="inputs in_1 signature"')
+    expect(html).not.toContain('aria-label="inputs in_1 name"')
+    expect(html).not.toContain('Default value for packet')
     expect(html).toContain('aria-label="Port layout"')
     expect(html).toContain('Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.')
 		expect(html).toContain('data-inspector-section="Behaviour"')
@@ -217,13 +219,15 @@ describe('Block inspector content', () => {
       />,
     )
 
-    for (const role of ['Display description', 'Title', 'Type', 'Name']) {
+    for (const role of ['Display description', 'Title', 'Type']) {
       expect(block).toContain(`placeholder="${role}"`)
     }
-    // The default-value field is an ExpandingExpressionField, not a real
-    // `<input>` — it paints its own guidance text as a span rather than an
-    // HTML `placeholder` attribute (a `<div>` has no such attribute).
-    expect(block).toContain('class="ss-expr-field__placeholder" aria-hidden="true">Default<')
+    // A port row is one CodeMirror field, not a real `<input>`: its guidance
+    // is the grammar itself, painted by CodeMirror's placeholder extension at
+    // mount time, so static markup can only show the field and its help line.
+    expect(block).toContain('aria-label="inputs in_1 signature"')
+    expect(block).toContain('name: Type = default')
+    expect(block).not.toContain('placeholder="Name"')
     expect(notes).toContain('placeholder="Notes"')
     for (const role of ['Name', 'Value', 'Type']) {
       expect(pill).toContain(`placeholder="${role}"`)

@@ -133,6 +133,10 @@ async function main() {
       await bindingFacts(page, SOURCE, 'out', bundle?.id, 'record'),
       { count: 2, source: SOURCE, sourcePort: 'out', sink: bundle?.id, sinkPort: 'record', normalized: true })
     await waitFor(page, `document.querySelector('[data-testid="bundle-add-member"]')`, 'Bundle member action')
+    // The signature field's per-port layout can leave this inspector button
+    // below the fold at this viewport — scroll it into view first.
+    await evaluate(page, `document.querySelector('[data-testid="bundle-add-member"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(120)
     const addMember = await box(page, '[data-testid="bundle-add-member"]')
     await clickAt(page, addMember.cx, addMember.cy); await delay(220)
     const grownBundle = (await blocks(page)).find((shape) => shape.id === bundle?.id)

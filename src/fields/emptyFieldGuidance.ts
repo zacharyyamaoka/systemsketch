@@ -13,9 +13,12 @@ export const EMPTY_FIELD_GUIDANCE = {
     type: 'Type',
     displayDescription: 'Display description',
     notes: 'Notes',
-    portName: 'Name',
-    portType: 'Type',
-    defaultValue: 'Default',
+    /**
+     * A port is one line of code, so its empty state shows the grammar rather
+     * than three role words: the colon and the equals sign are the whole
+     * lesson, and they are not sample data anyone would keep.
+     */
+    portSignature: 'name: Type = default',
   },
   pill: {
     name: 'Name',

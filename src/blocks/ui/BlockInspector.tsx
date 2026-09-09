@@ -21,6 +21,7 @@ import { type Editor, useEditor, useMaybeEditor, useValue, type TLShape, type TL
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 import { ExpandingExpressionField } from '../../expression/ExpandingExpressionField'
+import { PortSignatureField } from './PortSignatureField'
 import { EMPTY_VARIABLE_REGISTRY, useVariableRegistry, type VariableRegistryApi } from '../../expression/useVariableRegistry'
 import { isSafeNamespaceName } from '../../expression/pythonSafeNamespace'
 import type { UsedName } from '../../expression/expressionClient'
@@ -70,7 +71,6 @@ import {
 } from '../../prototypes/communication/communicationProjection'
 import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
-import { useAppearancePreferences } from '../../settings/appearancePreferences'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
@@ -1470,7 +1470,7 @@ function PortSection({
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
   // 3px, so a click that merely focuses the grip is not a reorder gesture.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 3 } }))
-  const { punctuatedPortRow } = useAppearancePreferences()
+  const editor = useMaybeEditor()
   const dragRef = useRef<InspectorPortDrag | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
@@ -1735,47 +1735,10 @@ function PortSection({
         </li>
       )
     }
-    const typeField = (
-      <LiveTextInput
-        className="block-inspector__port-type"
-        value={port.type}
-        disabled={!actions}
-        placeholder={EMPTY_FIELD_GUIDANCE.block.portType}
-        ariaLabel={`${side} ${port.id} type`}
-        beginEdit={() => actions?.beginEdit?.('retype block port')}
-        onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
-      />
-    )
-    // The Default placeholder remains guidance text; the row paints the '='
-    // itself in code-style mode, so the field needs no punctuation-specific state.
-    // Every default value is always live-evaluated as Python against the
-    // board's variable registry (there is no opt-in mode) — a value that
-    // isn't valid Python today, or isn't defined, falls back to showing its
-    // own raw text exactly as it always has, so no existing board changes.
-    const defaultField = side === 'inputs' ? (
-      <ExpandingExpressionField
-        className="block-inspector__port-default"
-        value={port.defaultValue ?? ''}
-        disabled={!actions}
-        registry={variableRegistry.registryMap}
-        placeholder={EMPTY_FIELD_GUIDANCE.block.defaultValue}
-        ariaLabel={`Default value for ${port.name || port.id}`}
-        beginEdit={() => actions?.beginEdit?.('edit port default')}
-        onWrite={(defaultValue) =>
-          actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
-        onEvalResult={(result) => {
-          setUsedByPort((current) => {
-            const next = new Map(current)
-            next.set(port.id, result?.usedNames ?? [])
-            return next
-          })
-        }}
-      />
-    ) : null
     return (
       <Fragment key={port.id}>
         <li
-          className={`block-inspector__port-row${held ? ' is-dragging' : ''}${punctuatedPortRow ? ' block-inspector__port-row--punctuated' : ''}`}
+          className={`block-inspector__port-row${held ? ' is-dragging' : ''}`}
           style={style}
           {...shared}
         >
@@ -1791,29 +1754,27 @@ function PortSection({
             <LinkIcon />
           </button>
         ) : grip(port)}
-        <LiveTextInput
-          className="block-inspector__port-name"
-          value={port.name}
+        <PortSignatureField
+          editor={editor}
+          className="block-inspector__port-signature"
+          port={port}
           disabled={!actions}
-          placeholder={EMPTY_FIELD_GUIDANCE.block.portName}
-          ariaLabel={`${side} ${port.id} name`}
-          beginEdit={() => actions?.beginEdit?.('rename block port')}
-          onWrite={(name) => actions?.updatePort(side, port.id, { name }, { continuous: true })}
+          placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
+          ariaLabel={`${side} ${port.id} signature`}
+          testId={`inspector-port-signature-${side}-${port.id}`}
+          registry={variableRegistry.registryMap}
+          evaluate={side === 'inputs'}
+          beginEdit={() => actions?.beginEdit?.('edit block port')}
+          onPatch={(patch) => actions?.updatePort(side, port.id, patch, { continuous: true })}
+          onEvalResult={(result) => {
+            if (side !== 'inputs') return
+            setUsedByPort((current) => {
+              const next = new Map(current)
+              next.set(port.id, result?.usedNames ?? [])
+              return next
+            })
+          }}
         />
-        {punctuatedPortRow ? (
-          <span className="block-inspector__port-field">
-            <span className="block-inspector__port-punct" aria-hidden="true">:</span>
-            {typeField}
-          </span>
-        ) : typeField}
-        {defaultField ? (
-          punctuatedPortRow ? (
-            <span className="block-inspector__port-field">
-              <span className="block-inspector__port-punct" aria-hidden="true">=</span>
-              {defaultField}
-            </span>
-          ) : defaultField
-        ) : null}
         {side === 'inputs' ? (
           <button
             type="button"

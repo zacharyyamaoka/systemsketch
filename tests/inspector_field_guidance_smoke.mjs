@@ -41,12 +41,38 @@ const fields = (page, selector) => evaluate(page, `JSON.stringify(
   }))
 )`).then(JSON.parse)
 
+/**
+ * A port's one CodeMirror signature field: its typed text and its empty-state
+ * placeholder. CodeMirror paints the placeholder as a widget *inside*
+ * `.cm-content` when the field is empty, so the typed text is read with that
+ * widget stripped out rather than off `.cm-content`'s raw textContent.
+ */
+const signatureField = (page, selector) => evaluate(page, `JSON.stringify((() => {
+  const field = document.querySelector(${JSON.stringify(selector)})
+  if (!field) return null
+  const content = field.querySelector('.cm-content')
+  const clone = content?.cloneNode(true)
+  clone?.querySelectorAll('.cm-placeholder').forEach((node) => node.remove())
+  return {
+    label: field.getAttribute('aria-label'),
+    text: clone?.textContent ?? null,
+    placeholder: content?.querySelector('.cm-placeholder')?.textContent ?? null,
+  }
+})())`).then(JSON.parse)
+
 async function drawBlankBlock(page) {
   await key(page, 'b', 'KeyB')
   await clickAt(page, 460, 300)
   await waitFor(page, `document.querySelector('[data-testid="block-inline-title"]')`, 'blank Block title editor')
   await key(page, 'Enter', 'Enter')
   await waitFor(page, `document.querySelector(${JSON.stringify(PANEL)})`, 'Block inspector')
+}
+
+/** Click a control that may sit below the fold, the way a person scrolls first. */
+async function scrollAndClick(page, selector) {
+  await evaluate(page, `document.querySelector(${JSON.stringify(selector)})?.scrollIntoView({ block: 'center' })`)
+  await delay(120)
+  await clickElement(page, selector)
 }
 
 async function drawBlankPill(page) {
@@ -78,17 +104,13 @@ async function main() {
     )
     pass('a blank Block names Title, Type, and Display description without filling them')
 
-    await clickElement(page, `${PANEL} [aria-label="Add input port"]`)
+    await scrollAndClick(page, `${PANEL} [aria-label="Add input port"]`)
     await waitFor(page,
-      `document.querySelector(${JSON.stringify(`${PANEL} [aria-label="inputs in_1 name"]`)})`,
+      `document.querySelector(${JSON.stringify(`${PANEL} [aria-label="inputs in_1 signature"]`)})`,
       'new input port')
-    const portFields = await fields(page, `${PANEL} [aria-label="inputs in_1 name"], ${PANEL} [aria-label="inputs in_1 type"], ${PANEL} [aria-label="Default value for in_1"]`)
-    assert.deepEqual(portFields, [
-      { label: 'inputs in_1 name', value: '', placeholder: 'Name' },
-      { label: 'inputs in_1 type', value: '', placeholder: 'Type' },
-      { label: 'Default value for in_1', value: '', placeholder: 'Default' },
-    ])
-    pass('a newly added port keeps its internal id private and shows Name, Type, and Default')
+    const portField = await signatureField(page, `${PANEL} [aria-label="inputs in_1 signature"]`)
+    assert.deepEqual(portField, { label: 'inputs in_1 signature', text: '', placeholder: 'name: Type = default' })
+    pass('a newly added port keeps its internal id private and shows one name: Type = default field')
 
     await drawBlankPill(page)
     const pill = await fields(page, '[data-inspector-section="Pill"] input')
@@ -124,15 +146,11 @@ async function main() {
         { label: 'Block type', value: '', placeholder: 'Type' },
       ],
     )
-    await clickElement(page, `${FIXTURE_PANEL} [aria-label="Add input port"]`)
-    await waitFor(page, `document.querySelector(${JSON.stringify(`${FIXTURE_PANEL} [aria-label="inputs in_2 name"]`)})`, 'fixture-added input')
+    await scrollAndClick(page, `${FIXTURE_PANEL} [aria-label="Add input port"]`)
+    await waitFor(page, `document.querySelector(${JSON.stringify(`${FIXTURE_PANEL} [aria-label="inputs in_2 signature"]`)})`, 'fixture-added input')
     assert.deepEqual(
-      await fields(page, `${FIXTURE_PANEL} [aria-label="inputs in_2 name"], ${FIXTURE_PANEL} [aria-label="inputs in_2 type"], ${FIXTURE_PANEL} [aria-label="Default value for in_2"]`),
-      [
-        { label: 'inputs in_2 name', value: '', placeholder: 'Name' },
-        { label: 'inputs in_2 type', value: '', placeholder: 'Type' },
-        { label: 'Default value for in_2', value: '', placeholder: 'Default' },
-      ],
+      await signatureField(page, `${FIXTURE_PANEL} [aria-label="inputs in_2 signature"]`),
+      { label: 'inputs in_2 signature', text: '', placeholder: 'name: Type = default' },
     )
     await evaluate(page, `(() => { window.__systemsketch.editor.select('shape:blank-pill'); return 'selected' })()`)
     await waitFor(page, `document.querySelector('[data-inspector-section="Pill"]')`, 'fixture Pill inspector')

@@ -44,12 +44,17 @@ function fieldsFor(editor: Editor): Atom<ReadonlyMap<TLShapeId, BlockInlineField
 }
 
 export function isSameBlockInlineField(a: BlockInlineField, b: BlockInlineField): boolean {
-	if (a.kind !== b.kind) return false
-	if (a.kind === 'portName' || a.kind === 'portType') {
+	const aIsPort = a.kind === 'portName' || a.kind === 'portType'
+	const bIsPort = b.kind === 'portName' || b.kind === 'portType'
+	// A port's painted name and type are two spans over ONE editable line
+	// (`name: Type = default`), so a click that moves from one span to the
+	// other on the same port is the same field, not a second editing session.
+	if (aIsPort && bIsPort) {
+		const first = a as Extract<BlockInlineField, { portId: string }>
 		const other = b as Extract<BlockInlineField, { portId: string }>
-		return a.side === other.side && a.portId === other.portId
+		return first.side === other.side && first.portId === other.portId
 	}
-	return true
+	return a.kind === b.kind
 }
 
 export function rememberBlockInlineField(

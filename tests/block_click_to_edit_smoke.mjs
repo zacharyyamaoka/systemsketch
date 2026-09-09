@@ -32,6 +32,7 @@ import {
   makeChecklist,
   mouse,
   openApp,
+  shortcut,
   startApp,
   waitFor,
 } from './browser_harness.mjs'
@@ -99,6 +100,25 @@ async function typeInto(page, selector, value) {
 }
 
 /**
+ * Replace a port signature field's text the way a person does. Unlike a plain
+ * `<input>`, a CodeMirror code field has no triple-click-to-select-all, so this
+ * clicks it, waits for real focus, selects with the keyboard, and confirms the
+ * new text actually reached `.cm-content` rather than trusting the keystrokes.
+ */
+async function typeSignature(page, selector, value) {
+  const found = JSON.stringify(selector)
+  await evaluate(page, `document.querySelector(${found})?.scrollIntoView({ block: 'center' })`)
+  await delay(120)
+  await clickElement(page, selector)
+  await waitFor(page, `document.querySelector(${found})?.contains(document.activeElement)`,
+    `focus to land on ${selector}`, 5000)
+  await shortcut(page, 'a', 'KeyA', 2)
+  await page.send('Input.insertText', { text: value })
+  await waitFor(page, `document.querySelector(${found})?.querySelector('.cm-content')?.textContent === ${JSON.stringify(value)}`,
+    `${selector} to hold ${JSON.stringify(value)}`, 5000)
+}
+
+/**
  * Assert the pointer would actually land on the Block field we mean, then click.
  *
  * Every gesture below is a raw coordinate click, so anything that drifts over
@@ -148,12 +168,16 @@ async function main() {
     await key(page, 'Enter', 'Enter')
     await waitFor(page, `document.querySelector('[data-testid="block-development-inspector"]')`, 'inspector')
 
+    await evaluate(page, `document.querySelector('${PANEL} [aria-label="Add input port"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(120)
     await clickElement(page, `${PANEL} [aria-label="Add input port"]`)
-    await waitFor(page, `document.querySelector('${PANEL} [aria-label="inputs in_1 name"]')`, 'input port row')
-    await typeInto(page, `${PANEL} [aria-label="inputs in_1 name"]`, 'raw')
+    await waitFor(page, `document.querySelector('${PANEL} [aria-label="inputs in_1 signature"]')`, 'input port row')
+    await typeSignature(page, `${PANEL} [aria-label="inputs in_1 signature"]`, 'raw')
+    await evaluate(page, `document.querySelector('${PANEL} [aria-label="Add output port"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(120)
     await clickElement(page, `${PANEL} [aria-label="Add output port"]`)
-    await waitFor(page, `document.querySelector('${PANEL} [aria-label="outputs out_1 name"]')`, 'output port row')
-    await typeInto(page, `${PANEL} [aria-label="outputs out_1 name"]`, 'Frame')
+    await waitFor(page, `document.querySelector('${PANEL} [aria-label="outputs out_1 signature"]')`, 'output port row')
+    await typeSignature(page, `${PANEL} [aria-label="outputs out_1 signature"]`, 'Frame')
     await clickAt(page, EMPTY_CANVAS.x, EMPTY_CANVAS.y)
     await delay(240)
 
@@ -187,10 +211,9 @@ async function main() {
     await delay(240)
     assert.equal(await editorTestId(page), 'block-inline-port-name-inputs-in_1',
       'one click on a port name must move the editor onto that port')
-    assert.equal(await evaluate(page,
-      `document.activeElement?.getAttribute('data-testid') ?? null`),
-      'block-inline-port-name-inputs-in_1',
-      'the moved editor must also take focus')
+    await waitFor(page,
+      `document.querySelector('[data-testid="block-inline-port-name-inputs-in_1"]')?.contains(document.activeElement) ?? false`,
+      'the moved editor to take focus', 5000)
     pass('one click on a port name moves the open editor onto that port')
 
     // 4. Typing into the moved editor still writes through to the document.

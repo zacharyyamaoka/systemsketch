@@ -1177,9 +1177,6 @@ function swatchOf(palettes: readonly ThemePalette[], id: string): SwatchTokens {
 function AppearancePanel() {
   const choice = useThemeChoice()
   const imported = useImportedPalettes()
-  const {
-    punctuatedPortRow,
-  } = useAppearancePreferences()
   const options = themeOptions(BUILT_IN_PALETTES, imported)
   const palettes = [...BUILT_IN_PALETTES, ...imported]
   const fileInput = useRef<HTMLInputElement | null>(null)
@@ -1330,27 +1327,6 @@ function AppearancePanel() {
           {importMessage.text}
         </p>
       ) : null}
-
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="port-row-punctuation-title">
-        <div className="systemsketch-settings__appearance-heading">
-          <h3 id="port-row-punctuation-title">Inputs row style</h3>
-          <p>Read a Block's ports as <code>name: type = default</code>, or keep the plain row.</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          className="systemsketch-settings__toggle-row"
-          aria-checked={punctuatedPortRow}
-          data-testid="systemsketch-punctuated-port-row"
-          onClick={() => updateAppearancePreferences({ punctuatedPortRow: !punctuatedPortRow })}
-        >
-          <span>
-            <strong>Code-style Inputs row</strong>
-            <small>Name, Type and Default all render in monospace, joined by a muted ':' and '='.</small>
-          </span>
-          <i aria-hidden="true"><span /></i>
-        </button>
-      </section>
     </section>
   )
 }

@@ -48,11 +48,20 @@ async function clickSelector(page, selector) {
   await clickAt(page, point.x, point.y)
 }
 
+/**
+ * Replace a CodeMirror code field's text the way a person does: click it,
+ * wait for real focus (there is no `.select()` on a code field), select all,
+ * type, then confirm the new text actually landed in `.cm-content`.
+ */
 async function replaceField(page, label, value) {
   const selector = `[aria-label=${JSON.stringify(label)}]`
   await clickSelector(page, selector)
+  await waitFor(page, `document.querySelector(${JSON.stringify(selector)})?.contains(document.activeElement)`, `${label} focused`)
   await shortcut(page, 'a', 'KeyA', 2)
   await page.send('Input.insertText', { text: value })
+  await waitFor(page,
+    `document.querySelector(${JSON.stringify(selector)})?.querySelector('.cm-content')?.textContent === ${JSON.stringify(value)}`,
+    `${label} to hold ${JSON.stringify(value)}`)
   await delay(180)
 }
 
@@ -119,9 +128,7 @@ async function main() {
     assert.deepEqual(await portState(page, SOURCE), { filled: false, fill: 'auto', label: 'velocity Number = 3.5' })
     pass('a selected Port exposes its small Block-style name, type, value, direction, text, and filled-state editor')
 
-    await replaceField(page, 'Port name', 'speed')
-    await replaceField(page, 'Port type', 'float')
-    await replaceField(page, 'Port value', '7.2')
+    await replaceField(page, 'Port signature', 'speed: float = 7.2')
     await clickSelector(page, '[aria-label="Port text layout"] button:nth-child(2)')
     const configured = JSON.parse(await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getShape(${JSON.stringify(SOURCE)}).props)`))
     assert.deepEqual(

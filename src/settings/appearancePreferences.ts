@@ -24,11 +24,6 @@ export interface AppearancePreferences {
   /** A percentage of tldraw's stock `zoomSpeed: 1`. Keeping the persisted
    * value in product language makes 100 the obvious, durable reset point. */
   wheelZoomSensitivityPercent: number
-  /** The Inputs row reads as `name: type = default` — Name, Type and
-   * Default all in monospace, the ':' / '=' muted rather than full-ink.
-   * Chosen over a bolder full-ink treatment and over hiding '=' until a
-   * default exists; defaults on, with the plain row kept reachable here. */
-  punctuatedPortRow: boolean
 }
 
 export const DEFAULT_APPEARANCE_PREFERENCES: AppearancePreferences = Object.freeze({
@@ -37,7 +32,6 @@ export const DEFAULT_APPEARANCE_PREFERENCES: AppearancePreferences = Object.free
   scrollDownZoomsIn: true,
   modifierWheelZoomsOppositely: false,
   wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
-  punctuatedPortRow: true,
 })
 
 interface StoredAppearancePreferences extends AppearancePreferences {
@@ -66,7 +60,6 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     scrollDownZoomsIn,
     modifierWheelZoomsOppositely,
     wheelZoomSensitivityPercent,
-    punctuatedPortRow,
   } = value
   // A field the stored record predates is `undefined`, not wrong — that
   // should fall back to its own default, not discard a real value the user
@@ -78,7 +71,6 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     || (scrollDownZoomsIn !== undefined && typeof scrollDownZoomsIn !== 'boolean')
     || (modifierWheelZoomsOppositely !== undefined && typeof modifierWheelZoomsOppositely !== 'boolean')
     || (wheelZoomSensitivityPercent !== undefined && !isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent))
-    || (punctuatedPortRow !== undefined && typeof punctuatedPortRow !== 'boolean')
   ) {
     return DEFAULT_APPEARANCE_PREFERENCES
   }
@@ -98,9 +90,6 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     wheelZoomSensitivityPercent: isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent)
       ? wheelZoomSensitivityPercent
       : DEFAULT_APPEARANCE_PREFERENCES.wheelZoomSensitivityPercent,
-    punctuatedPortRow: typeof punctuatedPortRow === 'boolean'
-      ? punctuatedPortRow
-      : DEFAULT_APPEARANCE_PREFERENCES.punctuatedPortRow,
   }
 }
 
@@ -156,7 +145,6 @@ export function updateAppearancePreferences(
     && next.scrollDownZoomsIn === snapshot.scrollDownZoomsIn
     && next.modifierWheelZoomsOppositely === snapshot.modifierWheelZoomsOppositely
     && next.wheelZoomSensitivityPercent === snapshot.wheelZoomSensitivityPercent
-    && next.punctuatedPortRow === snapshot.punctuatedPortRow
   ) {
     return snapshot
   }

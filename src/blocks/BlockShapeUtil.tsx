@@ -42,7 +42,7 @@ import {
 	valueBlockLabel,
 	valueBlockText,
 } from './valueBlock'
-import { applyCanvasPillSignature, canvasPortSignaturePatch } from './canvasPython'
+import { applyCanvasPillSignature } from './canvasPython'
 import { createTypeProps } from './typeAttributes'
 import { patchBlockPortProps } from './commands/blockCommands'
 import {
@@ -468,15 +468,12 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 
 	override onEditEnd(shape: BlockShape): void {
 		const field = getBlockInlineField(this.editor, shape.id)
-		if (field.kind === 'portName') {
+		// A capsule's declaration is split when the edit ends; a Block port's
+		// line is parsed live by its editor and needs no second reading here.
+		if (field.kind === 'portName' && shape.props.view === 'value') {
 			const port = shape.props[field.side].find((candidate) => candidate.id === field.portId)
 			if (port) {
-				const props = shape.props.view === 'value'
-					? applyCanvasPillSignature(shape.props, port.name)
-					: (() => {
-						const patch = canvasPortSignaturePatch(port, field.side, port.name)
-						return patch ? patchBlockPortProps(shape.props, field.side, port.id, patch) : shape.props
-					})()
+				const props = applyCanvasPillSignature(shape.props, port.name)
 				if (props !== shape.props) {
 					this.editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
 				}

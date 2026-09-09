@@ -1,0 +1,148 @@
+/*
+ * The code text box. Sized to sit where a plain `<input>` sat — the
+ * inspector's port row, a floating Port's panel — so a board with nothing
+ * typed in code looks unchanged. Colours are `--ss-*` tokens: the field is
+ * code, so it reads the code surface tokens the Code block reads.
+ */
+
+.ss-code-field {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 6px;
+  background: var(--ss-code-surface);
+  color: var(--ss-code-text);
+  cursor: text;
+  overflow: hidden;
+}
+
+.ss-code-field[aria-disabled='true'] {
+  opacity: .6;
+  cursor: default;
+}
+
+.ss-code-field:focus-within {
+  border-color: var(--ss-accent);
+}
+
+.ss-code-field .cm-editor {
+  outline: none;
+  background: transparent;
+  height: auto;
+}
+
+.ss-code-field .cm-scroller {
+  overflow: hidden;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ss-code-field .cm-content {
+  padding: 0;
+  caret-color: var(--ss-accent);
+  white-space: nowrap;
+}
+
+.ss-code-field .cm-line {
+  padding: 0;
+}
+
+.ss-code-field .cm-placeholder {
+  color: var(--ss-text-faint);
+  font-style: normal;
+}
+
+.ss-code-field .cm-selectionBackground,
+.ss-code-field .cm-focused .cm-selectionBackground,
+.ss-code-field ::selection {
+  background: color-mix(in srgb, var(--ss-accent) 30%, transparent);
+}
+
+.ss-code-field .cm-cursor {
+  border-left-color: var(--ss-accent);
+}
+
+/* The port-line grammar's three roles, in the same voice the canvas paints
+ * them: the name carries the ink, the type is an accent-tinted hint, the
+ * default is a muted value, and the two glyphs between them are quieter
+ * than any of the three. These win over the generic Python token colours
+ * on purpose — a free-text name of three words must not light up as three
+ * variable references. */
+.ss-code-field .ss-sig-name,
+.ss-code-field .ss-sig-name.tok-variableName {
+  color: var(--ss-code-text);
+  font-weight: 600;
+}
+
+.ss-code-field .ss-sig-type,
+.ss-code-field .ss-sig-type.tok-variableName {
+  color: color-mix(in srgb, var(--ss-accent) 55%, var(--ss-code-text));
+  font-weight: 400;
+}
+
+.ss-code-field .ss-sig-punct {
+  color: var(--ss-text-faint);
+}
+
+.ss-code-field .ss-sig-default {
+  color: var(--ss-code-text);
+}
+
+/* A live-resolved value rides beside the formula while the field is at rest,
+ * so `chassis_width / 4` still says what it currently is without the formula
+ * ever being replaced by it. */
+.ss-code-field .ss-sig-resolved {
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 4px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  font-size: 10px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ss-code-field .ss-expr-squiggle {
+  text-decoration: underline wavy var(--ss-danger);
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
+}
+
+/* The wrapper a grammar-aware host puts around the field to carry its
+ * diagnostics: a passive warning glyph and an accessible help line. */
+.ss-code-field-frame {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.ss-code-field-frame[data-error='true'] .ss-code-field {
+  border-color: color-mix(in srgb, var(--ss-danger) 60%, var(--ss-border-strong));
+}
+
+.ss-code-field-frame__warning {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  color: var(--ss-warning);
+  font-size: 11px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.ss-code-field-frame__help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The completion tooltip for a value slot reuses the type-name popup's
+ * chrome (`TypeNameAutocomplete-cm`); only the value rows lack a kind pill. */
