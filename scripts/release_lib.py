@@ -22,6 +22,7 @@ CHANNELS_SCHEMA_VERSION = 1
 MANIFEST_SCHEMA_VERSION = 1
 FILE_ACCESS_SCHEMA_VERSION = 1
 CONTROLLER_RUNTIME_FILES = (
+    "expression_eval.py",
     "recorder_frames.mjs",
     "recording_store.py",
     "release_lib.py",
@@ -360,9 +361,7 @@ def release_build_id(project_root: Path, dist: Path) -> str:
     for relative in (
         "scripts/launch_systemsketch.py",
         "scripts/release.py",
-        "scripts/release_lib.py",
-        "scripts/server.py",
-        "scripts/workspace_store.py",
+        *(f"scripts/{name}" for name in CONTROLLER_RUNTIME_FILES),
     ):
         path = project_root / relative
         digest.update(relative.encode())
@@ -386,9 +385,15 @@ def build_release(project_root: Path, release_home: Path, dist: Path) -> tuple[s
     dist = dist.resolve()
     if not (dist / "index.html").is_file():
         raise ReleaseError(f"{dist / 'index.html'} is missing")
-    for relative in ("scripts/server.py", "scripts/release_lib.py", "scripts/workspace_store.py"):
-        if not (project_root / relative).is_file():
-            raise ReleaseError(f"{project_root / relative} is missing")
+    # WHY derived from CONTROLLER_RUNTIME_FILES rather than a second hand-kept
+    # list: a new server.py import (expression_eval.py, added for the
+    # parametric property system) landed in SOURCE_PATHS' scope but not here,
+    # so every fresh candidate built after that commit launched to a bare
+    # ModuleNotFoundError on Stable's restart — the runtime bundle silently
+    # fell out of sync with what server.py actually imports.
+    for relative in CONTROLLER_RUNTIME_FILES:
+        if not (project_root / "scripts" / relative).is_file():
+            raise ReleaseError(f"{project_root / 'scripts' / relative} is missing")
 
     version, changes = project_metadata(project_root)
     build = release_build_id(project_root, dist)
@@ -402,11 +407,8 @@ def build_release(project_root: Path, release_home: Path, dist: Path) -> tuple[s
         shutil.copytree(dist, staging / "dist")
         runtime = staging / "runtime"
         runtime.mkdir()
-        shutil.copy2(project_root / "scripts" / "server.py", runtime / "server.py")
-        shutil.copy2(project_root / "scripts" / "release_lib.py", runtime / "release_lib.py")
-        shutil.copy2(project_root / "scripts" / "workspace_store.py", runtime / "workspace_store.py")
-        shutil.copy2(project_root / "scripts" / "recording_store.py", runtime / "recording_store.py")
-        shutil.copy2(project_root / "scripts" / "recorder_frames.mjs", runtime / "recorder_frames.mjs")
+        for relative in CONTROLLER_RUNTIME_FILES:
+            shutil.copy2(project_root / "scripts" / relative, runtime / relative)
         manifest = {
             "product": PRODUCT,
             "schemaVersion": MANIFEST_SCHEMA_VERSION,
@@ -481,15 +483,7 @@ def source_root_from_channels(release_home: Path) -> Path:
 def install_controller(project_root: Path, release_home: Path) -> Path:
     destination = controller_dir(release_home)
     destination.mkdir(parents=True, exist_ok=True)
-    mapping = {
-        "launch_systemsketch.py": "launch_systemsketch.py",
-        "release.py": "release.py",
-        "release_lib.py": "release_lib.py",
-        "server.py": "server.py",
-        "workspace_store.py": "workspace_store.py",
-        "recording_store.py": "recording_store.py",
-        "recorder_frames.mjs": "recorder_frames.mjs",
-    }
+    mapping = {name: name for name in ("launch_systemsketch.py", "release.py", *CONTROLLER_RUNTIME_FILES)}
     for source_name, destination_name in mapping.items():
         source = project_root / "scripts" / source_name
         if not source.is_file():

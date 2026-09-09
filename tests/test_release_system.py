@@ -157,6 +157,37 @@ class ReleaseSystemTests(unittest.TestCase):
             self.assertEqual(rolled_back.previous, second)
             self.assertEqual(source_root_from_channels(release_home), PROJECT_ROOT)
 
+    def test_staged_runtime_actually_imports_with_no_sibling_source_on_path(self) -> None:
+        """A candidate that Stable launches must carry every module server.py
+        imports, not just the ones some earlier list happened to name.
+
+        This caught a real bug (2026-09-09): `expression_eval.py` became a
+        `server.py` import when the parametric property system landed, but
+        `CONTROLLER_RUNTIME_FILES`/`build_release`'s copy list were never
+        updated, so every fresh Stable build after that commit launched
+        straight into `ModuleNotFoundError: No module named 'expression_eval'`
+        — invisible to every other test here because they all import `server`
+        with this repo's own `scripts/` still on `sys.path`, silently masking
+        exactly the isolation a real `runtime/` directory does not have.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            build, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "isolated"))
+            runtime_dir = release_home / "releases" / build / "runtime"
+            for name in CONTROLLER_RUNTIME_FILES:
+                self.assertTrue((runtime_dir / name).is_file(), f"{name} missing from the staged runtime")
+            completed = subprocess.run(
+                [sys.executable, "-c", "import server"],
+                cwd=runtime_dir,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(
+                completed.returncode, 0,
+                f"runtime/server.py could not import in isolation:\n{completed.stderr}",
+            )
+
     def test_release_api_identifies_stable_and_preview_without_touching_the_canvas(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
