@@ -53,6 +53,17 @@ def git(*args: str) -> str:
         return ""
 
 
+def unit_test_summary() -> str:
+    """Run the member unit tests at build time when vitest is reachable; say so when it is not."""
+    files = ["src/blocks/memberStack.test.ts", "src/blocks/memberLayout.test.ts", "src/blocks/blockVisibility.test.ts"]
+    try:
+        run = subprocess.run(["npx", "vitest", "run", *files], cwd=ROOT, capture_output=True, text=True, timeout=180)
+    except (OSError, subprocess.TimeoutExpired):
+        return "not run at build time (vitest unreachable here)"
+    match = re.search(r"Tests\s+(\d+) passed", run.stdout + run.stderr)
+    return f"{match.group(1)} passed across the three member test files" if match else "not run at build time (vitest unreachable here)"
+
+
 def measured() -> dict:
     model = read("src/blocks/blockModel.ts")
     member = read("src/blocks/memberLayout.ts")
@@ -69,7 +80,7 @@ def measured() -> dict:
     need(model, "export const BLOCK_MEMBER_LAYOUTS = ['inset', 'edge-to-edge'] as const", "the member layout enum")
     need(model, "export function canBlockContainChildren(view: BlockView): boolean {\n\treturn view === 'expanded'", "only Expanded contains")
     need(member, "sort((a, b) => a.y - b.y", "placements ordered by y, not by an authored order")
-    need(member, "Member layout is a helpful command, not an invisible constraint", "the one-shot WHY")
+    need(member, "in free mode member layout is a helpful command", "the one-shot WHY, now scoped to free mode")
     need(linking, "expandedSize: props.views.expanded", "expanded size is definition-shared")
     need(linking, "function syncLinkedBody(", "bodies replicate across occurrences")
     need(inspector, 'aria-label="Member layout"', "today's member layout control")
@@ -77,8 +88,16 @@ def measured() -> dict:
     need(autoresize, "fitFrameToContent(editor, block.id, { padding: BLOCK_AUTO_RESIZE_PADDING_PX })", "stock fit")
     need(scope, "shape.parentId === parent.id", "children resolved by parentId")
     need(app, "installBlockAutoResize(editor)", "the settle installer seam")
-    if 'data-inspector-section="Members"' in inspector or ">Members<" in inspector:
-        raise SystemExit("report is stale — the inspector already has a Members section")
+    need(inspector, 'data-inspector-section="Members"', "the Members section")
+    stack = read("src/blocks/memberStack.ts")
+    need(stack, "export function installBlockMemberStack(", "the live stack installer")
+    need(stack, "options.order === 'authored' ? members : membersByLanding(members)", "landing vs authored order")
+    need(model, "bodyLayout: T.literalEnum(...BLOCK_BODY_LAYOUTS).optional()", "the optional bodyLayout prop")
+    need(app, "installBlockMemberStack(editor)", "the installer registered")
+    need(read("src/blocks/blockVisibility.ts"), "blockBodyLayout(host.props) === 'stack') return 'hidden'", "cables hidden in a stack")
+    need(linking, "isEmptyDefinition(editor, source)", "the empty-Block rename exception")
+    journey = read("tests/block_members_smoke.mjs")
+    journey_checks = journey.count("pass('")
 
     tldraw = re.search(r'"tldraw":\s*"([^"]+)"', pkg).group(1)
     migration_ids = re.findall(r"id: blockVersions\.(\w+)", migrations)
@@ -108,6 +127,9 @@ def measured() -> dict:
             "blockModel.ts": model.count("\n"),
         },
         "optional_props_precedent": sum(1 for _ in re.finditer(r"T\.\w+(?:\([^)]*\))?\.optional\(\)", model)),
+        "journey_checks": journey_checks,
+        "stack_lines": stack.count("\n"),
+        "unit": unit_test_summary(),
     }
 
 
@@ -407,7 +429,7 @@ def page(m: dict) -> str:
 <style>{CSS}</style>
 <main>
 <h1>Members of a Block, authored like ports</h1>
-<p class="meta">Proposal · {date.today()} · measured against <code>{m['head']}</code> · tldraw {m['tldraw']} pinned · nothing in <code>src/</code> changes with this page</p>
+<p class="meta">Proposal, then built the same day · {date.today()} · measured against <code>{m['head']}</code> · tldraw {m['tldraw']} pinned · <a href="#built">jump to what shipped</a></p>
 
 <p class="lede"><b>Recommendation.</b> A member is what an Expanded Block's direct child Block already is — tldraw's <code>parentId</code>, already replicated across every linked occurrence by the definition body sync. So do not add a second membership model. Add the three things that are missing: a <b>Members</b> section in the inspector that mirrors Inputs/Outputs (list, grip reorder, <code>+</code>), an <b>authored order</b> that is tldraw's own child index, and a <b>live stack layout</b> on the parent driven by three numbers — <code>gap</code>, <code>gutter</code>, <code>width: fill | own</code> — with <b>Inset</b> and <b>Edge-to-edge</b> demoted to presets that write those numbers. One rule keeps a definition from being sized by two parents: Fill only ever writes an occurrence's Port/Simple box, and an Expanded child is always Own and drives its parent. Blocks do not store their parents; <code>parentId</code> plus <code>linkedBlockOccurrences</code> derive them, and PEP 0004 already ruled that a stored stamp loses to containment.</p>
 
@@ -547,8 +569,59 @@ installBlockMemberStack(editor):
 <div class="dec"><b class="q">D6 · <code>track/block-row-arms</code>?</b> <span class="default">Default: leave it unmerged; members subsume named rows.</span> Port rows stay.</div>
 <div class="dec"><b class="q">D7 · How does a Block enter stack mode?</b> <span class="default">Default: the first Add member from the inspector flips <code>bodyLayout</code> to stack; a Free/Stack toggle sits beside the presets for existing frames.</span> Existing boards never flip on their own.</div>
 
-<h2 id="not">8 · Deliberately not done</h2>
-<p>No code was written — the ask was a proposal, and the tracer bullet is small enough that the next turn can be the code. The Members list does not edit a child in place (Zach's own note rejected that: "no, it still kinda acts like a frame"). Horizontal stacks were not designed: the wireframe is vertical, Figma's direction toggle is a one-enum addition if it is ever wanted. The library was not touched — linking an existing definition is a command over <code>allBlocks</code>, not a palette. Nothing here proposes a PEP yet; if D1 lands, the free/stack fork is the one decision worth a numbered record at merge time.</p>
+<h2 id="built">8 · Built — V1, as decided</h2>
+<p>Zach's answers came back the same morning; this section records what shipped against them. The whole feature is one branch, <code>track/block-members-proposal</code>, on top of the proposal above. Unit tests: {m['unit']}. The real-browser journey <code>npm run test:members</code> makes {m['journey_checks']} checks on the review fixture.</p>
+
+<h3>8.1 D1, explained properly: one-shot vs live</h3>
+<table>
+<tr><th></th><th>One-shot (a command)</th><th>Live (a constraint)</th></tr>
+<tr><td>What happens when you press Inset</td><td>The members are arranged <i>once</i>, right now. Then they are ordinary free shapes again.</td><td>The Block adopts the arrangement as a property. It re-runs after every change.</td></tr>
+<tr><td>Drag a member half out of line</td><td>It stays where you dropped it.</td><td>It snaps back into the column — and takes the slot it landed on.</td></tr>
+<tr><td>Add a member, grow one by adding a port</td><td>Nothing else moves; you press Inset again to tidy.</td><td>The stack re-flows and the parent hugs it.</td></tr>
+<tr><td>Where it lives now</td><td><b>Free</b> mode — exactly today's behaviour, untouched.</td><td><b>Stack</b> mode — the new toggle. Ports have always worked this way.</td></tr>
+</table>
+<p>The implementation of live is the same shape as auto-fit: subscribe at tldraw's side-effect seam, note the dirty stack, settle <i>once</i> after the operation and never during a pointer gesture, write with history ignored, filter your own writes. <code>memberStack.ts</code> is {m['stack_lines']} lines.</p>
+
+<h3>8.2 The decisions, as taken</h3>
+<table>
+<tr><th>Decision</th><th>Zach</th><th>Shipped</th></tr>
+<tr><td>D1 live vs one-shot</td><td>asked for the explanation</td><td>Live in Stack, one-shot kept in Free (8.1).</td></tr>
+<tr><td>D2 order source</td><td>"up to you"</td><td>tldraw's child index. A reorder permutes the members' <i>existing</i> indexes, so their z-order against cables and annotations never changes.</td></tr>
+<tr><td>D3 width</td><td>V1</td><td>Parent-level <code>Fill | Own</code>. Per-member override deferred.</td></tr>
+<tr><td>D4 Expanded children always Own</td><td>agreed</td><td>Enforced in <code>stackMemberFillsWidth</code>; a unit test proves <code>views.expanded</code> is untouched by a pass, and the journey re-checks it after every gesture.</td></tr>
+<tr><td>D5 non-Block children</td><td>allow them; annotations should not show up in the stack</td><td>Every shape with a box of its own is a member — a Code block, a region — and keeps its own width in V1. Stock annotations (rectangle, line, sticky, arrow, text) are not members and <b>float free, still visible</b>. Zach's word was "hidden"; hiding a sticky that cannot be found again felt worse than leaving it beside the stack, and it is a one-line change in <code>getBlockShapeVisibility</code> if he wants it hidden.</td></tr>
+<tr><td>D6 named rows</td><td>members are the more powerful model</td><td><code>track/block-row-arms</code> left unmerged.</td></tr>
+<tr><td>D7 entering Stack</td><td>only the toggle</td><td>A Free / Stack toggle in the Members section. Add member lands in the middle of a free Block and at the bottom of a stack.</td></tr>
+<tr><td>Wired vs stacked</td><td>hide the cables in a stack</td><td>A cable parented to a stacked Block is hidden through tldraw's visibility seam (not deleted) and returns on Free. Unit-tested; not yet in the fixture.</td></tr>
+<tr><td>Add member is blank</td><td>yes, and naming links it</td><td>Add creates an untitled Port-view Block. Renaming an <i>empty</i> Block to an existing title now adopts that definition outright instead of minting "Draft 2" — <code>isEmptyDefinition</code> in the title commit.</td></tr>
+</table>
+
+<h3>8.3 Kanban cards, on dnd-kit</h3>
+<p>The list reorders exactly as the port list does: a <code>DndContext</code> with a 3px activation distance, the grip as the only handle, no <code>SortableContext</code>, and the drop resolved from live row rects — the moved row goes before the first row whose midpoint is below the pointer. ↑↓ on a grip steps one slot. On the canvas there is no new gesture at all: a plain drag is the reorder, because the settle pass re-takes the order from where the member <i>landed</i>, then snaps it into the column. Dragging out of the Block leaves the stack through stock drag-out; dropping a Block in through stock drag-in makes it a member at the slot it landed on.</p>
+
+<h3>8.4 The Type block, and "everything is a div"</h3>
+<p>The screenshot's Type block is today's <code>TypeAttributeRegion</code>: <code>attributeSource</code> parsed into a foldable presentation — deliberately not a second editable schema. The members model does not replace it yet, but it makes Zach's decomposition expressible: a Code block is already a stack member, so "an attribute block is a Block with a Code member" is something a board can hold today (Own width, since only a Block knows how to absorb Fill). The reusable component he pointed at — the rendered code block behind the attribute list — is the right next extraction; projecting a Type's attributes as a Code member would then be a small follow-up rather than a new primitive.</p>
+
+<div class="refs">
+  <figure><img src="{REL}/journey-added.png" alt="Journey capture: three stacked members after Add member, Members section open"><figcaption>Journey, step 3: Add member appended a blank Port-view member; the Members section lists all three; the parent hugged the stack.</figcaption></figure>
+  <figure><img src="{REL}/journey-edge-to-edge.png" alt="Journey capture: Edge-to-edge stack"><figcaption>Journey, step 8: Edge-to-edge wrote 0 / 0, the typed Gap cleared, the cards squared and joined.</figcaption></figure>
+  <figure class="wide"><img src="{REL}/fixture.png" alt="The review fixture: Class stacking two members with three numbered cues and a PASS WHEN card"><figcaption>The review board, <code>sketches/review/block-members.systemsketch</code>, generated through the real editor: the stack opened already hugged, three cues, one pass condition.</figcaption></figure>
+</div>
+
+<h3>8.5 Files</h3>
+<table class="plan">
+<tr><th>File</th><th>What</th></tr>
+<tr><td>src/blocks/blockModel.ts</td><td>Four optional props, readers, presets as numbers (<code>blockMemberSpacingPreset</code>).</td></tr>
+<tr><td>src/blocks/memberLayout.ts</td><td><code>stackMemberPlacements</code> over any boxed member, <code>stackMemberFillsWidth</code> (rule 4), <code>blockMemberDropTarget</code>; the free-mode command kept.</td></tr>
+<tr><td>src/blocks/memberStack.ts <span class="pill">new</span></td><td>Membership test, landing-order re-index, the pass, the hug, the installer.</td></tr>
+<tr><td>src/blocks/commands/memberCommands.ts <span class="pill">new</span></td><td>Body layout, spacing, width, add, move, step, remove.</td></tr>
+<tr><td>src/blocks/ui/BlockInspector.tsx</td><td>The Members section (V1 control block), actions wired; Member layout moved out of View.</td></tr>
+<tr><td>src/blocks/blockVisibility.ts · blockAutoResize.ts · definitionLinking.ts · App.tsx</td><td>Cables hidden in a stack · stock auto-fit stands aside for a stack · empty-Block rename adopts · installer registered (and asserted by <code>test_stock_boundary.py</code>).</td></tr>
+<tr><td>tests/block_members_smoke.mjs · sketches/review/block-members.*</td><td>The journey and the review fixture.</td></tr>
+</table>
+
+<h2 id="not">9 · Deliberately not done</h2>
+<p>Per-member width (V3) waits for a board that needs a mixed stack. <b>Link existing…</b> was dropped from the Add menu on Zach's call: naming a blank member is the link. The Members list does not edit a child in place ("it still kinda acts like a frame"); a row click selects the member and the inspector follows. Horizontal stacks were not designed. Non-member annotations float visibly rather than hiding (D5 above). A Code member keeps its own width — Fill for non-Blocks needs each shape to own a resize path. Nothing here is a PEP yet; if this lands on <code>main</code>, the Free/Stack fork is the one decision worth a numbered record at merge time.</p>
 
 <p class="meta">Built by <code>docs/build_block_members_proposal.py</code>. Numbers are read from the tree at build time; the builder refuses to publish if the seams it describes have moved.</p>
 </main>
@@ -557,7 +630,12 @@ installBlockMemberStack(editor):
 
 def main() -> None:
     m = measured()
-    for name in ("ref-wireframe.png", "ref-inputs-section.png", "ref-member-layout.png", "live-inset.png", "live-edge-to-edge.png"):
+    fixture_png = ROOT / "sketches/review/block-members.png"
+    if fixture_png.exists():
+        MEDIA.mkdir(parents=True, exist_ok=True)
+        (MEDIA / "fixture.png").write_bytes(fixture_png.read_bytes())
+    for name in ("ref-wireframe.png", "ref-inputs-section.png", "ref-member-layout.png", "live-inset.png", "live-edge-to-edge.png",
+                 "journey-added.png", "journey-edge-to-edge.png", "fixture.png"):
         if not (MEDIA / name).exists():
             raise SystemExit(f"missing reference capture {MEDIA / name}")
     OUT.parent.mkdir(parents=True, exist_ok=True)

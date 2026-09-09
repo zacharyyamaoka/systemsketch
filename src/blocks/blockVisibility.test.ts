@@ -59,6 +59,21 @@ describe('Block child visibility', () => {
 		})
 	}
 
+	it('hides a cable parented to a stacked Block, and shows it again when the Block is free', () => {
+		const parent = block('expanded')
+		parent.props = { ...parent.props, bodyLayout: 'stack' }
+		const cable = { ...child(parent.id), type: 'connection' } as TLShape
+		const editor = {
+			getShape: (id: string) => id === parent.id ? parent : undefined,
+			hasAncestor: () => false,
+			getBindingsFromShape: () => [],
+			getBindingsToShape: () => [],
+		} as unknown as Editor
+		expect(getBlockShapeVisibility(cable, editor)).toBe('hidden')
+		parent.props = { ...parent.props, bodyLayout: 'free' }
+		expect(getBlockShapeVisibility(cable, editor)).not.toBe('hidden')
+	})
+
 	it('hides a directly parented connection before applying Branch endpoint rules', () => {
 		const parent = block('port')
 		const connection = { ...child(parent.id), type: 'connection' } as TLShape

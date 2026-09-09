@@ -76,6 +76,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("const stopWorkspace = attach(editor)", product_source)
         self.assertIn("const stopBlockConnections = installBlockConnections(editor)", product_source)
         self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", product_source)
+        self.assertIn("const stopBlockMemberStack = installBlockMemberStack(editor)", product_source)
+        self.assertIn("stopBlockMemberStack()", product_source)
         self.assertIn("const stopInstantTextEditing = installInstantTextEditing(editor)", product_source)
         self.assertIn("stopInstantTextEditing()", product_source)
         self.assertIn("const stopArrowClickToPlace = installArrowClickToPlace(editor)", product_source)

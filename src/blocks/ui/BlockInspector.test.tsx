@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { createShapeId, EditorProvider, type Editor, type TLShape, type TLShapeId } from 'tldraw'
 
-import { getDefaultBlockProps } from '../blockModel'
+import { getDefaultBlockProps, type BlockShapeProps } from '../blockModel'
 import { createValueBlockProps } from '../valueBlock'
 import { createBundleProps, createClockTriggerProps, createSelectProps, createSetAttributesProps } from '../stockBlocks'
 import { BlockInspectorContent, type BlockInspectorActions } from './BlockInspector'
@@ -43,7 +44,7 @@ describe('Block inspector content', () => {
     expect(html).toContain('aria-label="Add output port"')
   })
 
-	it('offers the structural member layout only for an Expanded Block', () => {
+	it('offers the structural member layout, inside Members rather than View, only for an Expanded Block', () => {
 		const expanded = renderToStaticMarkup(
 			<BlockInspectorContent
 				props={{ ...getDefaultBlockProps(), view: 'expanded' }}
@@ -64,6 +65,15 @@ describe('Block inspector content', () => {
 		expect(expanded).toContain('data-testid="block-member-layout-edge-to-edge"')
 		expect(expanded).toMatch(/aria-pressed="true"[^>]*data-testid="block-member-layout-inset"/)
 		expect(port).not.toContain('aria-label="Member layout"')
+
+		// Moved out of View (Zach's 2026-09-09 spec) — it now lives in Members,
+		// after View's own section has already closed.
+		const viewClose = expanded.indexOf('data-inspector-section="Chrome"')
+		const membersOpen = expanded.indexOf('data-inspector-section="Members"')
+		const control = expanded.indexOf('data-testid="block-member-layout-control"')
+		expect(membersOpen).toBeGreaterThan(-1)
+		expect(membersOpen).toBeLessThan(viewClose)
+		expect(control).toBeGreaterThan(membersOpen)
 	})
 
   it('renders the donor information architecture without the old selected header or Connections tab', () => {
@@ -315,6 +325,163 @@ const noopActions: BlockInspectorActions = {
   linkPortRange() {},
   togglePortLinkSeam() {},
 }
+
+/** The smallest editor `blockStackMembers` needs: shapes by id, children by index. */
+function fakeMembersEditor(shapes: TLShape[]): Editor {
+  const byId = new Map(shapes.map((shape) => [shape.id, shape]))
+  return {
+    getShape: (id: TLShapeId) => byId.get(id),
+    getSortedChildIdsForParent: (parentId: TLShapeId) =>
+      [...byId.values()]
+        .filter((shape) => shape.parentId === parentId)
+        .sort((a, b) => (a.index < b.index ? -1 : a.index > b.index ? 1 : 0))
+        .map((shape) => shape.id),
+  } as unknown as Editor
+}
+
+describe('the Members section', () => {
+  const PARENT_ID = createShapeId('parent')
+
+  function member(
+    id: string,
+    index: string,
+    type: string,
+    props: Partial<BlockShapeProps> = {},
+  ): TLShape {
+    return {
+      id: createShapeId(id),
+      typeName: 'shape',
+      type,
+      x: 0,
+      y: 0,
+      rotation: 0,
+      index: index as never,
+      parentId: PARENT_ID,
+      isLocked: false,
+      opacity: 1,
+      meta: {},
+      props: type === 'block' ? { ...getDefaultBlockProps(), ...props } : { w: 200, h: 100 },
+    } as unknown as TLShape
+  }
+
+  function renderExpanded(props: Partial<BlockShapeProps> = {}, actions = noopActions, shapes: TLShape[] = []) {
+    return renderToStaticMarkup(
+      <EditorProvider editor={fakeMembersEditor(shapes)}>
+        <BlockInspectorContent
+          props={{ ...getDefaultBlockProps(), view: 'expanded', ...props }}
+          status="selected"
+          actions={actions}
+          shapeId={PARENT_ID}
+        />
+      </EditorProvider>,
+    )
+  }
+
+  it('renders only for an Expanded Block', () => {
+    const expanded = renderExpanded()
+    const port = renderToStaticMarkup(
+      <BlockInspectorContent props={{ ...getDefaultBlockProps(), view: 'port' }} status="selected" actions={noopActions} />,
+    )
+    expect(expanded).toContain('data-inspector-section="Members"')
+    expect(port).not.toContain('data-inspector-section="Members"')
+  })
+
+  it('shows the empty state and a count pill when there are no members', () => {
+    const html = renderExpanded()
+    expect(html).toContain('data-testid="inspector-member-count">0 members<')
+    expect(html).toContain('No members yet — Add member, or drop a Block into this one.')
+    expect(html).not.toContain('data-testid="inspector-members"')
+  })
+
+  it('lists members in index order, with a Block\'s title/type/view badge and a non-Block\'s shape type', () => {
+    const a = member('a', 'a1', 'block', { title: 'decode', blockType: 'call', view: 'port' })
+    const b = member('b', 'a2', 'code')
+    const c = member('c', 'a0', 'block') // authored first by index, despite being created last
+    const html = renderExpanded({}, noopActions, [a, b, c])
+
+    expect(html).toContain('data-testid="inspector-member-count">3 members<')
+    for (const shape of [a, b, c]) {
+      expect(html).toContain(`data-testid="inspector-member-row-${shape.id}"`)
+    }
+    // Index order (c, a, b), not creation order (a, b, c).
+    const positions = [c, a, b].map((shape) => html.indexOf(`inspector-member-row-${shape.id}`))
+    expect(positions).toEqual([...positions].sort((x, y) => x - y))
+    expect(html).toContain('decode')
+    expect(html).toContain('>call<')
+    expect(html).toContain('>P<')
+    expect(html).toContain('>Code<')
+    // The blank member never named: "Untitled", muted.
+    expect(html).toContain('block-inspector__member-title is-muted">Untitled<')
+  })
+
+  it('lights the matching spacing preset from the numbers, and neither when they are custom', () => {
+    const inset = renderExpanded({ memberGap: 12, memberGutter: 12 })
+    const edge = renderExpanded({ memberGap: 0, memberGutter: 0 })
+    const custom = renderExpanded({ memberGap: 4, memberGutter: 24 })
+
+    expect(inset).toMatch(/aria-pressed="true"[^>]*data-testid="block-member-layout-inset"/)
+    expect(edge).toMatch(/aria-pressed="true"[^>]*data-testid="block-member-layout-edge-to-edge"/)
+    expect(custom).toMatch(/aria-pressed="false"[^>]*data-testid="block-member-layout-inset"/)
+    expect(custom).toMatch(/aria-pressed="false"[^>]*data-testid="block-member-layout-edge-to-edge"/)
+    expect(custom).toContain('disabled="" data-testid="block-member-gap" value="4"')
+    expect(custom).toContain('disabled="" data-testid="block-member-gutter" value="24"')
+  })
+
+  it('reflects the free/stack model in the Free/Stack toggle', () => {
+    const stack = renderExpanded({ bodyLayout: 'stack' })
+    const free = renderExpanded({ bodyLayout: 'free' })
+    expect(stack).toMatch(/aria-pressed="true"[^>]*data-testid="block-body-layout-stack"/)
+    expect(stack).toMatch(/aria-pressed="false"[^>]*data-testid="block-body-layout-free"/)
+    expect(free).toMatch(/aria-pressed="true"[^>]*data-testid="block-body-layout-free"/)
+  })
+
+  /**
+   * WHY this stands in for "clicking Add calls addMember" / "ArrowDown on a
+   * grip calls stepMember" / "the Gap input's change calls setMemberSpacing":
+   * this file's whole suite renders with `renderToStaticMarkup` (see every
+   * other `it` above) because the repo has no jsdom/testing-library/
+   * react-test-renderer dependency to fire a real DOM event against — SSR
+   * output is a string, and a string has no attached event handlers to
+   * invoke. What IS provable from that string is the wiring's precondition:
+   * each control is enabled exactly when its action is supplied, and
+   * disabled — never a dead click — when it is withheld (the unplaced-draft
+   * case). The actual invocations (`addBlockMember`, `stepBlockMember`,
+   * `setBlockMemberSpacing`, …) are unit-tested directly, with a real
+   * argument-capturing fake editor, in `memberStack.test.ts`.
+   */
+  it('enables every Members control exactly when its action is supplied', () => {
+    const wired: BlockInspectorActions = {
+      ...noopActions,
+      addMember() {},
+      removeMember() {},
+      moveMember() {},
+      stepMember() {},
+      selectMember() {},
+      setBodyLayout() {},
+      setMemberSpacing() {},
+      setMemberWidth() {},
+    }
+    const a = member('a', 'a1', 'block')
+    const enabled = renderExpanded({}, wired, [a])
+    const disabled = renderExpanded({}, noopActions, [a])
+
+    for (const testid of [
+      'inspector-member-add',
+      'inspector-member-grip-shape:a',
+      `inspector-member-remove-${a.id}`,
+      'block-body-layout-free',
+      'block-member-gap',
+      'block-member-gutter',
+      'block-member-width-fill',
+    ]) {
+      expect(enabled).not.toMatch(new RegExp(`disabled=""[^>]*data-testid="${testid}"`))
+      expect(disabled).toMatch(new RegExp(`disabled=""[^>]*data-testid="${testid}"`))
+    }
+    // The row body (selectMember) has no testid of its own; its class is.
+    expect(enabled).toContain('block-inspector__member-body">')
+    expect(disabled).toContain('block-inspector__member-body" disabled="">')
+  })
+})
 
 describe('the Pill section', () => {
   it('replaces the Block sections for a value-view Block and says what feeds it', () => {

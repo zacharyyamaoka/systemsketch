@@ -1,6 +1,6 @@
 import { isShapeId, type Editor, type TLShape } from 'tldraw'
 
-import { blockIsFolded, isBlockShape } from './blockModel'
+import { blockBodyLayout, blockIsFolded, isBlockShape } from './blockModel'
 import { isBranchShape } from '../branch/branchModel'
 import {
 	foldedUnderCaseView,
@@ -66,6 +66,14 @@ export function getBlockShapeVisibility(
 		}
 	}
 	if (shape.type === CONNECTION_SHAPE_TYPE) {
+		// WHY: a stacked Block's members are read top-to-bottom, so a cable between
+		// two of them says nothing the order does not; Zach's 2026-09-09 rule is
+		// "with stacked we hide the connecting traces". The cable is parented to the
+		// stack (its two ends' shared scope), stays stored, and returns on Free.
+		if (isShapeId(shape.parentId)) {
+			const host = editor.getShape(shape.parentId)
+			if (isBlockShape(host) && blockBodyLayout(host.props) === 'stack') return 'hidden'
+		}
 		// WHY hidden and not merely unpainted: the communication lens draws one
 		// summary cable per relationship, and the legs it stands for used to keep
 		// their geometry — so a cable nobody could see was still hit-testable and
