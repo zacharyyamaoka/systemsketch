@@ -218,9 +218,23 @@ async function main() {
     assert.deepEqual(await storedPort(page, 'inputs', 0), { name: 'temperature', type: 'float', defaultValue: '2.5' }, 'Escape leaves the value where it was')
     pass('the painted name and type are two spans over one editable line')
 
+    // ----------------------------- a rename is a rename, nothing else moves ---
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const nameBox2 = await elementBox(page, `[data-shape-id=${JSON.stringify(BLOCK)}] .BlockNode-portLabel--in .BlockNode-portName`)
+    await clickAt(page, nameBox2.x + nameBox2.width / 2, nameBox2.y + nameBox2.height / 2)
+    await waitFor(page, `document.querySelector('[data-testid="block-inline-port-name-inputs-in_1"]')`, 'the on-canvas port editor again', 5000)
+    await typeSlowly(page, 'heat')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.inputs[0].name === 'heat'`, 'the rename to reach the store')
+    assert.deepEqual(await storedPort(page, 'inputs', 0), { name: 'heat', type: 'float', defaultValue: '2.5' },
+      'clicking the name selects only the name: typing renames and keeps the type and default')
+    await key(page, 'Enter', 'Enter')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Enter to close the canvas editor')
+    pass('a click on the name opens the whole line with just the name selected — a rename never drops the type or default')
+
     // ------------------------------------- the inspector agrees afterwards ---
     await selectBlock(page)
-    assert.equal((await fieldState(page, INPUT_FIELD)).text, 'temperature: float = 2.5', 'the inspector shows the canonical spelling of what the canvas wrote')
+    assert.equal((await fieldState(page, INPUT_FIELD)).text, 'heat: float = 2.5', 'the inspector shows the canonical spelling of what the canvas wrote')
     await shot(page, 'round-trip')
     pass('canvas and inspector are two views of one stored triple')
 

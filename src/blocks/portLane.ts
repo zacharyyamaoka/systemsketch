@@ -91,7 +91,9 @@ function nextLaneId(taken: ReadonlySet<string>, side: BlockPortSide): string {
 export function reconcilePortLane(props: BlockShapeProps, side: BlockPortSide, text: string): BlockShapeProps {
 	const before = lanePorts(props, side)
 	const beforeLines = before.map((port) => formatPortSignature(port))
-	const afterLines = text.split('\n')
+	// An empty document is an empty lane: select-all + Delete removes every
+	// port. A trailing newline is still a blank port, because Enter adds one.
+	const afterLines = text === '' ? [] : text.split('\n')
 	if (beforeLines.length === afterLines.length && beforeLines.every((line, index) => line === afterLines[index])) {
 		return props
 	}
@@ -122,6 +124,14 @@ export function reconcilePortLane(props: BlockShapeProps, side: BlockPortSide, t
 		const fromBefore = keep.get(j)
 		if (fromBefore !== undefined) {
 			const port = before[fromBefore]!
+			// A line that still reads exactly as the port was spelled is NOT
+			// re-parsed: a legacy name holding a depth-0 `:` or `=` must survive
+			// a keystroke on some other line untouched. Only an edited line
+			// goes back through the grammar.
+			if (line === beforeLines[fromBefore]) {
+				lane.push(port)
+				continue
+			}
 			const next = { ...port, name: parsed.name, type: parsed.type }
 			if (parsed.defaultValue) next.defaultValue = parsed.defaultValue
 			else delete next.defaultValue

@@ -41,6 +41,8 @@ export interface CodeFieldProps {
   autoFocus?: boolean | 'select'
   /** With `autoFocus`, put the caret here instead of selecting everything. */
   cursorAt?: number
+  /** With `autoFocus`, select exactly this range — the slot that was clicked, not the whole line. */
+  selectRange?: { from: number; to: number }
   /**
    * A lane: several lines, one per thing. Enter inserts a line, Alt+↑/↓
    * move one, Shift+Alt+↓ copies one (all CodeMirror's default keymap);
@@ -88,6 +90,7 @@ export function CodeField({
   style,
   autoFocus = false,
   cursorAt,
+  selectRange,
   multiline = false,
   lineHeightPx,
   align = 'left',
@@ -221,8 +224,13 @@ export function CodeField({
       const take = () => {
         if (view.hasFocus || !viewRef.current) return
         view.focus()
-        if (cursorAt !== undefined) {
-          const anchor = Math.max(0, Math.min(cursorAt, view.state.doc.length))
+        const length = view.state.doc.length
+        if (selectRange) {
+          const anchor = Math.max(0, Math.min(selectRange.from, length))
+          const head = Math.max(anchor, Math.min(selectRange.to, length))
+          view.dispatch({ selection: { anchor, head } })
+        } else if (cursorAt !== undefined) {
+          const anchor = Math.max(0, Math.min(cursorAt, length))
           view.dispatch({ selection: { anchor } })
         } else if (autoFocus === 'select') {
           view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } })

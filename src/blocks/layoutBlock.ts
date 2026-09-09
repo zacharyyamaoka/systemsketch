@@ -680,7 +680,9 @@ function portLabelContentWidth(port: BlockPort, side: 'input' | 'output'): numbe
 	const parts: number[] = []
 	if (port.name !== '') parts.push(measureBlockText(port.name, PORT_TEXT_FONT_PX, 400, 'mono'))
 	if (port.type !== '') parts.push(measureBlockText(port.type, PORT_TEXT_FONT_PX, 400, 'mono'))
-	const defaultValue = side === 'input' ? portDefaultValue(port) : ''
+	// An output may carry a default too (a NamedTuple field's), and a default that
+	// is stored is a default that is painted — the board never hides authored data.
+	const defaultValue = portDefaultValue(port)
 	if (defaultValue !== '') {
 		parts.push(Math.min(
 			PORT_DEFAULT_CHIP_MAX_PX,

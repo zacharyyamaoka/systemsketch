@@ -53,6 +53,19 @@ describe('port lane', () => {
 		expect(next.inputs[1]!.defaultValue).toBe('None')
 	})
 
+	it('never re-parses a line that was not edited, so a legacy name keeps its colon', () => {
+		const legacy: BlockPort = { id: 'in_9', name: 'step 1: grab', type: '', visible: true }
+		const props = block([legacy, frame])
+		const next = reconcilePortLane(props, 'inputs', 'step 1: grab\nframes: Frame')
+		expect(next.inputs[0]).toBe(legacy)
+		expect(next.inputs[1]).toMatchObject({ id: 'in_2', name: 'frames', type: 'Frame' })
+	})
+
+	it('reads an empty document as an empty lane', () => {
+		const next = reconcilePortLane(block([pose, frame]), 'inputs', '')
+		expect(next.inputs).toEqual([])
+	})
+
 	it('removes the port whose line is gone and clears a deleted default', () => {
 		const next = reconcilePortLane(block([pose, frame, gain]), 'inputs', 'pose: Pose\ngain: float = 1.0')
 		expect(next.inputs.map((port) => port.id)).toEqual(['in_1', 'in_3'])

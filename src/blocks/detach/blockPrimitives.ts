@@ -284,7 +284,7 @@ function portLabelsAt(
 	origin: { x: number; y: number },
 ): TLShapePartial[] {
 	if (!placed.label) return []
-	const defaultValue = placed.side === 'input' ? portDefaultValue(placed.port) : ''
+	const defaultValue = portDefaultValue(placed.port)
 	const element = (
 		kind: PortLabelElement['kind'],
 		text: string,

@@ -1134,7 +1134,7 @@ function PortLabels({
           && drag.portId === placed.port.id
           && drag.side === (placed.side === 'input' ? 'inputs' : 'outputs'),
         )
-        const defaultValue = placed.side === 'input' ? portDefaultValue(placed.port) : ''
+        const defaultValue = portDefaultValue(placed.port)
         // Both of the row's text fields, as pairs. Round 1 could only ever
         // speak for the name, via a single `stateBefore` string, which is read
         // here as the name pair it always was so no board already written loses
