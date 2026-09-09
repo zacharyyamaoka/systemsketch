@@ -94,7 +94,7 @@ def implemented() -> dict | None:
         "css_lines": (ROOT / "src/blocks/ui/iconPicker/block-icon-picker.css").read_text(encoding="utf-8").count("\n"),
         "vitest_files": len(tests),
         "vitest_cases": vitest_cases,
-        "journey_checks": len(re.findall(r"\bcheck\(", journey_text)) if journey_text else 0,
+        "journey_checks": len(re.findall(r"^\s*(?:pass|add)\(", journey_text, re.M)) if journey_text else 0,
         "journey": journey.exists(),
         "fetch_endpoint": "/api/icon/fetch" in server,
         "triggers": sum(1 for f, token in [
