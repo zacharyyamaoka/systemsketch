@@ -309,6 +309,9 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	// an ellipsis; the caret's line always shows everything.
 	const laneExtensions = useMemo(() => [portExtensions, laneEllipsis(LANE_FOLD_CHARS)], [portExtensions])
 	const [viewerOpen, setViewerOpen] = useState(false)
+	// tldraw's shape layer, the one element that carries the camera transform
+	// and every shape's z-index; the open lane is portalled into it.
+	const [shapeLayer] = useState<HTMLElement | null>(() => editor.getContainer().querySelector<HTMLElement>('.tl-html-layer.tl-shapes'))
 
 	// A later, more precise landing on the same open lane (a second handler
 	// reporting the clicked character) moves the caret without remounting.
@@ -387,7 +390,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				// and grows to the right as the active line is typed — the
 				// whiteboard-text feel Zach asked for — while folded lines keep
 				// it from growing for text nobody is looking at.
-				style={{ ...style, left: placement.box.x, top: placement.box.y, width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
+				style={{ ...style, left: 0, top: 0, width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
 				value={value}
 				placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
 				ariaLabel={`Edit ${field.side} lane`}
@@ -420,9 +423,28 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				)}
 			/>
 		)
+		// WHY a portal into tldraw's shape layer: the editor used to live inside
+		// this Block's own HTML container, so any shape later in z-order — a
+		// pasted Block sitting where the outputs lane parks — painted over it
+		// (Zach, 2026-09-09). The shape layer carries the camera transform, so
+		// page coordinates place the lane exactly where it was; a z-index above
+		// every shape's integer index keeps the open editor on top.
+		const pageBounds = editor.getShapePageBounds(shape.id)
+		const overlay = shapeLayer && pageBounds
+			? createPortal(
+				<div
+					className="BlockNode-laneOverlay"
+					data-testid={`block-lane-overlay-${field.side}`}
+					style={{ position: 'absolute', left: pageBounds.x + placement.box.x, top: pageBounds.y + placement.box.y, zIndex: 2147483 }}
+				>
+					{lane}
+				</div>,
+				shapeLayer,
+			)
+			: lane
 		return (
 			<>
-				{lane}
+				{overlay}
 				{viewerOpen ? (
 					<LaneViewer
 						title={`${shape.props.title || 'Block'} · ${field.side}`}

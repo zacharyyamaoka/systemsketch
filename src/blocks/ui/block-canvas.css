@@ -78,7 +78,7 @@
   cursor: pointer;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor {
   position: absolute;
   z-index: 12;
   box-sizing: border-box;
@@ -98,21 +98,21 @@
   transform-origin: center;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--title,
-.systemsketch-block-canvas .BlockNode-inlineEditor--portName,
-.systemsketch-block-canvas .BlockNode-inlineEditor--portType,
-.systemsketch-block-canvas .BlockNode-inlineEditor--blockType {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--title,
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--portName,
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--portType,
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--blockType {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--title,
-.systemsketch-block-canvas .BlockNode-inlineEditor--portName,
-.systemsketch-block-canvas .BlockNode-inlineEditor--portType {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--title,
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--portName,
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--portType {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--description {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--description {
   resize: none;
   overflow: auto;
 }
@@ -120,27 +120,33 @@
 /* The port line on the canvas is the code text box itself, dressed as the
  * inline editor: it takes the editor's accent frame and the port label's
  * 17px, and lets its own grammar colours show through. */
-.systemsketch-block-canvas .BlockNode-inlineEditor--port.ss-code-field {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--port.ss-code-field {
   display: block;
   padding: 3px 7px;
   color: var(--ss-text);
   background: var(--ss-surface-raised);
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--port .cm-scroller {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--port .cm-scroller {
   font-size: inherit;
   line-height: 1.2;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--port .cm-content {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--port .cm-content {
   padding: 0;
+}
+
+/* The open lane is portalled into tldraw's shape layer so it paints above
+ * every shape; the wrapper is only a page-space anchor. */
+.tl-html-layer .BlockNode-laneOverlay {
+  pointer-events: all;
 }
 
 /* The lane prototype (?portLanes=1): one editor over a whole side, each line
  * pinned to its port row. It carries the label's own 17px monospace so the
  * raw line sits where the rendered label was; the outputs lane reads from
  * the right edge, as its labels do. */
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane.ss-code-field {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane.ss-code-field {
   display: block;
   padding: 0 6px;
   overflow: visible;
@@ -148,25 +154,25 @@
   background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent);
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane .cm-scroller {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane .cm-scroller {
   font-size: inherit;
   overflow: visible;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane .cm-content {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane .cm-content {
   padding: 0 22px 0 0;
   white-space: pre;
 }
 
 /* A folded line: the tail past the caret's reach reads as an ellipsis. */
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane .ss-lane-ellipsis,
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane .ss-lane-ellipsis,
 .BlockNode-laneViewer .ss-lane-ellipsis {
   color: var(--ss-text-faint);
   padding-left: 2px;
 }
 
 /* The ⤢ at the lane's top-right corner: the way into the bigger viewer. */
-.systemsketch-block-canvas .BlockNode-laneExpand {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-laneExpand {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -183,7 +189,7 @@
   cursor: pointer;
 }
 
-.systemsketch-block-canvas .BlockNode-laneExpand:hover {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-laneExpand:hover {
   color: var(--ss-accent);
   border-color: var(--ss-accent);
 }
@@ -191,14 +197,14 @@
 /* Ragged lines: no shared box — each line carries its own, exactly as wide
  * as its text, so a long line grows to the right without widening its
  * neighbours. */
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane.is-ragged {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane.is-ragged {
   border-color: transparent;
   background: transparent;
   box-shadow: none;
   padding-left: 0;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane.is-ragged .cm-line {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane.is-ragged .cm-line {
   width: max-content;
   min-width: 48px;
   padding: 0 8px;
@@ -207,7 +213,7 @@
   box-shadow: 0 0 0 1.5px var(--ss-accent), var(--ss-shadow-1);
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane.is-ragged .cm-content {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--lane.is-ragged .cm-content {
   padding-right: 0;
 }
 
@@ -1438,7 +1444,7 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   opacity: 0.5;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--value {
+:is(.systemsketch-block-canvas, .BlockNode-laneOverlay) .BlockNode-inlineEditor--value {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-weight: 500;
 }

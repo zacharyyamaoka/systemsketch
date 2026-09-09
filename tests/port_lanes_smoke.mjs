@@ -395,6 +395,39 @@ async function main() {
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
     pass('a single click, a double-click and the body all open the same lane — never the single-line editor')
 
+    // --------------- the open lane paints above a shape that is above the Block ---
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const block = editor.getShape(${JSON.stringify(BLOCK)})
+      // A Block pasted later sits ABOVE estimate in z-order, right where the outputs lane parks.
+      editor.createShapes([{ id: 'shape:cover', type: 'block', x: block.x + block.props.w - 40, y: block.y + 60, props: { title: 'cover', view: 'simple', w: 260, h: 160, inputs: [], outputs: [] } }])
+      editor.select(${JSON.stringify(BLOCK)})
+      return true
+    })()`)
+    await delay(250)
+    const coverBox = await blockBox(page)
+    const outRow = await labelBox(page, 'out', 'quality')
+    await clickAt(page, coverBox.x + coverBox.width * 0.55, outRow.y + outRow.height / 2)
+    await waitFor(page, `document.querySelector(${JSON.stringify(OUTPUT_LANE)})`, 'the outputs lane under a covering shape', 5000)
+    const laneTop = JSON.parse(await evaluate(page, `JSON.stringify((() => {
+      const lane = document.querySelector(${JSON.stringify(OUTPUT_LANE)})
+      const rect = lane.getBoundingClientRect()
+      const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+      const coverRect = document.querySelector('[data-shape-id="shape:cover"]')?.getBoundingClientRect()
+      const overlaps = coverRect ? rect.x < coverRect.right && rect.right > coverRect.x && rect.y < coverRect.bottom && rect.bottom > coverRect.y : false
+      return { onTop: Boolean(hit && lane.contains(hit)), overlaps, inShapeLayer: Boolean(lane.closest('.tl-html-layer')) }
+    })())`))
+    assert.equal(laneTop.overlaps, true, 'the covering Block really overlaps the lane')
+    assert.equal(laneTop.onTop, true, 'the open lane paints above the covering Block')
+    assert.equal(laneTop.inShapeLayer, true, 'it lives in tldraw\'s shape layer, page-space')
+    await typeSlowly(page, 'X')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.outputs.some((port) => port.type === 'floatX' || port.name.endsWith('X'))`, 'typing to reach the store through the overlay', 5000)
+    await shot(page, 'lane-above-cover')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    await evaluate(page, `(() => { const editor = window.__systemsketch.editor; editor.deleteShapes(['shape:cover']); editor.updateShape({ id: ${JSON.stringify(BLOCK)}, type: 'block', props: { outputs: editor.getShape(${JSON.stringify(BLOCK)}).props.outputs.map((port) => port.id === 'out_2' ? { ...port, name: 'quality', type: 'float' } : port) } }); return true })()`)
+    pass('an open lane is promoted above a shape that sits above its Block in z-order')
+
     // ------------------------ a header port is not a line: its own editor ---
     await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
     await delay(200)
