@@ -188,7 +188,8 @@
     "test:frames-panel": "node tests/frames_panel_smoke.mjs",
     "test:semantic-stock-blocks": "node tests/semantic_stock_blocks_smoke.mjs",
     "test:compare": "node tests/compare_modal_smoke.mjs",
-    "test:converged": "node tests/compare_converged_smoke.mjs"
+    "test:converged": "node tests/compare_converged_smoke.mjs",
+    "test:icon-picker": "node tests/icon_picker_smoke.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",
