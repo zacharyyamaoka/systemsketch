@@ -124,6 +124,7 @@ import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
 import { CommunicationPortDndHost } from '../blocks/ports/CommunicationPortDnd'
+import { StackMemberDndHost } from '../blocks/memberStackDnd'
 import './systemsketch-chrome.css'
 import './rich-text-toolbar.css'
 
@@ -1047,6 +1048,9 @@ export function SystemSketchSurfaceHost() {
       <BtDragModelTunerPanel />
       <CommunicationPrototypeControls />
       <CommunicationPortDndHost />
+      {/* The stack lane: dnd-kit reorders a stacked Block's members like
+          Kanban cards — the third scoped canvas owner, see memberStackDnd.tsx. */}
+      <StackMemberDndHost />
       <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />

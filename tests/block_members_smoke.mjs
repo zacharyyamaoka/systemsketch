@@ -19,7 +19,9 @@ import {
   key,
   localConsoleErrors,
   makeChecklist,
+  mouse,
   openApp,
+  shortcut,
   startApp,
   waitFor,
 } from './browser_harness.mjs'
@@ -161,17 +163,69 @@ async function main() {
     assert.deepEqual(ys(listDragged.members), [HEADER + 12, HEADER + 12 + 190 + 12, HEADER + 12 + 190 + 12 + 170 + 12])
     pass('dragging a list grip past the last row moves the member to the end of the stack')
 
-    // 6 · Drag the card on the canvas: it re-takes its slot from where it lands.
+    // 6 · Drag the card on the canvas: dnd-kit takes the gesture, the card
+    // rides the pointer, the siblings open the slot, release commits.
     const from = await screenPoint(app.page, initId, 300, 120)
     const to = await screenPoint(app.page, callId, 300, 20)
-    await drag(app.page, from, to)
+    await mouse(app.page, 'mouseMoved', from.x, from.y)
+    await mouse(app.page, 'mousePressed', from.x, from.y, { buttons: 1 })
+    for (let step = 1; step <= 6; step += 1) {
+      await mouse(app.page, 'mouseMoved', from.x + (to.x - from.x) * step / 6, from.y + (to.y - from.y) * step / 6, { buttons: 1 })
+      await delay(40)
+    }
+    await delay(150)
+    const midDrag = await facts(app.page)
+    const lifted = await evaluate(app.page, `document.querySelectorAll('[data-member-dragging="true"]').length`)
+    assert.equal(lifted, 1, 'exactly one card is lifted mid-drag')
+    assert.equal(await evaluate(app.page, `window.__systemsketch.editor.getPath()`), 'select.idle', 'tldraw stood down: no native translate')
+    const midCall = midDrag.members.find((m) => m.id === callId)
+    assert.ok(midCall.y > HEADER + 12 + 100, `__call__() opened the slot above itself mid-drag, got y ${midCall.y}`)
+    pass('mid-drag: dnd-kit owns the gesture, the card is lifted and the siblings have opened its slot')
+    await capture(app.page, 'journey-mid-drag')
+    await mouse(app.page, 'mouseReleased', to.x, to.y)
     await waitFor(app.page, `window.__systemsketch.editor.getSortedChildIdsForParent(${JSON.stringify(added.parent.id)}).filter((id) => window.__systemsketch.editor.getShape(id).type === 'block')[0] === ${JSON.stringify(initId)}`, 'init first after the canvas drag')
     await delay(300)
     const canvasDragged = await facts(app.page)
     assert.deepEqual(canvasDragged.members.map((m) => m.title), ['__init__()', '__call__()', ''])
     assert.deepEqual(ys(canvasDragged.members), [HEADER + 12, HEADER + 12 + 190 + 12, HEADER + 12 + 190 + 12 + 190 + 12])
     assert.deepEqual(canvasDragged.members.map((m) => m.x), [12, 12, 12])
-    pass('a canvas drag reorders by the landing height and snaps back into the column')
+    assert.equal(await evaluate(app.page, `document.querySelectorAll('[data-member-dragging="true"]').length`), 0)
+    pass('release commits the slot and the stack settles into the column')
+
+    // 6b · One undo reverts the whole gesture; Escape mid-drag rolls it back too.
+    await evaluate(app.page, `document.querySelector('.tl-container').focus()`)
+    await shortcut(app.page, 'z', 'KeyZ', 2)
+    await waitFor(app.page, `window.__systemsketch.editor.getSortedChildIdsForParent(${JSON.stringify(added.parent.id)}).filter((id) => window.__systemsketch.editor.getShape(id).type === 'block').pop() === ${JSON.stringify(initId)}`, 'undo restores the pre-drag order')
+    await delay(200)
+    const undone = await facts(app.page)
+    assert.deepEqual(undone.members.map((m) => m.title), ['__call__()', '', '__init__()'])
+    assert.deepEqual(ys(undone.members), [HEADER + 12, HEADER + 12 + 190 + 12, HEADER + 12 + 190 + 12 + 170 + 12])
+    const from2 = await screenPoint(app.page, initId, 300, 120)
+    await mouse(app.page, 'mouseMoved', from2.x, from2.y)
+    await mouse(app.page, 'mousePressed', from2.x, from2.y, { buttons: 1 })
+    for (let step = 1; step <= 5; step += 1) {
+      await mouse(app.page, 'mouseMoved', from2.x, from2.y - 60 * step, { buttons: 1 })
+      await delay(40)
+    }
+    await delay(120)
+    assert.equal(await evaluate(app.page, `document.querySelectorAll('[data-member-dragging="true"]').length`), 1)
+    await key(app.page, 'Escape')
+    await delay(300)
+    await mouse(app.page, 'mouseReleased', from2.x, from2.y - 300)
+    await delay(300)
+    const cancelled = await facts(app.page)
+    assert.deepEqual(cancelled.members.map((m) => m.title), ['__call__()', '', '__init__()'])
+    assert.deepEqual(ys(cancelled.members), ys(undone.members))
+    assert.equal(await evaluate(app.page, `document.querySelectorAll('[data-member-dragging="true"]').length`), 0)
+    pass('one undo reverts the drag, and Escape mid-drag rolls everything back')
+
+    // 6c · Put init back on top for the steps that follow.
+    await selectParent(app.page)
+    await clickElement(app.page, `[data-testid="inspector-member-grip-${initId}"]`)
+    await key(app.page, 'ArrowUp')
+    await key(app.page, 'ArrowUp')
+    await waitFor(app.page, `window.__systemsketch.editor.getSortedChildIdsForParent(${JSON.stringify(added.parent.id)}).filter((id) => window.__systemsketch.editor.getShape(id).type === 'block')[0] === ${JSON.stringify(initId)}`, 'init first again')
+    await delay(200)
 
     // 7 · A typed gap wins over the preset, and neither preset stays lit.
     await selectParent(app.page)

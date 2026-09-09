@@ -33,6 +33,7 @@ import {
 import { isBlockAutoResizeGestureActive } from './blockAutoResize'
 import { layoutBlock } from './layoutBlock'
 import { stackMemberPlacements, type StackMember } from './memberLayout'
+import { memberStackDragState } from './memberStackDragState'
 
 /**
  * Shapes that never take a slot. Stock tldraw shapes are annotations — a
@@ -208,6 +209,9 @@ export function installBlockMemberStack(editor: Editor): () => void {
 		const entries = pending
 		pending = new Map()
 		for (const [id, source] of entries) {
+			// SINGLE WRITER: while the dnd-kit stack lane owns a gesture on this
+			// parent, its frames are the only geometry writes; the drop settles.
+			if (memberStackDragState.get(editor)?.parentId === id) continue
 			const pass = () => {
 				laying.add(id)
 				try {

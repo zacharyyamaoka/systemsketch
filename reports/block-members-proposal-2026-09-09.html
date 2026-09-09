@@ -98,7 +98,7 @@ figcaption { font-size:13px; color:var(--mute); padding:8px 10px; }
 </style>
 <main>
 <h1>Members of a Block, authored like ports</h1>
-<p class="meta">Proposal, then built the same day · 2026-09-09 · measured against <code>cd25d846</code> · tldraw 5.3.2 pinned · <a href="#built">jump to what shipped</a></p>
+<p class="meta">Proposal, then built the same day · 2026-09-09 · measured against <code>0613a148</code> · tldraw 5.3.2 pinned · <a href="#built">jump to what shipped</a></p>
 
 <p class="lede"><b>Recommendation.</b> A member is what an Expanded Block's direct child Block already is — tldraw's <code>parentId</code>, already replicated across every linked occurrence by the definition body sync. So do not add a second membership model. Add the three things that are missing: a <b>Members</b> section in the inspector that mirrors Inputs/Outputs (list, grip reorder, <code>+</code>), an <b>authored order</b> that is tldraw's own child index, and a <b>live stack layout</b> on the parent driven by three numbers — <code>gap</code>, <code>gutter</code>, <code>width: fill | own</code> — with <b>Inset</b> and <b>Edge-to-edge</b> demoted to presets that write those numbers. One rule keeps a definition from being sized by two parents: Fill only ever writes an occurrence's Port/Simple box, and an Expanded child is always Own and drives its parent. Blocks do not store their parents; <code>parentId</code> plus <code>linkedBlockOccurrences</code> derive them, and PEP 0004 already ruled that a stored stamp loses to containment.</p>
 
@@ -300,7 +300,7 @@ installBlockMemberStack(editor):
 <div class="dec"><b class="q">D7 · How does a Block enter stack mode?</b> <span class="default">Default: the first Add member from the inspector flips <code>bodyLayout</code> to stack; a Free/Stack toggle sits beside the presets for existing frames.</span> Existing boards never flip on their own.</div>
 
 <h2 id="built">8 · Built — V1, as decided</h2>
-<p>Zach's answers came back the same morning; this section records what shipped against them. The whole feature is one branch, <code>track/block-members-proposal</code>, on top of the proposal above. Unit tests: 20 passed across the three member test files. The real-browser journey <code>npm run test:members</code> makes 11 checks on the review fixture.</p>
+<p>Zach's answers came back the same morning; this section records what shipped against them. The whole feature is one branch, <code>track/block-members-proposal</code>, on top of the proposal above. Unit tests: 20 passed across the three member test files. The real-browser journey <code>npm run test:members</code> makes 13 checks on the review fixture.</p>
 
 <h3>8.1 D1, explained properly: one-shot vs live</h3>
 <table>
@@ -310,12 +310,12 @@ installBlockMemberStack(editor):
 <tr><td>Add a member, grow one by adding a port</td><td>Nothing else moves; you press Inset again to tidy.</td><td>The stack re-flows and the parent hugs it.</td></tr>
 <tr><td>Where it lives now</td><td><b>Free</b> mode — exactly today's behaviour, untouched.</td><td><b>Stack</b> mode — the new toggle. Ports have always worked this way.</td></tr>
 </table>
-<p>The implementation of live is the same shape as auto-fit: subscribe at tldraw's side-effect seam, note the dirty stack, settle <i>once</i> after the operation and never during a pointer gesture, write with history ignored, filter your own writes. <code>memberStack.ts</code> is 254 lines.</p>
+<p>The implementation of live is the same shape as auto-fit: subscribe at tldraw's side-effect seam, note the dirty stack, settle <i>once</i> after the operation and never during a pointer gesture, write with history ignored, filter your own writes. <code>memberStack.ts</code> is 258 lines.</p>
 
 <h3>8.2 The decisions, as taken</h3>
 <table>
 <tr><th>Decision</th><th>Zach</th><th>Shipped</th></tr>
-<tr><td>D1 live vs one-shot</td><td>asked for the explanation</td><td>Live in Stack, one-shot kept in Free (8.1).</td></tr>
+<tr><td>D1 live vs one-shot</td><td>asked for the explanation, then: "in stack mode I want them to behave more like cards in a kanban row, implementing using dnd kit"</td><td>Live in Stack, one-shot kept in Free (8.1); the canvas drag is a dnd-kit lane (8.3).</td></tr>
 <tr><td>D2 order source</td><td>"up to you"</td><td>tldraw's child index. A reorder permutes the members' <i>existing</i> indexes, so their z-order against cables and annotations never changes.</td></tr>
 <tr><td>D3 width</td><td>V1</td><td>Parent-level <code>Fill | Own</code>. Per-member override deferred.</td></tr>
 <tr><td>D4 Expanded children always Own</td><td>agreed</td><td>Enforced in <code>stackMemberFillsWidth</code>; a unit test proves <code>views.expanded</code> is untouched by a pass, and the journey re-checks it after every gesture.</td></tr>
@@ -326,14 +326,17 @@ installBlockMemberStack(editor):
 <tr><td>Add member is blank</td><td>yes, and naming links it</td><td>Add creates an untitled Port-view Block. Renaming an <i>empty</i> Block to an existing title now adopts that definition outright instead of minting "Draft 2" — <code>isEmptyDefinition</code> in the title commit.</td></tr>
 </table>
 
-<h3>8.3 Kanban cards, on dnd-kit</h3>
-<p>The list reorders exactly as the port list does: a <code>DndContext</code> with a 3px activation distance, the grip as the only handle, no <code>SortableContext</code>, and the drop resolved from live row rects — the moved row goes before the first row whose midpoint is below the pointer. ↑↓ on a grip steps one slot. On the canvas there is no new gesture at all: a plain drag is the reorder, because the settle pass re-takes the order from where the member <i>landed</i>, then snaps it into the column. Dragging out of the Block leaves the stack through stock drag-out; dropping a Block in through stock drag-in makes it a member at the slot it landed on.</p>
+<h3>8.3 Kanban cards, on dnd-kit — in the list and on the canvas</h3>
+<p>The list reorders exactly as the port list does: a <code>DndContext</code> with a 3px activation distance, the grip as the only handle, no <code>SortableContext</code>, and the drop resolved from live row rects — the moved row goes before the first row whose midpoint is below the pointer. ↑↓ on a grip steps one slot.</p>
+<p><b>On the canvas, per Zach's follow-up ("in stack mode I want them to behave more like cards in a kanban row, implementing using dnd kit"), dnd-kit owns the gesture too.</b> <code>memberStackDnd.tsx</code> (511 lines) is the third scoped canvas drag owner, admitted on the Behavior Tree lane's exact terms: a capture-phase listener shadows a plain press on a stack member; at 3 px (below tldraw's 4 px threshold) it re-checks that tldraw is still in <code>select.pointing_shape</code> for that press — PEP 0013's state-ownership property, which is what keeps a port press (in <code>pointing_block_port</code>) with the cable lanes — then asks the select tool to stand down through <code>editor.cancel()</code> and hands a cloned, <code>markEventAsHandled</code> pointer-down to the mounted DndContext's proxy. From there the card rides the pointer, the other members take the candidate layout so the slot visibly opens (the slot is read from the card's midpoint against the others' midpoints frozen at claim, so it depends on the pointer alone and never flickers), release commits the order through the same reducer the list uses, Escape bails to the session's history mark, and one undo reverts the whole gesture. The settle pass stands down for the parent while dnd-kit owns it — single writer. The lifted card carries <code>data-member-dragging</code> for its shadow. A Free Block is byte-identical native tldraw. Dragging out of the Block still leaves the stack through stock drag-out; dropping a Block in through stock drag-in joins at the slot it landed on.</p>
+<p>The boundary test admits the lane by property (state re-check at claim, preempt distance, cancel + markEventAsHandled, no sortable, page-space geometry, the pass standing down, the host mounted once). A PEP for the third owner is owed at merge time, not before.</p>
 
 <h3>8.4 The Type block, and "everything is a div"</h3>
 <p>The screenshot's Type block is today's <code>TypeAttributeRegion</code>: <code>attributeSource</code> parsed into a foldable presentation — deliberately not a second editable schema. The members model does not replace it yet, but it makes Zach's decomposition expressible: a Code block is already a stack member, so "an attribute block is a Block with a Code member" is something a board can hold today (Own width, since only a Block knows how to absorb Fill). The reusable component he pointed at — the rendered code block behind the attribute list — is the right next extraction; projecting a Type's attributes as a Code member would then be a small follow-up rather than a new primitive.</p>
 
 <div class="refs">
   <figure><img src="media/block-members-proposal/journey-added.png" alt="Journey capture: three stacked members after Add member, Members section open"><figcaption>Journey, step 3: Add member appended a blank Port-view member; the Members section lists all three; the parent hugged the stack.</figcaption></figure>
+  <figure><img src="media/block-members-proposal/journey-mid-drag.png" alt="Journey capture: a member card lifted mid-drag while its siblings open the slot"><figcaption>Journey, step 6, mid-gesture: dnd-kit has the pointer (tldraw is in <code>select.idle</code>), the card is lifted, and the siblings have opened the slot it will take.</figcaption></figure>
   <figure><img src="media/block-members-proposal/journey-edge-to-edge.png" alt="Journey capture: Edge-to-edge stack"><figcaption>Journey, step 8: Edge-to-edge wrote 0 / 0, the typed Gap cleared, the cards squared and joined.</figcaption></figure>
   <figure class="wide"><img src="media/block-members-proposal/fixture.png" alt="The review fixture: Class stacking two members with three numbered cues and a PASS WHEN card"><figcaption>The review board, <code>sketches/review/block-members.systemsketch</code>, generated through the real editor: the stack opened already hugged, three cues, one pass condition.</figcaption></figure>
 </div>
@@ -343,7 +346,8 @@ installBlockMemberStack(editor):
 <tr><th>File</th><th>What</th></tr>
 <tr><td>src/blocks/blockModel.ts</td><td>Four optional props, readers, presets as numbers (<code>blockMemberSpacingPreset</code>).</td></tr>
 <tr><td>src/blocks/memberLayout.ts</td><td><code>stackMemberPlacements</code> over any boxed member, <code>stackMemberFillsWidth</code> (rule 4), <code>blockMemberDropTarget</code>; the free-mode command kept.</td></tr>
-<tr><td>src/blocks/memberStack.ts <span class="pill">new</span></td><td>Membership test, landing-order re-index, the pass, the hug, the installer.</td></tr>
+<tr><td>src/blocks/memberStack.ts <span class="pill">new</span></td><td>Membership test, landing-order re-index, the pass, the hug, the installer; stands down while the lane owns a parent.</td></tr>
+<tr><td>src/blocks/memberStackDnd.tsx <span class="pill">new</span> · memberStackDragState.ts</td><td>The third canvas dnd-kit owner: claim, preempt, hand-off, interlock, per-frame slot preview, commit and cancel; the drag signal the pass and the canvas read.</td></tr>
 <tr><td>src/blocks/commands/memberCommands.ts <span class="pill">new</span></td><td>Body layout, spacing, width, add, move, step, remove.</td></tr>
 <tr><td>src/blocks/ui/BlockInspector.tsx</td><td>The Members section (V1 control block), actions wired; Member layout moved out of View.</td></tr>
 <tr><td>src/blocks/blockVisibility.ts · blockAutoResize.ts · definitionLinking.ts · App.tsx</td><td>Cables hidden in a stack · stock auto-fit stands aside for a stack · empty-Block rename adopts · installer registered (and asserted by <code>test_stock_boundary.py</code>).</td></tr>

@@ -297,6 +297,12 @@ class StockBoundaryTests(unittest.TestCase):
             # screenToPage and getPointInShapeSpace and mounts its own
             # context — so it must never be filed under PANEL_DND.
             "CommunicationPortDnd.tsx",
+            # The third admitted canvas owner (Zach, 2026-09-09: "in stack mode
+            # I want them to behave more like cards in a kanban row,
+            # implementing using dnd kit"). A stacked Block is a reactive
+            # layout, not a whiteboard frame — PEP 0007's reason, applied to
+            # Block members. Asserted by property below.
+            "memberStackDnd.tsx",
         }
         PANEL_DND = {"BlockInspector.tsx"}
 
@@ -315,6 +321,7 @@ class StockBoundaryTests(unittest.TestCase):
                 and "DndContext" in source
                 and "BehaviorTreeDndDragHost" not in source
                 and "CommunicationPortDndHost" not in source
+                and "StackMemberDndHost" not in source
             ):
                 offenders.append((str(path.relative_to(PROJECT_ROOT)), "second DndContext"))
         self.assertEqual(offenders, [])
@@ -353,6 +360,31 @@ class StockBoundaryTests(unittest.TestCase):
         # Geometry stays in PAGE space, where the layout's truth lives, rather
         # than in the screen-space DOM rects the sortable layer would measure.
         self.assertIn("blockEdgeAt(", port_lane)
+
+        # ---------------- the third canvas owner, by property ----------------
+        # The stack lane earns its place the way the first two do. What it
+        # must prove is PEP 0013's property: select-tool STATE ownership,
+        # re-checked at claim time — the claim fires only while tldraw is in
+        # `select.pointing_shape` for that press, so a port press (which lives
+        # in `pointing_block_port` / `dragging_block_port`) is never taken.
+        stack_lane_path = PROJECT_ROOT / "src" / "blocks" / "memberStackDnd.tsx"
+        stack_lane = _without_comments(stack_lane_path.read_text(encoding="utf-8"))
+        self.assertIn("if (!editor.isIn('select.pointing_shape')) return", stack_lane)
+        self.assertIn("if (!editor.isIn('select.idle')) return null", stack_lane)
+        self.assertIn("if (!isStackBlock(parent) || parent.isLocked) return null", stack_lane)
+        self.assertIn("export const STACK_DND_CLAIM_DISTANCE_PX = 3", stack_lane)
+        self.assertIn("editor.cancel()", stack_lane)
+        self.assertIn("editor.markEventAsHandled(clone)", stack_lane)
+        self.assertIn("<DndContext", stack_lane)
+        self.assertIn("editor.getShapeAtPoint(pagePoint, {", stack_lane)
+        self.assertIn("editor.getPointInShapeSpace(parent, pagePoint)", stack_lane)
+        for refused in ("@dnd-kit/sortable", "useSortable", "SortableContext", "arrayMove"):
+            self.assertNotIn(refused, stack_lane)
+        # Single writer: the settle pass stands down for the parent dnd-kit owns.
+        stack_pass = _without_comments(
+            (PROJECT_ROOT / "src" / "blocks" / "memberStack.ts").read_text(encoding="utf-8")
+        )
+        self.assertIn("if (memberStackDragState.get(editor)?.parentId === id) continue", stack_pass)
 
         # ------- the third gesture owner the dnd-kit rule cannot see --------
         # See KNOWN GAP in the docstring. The Dataflow reorder lane rides the
@@ -412,6 +444,7 @@ class StockBoundaryTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("<BehaviorTreeDndDragHost />", chrome)
+        self.assertIn("<StackMemberDndHost />", chrome)
 
         # The installer no longer resolves drags: the gesture and its reorder
         # machinery moved out together, and what remains is single-writer

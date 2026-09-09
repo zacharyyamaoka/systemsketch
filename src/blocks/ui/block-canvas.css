@@ -2234,3 +2234,10 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* A stacked member riding the dnd-kit pointer: lifted like a Kanban card while
+ * its siblings open the slot beneath it. Removed on drop or cancel. */
+.systemsketch-block-canvas[data-member-dragging='true'] {
+  box-shadow: var(--ss-shadow-2);
+  cursor: grabbing;
+}
