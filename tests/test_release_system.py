@@ -741,15 +741,18 @@ class ReleaseSystemTests(unittest.TestCase):
             self.assertEqual(spawn.call_count, 2)
             self.assertIn("--allow-source-root", spawn.call_args_list[0].args[0])
 
-    def test_preview_launcher_refuses_to_stop_a_live_session_from_another_checkout(self) -> None:
+    def test_preview_launcher_hands_back_a_live_session_from_another_checkout(self) -> None:
         """A fingerprint mismatch is not proof Preview is stale in THIS release's
         own checkout -- promoting a candidate built elsewhere makes a live,
         healthy Preview belonging to a different tree read as a mismatch too.
         Stopping it would kill someone else's session for a release that never
-        touched their checkout. This is the exact scenario the 2026-09-09
-        release-control-plane finding named: caught while restarting Stable
-        for the floating-toolbar-excalidraw merge, with an unrelated peer
-        session's Preview live on the primary checkout the whole time.
+        touched their checkout, so this must never happen -- but a person
+        clicking Preview only wants a working preview, and a live one we
+        cannot safely refresh is still that. Caught live (2026-09-09): the
+        first version of this guard raised instead of degrading, and broke
+        Zach's own "Open Latest Preview" button the moment Stable was rebuilt
+        from a worktree other than the one an unrelated peer session's real
+        Preview was running from.
         """
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -769,21 +772,23 @@ class ReleaseSystemTests(unittest.TestCase):
             # here is what makes this test actually exercise the new
             # sourceRoot guard rather than falling through to the pre-existing
             # (and unrelated) not-owned-by-this-launcher refusal, which would
-            # raise ReleaseError for the wrong reason and pass either way.
+            # raise ReleaseError for a different reason and pass either way.
             with patch.object(launcher, "health", return_value=live_elsewhere_health), patch.object(
                 launcher, "read_pid", return_value=111,
             ), patch.object(
                 launcher, "stop_pid",
             ) as stop, patch.object(launcher, "spawn_logged") as spawn:
-                with self.assertRaises(ReleaseError):
-                    launcher.ensure_preview(release_home, state_home)
+                url, payload = launcher.ensure_preview(release_home, state_home)
+            self.assertEqual(payload, live_elsewhere_health)
+            self.assertEqual(url, f"http://127.0.0.1:{launcher.PREVIEW_PORT}/")
             stop.assert_not_called()
             spawn.assert_not_called()
 
-    def test_preview_launcher_refuses_to_stop_when_health_predates_source_root(self) -> None:
+    def test_preview_launcher_hands_back_a_live_session_when_health_predates_source_root(self) -> None:
         """A health payload with no `sourceRoot` at all (an older, pre-fix
         controller) is the same "cannot tell whose checkout this is" case as
-        a differing one -- fail closed rather than assume same-checkout."""
+        a differing one -- never stop it, but still hand back what is
+        already running rather than blocking the user entirely."""
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             release_home = root / "runtime"
@@ -801,8 +806,9 @@ class ReleaseSystemTests(unittest.TestCase):
             ), patch.object(
                 launcher, "stop_pid",
             ) as stop, patch.object(launcher, "spawn_logged") as spawn:
-                with self.assertRaises(ReleaseError):
-                    launcher.ensure_preview(release_home, state_home)
+                url, payload = launcher.ensure_preview(release_home, state_home)
+            self.assertEqual(payload, legacy_health)
+            self.assertEqual(url, f"http://127.0.0.1:{launcher.PREVIEW_PORT}/")
             stop.assert_not_called()
             spawn.assert_not_called()
 

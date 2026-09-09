@@ -215,17 +215,18 @@ def ensure_preview(release_home: Path, state_home: Path) -> tuple[str, dict]:
         # candidate built from a DIFFERENT checkout changes what "expected"
         # means without changing what is actually running: a live Preview
         # rooted elsewhere (a peer's own worktree) now also reads as a
-        # mismatch, and blindly restarting it would kill someone else's
-        # session for a release that never touched their checkout at all.
-        # `health` predates this field, so a missing `sourceRoot` is the same
-        # "cannot tell" case as a differing one -- fail closed, not open.
+        # mismatch. `health` predates this field, so a missing `sourceRoot`
+        # is the same "cannot tell" case as a differing one.
+        #
+        # WHY degrade instead of raising here (same day, next finding): the
+        # first version of this guard refused the WHOLE call, which is safe
+        # for the user who never touched this session but wrong for the one
+        # who is only trying to OPEN a preview -- a live, healthy Preview we
+        # cannot safely refresh is still a working preview. Only the
+        # destructive half (stop_pid on a session we cannot verify) needs to
+        # refuse; handing back what is already running does not.
         if current.get("sourceRoot") != str(source_root):
-            raise ReleaseError(
-                f"Preview on port {PREVIEW_PORT} is rooted at "
-                f"{current.get('sourceRoot')!r}, not the release's {str(source_root)!r} -- "
-                "refusing to stop a live session this release did not build. Rebuild a "
-                "candidate from that checkout, or stop Preview yourself once it is safe to."
-            )
+            return f"http://127.0.0.1:{PREVIEW_PORT}/", current
         if read_pid(api_pid_path) is None or read_pid(vite_pid_path) is None:
             raise ReleaseError(
                 "Preview is outdated but its API and Vite processes are not owned by this launcher"
