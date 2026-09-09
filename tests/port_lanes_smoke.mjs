@@ -411,6 +411,30 @@ async function main() {
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the editor')
     pass('the header + bead names the header port — never line 0 of the lane')
 
+    // ------------- a Block just drawn: its title editor is open; the body still opens a lane ---
+    await clickAt(page, EMPTY_CANVAS.x, EMPTY_CANVAS.y)
+    await delay(200)
+    await key(page, 'b', 'KeyB')
+    // A box this size opens in Port view (a smaller one is a Simple Block, which has no lanes).
+    await mouse(page, 'mouseMoved', 120, 540)
+    await mouse(page, 'mousePressed', 120, 540, { buttons: 1 })
+    for (let step = 1; step <= 6; step += 1) {
+      await mouse(page, 'mouseMoved', 120 + (360 * step) / 6, 540 + (240 * step) / 6, { buttons: 1 })
+      await delay(20)
+    }
+    await mouse(page, 'mouseReleased', 480, 780)
+    await waitFor(page, `document.querySelector('[data-testid="block-inline-title"]')`, 'the fresh Block\'s title editor', 5000)
+    const freshId = await evaluate(page, `window.__systemsketch.editor.getEditingShapeId()`)
+    const fresh = await elementBox(page, `[data-shape-id=${JSON.stringify('__ID__')}] .systemsketch-block-canvas`.replace('__ID__', freshId))
+    await clickAt(page, fresh.x + fresh.width * 0.3, fresh.y + fresh.height * 0.5)
+    await waitFor(page, `document.querySelector(${JSON.stringify(INPUT_LANE)})`, 'the inputs lane from a Block whose title editor was open', 5000)
+    await typeSlowly(page, 'seed: int = 7')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify('__ID__')}.replace('__ID__', ${JSON.stringify(freshId)})).props.inputs.length === 1`, 'the fresh Block\'s first port', 5000)
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    await evaluate(page, `(() => { window.__systemsketch.editor.deleteShapes([${JSON.stringify(freshId)}]); return true })()`)
+    pass('a Block just drawn, title editor still open: one click on its left half opens the inputs lane and the first port is typed straight in')
+
     // -------------------- an empty Block: click a half, type, a port is born ---
     await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor

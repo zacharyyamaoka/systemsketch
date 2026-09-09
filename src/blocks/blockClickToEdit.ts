@@ -46,8 +46,19 @@ export function blockClickToEditCandidate(editor: Editor): BlockShape | null {
 	if (!shapeId) return null
 	const shape = editor.getShape(shapeId)
 	if (!isBlockShape(shape) || shape.isLocked) return null
-	if (!editor.canEditShape(shape)) return null
+	if (!isEditableBlock(editor, shape)) return null
 	return shape
+}
+
+/**
+ * tldraw's `canEditShape` answers "can editing START", and says no for the
+ * shape that is already being edited. Here the question is "may a click move
+ * the open editor to another field of this Block", which the editing shape
+ * answers yes to by definition. Without this, a body click while a fresh
+ * Block's title editor was open went nowhere (Zach, 2026-09-09).
+ */
+function isEditableBlock(editor: Editor, shape: BlockShape): boolean {
+	return editor.getEditingShapeId() === shape.id || editor.canEditShape(shape)
 }
 
 /** A plain left click with no modifiers. Everything else keeps stock meaning. */
@@ -151,7 +162,7 @@ export function installBlockClickToEdit(
 				// so accept the Block that is still merely selected as well.
 				const isActive = editor.getEditingShapeId() === shape.id
 					|| editor.getOnlySelectedShapeId() === shape.id
-				if (!isActive || !editor.canEditShape(shape)) return
+				if (!isActive || !isEditableBlock(editor, shape)) return
 
 				rememberBlockInlineField(editor, shape.id, click.field)
 				if (editor.getEditingShapeId() !== shape.id) editor.setEditingShape(shape.id)
