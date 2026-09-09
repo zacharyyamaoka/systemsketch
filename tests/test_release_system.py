@@ -714,6 +714,10 @@ class ReleaseSystemTests(unittest.TestCase):
                 "product": "systemsketch",
                 "channel": "preview",
                 "build": "working-tree",
+                # Same checkout as the release's own sourceRoot -- a genuinely
+                # stale controller in the same tree, the one case that must
+                # still restart.
+                "sourceRoot": str(PROJECT_ROOT),
             }
             fresh_health = {
                 **stale_health,
@@ -736,6 +740,71 @@ class ReleaseSystemTests(unittest.TestCase):
             )
             self.assertEqual(spawn.call_count, 2)
             self.assertIn("--allow-source-root", spawn.call_args_list[0].args[0])
+
+    def test_preview_launcher_refuses_to_stop_a_live_session_from_another_checkout(self) -> None:
+        """A fingerprint mismatch is not proof Preview is stale in THIS release's
+        own checkout -- promoting a candidate built elsewhere makes a live,
+        healthy Preview belonging to a different tree read as a mismatch too.
+        Stopping it would kill someone else's session for a release that never
+        touched their checkout. This is the exact scenario the 2026-09-09
+        release-control-plane finding named: caught while restarting Stable
+        for the floating-toolbar-excalidraw merge, with an unrelated peer
+        session's Preview live on the primary checkout the whole time.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            state_home = root / "state"
+            _build, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "elsewhere"))
+            promote_candidate(release_home)
+            live_elsewhere_health = {
+                "product": "systemsketch",
+                "channel": "preview",
+                "build": "working-tree",
+                "controllerFingerprint": "not-this-releases-fingerprint",
+                "sourceRoot": str(root / "a-different-checkout"),
+            }
+            # `read_pid` returning real pids is what the OLD code treated as
+            # "I own this, safe to restart" -- mocking it to a real value
+            # here is what makes this test actually exercise the new
+            # sourceRoot guard rather than falling through to the pre-existing
+            # (and unrelated) not-owned-by-this-launcher refusal, which would
+            # raise ReleaseError for the wrong reason and pass either way.
+            with patch.object(launcher, "health", return_value=live_elsewhere_health), patch.object(
+                launcher, "read_pid", return_value=111,
+            ), patch.object(
+                launcher, "stop_pid",
+            ) as stop, patch.object(launcher, "spawn_logged") as spawn:
+                with self.assertRaises(ReleaseError):
+                    launcher.ensure_preview(release_home, state_home)
+            stop.assert_not_called()
+            spawn.assert_not_called()
+
+    def test_preview_launcher_refuses_to_stop_when_health_predates_source_root(self) -> None:
+        """A health payload with no `sourceRoot` at all (an older, pre-fix
+        controller) is the same "cannot tell whose checkout this is" case as
+        a differing one -- fail closed rather than assume same-checkout."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            state_home = root / "state"
+            _build, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "no-source-root"))
+            promote_candidate(release_home)
+            legacy_health = {
+                "product": "systemsketch",
+                "channel": "preview",
+                "build": "working-tree",
+                "controllerFingerprint": "some-older-fingerprint",
+            }
+            with patch.object(launcher, "health", return_value=legacy_health), patch.object(
+                launcher, "read_pid", return_value=111,
+            ), patch.object(
+                launcher, "stop_pid",
+            ) as stop, patch.object(launcher, "spawn_logged") as spawn:
+                with self.assertRaises(ReleaseError):
+                    launcher.ensure_preview(release_home, state_home)
+            stop.assert_not_called()
+            spawn.assert_not_called()
 
     def test_window_focus_uses_an_exact_visible_app_class(self) -> None:
         search_result = type("Completed", (), {"returncode": 0, "stdout": "42\n"})()

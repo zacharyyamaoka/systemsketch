@@ -603,6 +603,7 @@ class SystemSketchServer(ThreadingHTTPServer):
                 *(str(root) for root in self.additional_document_roots),
             ],
             "controllerFingerprint": self.controller_fingerprint,
+            "sourceRoot": str(self.source_root),
             "recorderFrames": self.frames.availability()[0],
         }
 
