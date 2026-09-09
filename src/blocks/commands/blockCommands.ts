@@ -239,7 +239,39 @@ export function updateBlockProps(
 
   const historyLabel = options.historyLabel ?? 'edit block'
   if (historyLabel !== false) editor.markHistoryStoppingPoint(historyLabel)
-  editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+
+  const removedKeys = (Object.keys(shape.props) as (keyof BlockShapeProps)[])
+    .filter((key) => !Object.prototype.hasOwnProperty.call(props, key))
+
+  if (removedKeys.length === 0) {
+    editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+    return { ok: true, shapeId: shape.id, props }
+  }
+
+  // WHY: tldraw's updateShape merges `props` key-by-key onto the stored
+  // record (applyPartialToRecordWithProps in @tldraw/editor's Editor.ts) — a
+  // key the caller's object omits is left at its OLD value, never cleared.
+  // `patchBlockDetailsProps` deletes `assetId` from its own result once a
+  // pick no longer names an upload (see its own WHY), so once a Block has
+  // ever held one, handing that shorter object to updateShape alone would
+  // leave the stale assetId sitting in the store forever — a later Lucide
+  // pick, emoji pick, or Remove would all silently keep decoding as the old
+  // asset. `updateShape` still does the real work for every key that IS
+  // present (view/size restoration and stock-prop normalization in
+  // BlockShapeUtil.onBeforeUpdate, none of which reads icon or assetId), so
+  // it runs first; the removed keys are then deleted directly, same as
+  // `stripBehaviorTreeMeta` already does for `meta` in
+  // behaviorTreeDetachable.ts, guarded by the same lock/readonly rule
+  // updateShape enforces so this can't force a write it would have skipped.
+  editor.run(() => {
+    editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+    if (editor.getIsReadonly() || editor.isShapeOrAncestorLocked(shape.id)) return
+    editor.store.update(shape.id, (record) => {
+      const patched = { ...(record as BlockShape).props } as Record<string, unknown>
+      for (const key of removedKeys) delete patched[key]
+      return { ...record, props: patched } as typeof record
+    })
+  })
   return { ok: true, shapeId: shape.id, props }
 }
 

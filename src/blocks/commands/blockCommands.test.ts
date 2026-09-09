@@ -1,12 +1,14 @@
-import type { Editor, TLShapeId } from 'tldraw'
+import type { Editor, TLAssetId, TLShapeId } from 'tldraw'
 import { describe, expect, it } from 'vitest'
 
 import {
   BLOCK_SHAPE_TYPE,
   BLOCK_TOOL_ID,
+  blockIconRef,
   type BlockShape,
   getDefaultBlockProps,
 } from '../blockModel'
+import { encodeBlockIcon } from '../ui/iconPicker/iconRef'
 import {
   appendBundleMember,
   appendBlockPort,
@@ -48,19 +50,37 @@ function mockEditor(shape = blockShape()) {
   let current = shape
   let selected: BlockShape[] = [shape]
   let tool = 'select'
+  let readonly = false
   const history: string[] = []
   const editor = {
     getShape: (id: TLShapeId) => (id === current.id ? current : undefined),
     getSelectedShapes: () => selected,
     getCurrentToolId: () => tool,
+    getIsReadonly: () => readonly,
+    isShapeOrAncestorLocked: (id: TLShapeId) => (id === current.id ? current.isLocked : false),
     markHistoryStoppingPoint: (label: string) => {
       history.push(label)
       return `mark:${history.length}`
     },
+    // WHY this deliberately does NOT delete an omitted key: it stands in for
+    // tldraw's own updateShape, which merges `props` key-by-key onto the
+    // stored record (applyPartialToRecordWithProps in @tldraw/editor) and
+    // leaves a key the caller's object doesn't mention at its OLD value —
+    // never clears it. A fake that "helpfully" deleted omitted keys would
+    // hide exactly the bug updateBlockProps's removed-keys branch exists to
+    // work around; see the WHY at that branch in blockCommands.ts.
     updateShape: (partial: { props?: Partial<BlockShape['props']> }) => {
       current = { ...current, props: { ...current.props, ...partial.props } }
       selected = selected.length ? [current] : []
       return editor
+    },
+    run: (fn: () => void) => fn(),
+    store: {
+      update: (id: TLShapeId, updater: (record: BlockShape) => BlockShape) => {
+        if (id !== current.id) return
+        current = updater(current)
+        selected = selected.length ? [current] : []
+      },
     },
   }
   return {
@@ -69,6 +89,8 @@ function mockEditor(shape = blockShape()) {
     history,
     select: (next: BlockShape[]) => (selected = next),
     tool: (next: string) => (tool = next),
+    setReadonly: (next: boolean) => (readonly = next),
+    setLocked: (next: boolean) => (current = { ...current, isLocked: next }),
   }
 }
 
@@ -117,6 +139,68 @@ describe('block command integration surface', () => {
     expect(setBlockView(fixture.editor, fixture.current().id, 'expanded').ok).toBe(true)
     expect(fixture.current().props).toMatchObject({ view: 'expanded', w: 500, h: 410 })
     expect(fixture.history).toEqual(['edit block', 'edit block', 'show block as expanded'])
+  })
+
+  it('deletes a stored assetId once an upload no longer applies, not just leaves it undefined', () => {
+    // The bug this proves fixed: tldraw's real updateShape merges `props`
+    // key-by-key onto the stored record and only ever adds or overwrites a
+    // key present in the object it's given — a key the caller omits is left
+    // at its OLD value, never cleared. `mockEditor`'s `updateShape` fake
+    // deliberately reproduces that exact merge (see its own WHY above), so
+    // this test only passes because `updateBlockProps`'s removed-keys branch
+    // follows it with a direct `editor.store.update` deleting the key —
+    // exactly what a plain object-spread merge, real or fake, cannot do.
+    const ASSET_ID = 'asset:icon1' as TLAssetId
+    const fixture = mockEditor(blockShape())
+    expect(fixture.current().props).not.toHaveProperty('assetId')
+
+    // "uploads": a real command call, same shape as BlockInspector.tsx's own.
+    expect(updateBlockDetails(
+      fixture.editor,
+      fixture.current().id,
+      encodeBlockIcon({ kind: 'asset', assetId: ASSET_ID }),
+    ).ok).toBe(true)
+    expect(blockIconRef(fixture.current().props)).toEqual({ kind: 'asset', assetId: ASSET_ID })
+
+    // "picks a Lucide icon": the key must be gone, not merely undefined.
+    expect(updateBlockDetails(
+      fixture.editor,
+      fixture.current().id,
+      encodeBlockIcon({ kind: 'lucide', name: 'Boxes' }),
+    ).ok).toBe(true)
+    expect(Object.prototype.hasOwnProperty.call(fixture.current().props, 'assetId')).toBe(false)
+    expect(blockIconRef(fixture.current().props)).toEqual({ kind: 'lucide', name: 'Boxes' })
+
+    // "Remove": still gone, kind:'none'.
+    expect(updateBlockDetails(
+      fixture.editor,
+      fixture.current().id,
+      encodeBlockIcon({ kind: 'none' }),
+    ).ok).toBe(true)
+    expect(Object.prototype.hasOwnProperty.call(fixture.current().props, 'assetId')).toBe(false)
+    expect(blockIconRef(fixture.current().props)).toEqual({ kind: 'none' })
+
+    // A single real editor.undo() proving the pair of writes (updateShape +
+    // the store.update that deletes assetId) coalesce into one history step
+    // needs a real tldraw Editor/store — this vitest suite runs without a
+    // DOM, so that's proven against the real app instead: the assetId-fix
+    // check beside shuffle1 (step 7) and the restored Remove check (step 9)
+    // in tests/icon_picker_smoke.mjs, run via `npm run test:icon-picker`.
+  })
+
+  it('does not delete a removed key on a locked or readonly Block, matching updateShape', () => {
+    const ASSET_ID = 'asset:icon2' as TLAssetId
+    const fixture = mockEditor(blockShape({ icon: 'asset', assetId: ASSET_ID }))
+    fixture.setLocked(true)
+    expect(updateBlockDetails(
+      fixture.editor,
+      fixture.current().id,
+      encodeBlockIcon({ kind: 'lucide', name: 'Boxes' }),
+    ).ok).toBe(true)
+    // updateShape's own merge still runs (icon changes); only the direct
+    // deletion is withheld, the same guard updateShape enforces itself.
+    expect(fixture.current().props.icon).toBe('Boxes')
+    expect(fixture.current().props.assetId).toBe(ASSET_ID)
   })
 
   it('keeps stable port ids across edits, visibility, and reorder', () => {

@@ -485,6 +485,20 @@ async function main() {
       `finding 2: the first shuffle from the context-menu trigger keeps the picker open and changes the icon (before=${JSON.stringify(beforeShuffle1)}, after=${JSON.stringify(afterShuffle1)}, open=${pickerOpenAfterShuffle1})`,
       pickerOpenAfterShuffle1 && (afterShuffle1.icon !== beforeShuffle1.icon || afterShuffle1.assetId !== beforeShuffle1.assetId),
     )
+    // This Block has held step 4's uploaded assetId, untouched, ever since —
+    // shuffle1 above is the journey's first non-asset (Lucide) pick since
+    // then, so it's the real place the gap this WHY used to describe at
+    // step 9 actually opens. Fixed in blockCommands.ts's updateBlockProps:
+    // once a stored key would go missing from the shape's next props,
+    // updateShape alone can't clear it (tldraw's own partial-props merge
+    // only ever adds or overwrites a key that's present), so that command
+    // now follows updateShape with a direct `editor.store.update` deleting
+    // the keys it dropped — same pattern `stripBehaviorTreeMeta` already
+    // uses for `meta` in behaviorTreeDetachable.ts.
+    add(
+      `assetId fix: a Lucide pick actually clears an assetId the Block was holding (before=${JSON.stringify(beforeShuffle1.assetId)}, after=${JSON.stringify(afterShuffle1.assetId)})`,
+      beforeShuffle1.assetId != null && afterShuffle1.assetId == null,
+    )
     await clickAt(page, shuffleBox.cx, shuffleBox.cy)
     await delay(150)
     const afterShuffle2 = await blockIcon(page)
@@ -679,24 +693,12 @@ async function main() {
     await clickAt(page, removeBox.cx, removeBox.cy)
     await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'the picker to close after Remove')
     const afterRemove = await blockIcon(page)
-    // WHY this only asserts `icon`, not `assetId`, clears: `assetId` isn't
-    // written by ANY non-upload pick (see `encodeBlockIcon`'s own WHY in
-    // iconRef.ts) — `patchBlockDetailsProps` (blockCommands.ts) drops that
-    // explicit `undefined` from the patch entirely rather than persisting
-    // it, so a shape that never held an asset correctly reads `assetId`
-    // as absent (`== null`, confirmed above on every Lucide/emoji pick this
-    // journey made before step 4's upload). But once a shape HAS held one,
-    // omitting the key from the patch means tldraw's own partial-props merge
-    // (`applyPartialToRecordWithProps`) leaves the OLD value in place — the
-    // same orphan-cleanup-deferred philosophy `saveUpload`'s own WHY already
-    // documents for the asset record itself, just now observed on the
-    // shape's pointer to it too. `icon` still gates the on-canvas box's
-    // existence directly off the raw string (`BlockCanvas.tsx`'s own WHY),
-    // so Remove is visibly correct regardless. Reaching all the way to a
-    // guaranteed-null `assetId` after an upload needs a fix in
-    // patchBlockDetailsProps/iconRef.ts — both outside this slice's owned
-    // files and reported separately rather than patched here.
-    add(`9. Remove clears the icon (got ${JSON.stringify(afterRemove)})`, afterRemove.icon === '')
+    // Restored to check both props: fixed in blockCommands.ts's
+    // updateBlockProps (see the WHY beside shuffle1 above, step 7) — Remove
+    // clears assetId the same way any other non-upload pick now does. This
+    // Block's assetId was already cleared back at step 7's first shuffle,
+    // so this also proves the fix holds after several more picks in between.
+    add(`9. Remove clears both props (got ${JSON.stringify(afterRemove)})`, afterRemove.icon === '' && afterRemove.assetId == null)
     const iconBoxGone = await evaluate(page, `document.querySelector(${JSON.stringify(iconBoxSelector(BLOCK_ID))}) === null`)
     add('9. the canvas icon box is gone from the DOM after Remove', iconBoxGone)
 
