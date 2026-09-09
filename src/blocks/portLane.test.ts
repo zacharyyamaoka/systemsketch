@@ -24,7 +24,7 @@ describe('port lane', () => {
 		const props = block([header, pose, hidden, frame])
 		expect(lanePorts(props, 'inputs').map((port) => port.id)).toEqual(['in_1', 'in_2'])
 		const next = reconcilePortLane(props, 'inputs', 'frame: Frame\npose: Pose = None')
-		expect(next.inputs.map((port) => port.id)).toEqual(['in_9', 'in_2', 'in_1', 'in_8'])
+		expect(next.inputs.map((port) => port.id)).toEqual(['in_9', 'in_2', 'in_8', 'in_1'])
 	})
 
 	it('is a no-op when the text still spells the lane', () => {
@@ -67,7 +67,14 @@ describe('port lane', () => {
 		const props: BlockShapeProps = { ...getDefaultBlockProps(), view: 'port', inputs: [{ id: 'in_1', name: 'buf', type: 'list', visible: true, mutates: true } as BlockPort], outputs: [effect, ok] }
 		expect(lanePorts(props, 'outputs').map((port) => port.id)).toEqual(['out_1'])
 		const next = reconcilePortLane(props, 'outputs', 'ok: boolX')
-		expect(next.outputs.map((port) => [port.id, port.type])).toEqual([['out_1', 'boolX'], ['effect:in_1', 'list']])
+		expect(next.outputs.map((port) => [port.id, port.type])).toEqual([['effect:in_1', 'list'], ['out_1', 'boolX']])
+	})
+
+	it('keeps a hidden port at its place in the lane order through an edit', () => {
+		const hidden: BlockPort = { id: 'in_8', name: 'secret', type: 'str', visible: false }
+		const props = block([pose, hidden, frame, gain])
+		const next = reconcilePortLane(props, 'inputs', 'pose: Pose = None\nframe: Frame\ngain: float = 1.5')
+		expect(next.inputs.map((port) => port.id)).toEqual(['in_1', 'in_8', 'in_2', 'in_3'])
 	})
 
 	it('reads an empty document as an empty lane', () => {

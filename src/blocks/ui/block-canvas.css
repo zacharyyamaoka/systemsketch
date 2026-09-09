@@ -223,6 +223,9 @@
 }
 
 .BlockNode-laneViewer__panel {
+  /* The completion popup is parented here (data-tooltip-host), so the panel
+   * is its positioning and stacking root. */
+  position: relative;
   width: min(760px, calc(100vw - 48px));
   padding: 14px 16px 12px;
   border: 1px solid var(--ss-border);

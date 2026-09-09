@@ -163,8 +163,14 @@ export function reconcilePortLane(props: BlockShapeProps, side: BlockPortSide, t
 	//    line keeps the place it had and `reconcileEffectPorts` finds its own.
 	const wasLine = new Set(before.map((port) => port.id))
 	const header = props[side].filter((port) => portInHeader(port) && port.visible && !isEffectPort(port))
-	const others = props[side].filter((port) => !wasLine.has(port.id) && !header.includes(port))
-	const ports = [...header, ...lane, ...others]
+	// A port that is not a line — hidden, or a derived effect port — keeps the
+	// index it had, so un-hiding it later finds it where it was, not at the
+	// bottom (a round-4 judge finding).
+	const ports: BlockPort[] = [...header, ...lane]
+	props[side].forEach((port, index) => {
+		if (wasLine.has(port.id) || header.includes(port)) return
+		ports.splice(Math.min(index, ports.length), 0, port)
+	})
 	const withLinks = side === 'inputs' ? canonicalizeInputPortLinks(ports) : ports
 	return reconcileEffectPorts(normalizeBlockPortRows({ ...props, [side]: withLinks }))
 }

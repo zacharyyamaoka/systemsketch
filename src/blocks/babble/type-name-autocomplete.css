@@ -18,7 +18,7 @@
    call ("it needs to go to maximum z level ... on top of everything") — the
    popup must beat every shape AND every app panel, so it takes the largest
    value the cascade can hold rather than a house scale. */
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm {
   z-index: 2147483647 !important;
   min-width: 360px;
   max-width: 460px;
@@ -33,12 +33,12 @@
   line-height: 22px;
 }
 
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul {
   max-height: 280px;
   font: inherit;
 }
 
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul > li {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -47,7 +47,7 @@
   cursor: pointer;
 }
 
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li[aria-selected] {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul > li[aria-selected] {
   background: var(--ss-accent-soft);
   color: inherit;
 }
@@ -119,19 +119,19 @@
 /* The browse escalation — an explicit escape hatch into "scroll through this
    like an open library", kept as the final row with the button styling the
    old dropdown's footer had. */
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow {
   margin-top: 2px;
   border-top: 1px solid var(--ss-border);
   border-radius: 0 0 5px 5px;
   color: var(--ss-text-muted);
 }
 
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow .cm-completionLabel {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow .cm-completionLabel {
   color: inherit;
 }
 
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow:hover,
-.tl-container .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow[aria-selected] {
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow:hover,
+:is(.tl-container, .BlockNode-laneViewer__panel) .cm-tooltip.TypeNameAutocomplete-cm > ul > li.TypeNameAutocomplete-toggleRow[aria-selected] {
   color: var(--ss-accent);
   background: transparent;
 }

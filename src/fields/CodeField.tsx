@@ -184,9 +184,14 @@ export function CodeField({
           editableCompartment.current.of(EditorView.editable.of(!disabled)),
           placeholderCompartment.current.of(placeholder ? placeholderExtension(placeholder) : []),
           metricsCompartment.current.of(metrics()),
+          // The completion popup is parented to the nearest declared tooltip
+          // host (a modal that must keep it inside its own stacking context),
+          // else the tldraw container, else the body.
           tooltips({
             position: 'absolute',
-            parent: host.closest<HTMLElement>('.tl-container') ?? document.body,
+            parent: host.closest<HTMLElement>('[data-tooltip-host]')
+              ?? host.closest<HTMLElement>('.tl-container')
+              ?? document.body,
           }),
           // One line: a typed or pasted newline is dropped rather than
           // growing the field. A lane keeps its newlines — they are its ports.
