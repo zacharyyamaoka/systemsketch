@@ -1,4 +1,5 @@
-import { StyleProp, T, createShapeId, type TLShape } from 'tldraw'
+import { decodeBlockIcon, type BlockIconRef } from './ui/iconPicker/iconRef'
+import { StyleProp, T, assetIdValidator, createShapeId, type TLAssetId, type TLShape } from 'tldraw'
 
 export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
@@ -411,6 +412,17 @@ export const BLOCK_SHAPE_PROPS = {
 	autoResize: T.boolean,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
 	icon: T.string.optional(),
+	/**
+	 * An uploaded icon, as a tldraw image asset record. Named exactly `assetId`
+	 * and not `iconAssetId` on purpose.
+	 *
+	 * WHY: tldraw's copy / export scan (`Editor.getContentFromCurrentPage`) only
+	 * carries an asset with a shape when the prop is literally `assetId`. Any
+	 * other name pastes a Block whose image silently never arrives. Optional and
+	 * nullable so every existing Block record still validates.
+	 * See src/blocks/ui/iconPicker/iconRef.ts for the encoding.
+	 */
+	assetId: assetIdValidator.nullable().optional(),
 	view: BlockViewStyle,
 	views: T.object({
 		simple: BlockViewSize,
@@ -491,6 +503,7 @@ declare module 'tldraw' {
 			foldControlSide?: BlockFoldControlSide
 			autoResize: boolean
 			icon?: string
+			assetId?: TLAssetId | null
 			view: BlockView
 			views: {
 				simple: BlockViewSize
@@ -547,6 +560,7 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		folded: false,
 		autoResize: false,
 		icon: '',
+		assetId: null,
 		view: 'simple',
 		views,
 		showDescription: true,
@@ -566,6 +580,11 @@ export function getDefaultBlockProps(): BlockShapeProps {
 /** The one reader for the optional donor icon field. */
 export function blockIcon(props: BlockShapeProps): string {
 	return props.icon ?? ''
+}
+
+/** The decoded icon: none, a Lucide name, an emoji, or an uploaded asset. */
+export function blockIconRef(props: BlockShapeProps): BlockIconRef {
+	return decodeBlockIcon(props.icon, props.assetId)
 }
 
 /** Existing boards and newly placed Blocks retain the established left header. */

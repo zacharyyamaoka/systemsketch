@@ -210,7 +210,7 @@
     "codemirror": "^6.0.2",
     "d3-hierarchy": "3.1.2",
     "elkjs": "0.12.0",
-    "lucide-react": "1.33.0",
+    "lucide-react": "1.43.0",
     "radix-ui": "1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -222,6 +222,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.1.1",
+    "lucide-static": "1.43.0",
     "typescript": "7.0.2",
     "vite": "8.2.2",
     "vitest": "4.1.11"
