@@ -88,7 +88,7 @@ def implemented() -> dict | None:
     vitest_cases = sum(len(re.findall(r"^\s*(?:it|test)\(", t.read_text(encoding="utf-8"), re.M)) for t in tests)
     server = read("scripts/server.py")
     model = read("src/blocks/blockModel.ts")
-    need(model, "assetId: assetIdValidator.nullable().optional()", "the assetId prop")
+    need(model, "assetId: assetIdValidator.optional()", "the assetId prop")
     return {
         "picker_lines": picker.read_text(encoding="utf-8").count("\n"),
         "css_lines": (ROOT / "src/blocks/ui/iconPicker/block-icon-picker.css").read_text(encoding="utf-8").count("\n"),
@@ -579,7 +579,7 @@ def architecture_svg(m: dict) -> str:
   <rect class="lane" x="536" y="8" width="250" height="384" rx="14"/><text class="k" x="552" y="32">BLOCK RECORD · props</text>
   <rect class="bx" x="552" y="48" width="218" height="112" rx="9"/><text class="t" x="564" y="70">icon: string</text>
   <text class="s" x="564" y="90">'' · none</text><text class="s" x="564" y="106">'Box' · Lucide (unchanged, bare names)</text><text class="s" x="564" y="122">'emoji:🎉' · one prefix, one glyph</text><text class="s" x="564" y="138">'asset' · look at assetId</text>
-  <rect class="bx" x="552" y="176" width="218" height="88" rx="9"/><text class="t" x="564" y="198">assetId: TLAssetId | null</text>
+  <rect class="bx" x="552" y="176" width="218" height="88" rx="9"/><text class="t" x="564" y="198">assetId?: TLAssetId · only for uploads</text>
   <text class="s" x="564" y="218">named exactly `assetId` because tldraw's</text><text class="s" x="564" y="234">copy / export scan reads that key and</text><text class="s" x="564" y="250">carries the asset record with the shape</text>
   <rect class="lane" x="810" y="8" width="242" height="384" rx="14"/><text class="k" x="826" y="32">RENDER + FILE</text>
   <rect class="bx" x="826" y="48" width="210" height="72" rx="9"/><text class="t" x="838" y="70">BlockIconGlyph</text><text class="s" x="838" y="90">curated {m['curated']} static · rest from the</text><text class="s" x="838" y="106">lazy chunk · emoji span · &lt;img&gt; for assets</text>
@@ -604,7 +604,7 @@ def implemented_html(impl: dict | None, fig) -> str:
     rows = "".join(f"<tr><th>{escape(k)}</th><td>{v}</td></tr>" for k, v in [
         ("Picker", f"<code>src/blocks/ui/iconPicker/BlockIconPicker.tsx</code> · {impl['picker_lines']} lines, {impl['css_lines']} lines of CSS on <code>--ss-*</code> tokens"),
         ("Triggers wired", f"{impl['triggers']} of 3 — inspector well, on-canvas icon (inline editor), context menu “Icon…”"),
-        ("Model", "<code>assetId</code> beside <code>icon</code>; <code>blockIconRef()</code> decodes none · lucide · emoji · asset"),
+        ("Model", "<code>assetId</code> beside <code>icon</code>, written only for uploads so older builds still open boards without one; migration v13; <code>blockIconRef()</code> decodes none · lucide · emoji · asset"),
         ("Host", "<code>POST /api/icon/fetch</code> " + ("present" if impl["fetch_endpoint"] else "<b>missing</b>") + " — 8 s timeout, 5 MB cap, image/* only"),
         ("Unit tests", f"{impl['vitest_cases']} vitest cases in {impl['vitest_files']} files under <code>iconPicker/</code>, plus model, upload and Python endpoint tests"),
         ("Browser journey", (f"<code>tests/icon_picker_smoke.mjs</code> · {impl['journey_checks']} checks · <code>npm run test:icon-picker</code>" if impl["journey"] else "<b>not yet written</b>")),
@@ -738,7 +738,7 @@ def main() -> None:
 <section id="plan">
   <h2>Build plan</h2>
   <ol>
-    <li><b>Model.</b> <code>assetId: assetIdValidator.nullable().optional()</code> beside <code>icon</code>; <code>blockIcon()</code> stays the one reader, gains <code>blockIconRef()</code> returning <code>{{kind, name|char|assetId}}</code>. Migration-free: optional props.</li>
+    <li><b>Model.</b> <code>assetId: assetIdValidator.optional()</code> beside <code>icon</code>, absent unless an upload exists; <code>blockIcon()</code> stays the one reader, gains <code>blockIconRef()</code> returning <code>{{kind, name|char|assetId}}</code>. Migration-free: optional props.</li>
     <li><b>Library chunk.</b> <code>src/blocks/ui/iconPicker/lucideLibrary.ts</code> lazily imports <code>{{ icons }}</code> from lucide-react and <code>tags.json</code> from lucide-static; exposes <code>search(query)</code>. Vitest: ranking, empty query, unknown names, version-pin equality.</li>
     <li><b>Renderer.</b> <code>BlockIconGlyph</code> renders curated names statically, others via the chunk, <code>emoji:</code> as a span in the emoji font stack, assets via <code>editor.resolveAssetUrl</code>. Layout is untouched: same {m['simple_px']} / {m['header_px']} boxes.</li>
     <li><b>Picker.</b> Notion’s chrome on Radix Popover; one component, three triggers. Upload pipeline in <code>uploadIcon.ts</code> (downscale, SVG passthrough, host fetch for URLs).</li>
