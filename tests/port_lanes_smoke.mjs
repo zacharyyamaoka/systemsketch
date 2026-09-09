@@ -203,7 +203,27 @@ async function main() {
     assert.deepEqual(JSON.parse(caret), { line: 2, column: 1 }, `the caret opens beside the character that was clicked, not at the line start — got ${caret}`)
     pass('per-character: the caret lands next to the clicked character of the clicked port')
 
+    // A click on the bare body to the right of a line's text lands at its end.
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const frameRow = await labelBox(page, 'in', 'frame')
+    const blockBox0 = await blockBox(page)
+    await clickAt(page, blockBox0.x + blockBox0.width * 0.42, frameRow.y + frameRow.height / 2)
+    await waitFor(page, `document.querySelector(${JSON.stringify(INPUT_LANE)})`, 'the inputs lane from the bare body', 5000)
+    const caretEnd = JSON.parse(await evaluate(page, `(() => {
+      const view = document.querySelector(${JSON.stringify(INPUT_LANE)} + ' .cm-content')?.cmView?.view
+      const head = view.state.selection.main.head
+      const line = view.state.doc.lineAt(head)
+      return JSON.stringify({ line: line.number - 1, column: head - line.from, length: line.length })
+    })()`))
+    assert.deepEqual(caretEnd, { line: 1, column: caretEnd.length, length: caretEnd.length }, 'a click past the text puts the caret at the end of that line')
+    pass('a click on the body to the right of a line lands the caret at the end of that line')
+
     // ------------------------------------------- a long line folds when left ---
+    // The caret is at the end of frame's line; step down onto gain's.
+    await key(page, 'ArrowDown', 'ArrowDown')
     await key(page, 'End', 'End')
     await typeSlowly(page, ' + some_very_long_expression_that_keeps_going(frame, pose)')
     const longLine = (await laneState(page, INPUT_LANE)).lines[2]
@@ -239,6 +259,26 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="block-lane-viewer"] .cm-content')`, 'the lane viewer', 5000)
     const viewerText = await evaluate(page, `document.querySelector('[data-testid="block-lane-viewer"] .cm-content')?.textContent`)
     assert.equal(viewerText, 'pose: Pose = Noneframe: Framegain: float = 1.0', 'the viewer shows the same lane document')
+    const viewerStyle = JSON.parse(await evaluate(page, `JSON.stringify((() => {
+      const viewer = document.querySelector('[data-testid="block-lane-viewer"]')
+      const panel = viewer?.querySelector('.BlockNode-laneViewer__panel')
+      const panelStyle = panel ? getComputedStyle(panel) : null
+      return {
+        insideThemeRoot: Boolean(viewer?.closest('[data-ss-theme]')),
+        panelBackground: panelStyle?.backgroundColor ?? null,
+        panelColor: panelStyle?.color ?? null,
+        scrim: viewer ? getComputedStyle(viewer).backgroundColor : null,
+      }
+    })())`))
+    assert.equal(viewerStyle.insideThemeRoot, true, 'the viewer lives inside the theme root, where the colour tokens are')
+    assert.notEqual(viewerStyle.panelBackground, 'rgba(0, 0, 0, 0)', 'the panel has a painted background')
+    assert.notEqual(viewerStyle.panelColor, viewerStyle.panelBackground, 'its ink is not its paper')
+    assert.notEqual(viewerStyle.scrim, 'rgba(0, 0, 0, 0)', 'the scrim is visible')
+    await shot(page, 'viewer')
+    // Tab must not strand the person behind the scrim: focus stays in, Escape still closes.
+    await key(page, 'Tab', 'Tab')
+    await delay(120)
+    assert.equal(await evaluate(page, `Boolean(document.querySelector('[data-testid="block-lane-viewer"]')?.contains(document.activeElement))`), true, 'focus stays inside the viewer after Tab')
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('[data-testid="block-lane-viewer"]') && !document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the viewer and the lane')
     pass('the ⤢ in the lane\'s corner opens the same document in a bigger wrapped viewer')

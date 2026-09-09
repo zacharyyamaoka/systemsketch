@@ -393,7 +393,10 @@ export function portLaneAtPoint(
 			line = index
 		}
 	})
-	return { kind: 'portLane', side, line }
+	// Bare body, no painted character under the pointer: the caret goes to
+	// the END of that row's line, where a click past the text lands in any
+	// editor (the host clamps the column to the line's length).
+	return { kind: 'portLane', side, line, column: Number.MAX_SAFE_INTEGER }
 }
 
 export function blockInlineFieldAtPointOrNull(

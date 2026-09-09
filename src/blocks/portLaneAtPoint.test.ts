@@ -26,11 +26,11 @@ describe('port lanes', () => {
 	it('opens the inputs lane on the clicked port\'s line from the left half, outputs from the right', () => {
 		const layout = layoutBlock(props())
 		const frame = layout.ports.find((entry) => entry.port.id === 'in_2')!
-		expect(portLaneAtPoint(props(), { x: layout.bounds.w * 0.35, y: frame.y })).toEqual({ kind: 'portLane', side: 'inputs', line: 1 })
+		expect(portLaneAtPoint(props(), { x: layout.bounds.w * 0.35, y: frame.y })).toEqual({ kind: 'portLane', side: 'inputs', line: 1, column: Number.MAX_SAFE_INTEGER })
 		const quality = layout.ports.find((entry) => entry.port.id === 'out_2')!
-		expect(portLaneAtPoint(props(), { x: layout.bounds.w * 0.62, y: quality.y })).toEqual({ kind: 'portLane', side: 'outputs', line: 1 })
+		expect(portLaneAtPoint(props(), { x: layout.bounds.w * 0.62, y: quality.y })).toEqual({ kind: 'portLane', side: 'outputs', line: 1, column: Number.MAX_SAFE_INTEGER })
 		expect(blockInlineFieldAtPointOrNull(props(), { x: layout.bounds.w * 0.35, y: frame.y }, { portLanes: true }))
-			.toEqual({ kind: 'portLane', side: 'inputs', line: 1 })
+			.toEqual({ kind: 'portLane', side: 'inputs', line: 1, column: Number.MAX_SAFE_INTEGER })
 		// Without the flag the same point is still the one-port editor.
 		expect(blockInlineFieldAtPointOrNull(props(), { x: layout.bounds.w * 0.35, y: frame.y }))
 			.toMatchObject({ portId: 'in_2' })
