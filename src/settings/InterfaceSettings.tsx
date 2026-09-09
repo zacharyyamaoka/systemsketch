@@ -314,15 +314,16 @@ function ToolAliasesPanel() {
 }
 
 /**
- * Off by default. Enabling this defeats the fence in workspace_store.py that
- * confines every board open/save/rename/reveal to the configured workspace
- * root — the same fence a hostile web page would need to escape, so the
- * toggle is explained rather than buried, and persisted on the local
- * SystemSketch server (not this browser) since Stable and Preview both
- * enforce it independently and both need to see the same choice immediately.
+ * On by default (see FileAccessSettings in release_lib.py). Disabling this
+ * restores the fence in workspace_store.py that confines every board
+ * open/save/rename/reveal to the configured workspace root — the same fence
+ * a hostile web page would need to escape, so the toggle is explained rather
+ * than buried, and persisted on the local SystemSketch server (not this
+ * browser) since Stable and Preview both enforce it independently and both
+ * need to see the same choice immediately.
  */
 function GeneralPanel() {
-  const [allowAnyPath, setAllowAnyPath] = useState(false)
+  const [allowAnyPath, setAllowAnyPath] = useState(true)
   const [loaded, setLoaded] = useState(false)
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -365,7 +366,7 @@ function GeneralPanel() {
       <div className="systemsketch-settings__intro">
         <div>
           <h2 id="file-access-title">File access</h2>
-          <p>SystemSketch normally only opens, saves, and browses boards inside your workspace folder.</p>
+          <p>SystemSketch can open, save, and browse boards anywhere on this computer, not just your workspace folder.</p>
         </div>
       </div>
 
@@ -374,8 +375,9 @@ function GeneralPanel() {
           <h3 id="allow-any-path-title">Allow opening files anywhere</h3>
           <p>
             Lets a board link (<code>?board=</code>), Save As, or Rename reach any path on this
-            computer — not just your workspace folder. Turn this on only if you need to open a
-            board from somewhere else, like an agent worktree; leave it off otherwise.
+            computer — not just your workspace folder. On by default, since boards routinely come
+            from an agent worktree or another drive. Turn this off to confine SystemSketch to your
+            workspace folder only.
           </p>
         </div>
         <button
@@ -389,7 +391,7 @@ function GeneralPanel() {
         >
           <span>
             <strong>Allow opening files anywhere</strong>
-            <small>Off by default. Takes effect immediately, in both Stable and Preview.</small>
+            <small>On by default. Takes effect immediately, in both Stable and Preview.</small>
           </span>
           <i aria-hidden="true"><span /></i>
         </button>

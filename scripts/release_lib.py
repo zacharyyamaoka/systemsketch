@@ -78,13 +78,16 @@ class FileAccessSettings:
     WHY: opening a board from an arbitrary path (an agent worktree, another
     drive) hits the same confinement fence in workspace_store.py that keeps a
     stray web request from reading or overwriting files elsewhere on the
-    machine. Off by default — a person opts in from Settings — and persisted
-    here rather than in browser storage because the fence itself is enforced
-    server-side and shared by every Stable and Preview process on this
-    machine.
+    machine. On by default — Zach's own workflow routinely opens boards from
+    agent worktrees and review fixtures outside the workspace root, so the
+    fence would otherwise need opting into on every fresh release_home before
+    the first such board could even open. A person can still turn it off from
+    Settings. Persisted here rather than in browser storage because the fence
+    itself is enforced server-side and shared by every Stable and Preview
+    process on this machine.
     """
 
-    allow_any_path: bool = False
+    allow_any_path: bool = True
 
 
 @dataclass(frozen=True)

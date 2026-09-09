@@ -219,16 +219,16 @@ class ReleaseSystemTests(unittest.TestCase):
             finally:
                 server.server_close()
 
-    def test_file_access_settings_default_off_and_round_trip(self) -> None:
+    def test_file_access_settings_default_on_and_round_trip(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             release_home = Path(directory) / "runtime"
-            self.assertFalse(read_file_access_settings(release_home).allow_any_path)
-
-            write_file_access_settings(release_home, FileAccessSettings(allow_any_path=True))
             self.assertTrue(read_file_access_settings(release_home).allow_any_path)
 
             write_file_access_settings(release_home, FileAccessSettings(allow_any_path=False))
             self.assertFalse(read_file_access_settings(release_home).allow_any_path)
+
+            write_file_access_settings(release_home, FileAccessSettings(allow_any_path=True))
+            self.assertTrue(read_file_access_settings(release_home).allow_any_path)
 
             file_access_path(release_home).write_text("not json", encoding="utf-8")
             with self.assertRaises(ReleaseError):
@@ -250,12 +250,12 @@ class ReleaseSystemTests(unittest.TestCase):
                 source_root=PROJECT_ROOT,
             )
             try:
-                self.assertFalse(server.file_access_settings().allow_any_path)
+                self.assertTrue(server.file_access_settings().allow_any_path)
                 # A peer process (e.g. Preview, or the other channel's own
                 # server) writes the same shared file; this instance must see
                 # it on the very next call, with no restart or cache to bust.
-                write_file_access_settings(release_home, FileAccessSettings(allow_any_path=True))
-                self.assertTrue(server.file_access_settings().allow_any_path)
+                write_file_access_settings(release_home, FileAccessSettings(allow_any_path=False))
+                self.assertFalse(server.file_access_settings().allow_any_path)
             finally:
                 server.server_close()
 
