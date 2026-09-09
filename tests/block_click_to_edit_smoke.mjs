@@ -235,6 +235,16 @@ async function main() {
       'two rapid clicks must still open the title')
     pass('two rapid clicks still open the title, unchanged')
 
+    // 6a. A miss stays a miss WHILE an editor is open: with the title editor
+    //     up, a body click must not move it anywhere. This is the state the
+    //     editing-shape click fix changed, so it needs its own check (a
+    //     round-6 judge finding: the old step Escaped first and never saw it).
+    await clickAt(page, body.x, body.y)
+    await delay(240)
+    assert.equal(await editorTestId(page), 'block-inline-title',
+      'a body click while the title editor is open must leave the title editor where it is')
+    pass('with the title editor open, clicking the body moves it nowhere')
+
     // 6. A miss stays a miss: the body of an active Block is not a text box.
     await key(page, 'Escape', 'Escape')
     await delay(200)
