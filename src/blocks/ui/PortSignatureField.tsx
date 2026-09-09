@@ -10,7 +10,7 @@ import { isSafeNamespaceName, PYTHON_SAFE_NAMESPACE } from '../../expression/pyt
 import { useDebouncedExpressionEval } from '../../expression/useDebouncedExpressionEval'
 import { KIND_LABEL, buildBrowseList, buildQueryResults, buildRegistry, type AutocompleteKind } from '../babble/typeNameAutocompleteLogic'
 import type { BlockPort } from '../blockModel'
-import { formatPortSignature, parsePortSignature, portSignaturePatch, portSignatureSlotAt } from '../portSignature'
+import { formatPortSignature, parsePortLaneLines, parsePortSignature, portSignaturePatch, portSignatureSlotAt } from '../portSignature'
 import '../babble/type-name-autocomplete.css'
 
 // ---------------------------------------------------------------- grammar --
@@ -29,15 +29,17 @@ const SQUIGGLE_MARK = Decoration.mark({ class: 'ss-expr-squiggle' })
  */
 const slotDecorations = EditorView.decorations.compute(['doc'], (state) => {
 	const text = state.doc.toString()
-	const { spans } = parsePortSignature(text)
 	const builder = new RangeSetBuilder<Decoration>()
 	const marks: Array<[number, number, Decoration]> = []
-	if (spans.name.end > spans.name.start) marks.push([spans.name.start, spans.name.end, NAME_MARK])
-	if (spans.colon !== null) marks.push([spans.colon, spans.colon + 1, PUNCT_MARK])
-	if (spans.type && spans.type.end > spans.type.start) marks.push([spans.type.start, spans.type.end, TYPE_MARK])
-	if (spans.equals !== null) marks.push([spans.equals, spans.equals + 1, PUNCT_MARK])
-	if (spans.default && spans.default.end > spans.default.start) {
-		marks.push([spans.default.start, spans.default.end, DEFAULT_MARK])
+	// One port per line: a single field is a lane of one.
+	for (const { spans } of parsePortLaneLines(text)) {
+		if (spans.name.end > spans.name.start) marks.push([spans.name.start, spans.name.end, NAME_MARK])
+		if (spans.colon !== null) marks.push([spans.colon, spans.colon + 1, PUNCT_MARK])
+		if (spans.type && spans.type.end > spans.type.start) marks.push([spans.type.start, spans.type.end, TYPE_MARK])
+		if (spans.equals !== null) marks.push([spans.equals, spans.equals + 1, PUNCT_MARK])
+		if (spans.default && spans.default.end > spans.default.start) {
+			marks.push([spans.default.start, spans.default.end, DEFAULT_MARK])
+		}
 	}
 	marks.sort((a, b) => a[0] - b[0])
 	for (const [from, to, mark] of marks) builder.add(from, to, mark)

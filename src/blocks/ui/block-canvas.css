@@ -136,6 +136,31 @@
   padding: 0;
 }
 
+/* The lane prototype (?portLanes=1): one editor over a whole side, each line
+ * pinned to its port row. It carries the label's own 17px monospace so the
+ * raw line sits where the rendered label was; the outputs lane reads from
+ * the right edge, as its labels do. */
+.systemsketch-block-canvas .BlockNode-inlineEditor--lane.ss-code-field {
+  display: block;
+  padding: 0 6px;
+  overflow: visible;
+  color: var(--ss-text);
+  background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent);
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--lane .cm-scroller {
+  font-size: inherit;
+  overflow: visible;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--lane .cm-content {
+  padding: 0;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--lane-outputs .cm-content {
+  text-align: right;
+}
+
 /* Port and Expanded share the old white heading band. Expanded still names
  * the semantic type; the renderer never substitutes a literal "EXPANDED". */
 .systemsketch-block-canvas .NodeShape-heading {

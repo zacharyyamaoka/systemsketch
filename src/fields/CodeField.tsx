@@ -39,6 +39,17 @@ export interface CodeFieldProps {
   style?: CSSProperties
   /** Take focus on mount; `'select'` also selects the whole line, as a fresh canvas editor does. */
   autoFocus?: boolean | 'select'
+  /** With `autoFocus`, put the caret here instead of selecting everything. */
+  cursorAt?: number
+  /**
+   * A lane: several lines, one per thing. Enter inserts a line, Alt+↑/↓
+   * move one, Shift+Alt+↓ copies one (all CodeMirror's default keymap);
+   * Ctrl/Cmd+Enter is the exit that Enter is for a single line.
+   */
+  multiline?: boolean
+  /** Pin every line to this height so lines can sit on a host's own rows. */
+  lineHeightPx?: number
+  align?: 'left' | 'right'
   /**
    * Enter and Escape both end the gesture by leaving the field (the value is
    * never discarded — Ctrl+Z is the retract). A host that owns an editing
@@ -76,6 +87,10 @@ export function CodeField({
   testId,
   style,
   autoFocus = false,
+  cursorAt,
+  multiline = false,
+  lineHeightPx,
+  align = 'left',
   onEnter,
   onEscape,
   onViewReady,
@@ -85,9 +100,15 @@ export function CodeField({
   const grammarCompartment = useRef(new Compartment())
   const editableCompartment = useRef(new Compartment())
   const placeholderCompartment = useRef(new Compartment())
+  const metricsCompartment = useRef(new Compartment())
 
-  const latest = useRef({ onWrite, beginEdit, onEditEnd, onEnter, onEscape, value, disabled })
-  latest.current = { onWrite, beginEdit, onEditEnd, onEnter, onEscape, value, disabled }
+  const latest = useRef({ onWrite, beginEdit, onEditEnd, onEnter, onEscape, value, disabled, multiline })
+  latest.current = { onWrite, beginEdit, onEditEnd, onEnter, onEscape, value, disabled, multiline }
+
+  const metrics = (): Extension => EditorView.theme({
+    ...(lineHeightPx ? { '.cm-line': { lineHeight: `${lineHeightPx}px`, height: `${lineHeightPx}px` } } : {}),
+    ...(align === 'right' ? { '.cm-content': { textAlign: 'right' } } : {}),
+  })
 
   const gestureRef = useRef<FieldGesture | null>(null)
   if (!gestureRef.current) {
@@ -124,6 +145,8 @@ export function CodeField({
               if (event.isComposing) return false
               if (event.key !== 'Enter' && event.key !== 'Escape') return false
               if (completionStatus(target.state) === 'active') return false
+              // In a lane a bare Enter is a new line; only the modifier form exits.
+              if (event.key === 'Enter' && latest.current.multiline && !event.ctrlKey && !event.metaKey) return false
               event.preventDefault()
               event.stopPropagation()
               const exit = event.key === 'Enter' ? latest.current.onEnter : latest.current.onEscape
@@ -138,14 +161,15 @@ export function CodeField({
           grammarCompartment.current.of(extensions),
           editableCompartment.current.of(EditorView.editable.of(!disabled)),
           placeholderCompartment.current.of(placeholder ? placeholderExtension(placeholder) : []),
+          metricsCompartment.current.of(metrics()),
           tooltips({
             position: 'absolute',
             parent: host.closest<HTMLElement>('.tl-container') ?? document.body,
           }),
           // One line: a typed or pasted newline is dropped rather than
-          // growing the field.
+          // growing the field. A lane keeps its newlines — they are its ports.
           EditorView.inputHandler.of((target, from, to, insertedText) => {
-            if (!/[\r\n]/.test(insertedText)) return false
+            if (latest.current.multiline || !/[\r\n]/.test(insertedText)) return false
             const cleaned = insertedText.replace(/[\r\n]+/g, '')
             target.dispatch({ changes: { from, to, insert: cleaned }, selection: { anchor: from + cleaned.length } })
             return true
@@ -187,7 +211,10 @@ export function CodeField({
       const take = () => {
         if (view.hasFocus || !viewRef.current) return
         view.focus()
-        if (autoFocus === 'select') {
+        if (cursorAt !== undefined) {
+          const anchor = Math.max(0, Math.min(cursorAt, view.state.doc.length))
+          view.dispatch({ selection: { anchor } })
+        } else if (autoFocus === 'select') {
           view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } })
         }
       }
@@ -225,6 +252,11 @@ export function CodeField({
   useEffect(() => {
     viewRef.current?.dispatch({ effects: editableCompartment.current.reconfigure(EditorView.editable.of(!disabled)) })
   }, [disabled])
+
+  useEffect(() => {
+    viewRef.current?.dispatch({ effects: metricsCompartment.current.reconfigure(metrics()) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineHeightPx, align])
 
   useEffect(() => {
     viewRef.current?.dispatch({

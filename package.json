@@ -25,6 +25,7 @@
     "test:block-chrome-fixture": "node tests/block_chrome_toggles_fixture_smoke.mjs",
     "test:ports": "node tests/block_port_in_window_smoke.mjs",
     "test:port-signature": "node tests/port_signature_field_smoke.mjs",
+    "test:port-lanes": "node tests/port_lanes_smoke.mjs",
     "test:hidden-port-counts": "node tests/hidden_port_counts_smoke.mjs",
     "test:block-fold-autosize": "node tests/block_fold_autosize_smoke.mjs",
     "test:block-autofit-stock-settle-fixture": "node tests/block_autofit_stock_settle_fixture_smoke.mjs",

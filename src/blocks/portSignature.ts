@@ -158,19 +158,56 @@ export interface PortSignatureSlotAt {
  * deliberately — nothing at all while a name is being typed.
  */
 export function portSignatureSlotAt(text: string, caret: number): PortSignatureSlotAt {
-	const { colon, equals } = splitPoints(text)
+	// One port is one line. In a lane of several ports the grammar is applied
+	// to the caret's own line, with every offset reported against the whole
+	// text so a completion can splice into the document directly.
 	const at = Math.max(0, Math.min(caret, text.length))
-	if (equals >= 0 && at > equals) {
-		const start = leadingSpaceEnd(text, equals + 1)
-		return { slot: 'default', start, end: text.length, query: text.slice(start, at).trim() }
+	const lineStart = text.lastIndexOf('\n', at - 1) + 1
+	const nextBreak = text.indexOf('\n', at)
+	const lineEnd = nextBreak === -1 ? text.length : nextBreak
+	const line = text.slice(lineStart, lineEnd)
+	const local = at - lineStart
+	const { colon, equals } = splitPoints(line)
+	const shift = (found: PortSignatureSlotAt): PortSignatureSlotAt => ({
+		...found,
+		start: found.start + lineStart,
+		end: found.end + lineStart,
+	})
+	if (equals >= 0 && local > equals) {
+		const start = leadingSpaceEnd(line, equals + 1)
+		return shift({ slot: 'default', start, end: line.length, query: line.slice(start, local).trim() })
 	}
-	if (colon >= 0 && at > colon) {
-		const start = leadingSpaceEnd(text, colon + 1)
-		const end = equals >= 0 ? equals : text.length
-		return { slot: 'type', start, end, query: text.slice(start, Math.min(at, end)).trim() }
+	if (colon >= 0 && local > colon) {
+		const start = leadingSpaceEnd(line, colon + 1)
+		const end = equals >= 0 ? equals : line.length
+		return shift({ slot: 'type', start, end, query: line.slice(start, Math.min(local, end)).trim() })
 	}
-	const end = colon >= 0 ? colon : equals >= 0 ? equals : text.length
-	return { slot: 'name', start: 0, end, query: text.slice(0, Math.min(at, end)).trim() }
+	const end = colon >= 0 ? colon : equals >= 0 ? equals : line.length
+	return shift({ slot: 'name', start: 0, end, query: line.slice(0, Math.min(local, end)).trim() })
+}
+
+/** Every line of a lane parsed, with its spans shifted to whole-text offsets. */
+export function parsePortLaneLines(text: string): Array<PortSignature & { lineStart: number; lineEnd: number }> {
+	const lines: Array<PortSignature & { lineStart: number; lineEnd: number }> = []
+	let lineStart = 0
+	for (const line of text.split('\n')) {
+		const parsed = parsePortSignature(line)
+		const shiftSpan = (span: PortSignatureSpan | null) => (span ? { start: span.start + lineStart, end: span.end + lineStart } : null)
+		lines.push({
+			...parsed,
+			spans: {
+				name: shiftSpan(parsed.spans.name)!,
+				colon: parsed.spans.colon === null ? null : parsed.spans.colon + lineStart,
+				type: shiftSpan(parsed.spans.type),
+				equals: parsed.spans.equals === null ? null : parsed.spans.equals + lineStart,
+				default: shiftSpan(parsed.spans.default),
+			},
+			lineStart,
+			lineEnd: lineStart + line.length,
+		})
+		lineStart += line.length + 1
+	}
+	return lines
 }
 
 function leadingSpaceEnd(text: string, from: number): number {

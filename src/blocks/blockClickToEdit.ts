@@ -32,6 +32,8 @@ import {
 	rememberBlockInlineField,
 	type BlockInlineField,
 } from './inlineBlockEditing'
+import { laneLineOfPort } from './portLane'
+import { portLanesEnabled } from './portLanePrototype'
 
 /**
  * The Block a click can escalate from "activate" to "edit": the one already
@@ -69,10 +71,17 @@ export function blockFieldUnderPointer(editor: Editor, shape: BlockShape): Block
 		{ x: containerBounds.left + screenPoint.x, y: containerBounds.top + screenPoint.y },
 		shape.id,
 	)
+	const portLanes = portLanesEnabled()
+	// With lanes on, a painted port span opens its whole lane with the caret
+	// on that port's line, rather than a one-port editor.
+	if (painted && portLanes && (painted.kind === 'portName' || painted.kind === 'portType') && shape.props.view === 'port') {
+		return { kind: 'portLane', side: painted.side, line: laneLineOfPort(shape.props, painted.side, painted.portId) }
+	}
 	if (painted) return painted
 	return blockInlineFieldAtPointOrNull(
 		shape.props,
 		editor.getPointInShapeSpace(shape, editor.inputs.getCurrentPagePoint()),
+		{ portLanes },
 	)
 }
 

@@ -729,7 +729,7 @@ function canonicalizePortLinks(ports: readonly BlockPort[]): BlockPort[] {
 }
 
 /** Header inputs are control-flow beads, outside the linkable body lane. */
-function canonicalizeInputPortLinks(ports: readonly BlockPort[]): BlockPort[] {
+export function canonicalizeInputPortLinks(ports: readonly BlockPort[]): BlockPort[] {
   const bodyOnly = ports.map((port) => (portInHeader(port) ? withLink(port, undefined) : port))
   return canonicalizePortLinks(bodyOnly)
 }

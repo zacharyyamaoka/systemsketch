@@ -1,0 +1,119 @@
+{
+  "feature": "Port lanes prototype \u2014 one line per port",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 600,
+      "y": 300,
+      "props": {
+        "title": "estimate",
+        "description": "",
+        "blockType": "",
+        "view": "port",
+        "w": 420,
+        "h": 260,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true,
+            "defaultValue": "None"
+          },
+          {
+            "id": "in_2",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "gain",
+            "type": "float",
+            "visible": true,
+            "defaultValue": "1.0"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "quality",
+            "type": "float",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-0",
+      "kind": "step",
+      "text": "0 \u00b7 PROTOTYPE FLAG \u2014 add   &portLanes=1   to this page's URL and reload. Without it the Block keeps today's one-port editor.",
+      "x": 20,
+      "y": 60,
+      "w": 480,
+      "h": 150
+    },
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Select estimate, then click the LEFT half of its body on the frame row. One editor opens over all three inputs \u2014 a line per port \u2014 with the caret on frame's line.",
+      "x": 40,
+      "y": 300,
+      "w": 460,
+      "h": 190,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "left"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 Press Alt+\u2191 : frame moves above pose and the Block repaints. Press End, Enter, type   yaw: float = 0   \u2014 a fourth port appears. Shift+Alt+\u2193 duplicates it. Ctrl+Enter commits.",
+      "x": 560,
+      "y": 40,
+      "w": 620,
+      "h": 170,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Click the RIGHT half of the body: the outputs lane opens, right-aligned. Escape leaves it as it was.",
+      "x": 1120,
+      "y": 300,
+      "w": 420,
+      "h": 150,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "right"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 Ports read and edit as lines: reorder with Alt+\u2191/\u2193, add with Enter, duplicate with Shift+Alt+\u2193 \u2014 and a moved port keeps its cables, because its id moved with its line.",
+      "x": 560,
+      "y": 640,
+      "w": 620,
+      "h": 190
+    }
+  ]
+}

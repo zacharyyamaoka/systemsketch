@@ -10,6 +10,7 @@ import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 import { blockHeaderAlign, type BlockShape, type BlockShapeProps } from './blockModel'
 import { isClockTriggerBlock } from './stockBlocks'
 import {
+	PORT_LABEL_INSET_PX,
 	VALUE_FONT_PX,
 	VALUE_PAD_X,
 	layoutBlock,
@@ -23,6 +24,16 @@ export type BlockInlineField =
 			kind: 'portName' | 'portType'
 			side: 'inputs' | 'outputs'
 			portId: string
+	  }
+	| {
+			/**
+			 * The port-lane prototype (`?portLanes=1`): one multi-line editor
+			 * over a whole lane, one line per port. `line` is where the click
+			 * landed, so the caret opens on the port that was clicked.
+			 */
+			kind: 'portLane'
+			side: 'inputs' | 'outputs'
+			line?: number
 	  }
 
 const DEFAULT_FIELD: BlockInlineField = { kind: 'title' }
@@ -54,6 +65,9 @@ export function isSameBlockInlineField(a: BlockInlineField, b: BlockInlineField)
 		const other = b as Extract<BlockInlineField, { portId: string }>
 		return first.side === other.side && first.portId === other.portId
 	}
+	// A lane is one editor for its whole side; which line was clicked only
+	// places the caret and never restarts the session.
+	if (a.kind === 'portLane' && b.kind === 'portLane') return a.side === b.side
 	return a.kind === b.kind
 }
 
@@ -106,6 +120,42 @@ export function requestBlockInlineEdit(
 export interface BlockInlineEditorPlacement {
 	box: BlockRect
 	align: 'left' | 'center' | 'right'
+	/** A lane's line pitch, so each line of the editor sits on its port's row. */
+	linePitch?: number
+}
+
+/** The default row pitch a lane assumes when it has fewer than two ports to measure. */
+export const PORT_LANE_DEFAULT_PITCH_PX = 44
+
+/**
+ * Where a lane editor sits: over the side's body ports, one line per port,
+ * measured from the laid-out dots so the lines land on the rows. An empty
+ * lane still gets one line's worth of room to type the first port into.
+ */
+export function portLanePlacement(
+	props: BlockShapeProps,
+	side: 'inputs' | 'outputs',
+): BlockInlineEditorPlacement | null {
+	if (props.view !== 'port') return null
+	const layout = layoutBlock(props)
+	const width = layout.bounds.w
+	const placed = layout.ports.filter((entry) =>
+		entry.side === (side === 'inputs' ? 'input' : 'output')
+		&& entry.label !== null
+		&& (entry.edge === 'left' || entry.edge === 'right'))
+	const pitch = placed.length > 1 ? placed[1]!.y - placed[0]!.y : PORT_LANE_DEFAULT_PITCH_PX
+	const top = placed.length > 0 ? placed[0]!.y - pitch / 2 : layout.bodyTop
+	const laneWidth = Math.max(120, width / 2 - PORT_LABEL_INSET_PX - 8)
+	return {
+		box: {
+			x: side === 'inputs' ? PORT_LABEL_INSET_PX : width - PORT_LABEL_INSET_PX - laneWidth,
+			y: top,
+			w: laneWidth,
+			h: Math.max(pitch, pitch * placed.length),
+		},
+		align: side === 'inputs' ? 'left' : 'right',
+		linePitch: pitch,
+	}
 }
 
 export function blockInlineEditorPlacement(
@@ -186,6 +236,8 @@ export function blockInlineEditorPlacement(
 				align: 'left',
 			}
 		}
+		case 'portLane':
+			return portLanePlacement(props, field.side)
 		case 'portName':
 		case 'portType': {
 			const side = field.side === 'inputs' ? 'input' : 'output'
@@ -257,10 +309,44 @@ function contains(box: BlockRect | null, point: { x: number; y: number }): boole
  * Expanded Block's interior keeps selecting and dragging its children, and so a
  * double-click on it still reaches `stepIntoDepthScope`.
  */
+/**
+ * The lane under a Block-local point, for the port-lane prototype: the left
+ * half of a Port view's body is the inputs lane, the right half the outputs
+ * lane, and the nearest port row is the line the caret opens on.
+ */
+export function portLaneAtPoint(
+	props: BlockShapeProps,
+	point: { x: number; y: number },
+): Extract<BlockInlineField, { kind: 'portLane' }> | null {
+	if (props.view !== 'port') return null
+	const layout = layoutBlock(props)
+	if (point.y < layout.bodyTop || point.y > layout.footerTop) return null
+	const side = point.x < layout.bounds.w / 2 ? 'inputs' : 'outputs'
+	const placed = layout.ports.filter((entry) =>
+		entry.side === (side === 'inputs' ? 'input' : 'output')
+		&& entry.label !== null
+		&& (entry.edge === 'left' || entry.edge === 'right'))
+	let line = 0
+	let best = Number.POSITIVE_INFINITY
+	placed.forEach((entry, index) => {
+		const distance = Math.abs(entry.y - point.y)
+		if (distance < best) {
+			best = distance
+			line = index
+		}
+	})
+	return { kind: 'portLane', side, line }
+}
+
 export function blockInlineFieldAtPointOrNull(
 	props: BlockShapeProps,
 	point: { x: number; y: number },
+	options: { portLanes?: boolean } = {},
 ): BlockInlineField | null {
+	if (options.portLanes) {
+		const lane = portLaneAtPoint(props, point)
+		if (lane) return lane
+	}
 	const layout = layoutBlock(props)
 	if (props.view === 'value') {
 		// The painted spans answer a single click exactly; this is the reading

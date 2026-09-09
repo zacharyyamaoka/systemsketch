@@ -10,6 +10,7 @@ import {
 	type BlockInlineField,
 } from './inlineBlockEditing'
 import { VALUE_FONT_PX } from './layoutBlock'
+import { formatPortLane, lanePorts, reconcilePortLane } from './portLane'
 import { formatPortSignature, portSignaturePatch } from './portSignature'
 import { blockTitleAppearance } from './titleAppearance'
 import { BLOCK_ICONS } from './ui/blockIcons'
@@ -56,6 +57,8 @@ function valueFor(props: BlockShapeProps, field: BlockInlineField): string {
 			if (props.view === 'value') return port[field.kind === 'portName' ? 'name' : 'type']
 			return formatPortSignature(port)
 		}
+		case 'portLane':
+			return formatPortLane(lanePorts(props, field.side))
 	}
 }
 
@@ -91,6 +94,10 @@ function updateField(
 				const patch = port ? portSignaturePatch(port, value) : null
 				return patch ? patchBlockPortProps(props, field.side, field.portId, patch) : props
 			}
+			case 'portLane':
+				// Every keystroke reads the whole lane back: a moved line keeps its
+				// port's id (and its cables), a new line is a new port.
+				return reconcilePortLane(props, field.side, value)
 		}
 	})
 }
@@ -105,7 +112,7 @@ function editorStyle(
 	const titleAppearance = field.kind === 'title'
 		? blockTitleAppearance(editor, props)
 		: null
-	const isPortLine = field.kind.startsWith('port') && props.view !== 'value'
+	const isPortLine = (field.kind === 'portName' || field.kind === 'portType') && props.view !== 'value'
 	const minimumWidth = field.kind === 'icon'
 		? 170
 		: field.kind === 'description'
@@ -156,6 +163,7 @@ function placeholderFor(props: BlockShapeProps, field: BlockInlineField): string
 }
 
 function testIdFor(props: BlockShapeProps, field: BlockInlineField): string {
+	if (field.kind === 'portLane') return `block-inline-port-lane-${field.side}`
 	if (field.kind === 'portName' || field.kind === 'portType') {
 		// A Block port's editor is one line whichever span opened it, and it
 		// keeps the `port-name` id: that is the id every journey waits for, and
@@ -217,10 +225,9 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 		const focusAndSelect = () => {
 			if (editor.getEditingShapeId() !== shape.id) return
 			if (view) {
-				if (!view.hasFocus) {
-					view.focus()
-					view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } })
-				}
+				// The selection was set on mount (whole line, or the clicked
+				// lane line); the retry only needs to win focus back.
+				if (!view.hasFocus) view.focus()
 				return
 			}
 			if (!input) return
@@ -235,6 +242,35 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	if (!placement) return null
 	const value = valueFor(shape.props, field)
 	const style = editorStyle(editor, shape.props, field, placement.box, placement.align)
+
+	if (field.kind === 'portLane') {
+		// The lane sits exactly over its rows: the box is the rows' union and
+		// each line is pinned to the row pitch, so what you type lands beside
+		// the dot it belongs to. The caret opens on the line that was clicked.
+		const lines = value.split('\n')
+		const cursorAt = lines.slice(0, Math.min(field.line ?? 0, lines.length - 1)).reduce((sum, line) => sum + line.length + 1, 0)
+		return (
+			<CodeField
+				key={`lane:${field.side}`}
+				className={`BlockNode-inlineEditor BlockNode-inlineEditor--lane BlockNode-inlineEditor--lane-${field.side}`}
+				style={{ ...style, left: placement.box.x, top: placement.box.y, width: placement.box.w, height: placement.box.h, textAlign: undefined }}
+				value={value}
+				placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
+				ariaLabel={`Edit ${field.side} lane`}
+				testId={testIdFor(shape.props, field)}
+				autoFocus
+				cursorAt={cursorAt}
+				multiline
+				lineHeightPx={placement.linePitch}
+				align={field.side === 'outputs' ? 'right' : 'left'}
+				onViewReady={(view) => { codeViewRef.current = view }}
+				extensions={portExtensions}
+				onWrite={writeField}
+				onEnter={() => editor.complete()}
+				onEscape={() => editor.cancel()}
+			/>
+		)
+	}
 
 	if ((field.kind === 'portName' || field.kind === 'portType') && shape.props.view !== 'value') {
 		// The port line is the code text box itself, keyed per port so moving

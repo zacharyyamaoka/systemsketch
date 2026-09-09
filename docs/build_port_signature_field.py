@@ -39,6 +39,15 @@ CAPTURES = [
     ("fixture.png", "The guided review board that ships with this page: three numbered cues and one green PASS WHEN card around a real Type Block and a real Block."),
 ]
 
+LANE_CAPTURES = [
+    ("port-lanes-inputs-open.png", "<code>?portLanes=1</code> · a click on the left half of the body opens ONE editor over all three inputs, one line per port, each line pinned to its dot's row; the caret opened on <code>frame</code>, the row that was clicked."),
+    ("port-lanes-moved-up.png", "Alt+↑ on that line: <code>frame</code> is now first. The store reads <code>in_2, in_1, in_3</code> — the ids moved with their lines, so a cable bound to <code>in_2</code> is still bound to <code>frame</code>."),
+    ("port-lanes-duplicated.png", "Enter started <code>yaw: float = 0</code> as a new port in place; Shift+Alt+↓ then duplicated the line into a fifth port with its own id. The Block re-laid its rows under the editor as they were added."),
+    ("port-lanes-committed.png", "Ctrl+Enter commits: the Block paints the five ports the lane described."),
+    ("port-lanes-outputs-open.png", "The right half opens the outputs lane, right-aligned to its labels. Escape leaves the outputs untouched."),
+    ("lanes-fixture.png", "The lanes' own guided board: cue 0 is the flag, then the three gestures and a PASS WHEN."),
+]
+
 
 def read(name: str) -> str:
     return (ROOT / name).read_text(encoding="utf-8")
@@ -105,6 +114,17 @@ def measured() -> dict:
 
     results_path = MEDIA / "port-signature-field-results.json"
     checks = json.loads(results_path.read_text())["checks"] if results_path.exists() else []
+    lane_results = MEDIA / "port-lanes-results.json"
+    lane_checks = json.loads(lane_results.read_text())["checks"] if lane_results.exists() else []
+    lane = read("src/blocks/portLane.ts")
+    need(lane, "export function reconcilePortLane(", "the lane reconciler")
+    need(lane, "function commonLines(", "the line diff that keeps ids across a move")
+    need(read("src/blocks/portLanePrototype.ts"), "get('portLanes') === '1'", "the prototype flag")
+    need(inline_model, "kind: 'portLane'", "the lane field kind")
+    need(inline, "multiline", "the lane editor is the multi-line CodeField")
+    need(field, "multiline", "CodeField's lane mode")
+    need(pkg, "\"test:port-lanes\"", "the lanes journey runner")
+    lane_tests = read("src/blocks/portLane.test.ts").count("\tit(") + read("src/blocks/portLaneAtPoint.test.ts").count("\tit(")
     grammar_tests = read("src/blocks/portSignature.test.ts").count("\tit(")
     completion_tests = read("src/blocks/ui/PortSignatureField.test.ts").count("\tit(")
     journey_checks = journey.count("pass('") + journey.count('pass("')
@@ -115,6 +135,9 @@ def measured() -> dict:
         "codemirror": re.search(r'"@codemirror/view":\s*"([^"]+)"', pkg).group(1),
         "checks": checks,
         "journey_checks": journey_checks,
+        "lane_checks": lane_checks,
+        "lane_tests": lane_tests,
+        "lane_lines": lane.count("\n"),
         "grammar_tests": grammar_tests,
         "completion_tests": completion_tests,
         "lines": {
@@ -226,7 +249,7 @@ def page(m: dict) -> str:
 <style>{CSS}</style>
 <main>
 <h1>A port is one line of code</h1>
-<p class="meta">Refactor + the general code text box · {date.today()} · measured against <code>{m['head']}</code> · tldraw {m['tldraw']} pinned, CodeMirror view {m['codemirror']} · <a href="#thinking">the thinking</a> · <a href="#evidence">the evidence</a> · <a href="#decisions">what needs you</a></p>
+<p class="meta">Refactor + the general code text box + the lane prototype · {date.today()} · measured against <code>{m['head']}</code> · tldraw {m['tldraw']} pinned, CodeMirror view {m['codemirror']} · <a href="#thinking">the thinking</a> · <a href="#evidence">the evidence</a> · <a href="#lanes">the lane prototype</a> · <a href="#decisions">what needs you</a></p>
 
 <p class="lede"><b>What shipped.</b> Every place a port is edited is now <b>one text field</b> spelled <code>name: Type = default</code>: the docked inspector row (was Name · Type · Default, three boxes), the on-canvas click-to-edit editor (was a name box <i>or</i> a type box depending on which span you hit), and the free Port's panel (was Name · Type · Value). Underneath them is a new general component, <code>CodeField</code> — a single line of CodeMirror that knows nothing about grammar until one is plugged in — and one grammar module, <code>portSignature.ts</code>, that is the entire "language service": it splits the line into its three roles for highlighting, tells the completion which slot the caret is in, and writes the stored triple. <b>Storage did not change.</b> The stored <code>{{ name, type, defaultValue }}</code> is the parse tree of the line; the field formats it in and parses it back on every keystroke, so the Block paints the name, the type hint and the <code>= 5</code> chip live while you type, and every binding, projection and journey that reads the triple keeps reading it.</p>
 
@@ -287,6 +310,20 @@ def page(m: dict) -> str:
 
 {shots(CAPTURES[4:])}
 
+<h2 id="lanes">Prototype · one line per port (<code>?portLanes=1</code>)</h2>
+<p class="lede">Built the same afternoon from your follow-up: instead of one line per field, <b>each lane of a Port view is one multi-line code text box</b> — the inputs lane on the left, the outputs lane on the right, right-aligned — and each line <i>is</i> a port. Clicking the left half of the Block opens the inputs lane with the caret on the row you clicked; the right half opens the outputs. Because the lane is a CodeMirror document, the IDE keys come for free and mean what you'd hope: <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> reorders a port, <kbd>Enter</kbd> adds one on the next line, <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>↓</kbd> duplicates one, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> commits, <kbd>Esc</kbd> leaves. Every keystroke reads the whole lane back into the same port records: <code>reconcilePortLane</code> diffs the lines, a line that still says what a port said keeps that port's id (so a <b>moved port keeps its cables</b>), a line edited in place keeps its id, a new line is a new port, a missing line is a removed one. Storage is still the triple; header ports and hidden ports are not lines and keep their place around the lane.</p>
+<div class="callout"><b>What the lane taught about the overlay idea.</b> The Block itself is the rendered layer: while the lane is open the Block keeps painting dots, chips and labels from the store, so you are looking at source and projection at once, aligned row for row. That is the two-state field you described — rendered by default, source when you click in — with the cursor landing on the right line because the lines <i>are</i> the rows. What is still missing is the reveal rule inside the editor (raw only on the caret's line, rendered elsewhere); here the whole lane is raw while open, which is the "switch the whole thing" mode. The per-line reveal is the next step and is a decoration rule, not a second editor.</div>
+{shots(LANE_CAPTURES)}
+<p>Proof: <code>npm run test:port-lanes</code> ({len(m['lane_checks'])} real-browser checks) and {m['lane_tests']} unit tests over the reconciler and the hit-test (<code>portLane.test.ts</code>, <code>portLaneAtPoint.test.ts</code>); <code>portLane.ts</code> is {m['lane_lines']} lines. Behind the flag the shipped one-line editor and every journey are unchanged.</p>
+<h3>Rough edges, deliberately left</h3>
+<ul>
+<li><b>Rows and branches are not lines yet.</b> A moved port keeps its own row/branch; a new port takes its neighbour's. The Sep 5 port-text babble's <code>---</code> divider is the obvious grammar for a row break, and a lane with several rows will not line up with the row gaps until it exists.</li>
+<li><b>Header ports (row 0) and hidden ports are outside the lane</b> — visible in the Block, not in the text.</li>
+<li><b>Line pitch is measured from the first two dots</b>; a Block whose rows have already been compressed to fit re-measures on every render, so the editor keeps up, but the outputs lane in Aligned layout shares rows with the inputs and inherits their pitch.</li>
+<li><b>The inspector still lists ports one field per row.</b> The lane could replace the list there too; not done.</li>
+<li><b>No per-line reveal yet</b> (see the callout). The whole lane is source while open.</li>
+</ul>
+
 <h2 id="decisions">What needs you — each with the default silence keeps</h2>
 <table>
 <tr><th>#</th><th>Question</th><th>Recommendation · default if you say nothing</th></tr>
@@ -294,6 +331,8 @@ def page(m: dict) -> str:
 <tr><td>D2</td><td>The Pill's inspector still has Name · Value · Type boxes (its canvas editor was already one line).</td><td>Convert it next with the pill grammar (<code>value</code> first, <code>2.0</code> alone is a literal). Left as is here because its grammar differs and its journeys are large; default is unchanged.</td></tr>
 <tr><td>D3</td><td>Promote <code>typeNameAutocompleteLogic.ts</code> and the type index out of <code>src/blocks/babble/</code> — the product now imports them.</td><td>Yes, a pure move. Not done in this diff to keep it reviewable; default is a follow-up.</td></tr>
 <tr><td>D4</td><td>Fold <code>ExpandingExpressionField</code> into <code>CodeField</code> + an expression grammar, and give Type attribute lines and Type Mapping aliases the same field.</td><td>Yes — that is the "general feature" fully realised. Default is a follow-up, one grammar per change.</td></tr>
+<tr><td>D5</td><td>Lanes: promote from flag to default? The lane replaces the one-line-per-port canvas editor when it does; the inspector's per-row fields can stay as the "form" view.</td><td>Drive it first. Default: stays behind <code>?portLanes=1</code>; next step is the <code>---</code> row divider and the per-line reveal, then promote.</td></tr>
+<tr><td>D6</td><td>Lane keys: should bare Enter add a port (as now) or commit, with Shift+Enter adding? </td><td>Keep Enter = new line: a lane is a document, and that is what makes it feel like an editor. Default as built.</td></tr>
 </table>
 
 <p class="meta">Built by <code>docs/build_port_signature_field.py</code>; captures in <code>{REL}/</code>; guided board <code>sketches/review/port-signature-field.systemsketch</code>.</p>
@@ -307,7 +346,10 @@ def main() -> None:
     MEDIA.mkdir(parents=True, exist_ok=True)
     if fixture_png.exists():
         (MEDIA / "fixture.png").write_bytes(fixture_png.read_bytes())
-    for name, _ in CAPTURES:
+    lanes_png = ROOT / "sketches/review/port-lanes.png"
+    if lanes_png.exists():
+        (MEDIA / "lanes-fixture.png").write_bytes(lanes_png.read_bytes())
+    for name, _ in CAPTURES + LANE_CAPTURES:
         if not (MEDIA / name).exists():
             raise SystemExit(f"missing capture {MEDIA / name} — run npm run test:port-signature first")
     OUT.parent.mkdir(parents=True, exist_ok=True)
