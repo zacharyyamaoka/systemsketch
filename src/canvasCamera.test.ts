@@ -98,4 +98,20 @@ describe('SystemSketch canvas navigation', () => {
 
     expect(updateUserPreferences).not.toHaveBeenCalled()
   })
+
+  it('projects Settings → Canvas → Sensitivity onto stock-mode zoomSpeed, independent of the direct-mode sensitivity', () => {
+    const { editor, setCameraOptions } = editorWithPreferences('trackpad', false)
+
+    enforceSystemSketchCanvasNavigation(editor, false, true, 100, 150)
+
+    expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'pan', zoomSpeed: 1.5 })
+  })
+
+  it('defaults the stock-mode sensitivity to 100% when the caller omits it', () => {
+    const { editor, setCameraOptions } = editorWithPreferences('trackpad', false)
+
+    enforceSystemSketchCanvasNavigation(editor, false, true, 100)
+
+    expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'pan', zoomSpeed: 1 })
+  })
 })
