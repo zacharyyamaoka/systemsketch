@@ -294,6 +294,15 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 		[editor, shape.id],
 	)
 	const placement = blockInlineEditorPlacement(shape.props, field)
+	// Reactive too: tldraw memoises a shape's subtree on props and meta only,
+	// so a pure x/y or parent move never re-renders this component. The open
+	// lane is portalled by page bounds, so it would stay behind while the
+	// Block moved (a round-7 judge finding). A tracked read follows the move.
+	const pageBounds = useValue(
+		'Block page bounds',
+		() => editor.getShapePageBounds(shape.id) ?? null,
+		[editor, shape.id],
+	)
 	const editorRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null)
 	const codeViewRef = useRef<EditorView | null>(null)
 	const markedSession = useRef<string | null>(null)
@@ -390,7 +399,10 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				// and grows to the right as the active line is typed — the
 				// whiteboard-text feel Zach asked for — while folded lines keep
 				// it from growing for text nobody is looking at.
-				style={{ ...style, left: 0, top: 0, width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
+				// Portalled, the overlay wrapper carries the page position, so the
+				// lane sits at its origin; without a shape layer the lane keeps
+				// the in-shape placement the style already spells.
+				style={{ ...style, ...(shapeLayer ? { left: 0, top: 0 } : {}), width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
 				value={value}
 				placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
 				ariaLabel={`Edit ${field.side} lane`}
@@ -429,7 +441,6 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 		// (Zach, 2026-09-09). The shape layer carries the camera transform, so
 		// page coordinates place the lane exactly where it was; a z-index above
 		// every shape's integer index keeps the open editor on top.
-		const pageBounds = editor.getShapePageBounds(shape.id)
 		const overlay = shapeLayer && pageBounds
 			? createPortal(
 				<div
