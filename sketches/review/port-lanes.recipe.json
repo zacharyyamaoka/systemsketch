@@ -61,7 +61,7 @@
     {
       "id": "step-0",
       "kind": "step",
-      "text": "0 \u00b7 PROTOTYPE FLAG \u2014 add   &portLanes=1   to this page's URL and reload. Without it the Block keeps today's one-port editor.",
+      "text": "0 \u00b7 PROTOTYPE SWITCH \u2014 in the bottom-right corner, set the Prototype drop-down to 'lanes'. It sticks in this browser; 'one line per port' is today's shipped editor.",
       "x": 20,
       "y": 60,
       "w": 480,

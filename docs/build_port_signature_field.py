@@ -40,12 +40,12 @@ CAPTURES = [
 ]
 
 LANE_CAPTURES = [
-    ("port-lanes-inputs-open.png", "<code>?portLanes=1</code> · a click on the left half of the body opens ONE editor over all three inputs, one line per port, each line pinned to its dot's row; the caret opened on <code>frame</code>, the row that was clicked."),
+    ("port-lanes-inputs-open.png", "Prototype switch set to <i>lanes</i> (bottom-right drop-down; it remembers the choice, no URL editing) · a click on the left half of the body opens ONE editor over all three inputs, one line per port, each line pinned to its dot's row; the caret opened on <code>frame</code>, the row that was clicked."),
     ("port-lanes-moved-up.png", "Ctrl+↑ (or Alt+↑) on that line: <code>frame</code> is now first. The store reads <code>in_2, in_1, in_3</code> — the ids moved with their lines, so a cable bound to <code>in_2</code> is still bound to <code>frame</code>."),
     ("port-lanes-duplicated.png", "Enter started <code>yaw: float = 0</code> as a new port in place; Shift+Alt+↓ then duplicated the line into a fifth port with its own id. The Block re-laid its rows under the editor as they were added."),
     ("port-lanes-committed.png", "Ctrl+Enter commits: the Block paints the five ports the lane described."),
     ("port-lanes-outputs-open.png", "The right half opens the outputs lane — parked just past the Block's right edge and typed the ordinary way, rows still one-to-one with the dots (your suggestion, applied as V1 below). Escape leaves the outputs untouched."),
-    ("lanes-fixture.png", "The lanes' own guided board: cue 0 is the flag, then the three gestures and a PASS WHEN."),
+    ("lanes-fixture.png", "The lanes' own guided board: cue 0 is the drop-down, then the three gestures and a PASS WHEN."),
 ]
 
 
@@ -119,7 +119,8 @@ def measured() -> dict:
     lane = read("src/blocks/portLane.ts")
     need(lane, "export function reconcilePortLane(", "the lane reconciler")
     need(lane, "function commonLines(", "the line diff that keeps ids across a move")
-    need(read("src/blocks/portLanePrototype.ts"), "get('portLanes') === '1'", "the prototype flag")
+    need(read("src/development/PrototypeSwitch.tsx"), "aria-label=\"Port editor prototype\"", "the in-app prototype switch")
+    need(read("src/blocks/portLanePrototype.ts"), "localStorage.getItem(STORAGE_KEY)", "the switch is remembered")
     need(inline_model, "kind: 'portLane'", "the lane field kind")
     need(inline, "multiline", "the lane editor is the multi-line CodeField")
     need(field, "multiline", "CodeField's lane mode")
@@ -403,11 +404,11 @@ def page(m: dict) -> str:
 
 {shots(CAPTURES[4:])}
 
-<h2 id="lanes">Prototype · one line per port (<code>?portLanes=1</code>)</h2>
+<h2 id="lanes">Prototype · one line per port (the bottom-right <b>Prototype</b> drop-down → <i>lanes</i>)</h2>
 <p class="lede">Built the same afternoon from your follow-up: instead of one line per field, <b>each lane of a Port view is one multi-line code text box</b> — the inputs lane on the left, the outputs lane parked just outside the right edge so it is typed left-to-right — and each line <i>is</i> a port. Clicking the left half of the Block opens the inputs lane with the caret on the row you clicked; the right half opens the outputs. Because the lane is a CodeMirror document, the IDE keys come for free and mean what you'd hope: <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> reorders a port, <kbd>Enter</kbd> adds one on the next line, <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>↓</kbd> duplicates one, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> commits, <kbd>Esc</kbd> leaves. Every keystroke reads the whole lane back into the same port records: <code>reconcilePortLane</code> diffs the lines, a line that still says what a port said keeps that port's id (so a <b>moved port keeps its cables</b>), a line edited in place keeps its id, a new line is a new port, a missing line is a removed one. Storage is still the triple; header ports and hidden ports are not lines and keep their place around the lane.</p>
 <div class="callout"><b>What the lane taught about the overlay idea.</b> The Block itself is the rendered layer: while the lane is open the Block keeps painting dots, chips and labels from the store, so you are looking at source and projection at once, aligned row for row. That is the two-state field you described — rendered by default, source when you click in — with the cursor landing on the right line because the lines <i>are</i> the rows. What is still missing is the reveal rule inside the editor (raw only on the caret's line, rendered elsewhere); here the whole lane is raw while open, which is the "switch the whole thing" mode. The per-line reveal is the next step and is a decoration rule, not a second editor.</div>
 {shots(LANE_CAPTURES)}
-<p>Proof: <code>npm run test:port-lanes</code> ({len(m['lane_checks'])} real-browser checks) and {m['lane_tests']} unit tests over the reconciler and the hit-test (<code>portLane.test.ts</code>, <code>portLaneAtPoint.test.ts</code>); <code>portLane.ts</code> is {m['lane_lines']} lines. Behind the flag the shipped one-line editor and every journey are unchanged.</p>
+<p>Proof: <code>npm run test:port-lanes</code> ({len(m['lane_checks'])} real-browser checks) and {m['lane_tests']} unit tests over the reconciler and the hit-test (<code>portLane.test.ts</code>, <code>portLaneAtPoint.test.ts</code>); <code>portLane.ts</code> is {m['lane_lines']} lines. With the drop-down on <i>one line per port</i> the shipped editor and every journey are unchanged; the journey itself flips the drop-down both ways and proves the switch is live. (A URL override, <code>?portLanes=1|0</code>, exists for journeys only — the drop-down is the way in, per your rating.)</p>
 
 <h3 id="lane-ergonomics">Two questions you asked, five directions each</h3>
 <p><b>A · the outputs lane "feels reverse".</b> Typing into a right-anchored box is nothing anyone's hands know. The five ways out, with the one you suggested already applied:</p>
@@ -436,7 +437,7 @@ def page(m: dict) -> str:
 <tr><td>D2</td><td>The Pill's inspector still has Name · Value · Type boxes (its canvas editor was already one line).</td><td>Convert it next with the pill grammar (<code>value</code> first, <code>2.0</code> alone is a literal). Left as is here because its grammar differs and its journeys are large; default is unchanged.</td></tr>
 <tr><td>D3</td><td>Promote <code>typeNameAutocompleteLogic.ts</code> and the type index out of <code>src/blocks/babble/</code> — the product now imports them.</td><td>Yes, a pure move. Not done in this diff to keep it reviewable; default is a follow-up.</td></tr>
 <tr><td>D4</td><td>Fold <code>ExpandingExpressionField</code> into <code>CodeField</code> + an expression grammar, and give Type attribute lines and Type Mapping aliases the same field.</td><td>Yes — that is the "general feature" fully realised. Default is a follow-up, one grammar per change.</td></tr>
-<tr><td>D5</td><td>Lanes: promote from flag to default? The lane replaces the one-line-per-port canvas editor when it does; the inspector's per-row fields can stay as the "form" view.</td><td>Drive it first. Default: stays behind <code>?portLanes=1</code>; next step is the <code>---</code> row divider and the per-line reveal, then promote.</td></tr>
+<tr><td>D5</td><td>Lanes: promote from flag to default? The lane replaces the one-line-per-port canvas editor when it does; the inspector's per-row fields can stay as the "form" view.</td><td>Drive it first. Default: stays behind the Prototype drop-down; next step is the <code>---</code> row divider and the per-line reveal, then promote.</td></tr>
 <tr><td>D6</td><td>Lane keys: should bare Enter add a port (as now) or commit, with Shift+Enter adding? </td><td>Keep Enter = new line: a lane is a document, and that is what makes it feel like an editor. Default as built.</td></tr>
 </table>
 

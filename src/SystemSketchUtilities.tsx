@@ -50,6 +50,7 @@ import { setTreeDragModelOverlay, treeDragModelOverlay } from './behaviorTree/tr
 import { openDragModelTuner } from './behaviorTree/ui/BtDragModelTunerPanel'
 import { setTypeChevronPlacement, typeAttributePresentation } from './blocks/typeAttributePresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
+import { PrototypeSwitch } from './development/PrototypeSwitch'
 import './systemsketch-utilities.css'
 import { useBoardDiagnosticsModel } from './diagnostics'
 
@@ -654,6 +655,8 @@ export function SystemSketchNavigationPanel() {
           </button>
         </section>
       ) : null}
+
+      <PrototypeSwitch />
 
       <TldrawUiToolbar
         className="systemsketch-utility-strip"

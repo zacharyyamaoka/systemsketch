@@ -102,7 +102,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4zBah",
+      "index": "a4zzepV",
       "typeName": "shape"
     },
     {
@@ -154,7 +154,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5j0GV",
+      "index": "a5ktW",
       "typeName": "shape"
     },
     {
@@ -171,7 +171,7 @@
         "h": 150,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -191,7 +191,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "0 · PROTOTYPE FLAG — add   &portLanes=1   to this page's URL and reload. Without it the Block keeps today's one-port editor."
+                  "text": "0 · PROTOTYPE SWITCH — in the bottom-right corner, set the Prototype drop-down to 'lanes'. It sticks in this browser; 'one line per port' is today's shipped editor."
                 }
               ]
             }
@@ -199,7 +199,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2P5v",
+      "index": "a2OBv",
       "typeName": "shape"
     },
     {
@@ -244,7 +244,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3Ir2",
+      "index": "a32v6",
       "typeName": "shape"
     },
     {
@@ -289,7 +289,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6B5X",
+      "index": "a6YPr",
       "typeName": "shape"
     },
     {
@@ -334,7 +334,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4wmn",
+      "index": "a4zOH",
       "typeName": "shape"
     },
     {
@@ -387,7 +387,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5HQ6",
+      "index": "a5Su6",
       "typeName": "shape"
     },
     {
@@ -557,7 +557,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "B5_Z5itM0a2YDSu5vlsAR",
+        "definitionId": "zCBVJ8uwKjdJ-1A7FozpY",
         "inputs": [
           {
             "id": "in_1",
@@ -597,15 +597,15 @@
         "definitionKey": "estimate"
       },
       "parentId": "page:page",
-      "index": "a1flX",
+      "index": "a1qpb",
       "typeName": "shape"
     },
     {
       "name": "",
-      "color": "#39B178",
+      "color": "#11B3A3",
       "imageUrl": "",
       "meta": {},
-      "id": "user:wqLIXbXDQHwiBdCw9XuMF",
+      "id": "user:WYNR_EV0CCgQozmLG7ZNf",
       "typeName": "user"
     },
     {
@@ -713,7 +713,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3njzG",
+      "index": "a3yBJ",
       "typeName": "shape"
     }
   ]

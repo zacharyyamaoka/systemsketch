@@ -99,6 +99,19 @@ async function labelBox(page, lane, name) {
   return box
 }
 
+/** Pick a port-editor variant from the bottom-right prototype drop-down. */
+async function choosePrototype(page, mode) {
+  await evaluate(page, `(() => {
+    const select = document.querySelector('[aria-label="Port editor prototype"]')
+    const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set
+    setter.call(select, ${JSON.stringify(mode)})
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+    return select.value
+  })()`)
+  await waitFor(page, `document.querySelector('[aria-label="Port editor prototype"]')?.value === ${JSON.stringify(mode)}`, `the switch to read ${mode}`)
+  await delay(120)
+}
+
 async function seedBoard(page) {
   await evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
@@ -129,9 +142,13 @@ async function main() {
   const { page, port, filesRoot } = app
   try {
     const board = join(filesRoot, 'SystemSketch', 'port-lanes.systemsketch')
-    await openApp(page, port, `?portLanes=1&board=${encodeURIComponent(board)}`)
+    // No URL flag: the prototype is switched on from the in-app drop-down in
+    // the bottom-right corner, the way a person reviewing it would.
+    await openApp(page, port, `?board=${encodeURIComponent(board)}`)
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`, 'the SystemSketch product canvas')
     await waitFor(page, `Boolean(window.__systemsketch?.editor)`, 'editor seam')
+    await waitFor(page, `document.querySelector('[aria-label="Port editor prototype"]')`, 'the prototype switch')
+    await choosePrototype(page, 'lanes')
     await seedBoard(page)
     await delay(300)
 
@@ -230,6 +247,20 @@ async function main() {
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
     pass('a single click, a double-click and the body all open the same lane — never the single-line editor')
+
+    // ----------------------------------- the switch flips back, live ---
+    await choosePrototype(page, 'one-line')
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const gainAgain = await labelBox(page, 'in', 'gain')
+    await clickAt(page, gainAgain.x + 8, gainAgain.y + gainAgain.height / 2)
+    await waitFor(page, `document.querySelector('.BlockNode-inlineEditor')`, 'an editor after switching back', 5000)
+    assert.equal(await evaluate(page, `document.querySelector('.BlockNode-inlineEditor')?.getAttribute('data-testid')`), 'block-inline-port-name-inputs-in_3',
+      'with the switch back on the shipped editor, the same click opens the one-line field again')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the editor')
+    assert.equal(await evaluate(page, `localStorage.getItem('systemsketch.prototype.portEditor')`), 'one-line', 'the choice is remembered in this browser')
+    pass('the bottom-right drop-down switches the port editor live, no URL editing, and remembers the choice')
 
     const errors = localConsoleErrors(page)
     assert.equal(errors.length, 0, `the journey emits no local console errors:\n${errors.join('\n')}`)
