@@ -261,13 +261,25 @@ export function patchBlockDetailsProps(
   props: BlockShapeProps,
   patch: BlockDetailsPatch,
 ): BlockShapeProps {
-  const next = { ...props, ...patch }
+  const next: Partial<BlockShapeProps> = { ...props, ...patch }
+  // WHY: `encodeBlockIcon` returns `assetId: undefined` for every non-upload
+  // icon kind (see iconRef.ts), and a caller that spreads that straight into
+  // a patch — every current caller does — produces an own `assetId: undefined`
+  // key here after the merge above. Persisting that key at all, even with an
+  // undefined value, fails an older build's `T.object` validator, which
+  // throws `Unexpected property` on any key it does not declare regardless of
+  // what the key holds. This is the one seam that already merges a full props
+  // object before it reaches the store, so it is where an explicit "unset"
+  // becomes real absence rather than a still-present `undefined`.
+  for (const key of Object.keys(patch) as (keyof BlockDetailsPatch)[]) {
+    if (next[key] === undefined) delete next[key]
+  }
   return Object.keys(patch).every((key) => {
     const detail = key as keyof BlockDetailsPatch
     return props[detail] === next[detail]
   })
     ? props
-    : next
+    : (next as BlockShapeProps)
 }
 
 /** Switch view through the core projection so each view's saved size is restored. */

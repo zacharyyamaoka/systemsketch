@@ -1,5 +1,7 @@
 import { T, createShapeId, type TLAssetId, type TLShape } from 'tldraw'
 import { describe, expect, it } from 'vitest'
+import { patchBlockDetailsProps } from './commands/blockCommands'
+import { encodeBlockIcon } from './ui/iconPicker/iconRef'
 import {
 	appendBlockPortToProps,
 	blockMemberLayout,
@@ -324,5 +326,41 @@ describe('blockIconRef', () => {
 
 		const withAsset = { ...getDefaultBlockProps(), icon: 'asset', assetId: ASSET_ID }
 		expect(() => validator.validate(withAsset)).not.toThrow()
+	})
+
+	it('stays loadable on the build before assetId existed, for every icon kind except an upload', () => {
+		// SPEC-BREAKING finding 1: a plain `T.object` validator (what the
+		// previous build's Block shape used, since it never declared this
+		// prop at all) throws `Unexpected property` for ANY key it does not
+		// know — including `assetId` set to `undefined` or `null` — so the
+		// real proof is not "the value round-trips", it's "the key is never
+		// written to begin with" for a record that never had an upload.
+		const { assetId: _assetId, ...previousShapeProps } = BLOCK_SHAPE_PROPS
+		const previousValidator = T.object(previousShapeProps)
+
+		const bare = getDefaultBlockProps()
+		expect(() => previousValidator.validate(bare)).not.toThrow()
+		expect(Object.prototype.hasOwnProperty.call(bare, 'assetId')).toBe(false)
+
+		const lucidePick = patchBlockDetailsProps(bare, encodeBlockIcon({ kind: 'lucide', name: 'SquareFunction' }))
+		expect(() => previousValidator.validate(lucidePick)).not.toThrow()
+		expect(Object.prototype.hasOwnProperty.call(lucidePick, 'assetId')).toBe(false)
+		expect(JSON.parse(JSON.stringify(lucidePick))).not.toHaveProperty('assetId')
+
+		const emojiPick = patchBlockDetailsProps(lucidePick, encodeBlockIcon({ kind: 'emoji', char: '🔥' }))
+		expect(() => previousValidator.validate(emojiPick)).not.toThrow()
+		expect(Object.prototype.hasOwnProperty.call(emojiPick, 'assetId')).toBe(false)
+
+		// An actual upload is the documented, expected incompatibility: the
+		// key exists with a real value, and the previous build cannot read it.
+		const uploaded = patchBlockDetailsProps(emojiPick, encodeBlockIcon({ kind: 'asset', assetId: ASSET_ID }))
+		expect(() => previousValidator.validate(uploaded)).toThrowError(/Unexpected property/)
+
+		// Picking a Lucide icon again after an upload must delete the stored
+		// assetId key rather than null it out (finding 1(b)) — the record
+		// becomes loadable on the previous build again.
+		const revertedAfterUpload = patchBlockDetailsProps(uploaded, encodeBlockIcon({ kind: 'lucide', name: 'Boxes' }))
+		expect(Object.prototype.hasOwnProperty.call(revertedAfterUpload, 'assetId')).toBe(false)
+		expect(() => previousValidator.validate(revertedAfterUpload)).not.toThrow()
 	})
 })

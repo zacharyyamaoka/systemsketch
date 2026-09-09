@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import ipaddress
 import json
 import os
 import re
 import secrets
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -22,8 +24,8 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import URLError
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
-from urllib.request import Request, urlopen
+from urllib.parse import parse_qs, urlencode, urljoin, urlparse, urlunparse
+from urllib.request import HTTPHandler, HTTPSHandler, OpenerDirector, ProxyHandler, Request
 
 from release_lib import (
     PRODUCT,
@@ -97,6 +99,66 @@ def _post_failure_status(cause: BaseException) -> HTTPStatus:
 
 ICON_FETCH_TIMEOUT_SECONDS = 8
 ICON_FETCH_MAX_BYTES = 5 * 1024 * 1024
+ICON_FETCH_MAX_REDIRECTS = 3
+# WHY an env var and not an argument: fetch_icon_bytes is called from deep
+# inside do_POST with no plumbing for a "yes, this is a test" flag, and the
+# guard has to be off by construction for anyone who is not the test suite —
+# an argument defaulting to "safe" is one call site away from a silent bypass.
+ICON_FETCH_ALLOW_LOCAL_ENV = "SYSTEMSKETCH_ICON_FETCH_ALLOW_LOCAL"
+
+
+def _icon_fetch_opener() -> OpenerDirector:
+    """A urllib opener with no `HTTPRedirectHandler` and no error processor.
+
+    Both are on by default in `urlopen`, and both are wrong here: the redirect
+    handler follows a 3xx before our SSRF check ever sees the new host, and
+    the error processor turns a non-2xx response into a raised `HTTPError`
+    before we get a chance to read its `Location` header ourselves. This
+    opener just returns whatever response it gets — every status code,
+    3xx included — so `fetch_icon_bytes` can inspect and re-validate each hop.
+    """
+    opener = OpenerDirector()
+    for handler_class in (ProxyHandler, HTTPHandler, HTTPSHandler):
+        opener.add_handler(handler_class())
+    return opener
+
+
+_ICON_FETCH_OPENER = _icon_fetch_opener()
+
+
+def _reject_unsafe_icon_host(url: str) -> None:
+    """SSRF guard: refuse a target whose *resolved* address is loopback,
+    link-local, private (RFC1918), multicast, reserved, or unspecified —
+    e.g. `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254` (the cloud metadata
+    endpoint). Checked by IP, not by hostname string, so `localtest.me` or a
+    bare decimal/hex IP literal cannot smuggle a loopback address past a
+    naive host-name blocklist.
+
+    WHY `os.environ` and not a parameter: see `ICON_FETCH_ALLOW_LOCAL_ENV`.
+    The local `http.server` fixture every test in `tests/test_icon_fetch.py`
+    fetches from is itself `127.0.0.1` — this is the one escape hatch, and it
+    is off unless a human or a test explicitly opts in.
+    """
+    if os.environ.get(ICON_FETCH_ALLOW_LOCAL_ENV) == "1":
+        return
+    hostname = urlparse(url).hostname
+    if not hostname:
+        raise ValueError("the URL is missing a host")
+    try:
+        resolved = socket.getaddrinfo(hostname, None)
+    except OSError as cause:
+        raise ValueError(f"could not resolve the URL's host: {cause}") from cause
+    for info in resolved:
+        address = ipaddress.ip_address(info[4][0])
+        if (
+            address.is_loopback
+            or address.is_link_local
+            or address.is_private
+            or address.is_multicast
+            or address.is_reserved
+            or address.is_unspecified
+        ):
+            raise ValueError("the URL resolves to a local or private address")
 
 
 def fetch_icon_bytes(url: str) -> tuple[bytes, str]:
@@ -105,18 +167,43 @@ def fetch_icon_bytes(url: str) -> tuple[bytes, str]:
     WHY the host fetches this, not the browser: `fetch(url)` straight from the
     picker taints any `<canvas>` drawn from a cross-origin image, and the
     downscale step in `uploadIcon.ts` needs `canvas.toBlob` to actually work —
-    exactly the images someone pastes a link to. Restricted to http/https, an
-    `image/*` response, and a byte cap so this can't be turned into a generic
-    open proxy or a way to pull down an arbitrarily large file.
+    exactly the images someone pastes a link to.
+
+    This is a general-purpose SSRF surface by construction — it fetches
+    whatever URL the caller names — so it is layered, not just capped: only
+    http/https, `_reject_unsafe_icon_host` blocks loopback/private/link-local
+    targets by resolved IP (re-checked on every redirect hop below, since a
+    redirect into one of those is the actual attack), only an `image/*`
+    response is accepted, and the body is capped before more than one byte
+    over the limit is ever read into memory. `do_POST` adds the request-shape
+    checks (JSON content type, same-origin) that keep a foreign page from
+    driving this route at all.
     """
-    parsed = urlparse(url)
-    if parsed.scheme not in ("http", "https"):
-        raise ValueError("only http and https URLs are supported")
-    if not parsed.netloc:
-        raise ValueError("the URL is missing a host")
-    request = Request(url, headers={"User-Agent": "SystemSketch-icon-fetch/1"})
-    try:
-        with urlopen(request, timeout=ICON_FETCH_TIMEOUT_SECONDS) as response:
+    target = url
+    for _hop in range(ICON_FETCH_MAX_REDIRECTS + 1):
+        parsed = urlparse(target)
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError("only http and https URLs are supported")
+        if not parsed.netloc:
+            raise ValueError("the URL is missing a host")
+        _reject_unsafe_icon_host(target)
+        request = Request(target, headers={"User-Agent": "SystemSketch-icon-fetch/1"})
+        try:
+            response = _ICON_FETCH_OPENER.open(request, timeout=ICON_FETCH_TIMEOUT_SECONDS)
+        except URLError as cause:
+            raise ValueError(f"could not fetch the URL: {cause.reason}") from cause
+        except TimeoutError as cause:
+            raise ValueError(f"fetching the URL timed out after {ICON_FETCH_TIMEOUT_SECONDS}s") from cause
+        with response:
+            status = getattr(response, "status", None) or response.getcode()
+            if status in (301, 302, 303, 307, 308):
+                location = response.headers.get("Location")
+                if not location:
+                    raise ValueError("the URL redirected with no Location header")
+                target = urljoin(target, location)
+                continue
+            if status < 200 or status >= 300:
+                raise ValueError(f"could not fetch the URL: HTTP {status}")
             content_type = (response.headers.get("Content-Type") or "").split(";")[0].strip().lower()
             if not (content_type.startswith("image/")):
                 raise ValueError(f"the URL did not return an image (got {content_type or 'no content type'})")
@@ -124,10 +211,7 @@ def fetch_icon_bytes(url: str) -> tuple[bytes, str]:
             if len(body) > ICON_FETCH_MAX_BYTES:
                 raise ValueError(f"the image is larger than {ICON_FETCH_MAX_BYTES // (1024 * 1024)} MB")
             return body, content_type
-    except URLError as cause:
-        raise ValueError(f"could not fetch the URL: {cause.reason}") from cause
-    except TimeoutError as cause:
-        raise ValueError(f"fetching the URL timed out after {ICON_FETCH_TIMEOUT_SECONDS}s") from cause
+    raise ValueError("too many redirects")
 
 
 def _validated_promoted_workspace(payload: object, files_root: Path) -> dict:
@@ -325,6 +409,29 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             "summary": f"{self.command} {path}: {type(cause).__name__}: {cause}",
         })
 
+    def _icon_fetch_request_rejection(self) -> "tuple[HTTPStatus, str] | None":
+        """The two request-*shape* checks for `/api/icon/fetch`, ahead of
+        `fetch_icon_bytes`'s target-*host* checks.
+
+        WHY: a `<form>` (or `fetch` with a `text/plain` body) posted from any
+        page on the web is a CORS-simple request — no preflight `OPTIONS`
+        required — so the browser sends it regardless of origin as long as
+        nothing here rejects it first. Requiring the real `application/json`
+        content type closes that hole (a JSON body wearing a `text/plain`
+        header fails it); the `Origin` check is defence in depth for a
+        same-origin-only route, since a JSON `fetch` from another origin does
+        get a preflight, but only if the browser bothers to honor it.
+        """
+        content_type = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        if content_type != "application/json":
+            return HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Content-Type must be application/json"
+        origin = self.headers.get("Origin")
+        if origin:
+            parsed_origin = urlparse(origin)
+            if parsed_origin.scheme != "http" or parsed_origin.hostname not in ("127.0.0.1", "localhost"):
+                return HTTPStatus.FORBIDDEN, "origin is not permitted to fetch icons"
+        return None
+
     def do_GET(self) -> None:
         self._request_started = time.perf_counter()
         parsed = urlparse(self.path)
@@ -441,6 +548,12 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         }:
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
             return
+        if path == "/api/icon/fetch":
+            rejection = self._icon_fetch_request_rejection()
+            if rejection is not None:
+                status, message = rejection
+                self._json({"error": message}, status)
+                return
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if length > MAX_API_REQUEST_BYTES:

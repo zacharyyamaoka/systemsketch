@@ -13,9 +13,14 @@ import type { TLAssetId } from 'tldraw'
  * a shape when the prop is literally called `assetId`. A prettier name would
  * paste a Block whose image silently never arrives.
  *
- * WHY the `asset` marker in `icon` as well: an older build reads only `icon`,
- * and unknown names render as no decoration, so a board with uploaded icons
- * stays loadable there instead of drawing a stale Lucide glyph.
+ * WHY the `asset` marker in `icon` as well: an older build's validator
+ * throws `Unexpected property` on any record carrying an `assetId` key at
+ * all, so a board with an uploaded icon is never loadable there regardless
+ * of what `icon` says — `assetId` is written only for an actual upload, and
+ * never in defaults, to keep every other board readable. The `asset` marker
+ * just keeps a name-only reader (one still running with no `assetId` prop
+ * declared) from drawing a stale Lucide glyph once the upload it names is
+ * gone.
  */
 export type BlockIconRef =
 	| { kind: 'none' }
@@ -40,14 +45,23 @@ export function decodeBlockIcon(
 	return { kind: 'lucide', name: value }
 }
 
-export function encodeBlockIcon(ref: BlockIconRef): { icon: string; assetId: TLAssetId | null } {
+/**
+ * `assetId: undefined`, not `null`, for every non-upload kind — see the
+ * class doc above. A caller that spreads this straight into a props patch
+ * (as `BlockInspector.tsx` and `BlockInlineEditor.tsx` do) still produces an
+ * object with an own `assetId` key set to `undefined`; `patchBlockDetailsProps`
+ * in `commands/blockCommands.ts` is the seam that deletes it, since that is
+ * the only place already merging a full props object before it reaches the
+ * store.
+ */
+export function encodeBlockIcon(ref: BlockIconRef): { icon: string; assetId: TLAssetId | undefined } {
 	switch (ref.kind) {
 		case 'none':
-			return { icon: '', assetId: null }
+			return { icon: '', assetId: undefined }
 		case 'lucide':
-			return { icon: ref.name, assetId: null }
+			return { icon: ref.name, assetId: undefined }
 		case 'emoji':
-			return { icon: EMOJI_ICON_PREFIX + ref.char, assetId: null }
+			return { icon: EMOJI_ICON_PREFIX + ref.char, assetId: undefined }
 		case 'asset':
 			return { icon: ASSET_ICON_MARKER, assetId: ref.assetId }
 	}

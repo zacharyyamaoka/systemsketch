@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import os
 import sys
 import tempfile
 import threading
@@ -17,12 +18,24 @@ import unittest
 from http import HTTPStatus, client as http_client
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest import mock
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from server import ICON_FETCH_MAX_BYTES, SystemSketchServer, fetch_icon_bytes  # noqa: E402
+from server import (  # noqa: E402
+    ICON_FETCH_ALLOW_LOCAL_ENV,
+    ICON_FETCH_MAX_BYTES,
+    SystemSketchServer,
+    fetch_icon_bytes,
+)
+
+# WHY this constant exists: every fixture below is a local http.server on
+# 127.0.0.1, and the SSRF guard added for RISK finding 2 blocks loopback
+# targets by default. Tests that exercise the fetch itself opt in with this;
+# tests that exercise the guard deliberately leave it unset.
+ALLOW_LOCAL = {ICON_FETCH_ALLOW_LOCAL_ENV: "1"}
 
 # A minimal valid 1x1 transparent PNG.
 TINY_PNG = bytes.fromhex(
@@ -50,6 +63,15 @@ class _OriginHandler(BaseHTTPRequestHandler):
             self._send(HTTPStatus.OK, b"\0" * (ICON_FETCH_MAX_BYTES + 1024), "image/png")
         elif self.path == "/missing.png":
             self._send(HTTPStatus.NOT_FOUND, b"not found", "text/plain")
+        elif self.path == "/redirect-to-loopback":
+            # WHY a fixed, unreachable Location rather than a real second
+            # origin: the redirect test below intercepts the per-hop host
+            # check itself, so the target only needs to look like a URL —
+            # fetch_icon_bytes must never get far enough to dial it.
+            self.send_response(HTTPStatus.FOUND)
+            self.send_header("Location", "http://127.0.0.1:9/mark.png")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
         else:
             self._send(HTTPStatus.NOT_FOUND, b"not found", "text/plain")
 
@@ -79,6 +101,15 @@ class _Origin:
 
 
 class FetchIconBytesTests(unittest.TestCase):
+    # WHY class-wide: every fixture in this file is a loopback origin, and
+    # these tests are about the fetch mechanics (content type, size cap,
+    # redirects-followed, error shapes) — the SSRF guard itself gets its own
+    # tests below, deliberately without this opt-in.
+    def setUp(self) -> None:
+        self._env_patch = mock.patch.dict(os.environ, ALLOW_LOCAL)
+        self._env_patch.start()
+        self.addCleanup(self._env_patch.stop)
+
     def test_fetches_an_image_and_preserves_its_content_type(self) -> None:
         with _Origin() as origin:
             body, content_type = fetch_icon_bytes(f"{origin}/mark.png")
@@ -122,10 +153,53 @@ class FetchIconBytesTests(unittest.TestCase):
             fetch_icon_bytes("http://127.0.0.1:1/mark.png")
 
 
+class IconFetchSsrfGuardTests(unittest.TestCase):
+    """RISK finding 2: `fetch_icon_bytes` must not be a blind SSRF proxy.
+    Deliberately does not opt into ALLOW_LOCAL — these tests exist to prove
+    the guard fires, not to fetch a real image."""
+
+    def test_a_loopback_target_is_blocked_without_the_allow_local_env_var(self) -> None:
+        self.assertNotIn(ICON_FETCH_ALLOW_LOCAL_ENV, os.environ)
+        with _Origin() as origin:
+            with self.assertRaisesRegex(ValueError, "local or private address"):
+                fetch_icon_bytes(f"{origin}/mark.png")
+
+    def test_a_redirect_into_a_loopback_target_is_blocked_on_the_second_hop(self) -> None:
+        # The first hop (the test origin itself) is allowed through by the
+        # mock so the redirect is actually followed; the guard's second call,
+        # against the Location it redirects to, is left real and must reject.
+        # That proves re-validation happens per hop, not only on the URL the
+        # caller originally passed in.
+        with _Origin() as origin:
+            with mock.patch.dict(os.environ, ALLOW_LOCAL):
+                with mock.patch(
+                    "server._reject_unsafe_icon_host",
+                    side_effect=[None, ValueError("the URL resolves to a local or private address")],
+                ) as guard:
+                    with self.assertRaisesRegex(ValueError, "local or private address"):
+                        fetch_icon_bytes(f"{origin}/redirect-to-loopback")
+                    self.assertEqual(guard.call_count, 2)
+
+    def test_the_allow_local_env_var_permits_a_loopback_fetch(self) -> None:
+        with _Origin() as origin:
+            with mock.patch.dict(os.environ, ALLOW_LOCAL):
+                body, content_type = fetch_icon_bytes(f"{origin}/mark.png")
+                self.assertEqual(body, TINY_PNG)
+                self.assertEqual(content_type, "image/png")
+
+
 class IconFetchEndpointTests(unittest.TestCase):
     """Drives the real SystemSketchServer over a live socket, proving the
     route is registered on the do_POST allow-list and actually dispatches to
     fetch_icon_bytes — not just that the bare function works."""
+
+    def setUp(self) -> None:
+        # These tests fetch from the local _Origin fixture (127.0.0.1); the
+        # request-shape rejection tests below run without this, since they
+        # never get far enough for the SSRF guard to matter.
+        self._env_patch = mock.patch.dict(os.environ, ALLOW_LOCAL)
+        self._env_patch.start()
+        self.addCleanup(self._env_patch.stop)
 
     @contextlib.contextmanager
     def _running_server(self):
@@ -198,6 +272,57 @@ class IconFetchEndpointTests(unittest.TestCase):
                 self.assertEqual(response.status, HTTPStatus.CONFLICT)
             finally:
                 response._connection.close()
+
+    def test_a_non_json_content_type_is_rejected_before_the_body_is_read(self) -> None:
+        # RISK finding 2(a): a text/plain form POST is a CORS-simple request
+        # (no preflight), so this is the check that stops a foreign page from
+        # driving the route at all.
+        with self._running_server() as port:
+            connection = http_client.HTTPConnection("127.0.0.1", port, timeout=10)
+            connection.request(
+                "POST",
+                "/api/icon/fetch",
+                body=json.dumps({"url": "http://example.com/mark.png"}),
+                headers={"Content-Type": "text/plain"},
+            )
+            response = connection.getresponse()
+            try:
+                self.assertEqual(response.status, HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+            finally:
+                response.read()
+                connection.close()
+
+    def test_a_foreign_origin_is_rejected(self) -> None:
+        with self._running_server() as port:
+            connection = http_client.HTTPConnection("127.0.0.1", port, timeout=10)
+            connection.request(
+                "POST",
+                "/api/icon/fetch",
+                body=json.dumps({"url": "http://example.com/mark.png"}),
+                headers={"Content-Type": "application/json", "Origin": "http://evil.example"},
+            )
+            response = connection.getresponse()
+            try:
+                self.assertEqual(response.status, HTTPStatus.FORBIDDEN)
+            finally:
+                response.read()
+                connection.close()
+
+    def test_a_127_0_0_1_origin_is_permitted(self) -> None:
+        with _Origin() as origin, self._running_server() as port:
+            connection = http_client.HTTPConnection("127.0.0.1", port, timeout=10)
+            connection.request(
+                "POST",
+                "/api/icon/fetch",
+                body=json.dumps({"url": f"{origin}/mark.png"}),
+                headers={"Content-Type": "application/json", "Origin": "http://127.0.0.1:5173"},
+            )
+            response = connection.getresponse()
+            try:
+                self.assertEqual(response.status, HTTPStatus.OK)
+                self.assertEqual(response.read(), TINY_PNG)
+            finally:
+                connection.close()
 
 
 if __name__ == "__main__":

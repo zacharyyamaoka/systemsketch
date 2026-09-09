@@ -54,6 +54,22 @@ describe('BlockIconRef encoding', () => {
 			assetId: ASSET_ID,
 		})
 	})
+
+	it('encodes every non-upload kind with assetId undefined, never null', () => {
+		// SPEC-BREAKING finding 1: an older build's validator rejects any
+		// record carrying an `assetId` key at all. `undefined` is what lets
+		// a caller that merges this straight into a props patch delete the
+		// key (see patchBlockDetailsProps in commands/blockCommands.ts)
+		// instead of persisting a `null` the old validator still chokes on.
+		expect(encodeBlockIcon({ kind: 'none' }).assetId).toBeUndefined()
+		expect(encodeBlockIcon({ kind: 'lucide', name: 'Box' }).assetId).toBeUndefined()
+		expect(encodeBlockIcon({ kind: 'emoji', char: '🔥' }).assetId).toBeUndefined()
+	})
+
+	it('treats a stored null the same as undefined, for records written before this fix', () => {
+		expect(decodeBlockIcon('SquareFunction', null)).toEqual({ kind: 'lucide', name: 'SquareFunction' })
+		expect(decodeBlockIcon('SquareFunction', undefined)).toEqual({ kind: 'lucide', name: 'SquareFunction' })
+	})
 })
 
 describe('sameBlockIcon', () => {

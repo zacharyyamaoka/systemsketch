@@ -418,11 +418,18 @@ export const BLOCK_SHAPE_PROPS = {
 	 *
 	 * WHY: tldraw's copy / export scan (`Editor.getContentFromCurrentPage`) only
 	 * carries an asset with a shape when the prop is literally `assetId`. Any
-	 * other name pastes a Block whose image silently never arrives. Optional and
-	 * nullable so every existing Block record still validates.
-	 * See src/blocks/ui/iconPicker/iconRef.ts for the encoding.
+	 * other name pastes a Block whose image silently never arrives.
+	 *
+	 * WHY optional and never nullable: a plain `T.object` validator (this
+	 * one, on an older build with no `assetId` line here at all) throws
+	 * `Unexpected property` for any key it does not declare — `null`
+	 * included. The write path (`iconRef.ts` + `patchBlockDetailsProps` in
+	 * `commands/blockCommands.ts`) omits the key entirely for every Block
+	 * that has never had an upload, so those boards stay loadable on the
+	 * previous build; `blockShapeMigrations.ts`'s `AssetIcon` step strips
+	 * the key going down for the boards that do carry a real one.
 	 */
-	assetId: assetIdValidator.nullable().optional(),
+	assetId: assetIdValidator.optional(),
 	view: BlockViewStyle,
 	views: T.object({
 		simple: BlockViewSize,
@@ -503,7 +510,7 @@ declare module 'tldraw' {
 			foldControlSide?: BlockFoldControlSide
 			autoResize: boolean
 			icon?: string
-			assetId?: TLAssetId | null
+			assetId?: TLAssetId
 			view: BlockView
 			views: {
 				simple: BlockViewSize
@@ -560,7 +567,9 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		folded: false,
 		autoResize: false,
 		icon: '',
-		assetId: null,
+		// WHY no `assetId` key here at all: see the prop doc above. A default
+		// of `null` (the pre-fix behaviour) still fails an older validator,
+		// which throws on any unknown key regardless of its value.
 		view: 'simple',
 		views,
 		showDescription: true,
