@@ -20,7 +20,7 @@ import {
   BLOCK_PRESENTATION_VIEWS,
   HEADER_ROW,
   PORT_LAYOUTS,
-  blockIcon,
+  blockIconRef,
   isBlockShape,
   isProjectionBlock,
   isUnresolvedBlock,
@@ -514,13 +514,18 @@ function BlockContextMenuItems() {
               />
             </TldrawUiMenuGroup>
             <TldrawUiMenuGroup id="block-add-fields">
-              {blockIcon(selectedBlock.props) === '' ? (
-                <TldrawUiMenuItem
-                  id="block-add-icon"
-                  label="Icon…"
-                  onSelect={() => editField({ kind: 'icon' })}
-                />
-              ) : null}
+              {/* WHY always shown, unlike the description/type rows beside
+                  it: those are one-shot "add a missing field" actions, but
+                  Notion's own icon entry always reopens the picker to change
+                  it, not only to set one for the first time — and `editField`
+                  routes through the exact same `requestBlockInlineEdit`
+                  seam the on-canvas icon uses, so this is the controlled
+                  BlockIconPicker instance anchored there, not a second one. */}
+              <TldrawUiMenuItem
+                id="block-add-icon"
+                label={blockIconRef(selectedBlock.props).kind === 'none' ? 'Icon…' : 'Change icon…'}
+                onSelect={() => editField({ kind: 'icon' })}
+              />
               {selectedBlock.props.description.trim() === '' ? (
                 <TldrawUiMenuItem
                   id="block-add-description"

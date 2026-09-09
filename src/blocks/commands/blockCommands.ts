@@ -10,6 +10,7 @@ import {
   type BlockPortSection,
   type BlockPortSide,
   type BlockShape,
+  BLOCK_SHAPE_PROPS,
   type BlockShapeProps,
   type BlockPresentationView,
   blockPortSections,
@@ -96,6 +97,11 @@ export type BlockDetailsPatch = Partial<
 		| 'showFooter'
 		| 'showHeaderDivider'
     | 'icon'
+    // WHY paired with `icon` here: an uploaded icon is decoded from both
+    // props together (see `ui/iconPicker/iconRef.ts`), so a picker choice
+    // has to write them as one patch or an intermediate render sees a
+    // stale asset next to a fresh Lucide name (or vice versa).
+    | 'assetId'
     | 'notes'
 		| 'portLayout'
 		| 'insetBackground'
@@ -234,8 +240,52 @@ export function updateBlockProps(
 
   const historyLabel = options.historyLabel ?? 'edit block'
   if (historyLabel !== false) editor.markHistoryStoppingPoint(historyLabel)
-  editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+
+  const removedKeys = (Object.keys(shape.props) as (keyof BlockShapeProps)[])
+    .filter((key) => !Object.prototype.hasOwnProperty.call(props, key))
+
+  if (removedKeys.length === 0) {
+    editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+    return { ok: true, shapeId: shape.id, props }
+  }
+
+  // WHY: tldraw's updateShape merges `props` key-by-key onto the stored
+  // record (applyPartialToRecordWithProps in @tldraw/editor's Editor.ts) — a
+  // key the caller's object omits is left at its OLD value, never cleared.
+  // `patchBlockDetailsProps` deletes `assetId` from its own result once a
+  // pick no longer names an upload (see its own WHY), so once a Block has
+  // ever held one, handing that shorter object to updateShape alone would
+  // leave the stale assetId sitting in the store forever — a later Lucide
+  // pick, emoji pick, or Remove would all silently keep decoding as the old
+  // asset. `updateShape` still does the real work for every key that IS
+  // present (view/size restoration and stock-prop normalization in
+  // BlockShapeUtil.onBeforeUpdate, none of which reads icon or assetId), so
+  // it runs first; the removed keys are then deleted directly, same as
+  // `stripBehaviorTreeMeta` already does for `meta` in
+  // behaviorTreeDetachable.ts, guarded by the same lock/readonly rule
+  // updateShape enforces so this can't force a write it would have skipped.
+  editor.run(() => {
+    editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+    if (editor.getIsReadonly() || editor.isShapeOrAncestorLocked(shape.id)) return
+    editor.store.update(shape.id, (record) => {
+      const patched = { ...(record as BlockShape).props } as Record<string, unknown>
+      for (const key of removedKeys) delete patched[key]
+      return { ...record, props: patched } as typeof record
+    })
+  })
   return { ok: true, shapeId: shape.id, props }
+}
+
+/** True when the Block validator accepts the prop being absent. */
+function isOptionalBlockProp(key: keyof BlockShapeProps): boolean {
+  const validator = (BLOCK_SHAPE_PROPS as Record<string, { validate(value: unknown): unknown }>)[key as string]
+  if (!validator) return false
+  try {
+    validator.validate(undefined)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function updateBlockDetails(
@@ -256,13 +306,30 @@ export function patchBlockDetailsProps(
   props: BlockShapeProps,
   patch: BlockDetailsPatch,
 ): BlockShapeProps {
-  const next = { ...props, ...patch }
+  const next: Partial<BlockShapeProps> = { ...props, ...patch }
+  // WHY: `encodeBlockIcon` returns `assetId: undefined` for every non-upload
+  // icon kind (see iconRef.ts), and a caller that spreads that straight into
+  // a patch — every current caller does — produces an own `assetId: undefined`
+  // key here after the merge above. Persisting that key at all, even with an
+  // undefined value, fails an older build's `T.object` validator, which
+  // throws `Unexpected property` on any key it does not declare regardless of
+  // what the key holds. This is the one seam that already merges a full props
+  // object before it reaches the store, so it is where an explicit "unset"
+  // becomes real absence rather than a still-present `undefined`.
+  // Only an OPTIONAL prop may become absent; an explicit `undefined` for a
+  // required prop (`title: undefined`) keeps the current value instead of
+  // deleting a key the validator demands.
+  for (const key of Object.keys(patch) as (keyof BlockDetailsPatch)[]) {
+    if (next[key] !== undefined) continue
+    if (isOptionalBlockProp(key)) delete next[key]
+    else (next as Record<string, unknown>)[key] = props[key]
+  }
   return Object.keys(patch).every((key) => {
     const detail = key as keyof BlockDetailsPatch
     return props[detail] === next[detail]
   })
     ? props
-    : next
+    : (next as BlockShapeProps)
 }
 
 /** Switch view through the core projection so each view's saved size is restored. */

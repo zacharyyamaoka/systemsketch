@@ -160,6 +160,18 @@ export const ReliableContextMenu = memo(function ReliableContextMenu({
             alignOffset={-4}
             collisionPadding={4}
             onContextMenu={preventDefault}
+            // WHY: Radix returns focus to this menu's trigger when it closes,
+            // by default — harmless for a stock command, but "Icon…" closes
+            // this menu AND opens BlockIconPicker's own Radix Popover in the
+            // same tick. That focus-return then fires as a "focus moved
+            // outside" event on the just-opened Popover, so its own
+            // dismissable layer closes it before anyone ever sees it (traced
+            // via tests/icon_picker_smoke.mjs step 7 — editingShapeId was set
+            // then immediately cleared, one frame later, by exactly this
+            // handler). Every other item here focuses its own target itself
+            // (BlockInlineEditor's fields, e.g.), so nothing depends on the
+            // menu's own focus return.
+            onCloseAutoFocus={preventDefault}
             onPointerDownOutside={(event) => {
               if (dismissalSuppressed()) event.preventDefault()
             }}

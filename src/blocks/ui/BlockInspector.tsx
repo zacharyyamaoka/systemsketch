@@ -1,10 +1,12 @@
 import {
   Fragment,
+  forwardRef,
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
+  type ComponentPropsWithoutRef,
   type ReactNode,
 } from 'react'
 import {
@@ -34,6 +36,7 @@ import {
   BLOCK_MEMBER_WIDTHS,
   BLOCK_PRESENTATION_VIEWS,
 	blockHeaderAlign,
+	blockIconRef,
 	blockInsetBackground,
   blockBodyLayout,
   blockMemberLayout,
@@ -134,7 +137,9 @@ import {
 } from '../commands/blockStyleCommands'
 import { ElementHistoryPanel } from '../../history/ElementHistoryPanel'
 import { BlockBatchInspectorContent } from './BlockBatchInspector'
-import { BLOCK_ICONS, BlockIconGlyph } from './blockIcons'
+import { BlockIconRefGlyph } from './blockIcons'
+import { BlockIconPicker } from './iconPicker/BlockIconPicker'
+import { encodeBlockIcon, type BlockIconRef } from './iconPicker/iconRef'
 import './block-inspector.css'
 
 type InspectorTab = 'details' | 'notes' | 'history'
@@ -333,88 +338,54 @@ function ChevronIcon({ direction }: { direction: 'up' | 'down' }) {
   )
 }
 
-/** The same curated icon picker used by the mature pyblocks inspector. */
-function IconPicker({
-  value,
-  disabled,
-  onChange,
-}: {
-  value: string
-  disabled: boolean
-  onChange(icon: string): void
-}) {
-  const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const close = (event: Event) => {
-      if (rootRef.current && event.target instanceof Node && rootRef.current.contains(event.target)) {
-        return
-      }
-      setOpen(false)
-    }
-    const key = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('pointerdown', close, true)
-    document.addEventListener('keydown', key)
-    return () => {
-      document.removeEventListener('pointerdown', close, true)
-      document.removeEventListener('keydown', key)
-    }
-  }, [open])
-
-  return (
-    <div className="block-inspector__icon-picker" ref={rootRef}>
-      <button
-        type="button"
-        className={`block-inspector__icon-well${value ? '' : ' is-empty'}`}
-        disabled={disabled}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-label={value ? `Icon: ${value}. Change icon` : 'Set icon'}
-        title={value ? 'Change icon' : 'Set icon'}
-        onClick={() => setOpen((current) => !current)}
-      >
-        {value ? <BlockIconGlyph name={value} size={16} /> : null}
-      </button>
-      {open ? (
-        <div className="block-inspector__icon-grid" role="listbox" aria-label="Block icon">
-          <button
-            type="button"
-            className="block-inspector__icon-option block-inspector__icon-option--none"
-            role="option"
-            aria-selected={value === ''}
-            title="None"
-            onClick={() => {
-              onChange('')
-              setOpen(false)
-            }}
-          >
-            <XIcon />
-          </button>
-          {BLOCK_ICONS.map(({ name, label, Icon }) => (
-            <button
-              key={name}
-              type="button"
-              className="block-inspector__icon-option"
-              role="option"
-              aria-selected={value === name}
-              title={label}
-              onClick={() => {
-                onChange(name)
-                setOpen(false)
-              }}
-            >
-              <Icon size={16} aria-hidden="true" />
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  )
+/** "Icon: <name>. Change icon" when the name is legible; an asset has none. */
+function describeBlockIcon(icon: BlockIconRef): string {
+  switch (icon.kind) {
+    case 'none':
+      return 'Set icon'
+    case 'lucide':
+      return `Icon: ${icon.name}. Change icon`
+    case 'emoji':
+      return `Icon: ${icon.char}. Change icon`
+    case 'asset':
+      return 'Icon: uploaded image. Change icon'
+  }
 }
+
+/**
+ * The icon well trigger for `BlockIconPicker`, replacing the old fixed-grid
+ * `IconPicker` (curated Lucide names only, no search). `BlockIconPicker`
+ * itself owns the popover; this only renders the button it opens from and
+ * the current icon's glyph, via `BlockIconRefGlyph` so any kind — curated or
+ * full-library Lucide, emoji, or an uploaded asset — shows correctly.
+ *
+ * WHY `forwardRef` and a spread, not a plain `{icon, disabled}` component:
+ * `BlockIconPicker` mounts this as `<RadixPopover.Trigger asChild>` — Radix's
+ * `Slot` clones the single child in place and merges its own `onClick`
+ * (the actual open toggle), `ref`, and `aria-*`/`data-state` attributes onto
+ * it. A component that declares a narrow prop signature and ignores the rest
+ * silently swallows that `onClick`, so the button renders correctly but a
+ * real click never opens the picker — caught by the CDP journey, not by the
+ * (editor-less) unit tests, which never click anything.
+ */
+const IconWell = forwardRef<HTMLButtonElement, { icon: BlockIconRef; disabled: boolean } & ComponentPropsWithoutRef<'button'>>(
+  function IconWell({ icon, disabled, className, ...triggerProps }, ref) {
+    const description = describeBlockIcon(icon)
+    return (
+      <button
+        ref={ref}
+        type="button"
+        className={`block-inspector__icon-well${icon.kind === 'none' ? ' is-empty' : ''}${className ? ` ${className}` : ''}`}
+        disabled={disabled}
+        aria-label={description}
+        title={description}
+        {...triggerProps}
+      >
+        <BlockIconRefGlyph icon={icon} size={16} />
+      </button>
+    )
+  },
+)
 
 function NotesEditor({
   value,
@@ -2286,11 +2257,17 @@ export function BlockInspectorContent({
 
             <div className="block-inspector__field">
               <span>Type</span>
-              <IconPicker
-                value={props.icon ?? ''}
+              <BlockIconPicker
+                value={blockIconRef(props)}
+                title={props.title}
                 disabled={readOnly}
-                onChange={(icon) => actions?.updateDetails({ icon })}
-              />
+                onChange={(icon) => {
+                  const { icon: iconValue, assetId } = encodeBlockIcon(icon)
+                  actions?.updateDetails({ icon: iconValue, assetId })
+                }}
+              >
+                <IconWell icon={blockIconRef(props)} disabled={readOnly} />
+              </BlockIconPicker>
               <LiveTextInput
                 value={props.blockType}
                 disabled={readOnly}

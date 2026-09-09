@@ -1,4 +1,5 @@
-import { StyleProp, T, createShapeId, type TLShape } from 'tldraw'
+import { decodeBlockIcon, type BlockIconRef } from './ui/iconPicker/iconRef'
+import { StyleProp, T, assetIdValidator, createShapeId, type TLAssetId, type TLShape } from 'tldraw'
 
 export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
@@ -434,6 +435,27 @@ export const BLOCK_SHAPE_PROPS = {
 	autoResize: T.boolean,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
 	icon: T.string.optional(),
+	/**
+	 * An uploaded icon, as a tldraw image asset record. Named exactly `assetId`
+	 * and not `iconAssetId` on purpose.
+	 *
+	 * WHY: tldraw's copy / export scan (`Editor.getContentFromCurrentPage`) only
+	 * carries an asset with a shape when the prop is literally `assetId`. Any
+	 * other name pastes a Block whose image silently never arrives.
+	 *
+	 * WHY optional AND nullable, with no migration bridging the two builds:
+	 * the key is written only for an actual upload — `iconRef.ts` +
+	 * `patchBlockDetailsProps` in `commands/blockCommands.ts` omit it
+	 * entirely for every other Block — so a board with no uploaded icon
+	 * opens on the previous build same as always. A board that does carry
+	 * one does not; that incompatibility is inherent, not a bug this schema
+	 * can migrate away — the previous build has no such prop to receive it.
+	 * `.nullable()` exists only so a stray `assetId: null` (this feature's
+	 * short-lived original default, never shipped to Zach's own boards)
+	 * still validates on this build without needing a migration to clean it
+	 * up first.
+	 */
+	assetId: assetIdValidator.nullable().optional(),
 	view: BlockViewStyle,
 	views: T.object({
 		simple: BlockViewSize,
@@ -522,6 +544,7 @@ declare module 'tldraw' {
 			foldControlSide?: BlockFoldControlSide
 			autoResize: boolean
 			icon?: string
+			assetId?: TLAssetId | null
 			view: BlockView
 			views: {
 				simple: BlockViewSize
@@ -582,6 +605,12 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		folded: false,
 		autoResize: false,
 		icon: '',
+		// WHY no `assetId` key here at all: see the prop doc above. The
+		// validator accepts `null` now, but a default still has to be a
+		// genuinely absent key, not `null` — an older build with no
+		// `assetId` line at all throws `Unexpected property` on any key it
+		// does not declare, value irrelevant, so every Block that has never
+		// had an upload stays loadable there only by never writing the key.
 		view: 'simple',
 		views,
 		showDescription: true,
@@ -601,6 +630,11 @@ export function getDefaultBlockProps(): BlockShapeProps {
 /** The one reader for the optional donor icon field. */
 export function blockIcon(props: BlockShapeProps): string {
 	return props.icon ?? ''
+}
+
+/** The decoded icon: none, a Lucide name, an emoji, or an uploaded asset. */
+export function blockIconRef(props: BlockShapeProps): BlockIconRef {
+	return decodeBlockIcon(props.icon, props.assetId)
 }
 
 /** Existing boards and newly placed Blocks retain the established left header. */

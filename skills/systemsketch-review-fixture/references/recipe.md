@@ -123,6 +123,8 @@ free tldraw resize updates the same value and shows its live `ch` readout.
 Code is presentation and an authored literal only; never seed execution,
 lint, or inferred-program records.
 
+A Block's icon is a plain native prop, not a fixture-only shorthand: set `props.icon` to a curated Lucide export name (e.g. `"Database"`), an `emoji:<glyph>` string (e.g. `"emoji:🚀"`), or omit it for the empty dashed well. An uploaded icon needs a real tldraw asset record, which the recipe cannot author — seed the curated/emoji cases directly and drive the Upload tab's paste/Save in the real app instead.
+
 For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. Child `x` must clear the parent's left-edge port-label column (~160px), not just sit inside the frame: Expanded ports are vertically centred in the body, so extra top-inset alone leaves `poses` / `list[Pose]` buried under the child. Keep children below the 48px header as well.
 
 For a Floating Port direct-drag review, distinguish the two visible faces in the cue itself: drag the **label** to reposition the whole Port on its first press, and drag the **circular dot** to wire. Seed a real connection binding when the review should show that a moved Port takes its cable with it. Do not add a second selection click to the instruction—the label must be a normal shape hit target from rest.
