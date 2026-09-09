@@ -418,7 +418,10 @@ async function main() {
       // Pre-fix the lane already sat somewhere under .tl-html-layer (inside
       // its Block's own container), so that ancestor proves nothing; what the
       // portal changes is that the lane is no longer inside any Block.
-      return { onTop: Boolean(hit && lane.contains(hit)), overlaps, inShapeLayer: Boolean(lane.closest('.BlockNode-laneOverlay')) && !lane.closest('.systemsketch-block-canvas') }
+      // The overlay must also sit under the element that carries the camera
+      // transform, or the lane stops following a pan (a body portal would
+      // pass every other check here).
+      return { onTop: Boolean(hit && lane.contains(hit)), overlaps, inShapeLayer: Boolean(lane.closest('.BlockNode-laneOverlay')) && !lane.closest('.systemsketch-block-canvas') && Boolean(lane.closest('.tl-html-layer.tl-shapes')) }
     })())`))
     assert.equal(laneTop.overlaps, true, 'the covering Block really overlaps the lane')
     assert.equal(laneTop.onTop, true, 'the open lane paints above the covering Block')
@@ -440,6 +443,22 @@ async function main() {
     await evaluate(page, `(() => { const editor = window.__systemsketch.editor; const block = editor.getShape(${JSON.stringify(BLOCK)}); editor.updateShape({ id: block.id, type: 'block', x: block.x - 120, y: block.y - 40 }); return true })()`)
     await delay(200)
     pass('the open lane follows a pure x/y move of its Block')
+
+    // And a camera pan with the lane open: the lane rides the shape layer's
+    // transform, so it must slide with its Block on screen.
+    const blockBeforePan = JSON.parse(await evaluate(page, `JSON.stringify(document.querySelector('[data-shape-id=${JSON.stringify(BLOCK)}]').getBoundingClientRect())`))
+    const laneBeforePan = JSON.parse(await evaluate(page, `JSON.stringify(document.querySelector(${JSON.stringify(OUTPUT_LANE)}).getBoundingClientRect())`))
+    await evaluate(page, `(() => { const editor = window.__systemsketch.editor; const cam = editor.getCamera(); editor.setCamera({ x: cam.x - 150, y: cam.y - 90, z: cam.z }); return true })()`)
+    await delay(250)
+    const blockAfterPan = JSON.parse(await evaluate(page, `JSON.stringify(document.querySelector('[data-shape-id=${JSON.stringify(BLOCK)}]').getBoundingClientRect())`))
+    const laneAfterPan = JSON.parse(await evaluate(page, `JSON.stringify(document.querySelector(${JSON.stringify(OUTPUT_LANE)}).getBoundingClientRect())`))
+    const blockPan = { dx: blockAfterPan.x - blockBeforePan.x, dy: blockAfterPan.y - blockBeforePan.y }
+    const lanePan = { dx: laneAfterPan.x - laneBeforePan.x, dy: laneAfterPan.y - laneBeforePan.y }
+    assert.ok(Math.abs(blockPan.dx) > 50 && Math.abs(lanePan.dx - blockPan.dx) < 2 && Math.abs(lanePan.dy - blockPan.dy) < 2,
+      `the open lane must pan with its Block (block moved ${blockPan.dx},${blockPan.dy}; lane moved ${lanePan.dx},${lanePan.dy})`)
+    await evaluate(page, `(() => { const editor = window.__systemsketch.editor; const cam = editor.getCamera(); editor.setCamera({ x: cam.x + 150, y: cam.y + 90, z: cam.z }); return true })()`)
+    await delay(200)
+    pass('the open lane pans with the canvas, riding the shape layer\'s camera transform')
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
     await evaluate(page, `(() => { const editor = window.__systemsketch.editor; editor.deleteShapes(['shape:cover']); editor.updateShape({ id: ${JSON.stringify(BLOCK)}, type: 'block', props: { outputs: editor.getShape(${JSON.stringify(BLOCK)}).props.outputs.map((port) => port.id === 'out_2' ? { ...port, name: 'quality', type: 'float' } : port) } }); return true })()`)

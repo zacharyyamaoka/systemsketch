@@ -400,9 +400,10 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				// whiteboard-text feel Zach asked for — while folded lines keep
 				// it from growing for text nobody is looking at.
 				// Portalled, the overlay wrapper carries the page position, so the
-				// lane sits at its origin; without a shape layer the lane keeps
-				// the in-shape placement the style already spells.
-				style={{ ...style, ...(shapeLayer ? { left: 0, top: 0 } : {}), width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
+				// lane sits at its origin; without a shape layer OR page bounds
+				// (the same guard as the portal below) the lane keeps the
+				// in-shape placement the style already spells.
+				style={{ ...style, ...(shapeLayer && pageBounds ? { left: 0, top: 0 } : {}), width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
 				value={value}
 				placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
 				ariaLabel={`Edit ${field.side} lane`}
