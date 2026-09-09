@@ -454,7 +454,10 @@ async function main() {
     const laneAfterPan = JSON.parse(await evaluate(page, `JSON.stringify(document.querySelector(${JSON.stringify(OUTPUT_LANE)}).getBoundingClientRect())`))
     const blockPan = { dx: blockAfterPan.x - blockBeforePan.x, dy: blockAfterPan.y - blockBeforePan.y }
     const lanePan = { dx: laneAfterPan.x - laneBeforePan.x, dy: laneAfterPan.y - laneBeforePan.y }
-    assert.ok(Math.abs(blockPan.dx) > 50 && Math.abs(lanePan.dx - blockPan.dx) < 2 && Math.abs(lanePan.dy - blockPan.dy) < 2,
+    // The Block must have moved by the pan × zoom (not a fixed magnitude, which
+    // would go red at zoom ≤ 1/3 on a correct lane), and the lane by the same.
+    const panZoom = await evaluate(page, `window.__systemsketch.editor.getZoomLevel()`)
+    assert.ok(Math.abs(blockPan.dx + 150 * panZoom) < 2 && Math.abs(lanePan.dx - blockPan.dx) < 2 && Math.abs(lanePan.dy - blockPan.dy) < 2,
       `the open lane must pan with its Block (block moved ${blockPan.dx},${blockPan.dy}; lane moved ${lanePan.dx},${lanePan.dy})`)
     await evaluate(page, `(() => { const editor = window.__systemsketch.editor; const cam = editor.getCamera(); editor.setCamera({ x: cam.x + 150, y: cam.y + 90, z: cam.z }); return true })()`)
     await delay(200)
@@ -463,6 +466,29 @@ async function main() {
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
     await evaluate(page, `(() => { const editor = window.__systemsketch.editor; editor.deleteShapes(['shape:cover']); editor.updateShape({ id: ${JSON.stringify(BLOCK)}, type: 'block', props: { outputs: editor.getShape(${JSON.stringify(BLOCK)}).props.outputs.map((port) => port.id === 'out_2' ? { ...port, name: 'quality', type: 'float' } : port) } }); return true })()`)
     pass('an open lane is promoted above a shape that sits above its Block in z-order')
+
+    // --------------- no page bounds: the lane keeps its in-shape placement ---
+    // Only a monkeypatch reaches this branch today (deleting the Block unmounts
+    // the editor instead), but it is the other half of the portal's guard and
+    // a refactor that drops it leaves every other check green (round 9).
+    await evaluate(page, `(() => { const editor = window.__systemsketch.editor; editor.__realGetShapePageBounds = editor.getShapePageBounds; editor.getShapePageBounds = function (shape) { const id = typeof shape === 'string' ? shape : shape?.id; return id === ${JSON.stringify(BLOCK)} ? undefined : editor.__realGetShapePageBounds(shape) }; return true })()`)
+    const fallbackBox = await blockBox(page)
+    const fallbackRow = await labelBox(page, 'out', 'quality')
+    await clickAt(page, fallbackBox.x + fallbackBox.width * 0.55, fallbackRow.y + fallbackRow.height / 2)
+    await waitFor(page, `document.querySelector(${JSON.stringify(OUTPUT_LANE)})`, 'the outputs lane without page bounds', 5000)
+    const fallback = JSON.parse(await evaluate(page, `JSON.stringify((() => {
+      const lane = document.querySelector(${JSON.stringify(OUTPUT_LANE)})
+      const canvas = lane.closest('.systemsketch-block-canvas')
+      const w = window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.w
+      return { insideBlock: Boolean(canvas), portalled: Boolean(lane.closest('.BlockNode-laneOverlay')), left: lane.style.left, expectedLeft: (w + 12) + 'px' }
+    })())`))
+    assert.equal(fallback.portalled, false, 'without page bounds the lane is not portalled')
+    assert.equal(fallback.insideBlock, true, 'without page bounds the lane stays inside its Block')
+    assert.equal(fallback.left, fallback.expectedLeft, `without page bounds the outputs lane keeps its in-shape placement, not the corner (${fallback.left} vs ${fallback.expectedLeft})`)
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the fallback lane')
+    await evaluate(page, `(() => { const editor = window.__systemsketch.editor; editor.getShapePageBounds = editor.__realGetShapePageBounds; delete editor.__realGetShapePageBounds; return true })()`)
+    pass('with no page bounds the lane keeps its in-shape placement instead of collapsing to the corner')
 
     // ------------------------ a header port is not a line: its own editor ---
     await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
