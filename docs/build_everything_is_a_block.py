@@ -260,9 +260,16 @@ def measured() -> dict:
     subjects = re.findall(r"'(\w+)'", re.search(r"export type InspectorSubject = (.*)", subject).group(1))
 
     # --- who reads the Type body, and who reads the kind -------------------
+    # WHY comments are stripped first: `portSignature.ts` names attributeSource
+    # in a comment explaining why the Type body stays text — a mention, not a
+    # reader. Same trick as tests/test_stock_boundary.py's _without_comments.
+    def code_only(text: str) -> str:
+        text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+        return re.sub(r"(?m)^\s*//.*$", "", text)
+
     attr_readers = sorted(
         str(p.relative_to(ROOT)) for p in src
-        if p.suffix != ".css" and "attributeSource" in p.read_text(encoding="utf-8")
+        if p.suffix != ".css" and "attributeSource" in code_only(p.read_text(encoding="utf-8"))
         and "/babble/" not in str(p) and p.name not in ("blockModel.ts", "blockShapeMigrations.ts")
     )
     block_type_files = sorted(
