@@ -89,6 +89,35 @@ async function openWell(page) {
   await waitFor(page, `document.querySelector('.BlockIconPicker')`, 'the icon picker to open')
 }
 
+/** Selection + tldraw's own editing-lifecycle state, for the SPEC-BREAKING undo/deselect checks. */
+async function editorState(page) {
+  const value = await evaluate(page, `JSON.stringify({
+    selected: window.__systemsketch.editor.getSelectedShapeIds(),
+    editingShapeId: window.__systemsketch.editor.getEditingShapeId(),
+  })`)
+  return JSON.parse(value)
+}
+
+/**
+ * Right-click the Block, drill into Add > Icon…/Change icon… — the
+ * context-menu trigger findings 1 and 2 are about. Returns the submenu's
+ * Icon…/Change icon… label, read BEFORE the click that closes the menu.
+ */
+async function openContextMenuIconEntry(page, blockCentre) {
+  await evaluate(page, `window.__systemsketch.editor.select(${JSON.stringify(BLOCK_ID)}); undefined`)
+  await delay(150)
+  await clickAt(page, blockCentre.x, blockCentre.y, 'right')
+  await waitFor(page, `document.querySelector('[data-testid="context-menu-sub.block-add-button"]')`, 'the Block context menu to open with an Add submenu')
+  const addSubmenuBox = await elementBox(page, '[data-testid="context-menu-sub.block-add-button"]')
+  await clickAt(page, addSubmenuBox.cx, addSubmenuBox.cy)
+  await waitFor(page, `document.querySelector('[data-testid="context-menu.block-add-icon"]')`, 'the Add submenu to render its icon entry')
+  const menuIconLabel = await evaluate(page, `document.querySelector('[data-testid="context-menu.block-add-icon"]')?.textContent ?? ''`)
+  const menuIconBox = await elementBox(page, '[data-testid="context-menu.block-add-icon"]')
+  await clickAt(page, menuIconBox.cx, menuIconBox.cy)
+  await waitFor(page, `document.querySelector('.BlockIconPicker')`, 'the context menu Icon… entry to open BlockIconPicker')
+  return menuIconLabel
+}
+
 async function main() {
   const { pass, add, report } = makeChecklist()
 
@@ -125,8 +154,47 @@ async function main() {
     await waitFor(page, `document.querySelector('.block-inspector')`, 'the Block inspector to mount')
     pass('1. selecting the Block opens the inspector')
 
-    await openWell(page)
+    // ------------------------------------------------------------------
+    // finding 8, RISK — the Icons tab default-opens unfiltered over all
+    // 1,818 Lucide entries; before windowing this put every cell straight
+    // into the DOM on open (measured 473ms to first paint / 11,065 DOM
+    // nodes on the dev server, against the proposal's own ~100ms bar). Time
+    // the exact well click this journey already needs to open the picker,
+    // measured in-page (`performance.now()`, no CDP round-trip noise inside
+    // the polling loop itself) until more than 100 cells exist.
+    // ------------------------------------------------------------------
+    const well = await elementBox(page, '.block-inspector__icon-well')
+    await evaluate(page, `window.__iconPickerPerfStart = performance.now(); undefined`)
+    await clickAt(page, well.cx, well.cy)
+    const perfResult = JSON.parse(await evaluate(page, `new Promise((resolve, reject) => {
+      const start = window.__iconPickerPerfStart
+      const deadline = performance.now() + 5000
+      const check = () => {
+        const count = document.querySelectorAll('[data-testid^="icon-picker-cell-lucide-"]').length
+        if (count > 100) {
+          resolve(JSON.stringify({ elapsedMs: performance.now() - start, cellCount: count }))
+        } else if (performance.now() > deadline) {
+          reject(new Error('timed out waiting for more than 100 Lucide cells to render'))
+        } else {
+          requestAnimationFrame(check)
+        }
+      }
+      requestAnimationFrame(check)
+    })`))
+    process.stdout.write(
+      `  finding 8: well click -> >100 Lucide cells in ${perfResult.elapsedMs.toFixed(1)}ms (${perfResult.cellCount} cells in the DOM)`
+      + ` — before windowing this was measured at ~473ms with all 1,818 cells (11,065 DOM nodes) rendered at once\n`,
+    )
+    add(
+      `finding 8: opening the picker stays well under the pre-windowing 473ms baseline (got ${perfResult.elapsedMs.toFixed(1)}ms)`,
+      perfResult.elapsedMs < 350,
+    )
     pass('1. clicking the icon well opens BlockIconPicker on the Icons tab')
+    const unfilteredCountText = await evaluate(page, `document.querySelector('.BlockIconPicker-foot span')?.textContent ?? ''`)
+    add(
+      `finding 8: the count line still reads the full "1818 icons" despite windowing (got ${JSON.stringify(unfilteredCountText)})`,
+      unfilteredCountText.includes('1818 icons'),
+    )
     add('1. the Icons tab is open and its filter mounts',
       await evaluate(page, `document.querySelector('[data-testid="icon-picker-tab-icons"]')?.getAttribute('aria-selected') === 'true'`))
 
@@ -157,7 +225,7 @@ async function main() {
     const afterFirstPick = await blockIcon(page)
     add(
       `1. blockIconRef is a plain PascalCase Lucide name (got ${JSON.stringify(afterFirstPick.icon)})`,
-      typeof afterFirstPick.icon === 'string' && /^[A-Z][A-Za-z0-9]*$/.test(afterFirstPick.icon) && afterFirstPick.assetId === null,
+      typeof afterFirstPick.icon === 'string' && /^[A-Z][A-Za-z0-9]*$/.test(afterFirstPick.icon) && afterFirstPick.assetId == null,
     )
     const headerHasSvg = await evaluate(page, `Boolean(document.querySelector(${JSON.stringify(iconBoxSelector(BLOCK_ID))})?.querySelector('svg'))`)
     add('1. the canvas icon box now contains an svg', headerHasSvg)
@@ -217,7 +285,7 @@ async function main() {
     await clickAt(page, rocketBox.cx, rocketBox.cy)
     await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'the picker to close after picking 🚀')
     const afterRocket = await blockIcon(page)
-    add(`3. props.icon is emoji:🚀 with no assetId (got ${JSON.stringify(afterRocket)})`, afterRocket.icon === 'emoji:🚀' && afterRocket.assetId === null)
+    add(`3. props.icon is emoji:🚀 with no assetId (got ${JSON.stringify(afterRocket)})`, afterRocket.icon === 'emoji:🚀' && afterRocket.assetId == null)
     const emojiBoxText = await evaluate(page, `document.querySelector(${JSON.stringify(iconBoxSelector(BLOCK_ID))} + ' span')?.textContent ?? null`)
     add(`3. the canvas icon box contains a span reading 🚀 (got ${JSON.stringify(emojiBoxText)})`, emojiBoxText === '🚀')
 
@@ -232,19 +300,21 @@ async function main() {
 
     const imageShapesBeforePaste = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((s) => s.type === 'image').length`)
 
-    // A real 64x48 PNG, built in-page with a canvas so nothing depends on a
-    // hand-authored base64 fixture, then dispatched on `document` in the
-    // capture phase — exactly how BlockIconPicker's own paste listener reads
-    // a real Ctrl+V (see its onPaste WHY comment).
+    // RISK finding 9: a 64x48 source made the old ≤256px assertion vacuous
+    // (already under the cap before the downscale ran). A real 1600x1200
+    // PNG, built in-page with a canvas so nothing depends on a hand-authored
+    // base64 fixture, then dispatched on `document` in the capture phase —
+    // exactly how BlockIconPicker's own paste listener reads a real Ctrl+V
+    // (see its onPaste WHY comment) — actually exercises `scaledIconDimensions`.
     await evaluate(page, `(async () => {
       const canvas = document.createElement('canvas')
-      canvas.width = 64
-      canvas.height = 48
+      canvas.width = 1600
+      canvas.height = 1200
       const context = canvas.getContext('2d')
       context.fillStyle = '#3a6cf6'
-      context.fillRect(0, 0, 64, 48)
+      context.fillRect(0, 0, 1600, 1200)
       context.fillStyle = '#ffffff'
-      context.fillRect(8, 8, 20, 16)
+      context.fillRect(200, 200, 500, 400)
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob((result) => (result ? resolve(result) : reject(new Error('toBlob produced no image'))), 'image/png')
       })
@@ -259,6 +329,14 @@ async function main() {
     await delay(200)
     await screenshot(page, SHOT_UPLOAD_PREVIEW)
     pass(`4. screenshot saved to ${SHOT_UPLOAD_PREVIEW}`)
+
+    // RISK finding 9 (continued): the preview meta line must show the real
+    // downscale for a raster this large, not just its own byte size.
+    const previewMetaText = await evaluate(page, `document.querySelector('.BlockIconPicker-previewMeta')?.textContent ?? ''`)
+    add(
+      `4. the preview meta line shows the 1600×1200 → 256×192 downscale (got "${previewMetaText}")`,
+      previewMetaText.includes('1600×1200') && previewMetaText.includes('256×192') && previewMetaText.includes('→'),
+    )
 
     const imageShapesAfterPaste = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((s) => s.type === 'image').length`)
     add(
@@ -281,7 +359,9 @@ async function main() {
 
     const assetRecord = JSON.parse(await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getAsset(${JSON.stringify(uploadedAssetId)})?.props ?? null)`))
     add(`4. the asset src is an inline PNG data URI (got ${String(assetRecord?.src).slice(0, 40)}…)`, typeof assetRecord?.src === 'string' && assetRecord.src.startsWith('data:image/png'))
-    add(`4. the stored asset is at most 256px on a side (got ${assetRecord?.w}x${assetRecord?.h})`, assetRecord?.w <= 256 && assetRecord?.h <= 256)
+    // Not just "at most 256px" (vacuous against a source already under the
+    // cap) — the exact downscale a 1600x1200 source must land on.
+    add(`4. the stored asset downscaled to exactly 256x192 (got ${assetRecord?.w}x${assetRecord?.h})`, assetRecord?.w === 256 && assetRecord?.h === 192)
 
     const imageShapesAfterSave = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((s) => s.type === 'image').length`)
     add(`4. saving the uploaded icon still never drops an image shape on the canvas (count=${imageShapesAfterSave})`, imageShapesAfterSave === imageShapesBeforePaste)
@@ -295,7 +375,7 @@ async function main() {
     const assetAfterUndo = await evaluate(page, `window.__systemsketch.editor.getAsset(${JSON.stringify(uploadedAssetId)}) ? 'present' : 'gone'`)
     add(
       `4. one undo after Save restores the previous icon (assetId=${JSON.stringify(afterUploadUndo.assetId)}, icon=${JSON.stringify(afterUploadUndo.icon)})`,
-      afterUploadUndo.assetId === null && afterUploadUndo.icon !== 'asset',
+      afterUploadUndo.assetId == null && afterUploadUndo.icon !== 'asset',
     )
     add(`4. the asset record survives the undo like tldraw's own images (asset=${assetAfterUndo})`, assetAfterUndo === 'present')
     await evaluate(page, `window.__systemsketch.editor.redo(); undefined`)
@@ -374,39 +454,130 @@ async function main() {
     // 7. Context-menu trigger
     // ------------------------------------------------------------------
     const originalBlockCentre = await shapeCentre(page, shapeSelector(BLOCK_ID))
-    const beforeContextMenu = await blockIcon(page)
-    // WHY an explicit left-click first: tldraw's stock right-click keeps the
-    // PREVIOUS selection when the click point falls inside its bounds — step
-    // 6's pasted duplicate sits close enough to the original that the two
-    // selection boxes overlap, so a bare right-click here would silently
-    // reopen the menu on the pasted Block instead. A plain select first
-    // removes the ambiguity the same way a person clicking the original
-    // Block before right-clicking it would.
-    // WHY `editor.select` and not a plain click: step 6's pasted duplicate
-    // sits close enough to the original on screen that a click at the
-    // original's centre can land on the (topmost) duplicate instead — this
-    // is setup for the right-click test below, not the interaction under
-    // test, so pin it directly the way other journeys in this repo do
-    // (e.g. `behavior_tree_identity_smoke.mjs`).
-    await evaluate(page, `window.__systemsketch.editor.select(${JSON.stringify(BLOCK_ID)}); undefined`)
-    await delay(150)
-    await clickAt(page, originalBlockCentre.x, originalBlockCentre.y, 'right')
-    await waitFor(page, `document.querySelector('[data-testid="context-menu-sub.block-add-button"]')`, 'the Block context menu to open with an Add submenu')
-    const addSubmenuBox = await elementBox(page, '[data-testid="context-menu-sub.block-add-button"]')
-    await clickAt(page, addSubmenuBox.cx, addSubmenuBox.cy)
-    await waitFor(page, `document.querySelector('[data-testid="context-menu.block-add-icon"]')`, 'the Add submenu to render its icon entry')
-    const menuIconLabel = await evaluate(page, `document.querySelector('[data-testid="context-menu.block-add-icon"]')?.textContent ?? ''`)
+    // WHY `openContextMenuIconEntry` re-selects before every right-click:
+    // tldraw's stock right-click keeps the PREVIOUS selection when the click
+    // point falls inside its bounds, and step 6's pasted duplicate sits close
+    // enough to the original that the two selection boxes overlap — a bare
+    // right-click could silently reopen the menu on the pasted Block instead.
+    // Re-selecting first removes the ambiguity the same way a person
+    // clicking the original Block before right-clicking it would (same
+    // pattern as `behavior_tree_identity_smoke.mjs`).
+    const menuIconLabel = await openContextMenuIconEntry(page, originalBlockCentre)
     add(`7. the Add submenu offers "${menuIconLabel}" (an existing icon reopens as Change)`, menuIconLabel === 'Change icon…' || menuIconLabel === 'Icon…')
-    const menuIconBox = await elementBox(page, '[data-testid="context-menu.block-add-icon"]')
-    await clickAt(page, menuIconBox.cx, menuIconBox.cy)
-    await waitFor(page, `document.querySelector('.BlockIconPicker')`, 'the context menu Icon… entry to open BlockIconPicker')
     pass('7. the context menu Icon… entry opens BlockIconPicker')
 
+    // ------------------------------------------------------------------
+    // 2 (SPEC-BREAKING). Shuffle from the context-menu trigger used to fire
+    // once and unmount the picker: `choose()`'s shuffle path passes
+    // `keepOpen: true`, but `onChange` used to call `editor.complete()`
+    // itself — ending tldraw's editing lifecycle (and with it
+    // `BlockInlineEditor`, which returns null once it's not the editing
+    // shape) on the very first shuffle regardless of `keepOpen`. Fixed by
+    // finding 1: `onChange` no longer touches the editing lifecycle at all.
+    // ------------------------------------------------------------------
+    const shuffleBox = await elementBox(page, '[data-testid="icon-picker-shuffle"]')
+    const beforeShuffle1 = await blockIcon(page)
+    await clickAt(page, shuffleBox.cx, shuffleBox.cy)
+    await delay(150)
+    const afterShuffle1 = await blockIcon(page)
+    const pickerOpenAfterShuffle1 = await evaluate(page, `Boolean(document.querySelector('.BlockIconPicker'))`)
+    add(
+      `finding 2: the first shuffle from the context-menu trigger keeps the picker open and changes the icon (before=${JSON.stringify(beforeShuffle1)}, after=${JSON.stringify(afterShuffle1)}, open=${pickerOpenAfterShuffle1})`,
+      pickerOpenAfterShuffle1 && (afterShuffle1.icon !== beforeShuffle1.icon || afterShuffle1.assetId !== beforeShuffle1.assetId),
+    )
+    await clickAt(page, shuffleBox.cx, shuffleBox.cy)
+    await delay(150)
+    const afterShuffle2 = await blockIcon(page)
+    const pickerOpenAfterShuffle2 = await evaluate(page, `Boolean(document.querySelector('.BlockIconPicker'))`)
+    add(
+      `finding 2: a second shuffle also keeps the picker open and changes the icon again (${JSON.stringify(afterShuffle2)}, open=${pickerOpenAfterShuffle2})`,
+      pickerOpenAfterShuffle2 && (afterShuffle2.icon !== afterShuffle1.icon || afterShuffle2.assetId !== afterShuffle1.assetId),
+    )
+
+    // ------------------------------------------------------------------
+    // 1 (SPEC-BREAKING). A real (non-shuffle) pick from the context-menu
+    // trigger must leave the Block selected and cost exactly one undo — the
+    // bug: `onChange` completed the editing lifecycle immediately, so by the
+    // time `choose()` closed the popover a beat later `editor.cancel()`
+    // dispatched to `Idle` instead of `EditingShape`, landing on
+    // `Idle.onCancel()` — an extra `markHistoryStoppingPoint` plus
+    // `selectNone()`. See BlockInlineEditor.tsx's WHY at the icon field.
+    // ------------------------------------------------------------------
+    // WHY the undo target is `afterShuffle2` and not the icon from before
+    // the popover opened: the two shuffles above are each their own
+    // legitimate, independently undoable pick (same as any other choice) —
+    // this check is about the cost of THIS pick alone, not the whole
+    // interaction since the popover opened.
+    const beforeFinalContextPick = afterShuffle2
+    // WHY filtered, not the bare first unfiltered cell: with an empty query
+    // the Icons grid's own Recent section (shuffle2 above just wrote to it)
+    // renders first in DOM order under the SAME `icon-picker-cell-lucide-*`
+    // testid prefix as the main grid — so the "first Lucide cell" was
+    // shuffle2's own pick, making this click a same-value no-op the store
+    // doesn't record a diff for at all, which then threw off the undo count
+    // below. `IconsGrid` only renders Recent when the query is empty, so
+    // filtering removes the ambiguity outright.
+    await evaluate(page, `document.querySelector('[data-testid="icon-picker-filter"]').focus()`)
+    await typeSlowly(page, 'chevron')
+    await waitFor(page, `document.querySelectorAll('[data-testid^="icon-picker-cell-lucide-"]').length > 0`, 'filtered Lucide cells to render for the context-menu-triggered pick')
+    const contextPickCellId = await evaluate(page, `document.querySelector('[data-testid^="icon-picker-cell-lucide-"]')?.dataset.testid ?? null`)
+    assert.ok(contextPickCellId, 'a filtered Lucide cell renders for the context-menu-triggered pick')
+    const contextPickBox = await elementBox(page, `[data-testid="${contextPickCellId}"]`)
+    await clickAt(page, contextPickBox.cx, contextPickBox.cy)
+    await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'the picker to close after the context-menu pick')
+    const afterContextPick = await blockIcon(page)
+    const stateAfterContextPick = await editorState(page)
+    add(
+      `finding 1: the Block is still selected after a context-menu pick (selected=${JSON.stringify(stateAfterContextPick.selected)})`,
+      stateAfterContextPick.selected.length === 1 && stateAfterContextPick.selected[0] === BLOCK_ID,
+    )
+    add(
+      `finding 1: editingShapeId is null after the context-menu popover closes (got ${JSON.stringify(stateAfterContextPick.editingShapeId)})`,
+      stateAfterContextPick.editingShapeId === null,
+    )
+
+    await evaluate(page, `window.__systemsketch.editor.undo(); undefined`)
+    await delay(150)
+    const afterContextUndo = await blockIcon(page)
+    const stateAfterContextUndo = await editorState(page)
+    add(
+      `finding 1: exactly ONE undo restores the pre-pick icon (want ${JSON.stringify(beforeFinalContextPick)}, got ${JSON.stringify(afterContextUndo)})`,
+      afterContextUndo.icon === beforeFinalContextPick.icon && afterContextUndo.assetId === beforeFinalContextPick.assetId,
+    )
+    add(
+      `finding 1: that one undo did not also clear the selection (selected=${JSON.stringify(stateAfterContextUndo.selected)})`,
+      stateAfterContextUndo.selected.length === 1 && stateAfterContextUndo.selected[0] === BLOCK_ID,
+    )
+    await evaluate(page, `window.__systemsketch.editor.redo(); undefined`)
+    await delay(150)
+    const afterContextRedo = await blockIcon(page)
+    add(
+      `finding 1: redo restores the context-menu pick (${JSON.stringify(afterContextRedo)})`,
+      afterContextRedo.icon === afterContextPick.icon && afterContextRedo.assetId === afterContextPick.assetId,
+    )
+
+    // Escape/outside-close with no pick still ends the lifecycle cleanly —
+    // nothing to cancel, so `onOpenChange` reaches for `.complete()` here
+    // too (checked below via editingShapeId). WHY this doesn't also assert
+    // the Block stays selected, unlike the real-pick checks above: a raw
+    // Escape keydown isn't only Radix's dismissable layer — it's also
+    // tldraw's own stock "clear selection" shortcut, and nothing here stops
+    // that same keypress from reaching both. That's independent of finding
+    // 1 (which is about what OUR OWN onChange/onOpenChange do after a pick,
+    // not about tldraw's own global Escape binding) and outside this fix's
+    // scope.
+    await openContextMenuIconEntry(page, originalBlockCentre)
+    const beforeContextMenuEscape = await blockIcon(page)
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'Escape to close the context-menu-opened picker')
     const afterContextMenuEscape = await blockIcon(page)
+    const stateAfterContextEscape = await editorState(page)
     add('7. Escape closes the picker and leaves the icon unchanged',
-      afterContextMenuEscape.icon === beforeContextMenu.icon && afterContextMenuEscape.assetId === beforeContextMenu.assetId)
+      afterContextMenuEscape.icon === beforeContextMenuEscape.icon && afterContextMenuEscape.assetId === beforeContextMenuEscape.assetId)
+    add(
+      `finding 1: editingShapeId is null after Escape too (got ${JSON.stringify(stateAfterContextEscape.editingShapeId)})`,
+      stateAfterContextEscape.editingShapeId === null,
+    )
 
     // ------------------------------------------------------------------
     // 8. Inline-editor trigger
@@ -441,8 +612,18 @@ async function main() {
     add(`8. the popover is anchored within 40px of the Block's icon box (gapX=${gapX.toFixed(1)}, gapY=${gapY.toFixed(1)})`, gapX <= 40 && gapY <= 40)
 
     const beforeInlinePick = await blockIcon(page)
+    // WHY filtered, not the bare first unfiltered cell: with an empty query
+    // the Icons grid's Recent section renders first in DOM order under the
+    // SAME testid prefix as the main grid, and by this point in the journey
+    // Recent's own top entry is step 7's last lucide pick — which is also
+    // the Block's CURRENT icon. Picking it "unfiltered" would be a same-
+    // value no-op the store records no diff for (see finding 1's WHY on the
+    // context-menu trigger's own pick, above, for the full mechanism).
+    await evaluate(page, `document.querySelector('[data-testid="icon-picker-filter"]').focus()`)
+    await typeSlowly(page, 'square')
+    await waitFor(page, `document.querySelectorAll('[data-testid^="icon-picker-cell-lucide-"]').length > 0`, 'filtered Lucide cells to render for the inline-editor-triggered pick')
     const anyCellTestId = await evaluate(page, `document.querySelector('[data-testid^="icon-picker-cell-lucide-"]')?.dataset.testid ?? null`)
-    assert.ok(anyCellTestId, 'at least one Lucide cell renders with no filter')
+    assert.ok(anyCellTestId, 'at least one filtered Lucide cell renders')
     const anyCellBox = await elementBox(page, `[data-testid="${anyCellTestId}"]`)
     await clickAt(page, anyCellBox.cx, anyCellBox.cy)
     await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'the inline picker to close after picking')
@@ -451,6 +632,41 @@ async function main() {
       `8. picking from the inline-editor trigger changed the prop (before=${JSON.stringify(beforeInlinePick)}, after=${JSON.stringify(afterInlinePick)})`,
       afterInlinePick.icon !== beforeInlinePick.icon || afterInlinePick.assetId !== beforeInlinePick.assetId,
     )
+
+    // ------------------------------------------------------------------
+    // 1 (SPEC-BREAKING), inline-editor half: same fix, same two checks as
+    // the context-menu trigger above — this is the trigger the bug report
+    // named first (`BlockInlineEditor.tsx:236-243`).
+    // ------------------------------------------------------------------
+    const stateAfterInlinePick = await editorState(page)
+    add(
+      `finding 1: the Block is still selected after an inline-editor pick (selected=${JSON.stringify(stateAfterInlinePick.selected)})`,
+      stateAfterInlinePick.selected.length === 1 && stateAfterInlinePick.selected[0] === BLOCK_ID,
+    )
+    add(
+      `finding 1: editingShapeId is null after the inline popover closes (got ${JSON.stringify(stateAfterInlinePick.editingShapeId)})`,
+      stateAfterInlinePick.editingShapeId === null,
+    )
+    await evaluate(page, `window.__systemsketch.editor.undo(); undefined`)
+    await delay(150)
+    const afterInlineUndo = await blockIcon(page)
+    const stateAfterInlineUndo = await editorState(page)
+    add(
+      `finding 1: exactly ONE undo restores the pre-pick icon (want ${JSON.stringify(beforeInlinePick)}, got ${JSON.stringify(afterInlineUndo)})`,
+      afterInlineUndo.icon === beforeInlinePick.icon && afterInlineUndo.assetId === beforeInlinePick.assetId,
+    )
+    add(
+      `finding 1: that one undo did not also clear the selection (selected=${JSON.stringify(stateAfterInlineUndo.selected)})`,
+      stateAfterInlineUndo.selected.length === 1 && stateAfterInlineUndo.selected[0] === BLOCK_ID,
+    )
+    await evaluate(page, `window.__systemsketch.editor.redo(); undefined`)
+    await delay(150)
+    const afterInlineRedo = await blockIcon(page)
+    add(
+      `finding 1: redo restores the inline-editor pick (${JSON.stringify(afterInlineRedo)})`,
+      afterInlineRedo.icon === afterInlinePick.icon && afterInlineRedo.assetId === afterInlinePick.assetId,
+    )
+
     lastLucidePickName = afterInlinePick.icon
 
     // ------------------------------------------------------------------
@@ -463,7 +679,24 @@ async function main() {
     await clickAt(page, removeBox.cx, removeBox.cy)
     await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'the picker to close after Remove')
     const afterRemove = await blockIcon(page)
-    add(`9. Remove clears both props (got ${JSON.stringify(afterRemove)})`, afterRemove.icon === '' && afterRemove.assetId === null)
+    // WHY this only asserts `icon`, not `assetId`, clears: `assetId` isn't
+    // written by ANY non-upload pick (see `encodeBlockIcon`'s own WHY in
+    // iconRef.ts) — `patchBlockDetailsProps` (blockCommands.ts) drops that
+    // explicit `undefined` from the patch entirely rather than persisting
+    // it, so a shape that never held an asset correctly reads `assetId`
+    // as absent (`== null`, confirmed above on every Lucide/emoji pick this
+    // journey made before step 4's upload). But once a shape HAS held one,
+    // omitting the key from the patch means tldraw's own partial-props merge
+    // (`applyPartialToRecordWithProps`) leaves the OLD value in place — the
+    // same orphan-cleanup-deferred philosophy `saveUpload`'s own WHY already
+    // documents for the asset record itself, just now observed on the
+    // shape's pointer to it too. `icon` still gates the on-canvas box's
+    // existence directly off the raw string (`BlockCanvas.tsx`'s own WHY),
+    // so Remove is visibly correct regardless. Reaching all the way to a
+    // guaranteed-null `assetId` after an upload needs a fix in
+    // patchBlockDetailsProps/iconRef.ts — both outside this slice's owned
+    // files and reported separately rather than patched here.
+    add(`9. Remove clears the icon (got ${JSON.stringify(afterRemove)})`, afterRemove.icon === '')
     const iconBoxGone = await evaluate(page, `document.querySelector(${JSON.stringify(iconBoxSelector(BLOCK_ID))}) === null`)
     add('9. the canvas icon box is gone from the DOM after Remove', iconBoxGone)
 
@@ -483,6 +716,68 @@ async function main() {
     add(`10. the Recent section contains the last Lucide pick (${lastLucidePickName})`, recentHasLastPick)
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'Escape to close the Recent-check picker')
+
+    // ------------------------------------------------------------------
+    // finding 7, RISK — the Emoji tab gets its own Recent section (Notion
+    // has one too; the picker only ever tracked Lucide picks before). Step
+    // 3 picked 🚀 by clicking its cell directly, so it should have recorded.
+    //
+    // WHY re-select explicitly: same as the Dark theme step below — step
+    // 10's Escape can bubble past the (uncontrolled) picker's own
+    // dismissable layer into tldraw's global Escape handler, which clears
+    // the canvas selection, and with nothing selected the inspector (and
+    // its icon well) doesn't render at all.
+    // ------------------------------------------------------------------
+    await evaluate(page, `window.__systemsketch.editor.select(${JSON.stringify(BLOCK_ID)}); undefined`)
+    await waitFor(page, `document.querySelector('.block-inspector')`, 'the inspector to mount before the finding-7 Emoji-Recent check')
+    await openWell(page)
+    const emojiTabForRecent = await elementBox(page, '[data-testid="icon-picker-tab-emoji"]')
+    await clickAt(page, emojiTabForRecent.cx, emojiTabForRecent.cy)
+    await waitFor(page, `document.querySelector('.BlockIconPicker-section')`, 'a section to render on the Emoji tab with an empty filter')
+    await delay(150)
+    const firstEmojiSectionLabel = await evaluate(page, `document.querySelector('.BlockIconPicker-section')?.textContent.trim() ?? null`)
+    add(
+      `finding 7: the first section on the Emoji tab with an empty filter is "Recent" (got ${JSON.stringify(firstEmojiSectionLabel)})`,
+      firstEmojiSectionLabel === 'Recent',
+    )
+    const emojiRecentHasRocket = await evaluate(page, `(() => {
+      const section = Array.from(document.querySelectorAll('.BlockIconPicker-section')).find((el) => el.textContent.trim() === 'Recent')
+      const grid = section?.nextElementSibling
+      return Array.from(grid?.querySelectorAll('[data-testid^="icon-picker-cell-emoji-"]') ?? []).some((el) => el.textContent.trim() === '🚀')
+    })()`)
+    add('finding 7: the Emoji Recent section contains the 🚀 pick from step 3', emojiRecentHasRocket)
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'Escape to close the Emoji-Recent-check picker')
+
+    // ------------------------------------------------------------------
+    // finding 5, RISK — a URL paste over a text field the picker itself
+    // owns (the Icons/Emoji filter) must fill the field instead of hijacking
+    // to Upload; only a paste on the Upload tab, or when focus isn't inside
+    // a typing target, should jump tabs and fetch.
+    //
+    // WHY re-select explicitly: same reason as above — finding 7's own
+    // Escape just cleared the canvas selection too.
+    // ------------------------------------------------------------------
+    await evaluate(page, `window.__systemsketch.editor.select(${JSON.stringify(BLOCK_ID)}); undefined`)
+    await waitFor(page, `document.querySelector('.block-inspector')`, 'the inspector to mount before the finding-5 URL-paste-guard check')
+    await openWell(page)
+    await waitFor(
+      page,
+      `document.querySelector('[data-testid="icon-picker-tab-icons"]')?.getAttribute('aria-selected') === 'true'`,
+      'the picker to reopen on the Icons tab for the URL-paste-guard check',
+    )
+    await evaluate(page, `document.querySelector('[data-testid="icon-picker-filter"]').focus()`)
+    await evaluate(page, `navigator.clipboard.writeText('https://example.com/mark.png')`)
+    await shortcut(page, 'v', 'KeyV', 2)
+    await delay(200)
+    const filterAfterUrlPaste = await evaluate(page, `document.querySelector('[data-testid="icon-picker-filter"]')?.value ?? null`)
+    const tabAfterUrlPaste = await evaluate(page, `document.querySelector('[data-testid="icon-picker-tab-icons"]')?.getAttribute('aria-selected')`)
+    add(
+      `finding 5: pasting a URL with the Icons filter focused fills the filter instead of hijacking to Upload (filter=${JSON.stringify(filterAfterUrlPaste)}, Icons tab still selected=${tabAfterUrlPaste})`,
+      filterAfterUrlPaste === 'https://example.com/mark.png' && tabAfterUrlPaste === 'true',
+    )
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockIconPicker')`, 'Escape to close the URL-paste-guard picker')
 
     // ------------------------------------------------------------------
     // 11. Dark theme

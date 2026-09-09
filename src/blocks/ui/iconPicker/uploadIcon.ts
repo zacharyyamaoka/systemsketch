@@ -14,6 +14,15 @@ import type { Editor, TLAsset, TLAssetId } from 'tldraw'
 /** The longest edge a raster icon is allowed to keep. SVGs pass through unscaled. */
 export const ICON_MAX_EDGE_PX = 256
 
+// WHY a size cap on SVGs when rasters are already bounded by ICON_MAX_EDGE_PX:
+// an SVG passes through byte-for-byte (see prepareIconImage below), so there
+// is no downscale step to shrink a pathological file the way there is for a
+// raster. Without a ceiling here, a multi-megabyte vector (embedded raster
+// data, thousands of paths) sails past every other guard and only surfaces
+// as a stall in `editor.getAssetForExternalContent` — see the SPEC-BREAKING
+// finding on saveUpload's missing try/catch.
+export const ICON_MAX_SVG_BYTES = 1024 * 1024
+
 export interface PreparedIconImage {
 	file: File
 	/** The stored (post-downscale) size — an SVG's is its own declared size. */
@@ -38,6 +47,22 @@ export function scaledIconDimensions(width: number, height: number): { width: nu
 		width: Math.max(1, Math.round(width * scale)),
 		height: Math.max(1, Math.round(height * scale)),
 	}
+}
+
+/**
+ * Shared with `BlockIconPicker`'s preview meta line and this module's own
+ * error messages, so a size only ever gets formatted one way.
+ *
+ * WHY a "N B" rung below 1 KB: `Math.max(1, Math.round(bytes / 1024))` used
+ * to floor everything under 1 KB to "1 KB" — true for nothing, since an SVG
+ * that small genuinely is a handful of bytes, and the old line also claimed
+ * that count as the *stored* size for an SVG tldraw hadn't sanitised yet.
+ * See `describeUpload`'s own WHY for the second half of that fix.
+ */
+export function formatIconBytes(bytes: number): string {
+	if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+	if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`
+	return `${Math.max(0, Math.round(bytes))} B`
 }
 
 function isSvg(file: File): boolean {
@@ -69,6 +94,9 @@ function svgDimensions(source: string): { width: number; height: number } {
 export async function prepareIconImage(file: File): Promise<PreparedIconImage> {
 	const originalBytes = file.size
 	if (isSvg(file)) {
+		if (originalBytes > ICON_MAX_SVG_BYTES) {
+			throw new Error(`this SVG is ${formatIconBytes(originalBytes)} — the largest an icon can be is ${formatIconBytes(ICON_MAX_SVG_BYTES)}`)
+		}
 		const text = await file.text()
 		const { width, height } = svgDimensions(text)
 		return {

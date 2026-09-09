@@ -228,18 +228,34 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 		// editing lifecycle already has the icon field active, so closing the
 		// popover (Escape, an outside click, or a pick) is what should end
 		// that lifecycle, not the other way around.
+		//
+		// WHY `onChange` never calls `editor.complete()`/`.cancel()` itself,
+		// and `onOpenChange` only ever calls `.complete()`: a pick already
+		// applied its own undo step (`updateBlockDetails`), so ending the
+		// editing lifecycle here is bookkeeping, not a second action to
+		// record. Calling `.complete()` from `onChange` used to end that
+		// lifecycle immediately, so by the time the picker's own `choose()`
+		// closed the popover a beat later the select tool was already back in
+		// `idle` — and `editor.cancel()` dispatched there instead of to
+		// `editing_shape`, landing on `Idle.onCancel()`, which marks a second
+		// history step and calls `selectNone()`. That cost every pick an
+		// extra undo and a deselected Block. `.cancel()` after a pick is
+		// wrong for the same reason Escape/outside-click use `.complete()`
+		// too: there is nothing left to cancel. Guarding on
+		// `getEditingShapeId() === shape.id` keeps a stale close (this Block
+		// already lost editing focus to something else) from completing an
+		// editing session it doesn't own.
 		return (
 			<BlockIconPicker
 				value={blockIconRef(shape.props)}
 				title={shape.props.title}
 				open
 				onOpenChange={(next) => {
-					if (!next) editor.cancel()
+					if (!next && editor.getEditingShapeId() === shape.id) editor.complete()
 				}}
 				onChange={(icon) => {
 					const { icon: iconValue, assetId } = encodeBlockIcon(icon)
 					updateBlockDetails(editor, shape.id, { icon: iconValue, assetId }, { historyLabel: 'edit block icon' })
-					editor.complete()
 				}}
 			>
 				<span

@@ -19,6 +19,8 @@ export interface EmojiLibrary {
 	readonly entries: readonly EmojiEntry[]
 	/** Unicode group names in Notion's order, only those present. */
 	readonly groups: readonly string[]
+	/** Same shape as `LucideLibrary.byName` — the Emoji tab's own Recent section looks entries up by slug. */
+	readonly bySlug: ReadonlyMap<string, EmojiEntry>
 	search(query: string): EmojiEntry[]
 }
 
@@ -62,10 +64,12 @@ export function loadEmojiLibrary(): Promise<EmojiLibrary> {
 
 export function buildEmojiLibrary(version: string, entries: readonly EmojiEntry[]): EmojiLibrary {
 	const present = new Set(entries.map((entry) => entry.group))
+	const bySlug = new Map(entries.map((entry) => [entry.slug, entry]))
 	return {
 		version,
 		entries,
 		groups: EMOJI_GROUP_ORDER.filter((group) => present.has(group)),
+		bySlug,
 		search: (query) => searchEmoji(entries, query),
 	}
 }

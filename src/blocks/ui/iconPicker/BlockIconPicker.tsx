@@ -42,30 +42,43 @@ import {
 	IconFetchError,
 	createIconAsset,
 	fetchIconFromUrl,
+	formatIconBytes,
 	prepareIconImage,
 	type PreparedIconImage,
 } from './uploadIcon'
+import { useWindowedGrid } from './useWindowedGrid'
 import { HEADER_ICON_PX, SIMPLE_ICON_PX } from '../../layoutBlock'
 import './block-icon-picker.css'
 
 type PickerTab = 'emoji' | 'icons' | 'upload'
 
-/** Staged Upload-tab state: nothing yet, or a prepared image waiting on Save. */
+/**
+ * Staged Upload-tab state: nothing yet, a prepared image waiting on Save, or
+ * an error. `error` carries `prepared`/`previewUrl` when the failure came
+ * from `saveUpload` (the file was already staged) so Back can return to that
+ * preview instead of losing the pick; it's absent when the failure came from
+ * `stageFile`/`stageUrl` (nothing staged yet to go back to).
+ */
 type UploadStage =
 	| { kind: 'empty' }
 	| { kind: 'preview'; prepared: PreparedIconImage; previewUrl: string; addToLibrary: boolean }
 	| { kind: 'saving'; prepared: PreparedIconImage; previewUrl: string }
-	| { kind: 'error'; message: string }
+	| { kind: 'error'; message: string; prepared?: PreparedIconImage; previewUrl?: string }
 
 const RECENT_KEY = 'systemsketch.iconPicker.recent'
+// WHY a sibling key rather than mixing kinds into `RECENT_KEY`: Lucide's
+// recent list is a list of `name`s, looked up through `lucideLib.byName`;
+// keeping emoji `slug`s in their own key means neither tab's lookup has to
+// guess what kind of id a given string is.
+const RECENT_EMOJI_KEY = 'systemsketch.iconPicker.recentEmoji'
 const SKIN_TONE_KEY = 'systemsketch.iconPicker.skinTone'
 const RECENT_LIMIT = 12
 /** Notion's promise, spelled out in the filter's own placeholder area. */
 const URL_PATTERN = /^https?:\/\/\S+$/
 
-function readRecents(): string[] {
+function readRecents(key: string): string[] {
 	try {
-		const raw = localStorage.getItem(RECENT_KEY)
+		const raw = localStorage.getItem(key)
 		const parsed: unknown = raw ? JSON.parse(raw) : []
 		return Array.isArray(parsed) ? parsed.filter((entry): entry is string => typeof entry === 'string') : []
 	} catch {
@@ -73,9 +86,9 @@ function readRecents(): string[] {
 	}
 }
 
-function writeRecents(names: readonly string[]): void {
+function writeRecents(key: string, names: readonly string[]): void {
 	try {
-		localStorage.setItem(RECENT_KEY, JSON.stringify(names))
+		localStorage.setItem(key, JSON.stringify(names))
 	} catch {
 		// private browsing / storage disabled — recents just don't persist
 	}
@@ -100,20 +113,31 @@ function writeSkinTone(tone: number): void {
 
 const TONE_HANDS: readonly string[] = EMOJI_SKIN_TONES.map((modifier) => `✋${modifier}`)
 
+/** True for anything a person can type text into — an `<input>`/`<textarea>` or a contenteditable. */
+function isTypingTarget(element: Element | null): boolean {
+	if (!element) return false
+	if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return true
+	return element instanceof HTMLElement && element.isContentEditable
+}
+
 function randomEntry<T>(list: readonly T[]): T | undefined {
 	return list.length ? list[Math.floor(Math.random() * list.length)] : undefined
 }
 
-function formatBytes(bytes: number): string {
-	if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-	return `${Math.max(1, Math.round(bytes / 1024))} KB`
-}
-
+// WHY this doesn't claim a stored size for an SVG: tldraw sanitises an SVG
+// asset's markup on save (`Editor.getAssetForExternalContent` runs it through
+// a sanitiser before `createAssets`), so `storedBytes` here is never a
+// measurement — the old line reported `originalBytes` as "stored as-is",
+// which is only true for a raster. Say what's actually known (kept as
+// vector, original size) and name the step that changes it instead of
+// inventing a number for it.
 function describeUpload(prepared: PreparedIconImage): string {
-	if (prepared.kind === 'svg') return `SVG kept as vector · ${formatBytes(prepared.originalBytes)} stored as-is`
+	if (prepared.kind === 'svg') {
+		return `SVG kept as vector · ${formatIconBytes(prepared.originalBytes)} (sanitised by tldraw on save)`
+	}
 	return (
-		`${prepared.originalWidth}×${prepared.originalHeight} ${formatBytes(prepared.originalBytes)} → `
-		+ `${prepared.width}×${prepared.height} PNG ${formatBytes(prepared.storedBytes)} stored in the .systemsketch`
+		`${prepared.originalWidth}×${prepared.originalHeight} ${formatIconBytes(prepared.originalBytes)} → `
+		+ `${prepared.width}×${prepared.height} PNG ${formatIconBytes(prepared.storedBytes)} stored in the .systemsketch`
 	)
 }
 
@@ -164,7 +188,8 @@ export function BlockIconPicker({
 	const [query, setQuery] = useState('')
 	const [tone, setTone] = useState(() => readSkinTone())
 	const [toneOpen, setToneOpen] = useState(false)
-	const [recent, setRecent] = useState(() => readRecents())
+	const [recent, setRecent] = useState(() => readRecents(RECENT_KEY))
+	const [recentEmoji, setRecentEmoji] = useState(() => readRecents(RECENT_EMOJI_KEY))
 	const [upload, setUpload] = useState<UploadStage>({ kind: 'empty' })
 	const [lucideLib, setLucideLib] = useState<LucideLibrary | null>(() => peekLucideLibrary())
 	const [emojiLib, setEmojiLib] = useState<EmojiLibrary | null>(() => peekEmojiLibrary())
@@ -189,20 +214,33 @@ export function BlockIconPicker({
 
 	// Reset transient UI (never the staged upload — Cancel/Back own that) each
 	// time the panel opens, so a stale filter or tab doesn't survive a reopen.
+	//
+	// WHY `recent`/`recentEmoji` are re-read from storage here too, not just
+	// seeded once via `useState`'s initializer: an uncontrolled picker (the
+	// inspector's icon well) stays mounted for as long as the inspector does,
+	// so its OWN `recent` state only ever reflects picks made through THAT
+	// instance. The context-menu and inline-editor triggers are each a fresh
+	// mount of a SEPARATE `BlockIconPicker` instance every time they open —
+	// their picks land in the shared `localStorage` list correctly, but the
+	// long-lived inspector instance never saw those writes, so its Recent
+	// section silently fell behind whatever was actually most recent. Same
+	// storage, three independent React copies of it.
 	useEffect(() => {
 		if (!open) return
 		setTab('icons')
 		setQuery('')
 		setToneOpen(false)
 		setUpload({ kind: 'empty' })
+		setRecent(readRecents(RECENT_KEY))
+		setRecentEmoji(readRecents(RECENT_EMOJI_KEY))
 		const frame = requestAnimationFrame(() => searchRef.current?.focus())
 		return () => cancelAnimationFrame(frame)
 	}, [open])
 
 	useEffect(() => {
-		if (upload.kind === 'preview' || upload.kind === 'saving') {
+		if (upload.kind === 'preview' || upload.kind === 'saving' || (upload.kind === 'error' && upload.previewUrl)) {
 			const url = upload.previewUrl
-			return () => URL.revokeObjectURL(url)
+			if (url) return () => URL.revokeObjectURL(url)
 		}
 	}, [upload])
 
@@ -218,12 +256,26 @@ export function BlockIconPicker({
 		if (!lucideLib || query.trim() !== '') return []
 		return recent.map((name) => lucideLib.byName.get(name)).filter((entry): entry is LucideLibraryEntry => Boolean(entry))
 	}, [lucideLib, recent, query])
+	// WHY looked up by slug rather than replaying the stored char: the stored
+	// identity is the emoji, not one particular skin-tone rendering of it, so
+	// Recent re-applies whatever tone is currently selected — same contract
+	// as the Icons tab's Recent honoring the icon's current style.
+	const recentEmojiEntries = useMemo<EmojiEntry[]>(() => {
+		if (!emojiLib || query.trim() !== '') return []
+		return recentEmoji.map((slug) => emojiLib.bySlug.get(slug)).filter((entry): entry is EmojiEntry => Boolean(entry))
+	}, [emojiLib, recentEmoji, query])
 
-	const choose = (ref: BlockIconRef, options: { keepOpen?: boolean } = {}) => {
+	const choose = (ref: BlockIconRef, options: { keepOpen?: boolean; emojiSlug?: string } = {}) => {
 		if (ref.kind === 'lucide') {
 			const next = [ref.name, ...recent.filter((name) => name !== ref.name)].slice(0, RECENT_LIMIT)
 			setRecent(next)
-			writeRecents(next)
+			writeRecents(RECENT_KEY, next)
+		}
+		if (ref.kind === 'emoji' && options.emojiSlug) {
+			const slug = options.emojiSlug
+			const next = [slug, ...recentEmoji.filter((entry) => entry !== slug)].slice(0, RECENT_LIMIT)
+			setRecentEmoji(next)
+			writeRecents(RECENT_EMOJI_KEY, next)
 		}
 		onChange(ref)
 		if (!options.keepOpen) setOpen(false)
@@ -252,8 +304,13 @@ export function BlockIconPicker({
 	}
 
 	const saveUpload = async () => {
-		if (upload.kind !== 'preview' || !editor) return
-		setUpload({ kind: 'saving', prepared: upload.prepared, previewUrl: upload.previewUrl })
+		// WHY `error` is a valid source too: Retry re-runs this on the same
+		// staged file after a failed save (see the try/catch below) — Back
+		// already returns here from the preview screen, so Save/Retry share
+		// one code path off whichever stage still carries `prepared`.
+		if ((upload.kind !== 'preview' && upload.kind !== 'error') || !upload.prepared || !upload.previewUrl || !editor) return
+		const { prepared, previewUrl } = upload
+		setUpload({ kind: 'saving', prepared, previewUrl })
 		// WHY the asset is created outside the Block command's undo step: tldraw
 		// writes assets with `history: 'ignore'` (Editor.createAssets), so no
 		// undo ever removes an asset record — the same as undoing one of its own
@@ -261,13 +318,25 @@ export function BlockIconPicker({
 		// a single step and the asset stays in the board as an orphan, exactly
 		// like stock tldraw. Reclaiming orphans is a save-time sweep for later,
 		// not an undo concern.
-		const assetId = await createIconAsset(editor, upload.prepared)
-		if (!assetId) {
-			setUpload({ kind: 'error', message: 'the editor declined this file — try a different image' })
-			setTab('upload')
-			return
+		//
+		// WHY this is wrapped: `getAssetForExternalContent` throws — not
+		// rejects to `undefined` — for an SVG tldraw's own sanitiser reduces
+		// to nothing, a file over tldraw's own upload cap, or a MIME it
+		// doesn't accept, and an unhandled rejection here left the button
+		// reading "Saving…" forever with no way out but reopening the picker.
+		// `prepared`/`previewUrl` ride along into the error so Back can return
+		// to the same preview instead of discarding the pick.
+		try {
+			const assetId = await createIconAsset(editor, prepared)
+			if (!assetId) {
+				setUpload({ kind: 'error', message: 'the editor declined this file — try a different image', prepared, previewUrl })
+				return
+			}
+			choose({ kind: 'asset', assetId })
+		} catch (cause) {
+			const message = cause instanceof Error ? cause.message : String(cause)
+			setUpload({ kind: 'error', message: `couldn't save this icon — ${message}`, prepared, previewUrl })
 		}
-		choose({ kind: 'asset', assetId })
 	}
 
 	// WHY a capture-phase listener on the document: tldraw registers its own
@@ -291,16 +360,24 @@ export function BlockIconPicker({
 				return
 			}
 			const text = event.clipboardData?.getData('text/plain')?.trim()
-			if (text && URL_PATTERN.test(text)) {
-				event.preventDefault()
-				event.stopImmediatePropagation()
-				void stageUrl(text)
-			}
+			if (!text || !URL_PATTERN.test(text)) return
+			// WHY gated on tab/focus, unlike the image branch above: this used to
+			// match any `https?://` text regardless of where focus was, so
+			// pasting a URL into the Icons/Emoji filter mid-search hijacked the
+			// paste, jumped to Upload, and fired a host fetch instead of filling
+			// the field it was pasted into. A URL string is only ever meant for
+			// Upload, so only intercept it there — or when focus isn't inside a
+			// text field the picker itself owns (e.g. a grid cell or button has
+			// focus), where there's no typing target to lose the paste to.
+			if (tab !== 'upload' && isTypingTarget(document.activeElement)) return
+			event.preventDefault()
+			event.stopImmediatePropagation()
+			void stageUrl(text)
 		}
 		document.addEventListener('paste', onPaste, true)
 		return () => document.removeEventListener('paste', onPaste, true)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [open])
+	}, [open, tab])
 
 	if (disabled) return <>{children}</>
 
@@ -328,7 +405,7 @@ export function BlockIconPicker({
 								const first = tab === 'icons' ? filteredIcons[0] : tab === 'emoji' ? filteredEmoji[0] : null
 								if (first) {
 									if (tab === 'icons') choose({ kind: 'lucide', name: (first as LucideLibraryEntry).name })
-									else choose({ kind: 'emoji', char: applySkinTone(first as EmojiEntry, tone) })
+									else choose({ kind: 'emoji', char: applySkinTone(first as EmojiEntry, tone) }, { emojiSlug: (first as EmojiEntry).slug })
 								}
 							}
 						}}
@@ -410,10 +487,18 @@ export function BlockIconPicker({
 											</button>
 										) : null}
 									</label>
+									{/* WHY disabled while its library is loading, unlike the filter
+									    input beside it: the ~1,800-icon Lucide/emoji chunk loads lazily
+									    (see the `open` effect above), so a click here before it lands
+									    used to be a silent no-op — `randomEntry` over an empty array
+									    finds nothing to choose. Gate on the tab's own library, not
+									    `lucideLib && emojiLib` together, so Emoji doesn't wait on
+									    Lucide or vice versa. */}
 									<button
 										type="button"
 										className="BlockIconPicker-btn"
-										title="Random"
+										title={(tab === 'icons' ? lucideLib : emojiLib) ? 'Random' : 'Loading…'}
+										disabled={!(tab === 'icons' ? lucideLib : emojiLib)}
 										data-testid="icon-picker-shuffle"
 										onClick={() => {
 											if (tab === 'icons') {
@@ -421,7 +506,7 @@ export function BlockIconPicker({
 												if (entry) choose({ kind: 'lucide', name: entry.name }, { keepOpen: true })
 											} else {
 												const entry = randomEntry(filteredEmoji)
-												if (entry) choose({ kind: 'emoji', char: applySkinTone(entry, tone) }, { keepOpen: true })
+												if (entry) choose({ kind: 'emoji', char: applySkinTone(entry, tone) }, { keepOpen: true, emojiSlug: entry.slug })
 											}
 										}}
 									>
@@ -479,11 +564,12 @@ export function BlockIconPicker({
 									) : (
 										<EmojiGrid
 											entries={filteredEmoji}
+											recent={recentEmojiEntries}
 											groups={emojiLib.groups}
 											query={query}
 											tone={tone}
 											value={value}
-											onChoose={(char) => choose({ kind: 'emoji', char })}
+											onChoose={(char, slug) => choose({ kind: 'emoji', char }, { emojiSlug: slug })}
 										/>
 									)}
 								</div>
@@ -505,6 +591,30 @@ export function BlockIconPicker({
 				</RadixPopover.Portal>
 			) : null}
 		</RadixPopover.Root>
+	)
+}
+
+/**
+ * The windowed replacement for a bare `entries.map(renderItem)` inside a
+ * `.BlockIconPicker-grid` — used for every grid big enough to matter (the
+ * flat Icons/Emoji-search lists and each group in the Emoji browse view).
+ * `Recent` stays a plain map: it's capped at `RECENT_LIMIT` (12), never
+ * enough rows to be worth a scroll listener.
+ *
+ * WHY the spacers are `gridColumn: '1 / -1'` and not just a `height` on some
+ * wrapping element: the grid's `1fr` columns give a bare child one column's
+ * width, not the full row — spanning every column is what turns it into a
+ * proper full-width spacer that reserves the collapsed rows' scroll height.
+ */
+function WindowedGrid<T>({ items, renderItem }: { items: readonly T[]; renderItem(item: T): ReactNode }) {
+	const { gridRef, start, end, topPad, bottomPad } = useWindowedGrid(items.length)
+	const visible = items.slice(start, end)
+	return (
+		<div className="BlockIconPicker-grid" ref={gridRef}>
+			{topPad > 0 ? <div aria-hidden="true" style={{ gridColumn: '1 / -1', height: topPad }} /> : null}
+			{visible.map((item) => renderItem(item))}
+			{bottomPad > 0 ? <div aria-hidden="true" style={{ gridColumn: '1 / -1', height: bottomPad }} /> : null}
+		</div>
 	)
 }
 
@@ -537,11 +647,12 @@ function IconsGrid({
 				</>
 			) : null}
 			<div className="BlockIconPicker-section">{query ? `Icons · ${entries.length}` : 'Icons'}</div>
-			<div className="BlockIconPicker-grid">
-				{entries.map((entry) => (
+			<WindowedGrid
+				items={entries}
+				renderItem={(entry) => (
 					<IconCell key={entry.name} entry={entry} selected={value.kind === 'lucide' && value.name === entry.name} onChoose={onChoose} />
-				))}
-			</div>
+				)}
+			/>
 		</>
 	)
 }
@@ -572,6 +683,7 @@ function IconCell({
 
 function EmojiGrid({
 	entries,
+	recent,
 	groups,
 	query,
 	tone,
@@ -579,50 +691,63 @@ function EmojiGrid({
 	onChoose,
 }: {
 	entries: readonly EmojiEntry[]
+	recent: readonly EmojiEntry[]
 	groups: readonly string[]
 	query: string
 	tone: number
 	value: BlockIconRef
-	onChoose(char: string): void
+	onChoose(char: string, slug: string): void
 }) {
 	if (entries.length === 0) {
 		return <div className="BlockIconPicker-empty">No emoji match “{query}”.</div>
 	}
-	const cell = (entry: EmojiEntry) => {
+	const cell = (entry: EmojiEntry, keyPrefix = '') => {
 		const char = applySkinTone(entry, tone)
 		const title = entry.keywords.length ? `${entry.name} · ${entry.keywords.join(', ')}` : entry.name
 		return (
 			<button
-				key={entry.slug}
+				key={`${keyPrefix}${entry.slug}`}
 				type="button"
 				className="BlockIconPicker-cell BlockIconPicker-cell--emoji"
 				aria-selected={value.kind === 'emoji' && value.char === char}
 				title={title}
 				data-testid={`icon-picker-cell-emoji-${entry.slug}`}
-				onClick={() => onChoose(char)}
+				onClick={() => onChoose(char, entry.slug)}
 				style={{ fontFamily: EMOJI_FONT_FAMILY }}
 			>
 				{char}
 			</button>
 		)
 	}
+	// WHY rendered ahead of both branches below, keyed `recent:` like
+	// `IconsGrid`'s own Recent row: `recent` is only ever non-empty when
+	// `query` is empty (see the `recentEmojiEntries` memo), so there's no
+	// case where this collides with the "Emoji · N" search-results heading.
+	const recentSection =
+		recent.length > 0 ? (
+			<>
+				<div className="BlockIconPicker-section">Recent</div>
+				<div className="BlockIconPicker-grid">{recent.map((entry) => cell(entry, 'recent:'))}</div>
+			</>
+		) : null
 	if (query.trim()) {
 		return (
 			<>
 				<div className="BlockIconPicker-section">Emoji · {entries.length}</div>
-				<div className="BlockIconPicker-grid">{entries.map(cell)}</div>
+				<WindowedGrid items={entries} renderItem={(entry) => cell(entry)} />
 			</>
 		)
 	}
 	return (
 		<>
+			{recentSection}
 			{groups.map((group) => {
 				const items = entries.filter((entry) => entry.group === group)
 				if (items.length === 0) return null
 				return (
 					<div key={group}>
 						<div className="BlockIconPicker-section">{group}</div>
-						<div className="BlockIconPicker-grid">{items.map(cell)}</div>
+						<WindowedGrid items={items} renderItem={(entry) => cell(entry)} />
 					</div>
 				)
 			})}
@@ -651,23 +776,34 @@ function UploadPanel({
 	const dropTargetRef = useRef<HTMLButtonElement | null>(null)
 	const [dragOver, setDragOver] = useState(false)
 
-	if (stage.kind === 'preview' || stage.kind === 'saving') {
+	// WHY a failed save (`error` with `prepared`/`previewUrl` still attached)
+	// renders through this same preview branch rather than falling to the
+	// picker screen below: the file is still staged, so Back should return
+	// the person to it, not discard the pick and make them start over. Only
+	// `saving` disables Back — a save that hasn't failed or finished yet is
+	// the one moment there's nothing safe to go back to.
+	if (stage.kind === 'preview' || stage.kind === 'saving' || (stage.kind === 'error' && stage.prepared)) {
 		const displayTitle = title || 'Block'
+		const previewUrl = stage.previewUrl ?? ''
 		return (
 			<div className="BlockIconPicker-upload">
 				<div className="BlockIconPicker-preview">
 					<div className="BlockIconPicker-previewLabel">Preview</div>
 					<div className="BlockIconPicker-previewRow">
 						<div className="BlockIconPicker-previewChip BlockIconPicker-previewChip--big">
-							<img src={stage.previewUrl} alt="" width={SIMPLE_ICON_PX} height={SIMPLE_ICON_PX} />
+							<img src={previewUrl} alt="" width={SIMPLE_ICON_PX} height={SIMPLE_ICON_PX} />
 							<span>{displayTitle}</span>
 						</div>
 						<div className="BlockIconPicker-previewChip BlockIconPicker-previewChip--small">
-							<img src={stage.previewUrl} alt="" width={HEADER_ICON_PX} height={HEADER_ICON_PX} />
+							<img src={previewUrl} alt="" width={HEADER_ICON_PX} height={HEADER_ICON_PX} />
 							<span>{displayTitle}</span>
 						</div>
 					</div>
-					<div className="BlockIconPicker-previewMeta">{describeUpload(stage.prepared)}</div>
+					{stage.kind === 'error' ? (
+						<div className="BlockIconPicker-uploadError">{stage.message}</div>
+					) : (
+						<div className="BlockIconPicker-previewMeta">{describeUpload(stage.prepared)}</div>
+					)}
 				</div>
 				<label className="BlockIconPicker-check">
 					<input
@@ -681,7 +817,7 @@ function UploadPanel({
 				<div className="BlockIconPicker-actions">
 					<button type="button" onClick={onBack} disabled={stage.kind === 'saving'}>Back</button>
 					<button type="button" className="BlockIconPicker-save" onClick={onSave} disabled={stage.kind === 'saving'}>
-						{stage.kind === 'saving' ? 'Saving…' : 'Save'}
+						{stage.kind === 'saving' ? 'Saving…' : stage.kind === 'error' ? 'Retry' : 'Save'}
 					</button>
 				</div>
 			</div>

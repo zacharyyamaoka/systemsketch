@@ -134,6 +134,16 @@
   color: var(--ss-text);
 }
 
+.BlockIconPicker-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.BlockIconPicker-btn:disabled:hover {
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+}
+
 .BlockIconPicker-toneWrap {
   position: relative;
 }

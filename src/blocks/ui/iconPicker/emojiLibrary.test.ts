@@ -82,4 +82,13 @@ describe('buildEmojiLibrary', () => {
 		expect(library.version).toBe('1.0.0')
 		expect(library.search('grinning').map((e) => e.slug)).toEqual(['grinning_face'])
 	})
+
+	// RISK: the Emoji tab's Recent section looks entries up by slug the same
+	// way Lucide's Recent looks them up by name — a stable id survives a skin
+	// tone change, the rendered `char` alone wouldn't.
+	it('indexes entries by slug for the Recent section', () => {
+		const library = buildEmojiLibrary('1.0.0', ENTRIES)
+		expect(library.bySlug.get('waving_hand')).toBe(WAVE)
+		expect(library.bySlug.get('does-not-exist')).toBeUndefined()
+	})
 })
