@@ -1,0 +1,296 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Everything is a Block — what survives</title>
+<style>
+:root { --ink:#17191c; --mute:#5b6470; --line:#dfe3e8; --paper:#fff; --wash:#f4f6f8; --accent:#5b46e5; --ok:#1f8a4c; --warn:#b4531d; --bad:#b23a2c; }
+* { box-sizing:border-box; }
+body { margin:0; color:var(--ink); background:var(--paper); font:15px/1.5 Inter,system-ui,sans-serif; }
+main { max-width:1120px; margin:0 auto; padding:28px 28px 80px; }
+h1 { font-size:30px; line-height:1.15; margin:0 0 6px; letter-spacing:-.01em; }
+h2 { font-size:21px; margin:44px 0 10px; letter-spacing:-.01em; }
+h3 { font-size:16px; margin:22px 0 6px; }
+p, li { max-width:84ch; }
+p { margin:8px 0; }
+.lede { font-size:17px; max-width:88ch; }
+.meta, .dim { color:var(--mute); font-size:13px; }
+code, pre { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+code { background:var(--wash); padding:1px 5px; border-radius:4px; font-size:13px; }
+table { border-collapse:collapse; width:100%; margin:10px 0 16px; font-size:14px; }
+th, td { text-align:left; vertical-align:top; padding:7px 10px; border-bottom:1px solid var(--line); }
+th { color:var(--mute); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+td.num { text-align:right; white-space:nowrap; }
+.scroll { overflow-x:auto; }
+table.matrix { min-width:1040px; font-size:12.5px; }
+table.matrix td { padding:6px 8px; }
+.callout { border-left:4px solid var(--accent); background:#f4f2ff; padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; max-width:92ch; }
+.callout.warn { border-color:var(--warn); background:#fff5ee; }
+.callout.ok { border-color:var(--ok); background:#eefaf2; }
+.bad { color:var(--bad); }
+.dg { margin:12px 0; border:1px solid var(--line); border-radius:8px; background:#fbfcfd; padding:8px; }
+.dg-title { font:600 13px Inter,system-ui,sans-serif; fill:var(--ink); }
+.dg-parent { fill:#fff; stroke:#3b3f45; stroke-width:1.4; }
+.dg-child { fill:#fff; stroke:#8a9099; stroke-width:1.1; }
+.dg-band { fill:#eef1f5; stroke:none; }
+.dg-def { fill:#efe9ff; stroke:#5b46e5; stroke-width:1.2; }
+.dg-code { fill:#0f1115; stroke:none; }
+.dg-warnbox { fill:#fff5ee; stroke:#b4531d; stroke-width:1.1; }
+.dg-h { font:600 12.5px ui-monospace,Menlo,monospace; fill:#1a1c1f; }
+.dg-c { font:500 11.5px ui-monospace,Menlo,monospace; fill:#2c3036; }
+.dg-dim { font:11px ui-monospace,Menlo,monospace; fill:#6b7480; }
+.dg-mono { font:10.5px ui-monospace,Menlo,monospace; fill:#e6e8ee; }
+.dg-code + .dg-mono { fill:#e6e8ee; }
+.dg-arrow { fill:none; stroke:#5b46e5; stroke-width:1.3; }
+.dg-dotted { fill:none; stroke:#5b46e5; stroke-width:1.3; stroke-dasharray:2 3; }
+.dg-arrfill { fill:#5b46e5; }
+.dg-rule { stroke:#c9ced6; stroke-width:1; }
+ol.tight li { margin:6px 0; }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:820px) { .two { grid-template-columns:1fr; } }
+</style>
+<main>
+<h1>Everything is a Block — what survives</h1>
+<p class="meta">A thinking pass on your 2026-09-09 thesis · measured against <code>9cfecaec</code> on <code>claude/port-signature-field-31af09</code> · tldraw 5.3.2 pinned · <a href="#thesis">the thesis, precisely</a> · <a href="#criteria">what good looks like</a> · <a href="#missing">what you are not seeing</a> · <a href="#prior">prior art</a> · <a href="#frame">the frame that survives</a> · <a href="#decisions">what needs you</a> · <a href="#measured">measured</a></p>
+
+<p class="lede"><b>The short answer.</b> The <i>anatomy</i> half of your thesis is right, and the tree is already most of the way there: a Type, a Type Mapping and a Pill are each a Block with a kind, an Async region is a stock frame with a stamp, and your four sketch panels are expressible with props Block already has. The half that does not survive is "nest and style <i>instead of</i> a kind". Style and nesting cannot carry what a thing <i>means</i> — a NamedTuple against an alias, an arm against a member, a loop body against a class body — and the tree proves it by smuggling that meaning through one string, <code>blockType</code>, which on your own boards is simultaneously the label you type, a machine switch, the Behavior Tree's leaf subtitle and the Python export. The version that survives is: <b>one anatomy, one containment tree, one text seam, one closed style vocabulary — and an explicit, authored <code>kind</code> with a per-kind contract</b> saying what the body's canonical form is, what it may contain, what edges it accepts, what it projects to in Python, and which styles it defaults to. That is your thesis with its missing column filled in, and it is the same conclusion the 2026-09-06 seam audit reached from the other side.</p>
+
+<div class="callout ok"><b>Where to affirm, not argue.</b> "Attribute block = Block with a Code child" is better than you think: a Type's body is already text, a Code block is already a stack member, and moving the text into a Code member makes it definition-shared and detachable for free — two things the current <code>attributeSource</code> prop is not. Members are already children on tldraw's own child index. The style set you sketched (footer, divider, inset / edge-to-edge, disclosure, size) is already on the schema. Your instinct that you have "seen the extent of it" is sound for the anatomy; keep it.</div>
+
+<h2 id="thesis">1 · The thesis, reconstructed precisely</h2>
+<p>Which primitives: the palette's system rungs — Behavior Tree, Loop, Branch, Block, Pill, Type, Type Mapping, Code, Port — plus members and regions. Which "couple of ways" of styling: the closed set your panels use, every one of which is a prop on Block today — footer on/off, header divider on/off, inset vs edge-to-edge (gap and gutter), a disclosure chevron, the text size rung, the glyph, the inset background, and now free vs stack for the body. What "nest" means in the store: tldraw <code>parentId</code> and the child <code>index</code> for membership and order, exactly what the members work shipped — <i>plus</i>, in your sketch, a Code child as the body's <b>source of truth</b>, which is the one place the thesis changes what is canonical.</p>
+<table><thead><tr><th>Your panel</th><th>What it draws</th><th>What carries it in today's schema</th></tr></thead><tbody><tr><td><b>1 · today's Type</b></td><td>header with glyph, title, Draft chip, kind label; an ATTRIBUTES band with a UI / SOURCE toggle; rows with type names as links</td><td><code>blockType: 'type'</code> + <code>attributeSource</code>, painted by <code>TypeAttributeRegion</code> / <code>TypeBabbleV1</code> — a body region only a Type has</td></tr><tr><td><b>2 · "same patterns as everything else"</b></td><td>Block <i>Type a</i> (kind label <i>class</i>) containing a child Block <i>attributes</i> whose body is a Code block, with its own footer</td><td>expressible today: <code>bodyLayout: 'stack'</code>, a Block member, a Code member (<code>isStackMemberShape</code> admits <code>code</code>) — three shapes</td></tr><tr><td><b>3 · hide the footer and divider, add a drop-down, smaller text</b></td><td><i>Type b</i>: the child shown as a card, footer hidden, header line hidden, a chevron, over a grey inset body</td><td><code>showFooter</code>, <code>showHeaderDivider</code>, <code>foldable</code> (chevron), <code>titleSize</code>, <code>memberLayout: 'inset'</code>, <code>insetBackground: 'soft-gray'</code> — all props already</td></tr><tr><td><b>4 · edge to edge, or keep it offset</b></td><td><i>Type_c</i>: the attributes child edge-to-edge, a <i>› attributes</i> disclosure row, the code block filling the width</td><td><code>memberLayout: 'edge-to-edge'</code> (<code>memberGap</code>/<code>memberGutter</code> = 0), a folded child's header as the disclosure row; Fill for a Code member is the one thing not built (<code>stackMemberFillsWidth</code> is Block-only)</td></tr></tbody></table>
+<div class="dg"><svg viewBox="0 0 980 470" width="100%" role="img" aria-label="Left: the one Block anatomy with its style toggles. Right: the kinds, the readers that need the kind, and the one string that carries four jobs today.">
+<defs><marker id="k-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="dg-arrfill"/></marker></defs>
+<text x="20" y="26" class="dg-title">Anatomy — one, shared by every kind (all of it is on Block's schema today)</text>
+<rect x="24" y="40" width="430" height="262" rx="10" class="dg-parent"/>
+<rect x="24" y="40" width="430" height="46" rx="10" class="dg-band"/>
+<circle cx="48" cy="63" r="9" class="dg-child"/><text x="42" y="67" class="dg-dim">›_</text>
+<text x="66" y="68" class="dg-h">Type a</text>
+<text x="132" y="68" class="dg-dim">class</text>
+<rect x="176" y="52" width="56" height="20" rx="10" class="dg-def"/><text x="184" y="66" class="dg-dim">Draft 2</text>
+<text x="432" y="68" class="dg-dim">›</text>
+<line x1="24" y1="86" x2="454" y2="86" class="dg-rule"/>
+<text x="300" y="80" class="dg-dim">header divider · toggle</text>
+<rect x="36" y="98" width="406" height="50" rx="6" class="dg-child"/>
+<text x="46" y="118" class="dg-h">text seam</text><text x="46" y="136" class="dg-dim">CodeField + a grammar (attributes · aliases · a port line)</text>
+<rect x="36" y="156" width="406" height="50" rx="6" class="dg-child"/>
+<text x="46" y="176" class="dg-h">ports</text><text x="46" y="194" class="dg-dim">{ name, type, defaultValue } — an id a cable binds to</text>
+<rect x="36" y="214" width="406" height="50" rx="6" class="dg-child"/>
+<text x="46" y="234" class="dg-h">members</text><text x="46" y="252" class="dg-dim">children · order = tldraw child index · live stack or free</text>
+<rect x="24" y="284" width="430" height="18" rx="6" class="dg-band"/><text x="34" y="297" class="dg-dim">footer · toggle</text>
+<text x="20" y="330" class="dg-title">The closed style set — every one a prop already</text>
+<rect x="24" y="342" width="57" height="20" rx="10" class="dg-child"/><text x="32" y="356" class="dg-dim">footer</text><rect x="87" y="342" width="64" height="20" rx="10" class="dg-child"/><text x="95" y="356" class="dg-dim">divider</text><rect x="157" y="342" width="154" height="20" rx="10" class="dg-child"/><text x="165" y="356" class="dg-dim">inset | edge-to-edge</text><rect x="317" y="342" width="85" height="20" rx="10" class="dg-child"/><text x="325" y="356" class="dg-dim">disclosure</text><rect x="24" y="368" width="105" height="20" rx="10" class="dg-child"/><text x="32" y="382" class="dg-dim">size s·m·l·xl</text><rect x="135" y="368" width="50" height="20" rx="10" class="dg-child"/><text x="143" y="382" class="dg-dim">glyph</text><rect x="191" y="368" width="85" height="20" rx="10" class="dg-child"/><text x="199" y="382" class="dg-dim">background</text><rect x="282" y="368" width="98" height="20" rx="10" class="dg-child"/><text x="290" y="382" class="dg-dim">gap · gutter</text><rect x="24" y="394" width="85" height="20" rx="10" class="dg-child"/><text x="32" y="408" class="dg-dim">fill | own</text><rect x="115" y="394" width="133" height="20" rx="10" class="dg-child"/><text x="123" y="408" class="dg-dim">free | stack body</text>
+<text x="24" y="428" class="dg-dim">22 of Block's 40 props are this vocabulary; 11 carry meaning.</text>
+<text x="24" y="446" class="dg-dim">Style says how it looks. It cannot say what it is.</text>
+
+<text x="500" y="26" class="dg-title">Kind — what it means, and who has to read that</text>
+<g>
+<rect x="500" y="40" width="150" height="262" rx="8" class="dg-def"/>
+<text x="512" y="60" class="dg-h">kind</text>
+<text x="512" y="82" class="dg-c">call · def</text>
+<text x="512" y="100" class="dg-c">value (pill)</text>
+<text x="512" y="118" class="dg-c">type</text>
+<text x="512" y="136" class="dg-c">type mapping</text>
+<text x="512" y="154" class="dg-c">code</text>
+<text x="512" y="172" class="dg-c">port</text>
+<text x="512" y="190" class="dg-c">loop</text>
+<text x="512" y="208" class="dg-c">branch · arm</text>
+<text x="512" y="226" class="dg-c">async region</text>
+<text x="512" y="244" class="dg-c">bt region · node</text>
+<text x="512" y="270" class="dg-dim">authored, closed,</text>
+<text x="512" y="286" class="dg-dim">never derived</text>
+</g>
+<g>
+<rect x="686" y="40" width="274" height="34" rx="6" class="dg-child"/><text x="696" y="56" class="dg-h">Python projection</text><text x="696" y="69" class="dg-dim">NamedTuple? alias? loop body? arm?</text>
+<rect x="686" y="82" width="274" height="34" rx="6" class="dg-child"/><text x="696" y="98" class="dg-h">definition linking</text><text x="696" y="111" class="dg-dim">shares blockType, not attributeSource</text>
+<rect x="686" y="124" width="274" height="34" rx="6" class="dg-child"/><text x="696" y="140" class="dg-h">completion · go-to-definition</text><text x="696" y="153" class="dg-dim">which Blocks are Types? — a kind scan</text>
+<rect x="686" y="166" width="274" height="34" rx="6" class="dg-child"/><text x="696" y="182" class="dg-h">detach → stock primitives</text><text x="696" y="195" class="dg-dim">one registered reduction per kind</text>
+<rect x="686" y="208" width="274" height="34" rx="6" class="dg-child"/><text x="696" y="224" class="dg-h">inspector · menus · tools</text><text x="696" y="237" class="dg-dim">8 inspector subjects, 13 tools</text>
+<rect x="686" y="250" width="274" height="34" rx="6" class="dg-child"/><text x="696" y="266" class="dg-h">the style defaults themselves</text><text x="696" y="279" class="dg-dim">kind → footer / divider / inset</text>
+</g>
+<path d="M650 90 L 686 57" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M650 120 L 686 99" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M650 150 L 686 141" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M650 180 L 686 183" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M650 210 L 686 225" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M650 240 L 686 267" class="dg-arrow" marker-end="url(#k-ah)"/>
+
+<text x="500" y="328" class="dg-title">Today: one string, four jobs</text>
+<rect x="500" y="340" width="460" height="122" rx="8" class="dg-warnbox"/>
+<rect x="508" y="387" width="104" height="28" rx="6" class="dg-def"/><text x="522" y="405" class="dg-h">blockType</text>
+<text x="634" y="360" class="dg-c">the label you type</text><text x="634" y="373" class="dg-dim">'class' ×92 · 'component' ×37 · 'system' ×7</text>
+<text x="634" y="387" class="dg-c">the machine switch</text><text x="634" y="400" class="dg-dim">&#x27;type&#x27; &#x27;unresolved&#x27; &#x27;unbundle&#x27; + a meta stamp</text>
+<text x="634" y="414" class="dg-c">the BT leaf subtitle</text><text x="634" y="427" class="dg-dim">'Skill' ×81 · 'Condition' ×12 (btLeafBlockType)</text>
+<text x="634" y="441" class="dg-c">the Python export</text><text x="634" y="454" class="dg-dim">pyblocks codec → content["type"]</text>
+<path d="M612 396 L 630 366" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M612 400 L 630 393" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M612 404 L 630 420" class="dg-arrow" marker-end="url(#k-ah)"/>
+<path d="M612 408 L 630 447" class="dg-arrow" marker-end="url(#k-ah)"/>
+</svg></div>
+<p>Read the left half as the part you are right about and the right half as the part the sketch leaves out. The bottom-right strip is measured from your boards: the same string is doing four jobs, and two of its authors are machines.</p>
+
+<h2 id="criteria">2 · What a good answer looks like here</h2>
+<p>Weighted from your own stated values — Principle 3 (a small set of visual grammars so you can see what things are), Principle 1 (build from primitives, detach to primitives), the 2026-09-03 boundary (the whiteboard stays dumb, Python is rigid), PEP 0004's rule that containment is a tree fact tldraw maintains, and this morning's port ruling (store the tree when the parse drops nothing).</p>
+<table><thead><tr><th>Criterion (from your values, weighted for this decision)</th><th>Weight</th></tr></thead><tbody><tr><td>Small, closed visual grammar — you can see what a thing is (Principle 3, black)</td><td class='num'>20</td></tr><tr><td>Code compactness — one seam per concern, no second copy of a mechanism (Principle 1; &quot;you always write code twice&quot;)</td><td class='num'>15</td></tr><tr><td>Whiteboard stays dumb, Python is rigid — nothing on the canvas derives meaning (2026-09-03)</td><td class='num'>15</td></tr><tr><td>One document model — tldraw&#x27;s store is the truth; text canonical only where a parse would lose something</td><td class='num'>15</td></tr><tr><td>Detach / export fidelity — every kind reduces to stock records without losing what it said (Principle 1)</td><td class='num'>10</td></tr><tr><td>Meaning is readable — definition linking, go-to-definition and the Python projection can tell kinds apart</td><td class='num'>10</td></tr><tr><td>Migration safety for the boards that exist</td><td class='num'>5</td></tr><tr><td>Registry and IDE-embed cost per kind (the six shape-util lists)</td><td class='num'>5</td></tr><tr><td>Performance at 200+ shapes (shape count, settle passes, definition replication)</td><td class='num'>5</td></tr><tr><td><b>Total</b></td><td class='num'><b>100</b></td></tr></tbody></table>
+<div><table><thead><tr><th>Score 0–5</th><th>A · Today</th><th>B · The thesis, literally</th><th>C · One anatomy + explicit kind</th></tr></thead><tbody><tr><td></td><td class='dim'>N ShapeUtils, kinds smuggled through blockType, bodies each built their own way</td><td class='dim'>one Block; kind implied by nesting + style; every body a Code child</td><td class='dim'>one Block anatomy, one tree, one text seam, closed styles, and a per-kind contract</td></tr><tr><td>Small, closed visual grammar</td><td class='num'>2 <span class='dim'>×20</span></td><td class='num'>4 <span class='dim'>×20</span></td><td class='num'>5 <span class='dim'>×20</span></td></tr><tr><td>Code compactness</td><td class='num'>2 <span class='dim'>×15</span></td><td class='num'>4 <span class='dim'>×15</span></td><td class='num'>4 <span class='dim'>×15</span></td></tr><tr><td>Whiteboard stays dumb, Python is rigid</td><td class='num'>4 <span class='dim'>×15</span></td><td class='num'>2 <span class='dim'>×15</span></td><td class='num'>5 <span class='dim'>×15</span></td></tr><tr><td>One document model</td><td class='num'>3 <span class='dim'>×15</span></td><td class='num'>3 <span class='dim'>×15</span></td><td class='num'>5 <span class='dim'>×15</span></td></tr><tr><td>Detach / export fidelity</td><td class='num'>3 <span class='dim'>×10</span></td><td class='num'>2 <span class='dim'>×10</span></td><td class='num'>4 <span class='dim'>×10</span></td></tr><tr><td>Meaning is readable</td><td class='num'>3 <span class='dim'>×10</span></td><td class='num'>1 <span class='dim'>×10</span></td><td class='num'>5 <span class='dim'>×10</span></td></tr><tr><td>Migration safety for the boards that exist</td><td class='num'>5 <span class='dim'>×5</span></td><td class='num'>2 <span class='dim'>×5</span></td><td class='num'>4 <span class='dim'>×5</span></td></tr><tr><td>Registry and IDE-embed cost per kind</td><td class='num'>1 <span class='dim'>×5</span></td><td class='num'>5 <span class='dim'>×5</span></td><td class='num'>4 <span class='dim'>×5</span></td></tr><tr><td>Performance at 200+ shapes</td><td class='num'>4 <span class='dim'>×5</span></td><td class='num'>3 <span class='dim'>×5</span></td><td class='num'>3 <span class='dim'>×5</span></td></tr><tr><td><b>Weighted</b></td><td class='num'><b>285</b> / 500</td><td class='num'><b>295</b> / 500</td><td class='num'><b>455</b> / 500</td></tr></tbody></table><p class="dim">B loses on exactly the criteria that are yours: deriving a kind from how something is nested and styled is canvas-side derivation, and a body that is only text has nothing definition linking or the projection can read without a parser in front of every reader. C keeps B's grammar and compactness and adds the one column B lacks.</p></div>
+
+<h2 id="missing">3 · What you are not seeing</h2>
+<h3>3.1 · The kind is already there, and it is overloaded</h3>
+<p>A Block <i>looks</i> like one thing; what it <i>means</i> in Python is another. Today that meaning is carried by <code>blockType</code>, a free string: <code>isTypeBlock</code>, <code>isTypeMappingBlock</code>, <code>isUnresolvedBlock</code> and <code>isProjectionBlock</code> all switch on it, the Behavior Tree projection writes a leaf's subtitle into it (<code>btLeafBlockType</code> → 'Skill' / 'Condition' / 'Sub Tree'), definition linking shares it across occurrences, and the pyblocks codec exports it as <code>content["type"]</code>. It is also the label you type — 92 Blocks say <code>class</code>, 37 say <code>component</code>. On this branch a Type Mapping's kind is not even on that string yet — it is a meta stamp, <code>typeMappingBabbleVariant</code>; main has since promoted it to <code>blockType: 'typeMapping'</code> in <code>f1f0bdd8</code> — so the kind has already changed carriers once, with nothing anywhere saying what a kind is. A label and a kind sharing one field is a latent collision, not a design; the thesis makes it explicit by asking nesting and style to carry the kind, and they cannot. The fix is not more style — it is a closed, authored <code>kind</code> beside the label, with a contract per kind that the readers above consult.</p>
+<h3>3.2 · Your own boundary rule cuts against the literal thesis</h3>
+<p>"No deriving logic within the whiteboard" (2026-09-03) is what killed derived Branch control ports and derived source/sink marks. Inferring "this Block is a Type because it has one Code child and no ports", or "this is a loop body because it is edge-to-edge", is the same derivation wearing a costume. A kind must be a fact someone wrote down, not a pattern the canvas recognises. The Async region already shows the honest form: a stock frame plus one authored stamp.</p>
+<h3>3.3 · Containment is one carrier; three relations need the other two</h3>
+<div class="dg"><svg viewBox="0 0 980 372" width="100%" role="img" aria-label="Four relations that nesting cannot carry: a Branch's exclusive ordered arms, a Loop's one cable back, a Behavior Tree's canonical XML order, and a Type Mapping's reference to another Type.">
+<defs><marker id="r-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="dg-arrfill"/></marker></defs>
+<text x="20" y="22" class="dg-title">Branch</text>
+<rect x="20" y="32" width="220" height="190" rx="8" class="dg-parent"/>
+<rect x="20" y="32" width="220" height="30" rx="8" class="dg-band"/><text x="30" y="52" class="dg-h">if pose is None</text>
+<circle cx="20" cy="47" r="4.5" class="dg-child"/>
+<rect x="30" y="72" width="200" height="86" rx="6" class="dg-child"/><text x="40" y="90" class="dg-dim">arm 1 · open · active</text>
+<rect x="60" y="100" width="90" height="40" rx="6" class="dg-def"/><text x="70" y="124" class="dg-h">estimate()</text>
+<rect x="30" y="166" width="200" height="26" rx="6" class="dg-child"/><text x="40" y="184" class="dg-dim">arm 2 · folded · faded</text>
+<text x="20" y="246" class="dg-c">exclusive · ordered · one active</text>
+<text x="20" y="264" class="dg-dim">carrier: props.arms[] + a meta stamp</text>
+<text x="20" y="280" class="dg-dim">geometry alone failed on fold</text>
+<text x="20" y="296" class="dg-dim">(PEP 0002)</text>
+
+<text x="270" y="22" class="dg-title">Loop</text>
+<rect x="270" y="32" width="220" height="190" rx="8" class="dg-parent"/>
+<rect x="270" y="32" width="220" height="34" rx="8" class="dg-band"/><text x="280" y="54" class="dg-h">for pose in poses</text>
+<circle cx="330" cy="66" r="4.5" class="dg-child"/><text x="338" y="70" class="dg-dim">Iter</text>
+<rect x="320" y="100" width="90" height="40" rx="6" class="dg-def"/><text x="330" y="124" class="dg-h">refine()</text>
+<circle cx="320" cy="120" r="4.5" class="dg-child"/><circle cx="410" cy="120" r="4.5" class="dg-child"/>
+<path d="M330 66 L 320 100" class="dg-arrow"/>
+<path d="M410 120 C 470 120, 470 200, 400 200 L 300 200 C 285 200, 285 120, 315 120" class="dg-dotted" marker-end="url(#r-ah)"/>
+<rect x="336" y="190" width="30" height="18" rx="9" class="dg-def"/><text x="342" y="203" class="dg-dim">z⁻¹</text>
+<text x="270" y="246" class="dg-c">one cable back · seed | last</text>
+<text x="270" y="264" class="dg-dim">carrier: an EDGE (temporal: delayed)</text>
+<text x="270" y="280" class="dg-dim">plus the header's own ports</text>
+<text x="270" y="296" class="dg-dim">no child can mean "next iteration"</text>
+
+<text x="520" y="22" class="dg-title">Behavior Tree</text>
+<rect x="520" y="32" width="220" height="190" rx="8" class="dg-parent"/>
+<rect x="520" y="32" width="220" height="30" rx="8" class="dg-band"/><text x="530" y="52" class="dg-h">GraspTree</text>
+<rect x="530" y="70" width="200" height="60" rx="6" class="dg-code"/>
+<text x="538" y="84" class="dg-mono">&lt;Sequence&gt;</text>
+<text x="538" y="97" class="dg-mono">  &lt;Action ID="Approach"/&gt;</text>
+<text x="538" y="110" class="dg-mono">  &lt;Action ID="Grasp"/&gt;</text>
+<text x="538" y="123" class="dg-mono">&lt;/Sequence&gt;</text>
+<rect x="600" y="140" width="60" height="22" rx="4" class="dg-child"/><text x="608" y="155" class="dg-dim">→ seq</text>
+<rect x="540" y="180" width="80" height="34" rx="6" class="dg-def"/><text x="548" y="201" class="dg-h">Approach</text>
+<rect x="640" y="180" width="80" height="34" rx="6" class="dg-def"/><text x="648" y="201" class="dg-h">Grasp</text>
+<path d="M620 162 L 580 180" class="dg-arrow"/><path d="M640 162 L 680 180" class="dg-arrow"/>
+<text x="520" y="246" class="dg-c">canonical order · attributes · ids</text>
+<text x="520" y="264" class="dg-dim">carrier: props.xml</text>
+<text x="520" y="280" class="dg-dim">children are projections; owner by</text>
+<text x="520" y="296" class="dg-dim">containment, stamp repaired — 0004</text>
+
+<text x="770" y="22" class="dg-title">Type Mapping</text>
+<rect x="770" y="32" width="190" height="90" rx="8" class="dg-parent"/>
+<rect x="770" y="32" width="190" height="30" rx="8" class="dg-band"/><text x="780" y="52" class="dg-h">= Type Mapping</text>
+<text x="780" y="82" class="dg-mono">Pair = Tuple[Pose, Pose]</text>
+<text x="780" y="100" class="dg-mono">Pairs = Iterable[Pair]</text>
+<rect x="800" y="150" width="120" height="60" rx="8" class="dg-parent"/>
+<rect x="800" y="150" width="120" height="26" rx="8" class="dg-band"/><text x="810" y="168" class="dg-h">{ } Pose</text>
+<text x="810" y="196" class="dg-mono">x: float</text>
+<path d="M880 84 C 940 84, 940 140, 900 150" class="dg-arrow" marker-end="url(#r-ah)"/>
+<text x="770" y="246" class="dg-c">a reference, not a child</text>
+<text x="770" y="264" class="dg-dim">carrier: a name scan</text>
+<text x="770" y="280" class="dg-dim">(findKnownTypeSource)</text>
+<text x="770" y="296" class="dg-dim">nesting Pose would copy it</text>
+
+<line x1="20" y1="310" x2="960" y2="310" class="dg-rule"/>
+<text x="20" y="330" class="dg-c">Containment (parentId) gives membership, z-order, clipping and move-with. It does not give exclusivity, order, direction or reference.</text>
+<text x="20" y="348" class="dg-dim">Three carriers: the tree for membership · props and meta for roles and order · edges for direction and delay.</text>
+<text x="20" y="364" class="dg-dim">The kind contract says which carrier each relation uses.</text>
+</svg></div>
+<p>Branch arms are mutually exclusive, ordered and at most one is active — <code>props.arms[]</code> plus a <code>branchArm</code> stamp, because geometry alone failed the moment an arm folded (PEP 0002). A Loop has exactly one cable back and a seed | last choice — an <i>edge</i> fact (<code>temporal: delayed</code>) plus header ports; no child can mean "next iteration". A Behavior Tree has a canonical order and attributes that must round-trip to BT.CPP — <code>props.xml</code>, with the children as projections and ownership resolved by containment (PEP 0004). A Type Mapping's target is a <i>reference</i> to another Type — nesting it would copy it. Nesting gives membership, z-order, clipping and move-with; roles, order and direction ride on props, meta and edges. The kind contract's job is to say which carrier each relation uses so a future primitive does not re-litigate it.</p>
+<h3>3.4 · Text-canonical or prop-canonical is a per-kind choice, not a global one</h3>
+<p>This morning's ruling — store the tree when the parse drops nothing, store text when it would — is the rule, and it lands differently per kind. A Type body drops docstrings, comments and indentation when parsed, so text is canonical there and a Code member is the right home. A port line drops nothing, so the triple stays canonical and the lane is a projection whose reconciler exists precisely because text lines have no stable ids for cables to bind to. "Every body is a Code child" would put a parser in front of every reader of <code>port.name</code> and cut cables loose from ids. The contract records the choice per kind: Type and Type Mapping <b>text</b>; ports, arms, loop headers and BT nodes <b>props</b>. See <i>C - Comment Preserving Code Editing (CST vs AST)</i> for why the lossy/lossless line is the whole question, and <i>C - Projectional Editing</i> for the pole to avoid.</p>
+<h3>3.5 · "Everything is a div" is the cautionary half of HTML</h3>
+<p>Div soup works for layout. It fails for every machine reader — screen readers, crawlers, forms, default keyboard behaviour — and the web's answer was to add kinds (<code>&lt;button&gt;</code>, <code>&lt;nav&gt;</code>, ARIA <code>role</code>), not to remove divs. Your machine readers are the Python projection, definition linking, go-to-definition and detach. A Block with a <code>kind</code> is a div with a role; a Block without one is a div with a class name and a hope.</p>
+<h3>3.6 · Sameness is the cost of a visual grammar, not its goal</h3>
+<p>Principle 3 wants a small set of grammars <i>so you can see what things are</i>. If every kind is Block plus styles, the style vocabulary becomes each kind's uniform, and a uniform only works if it is reserved: "edge-to-edge, no footer, a chevron" must mean an attributes body and nothing else, or the reader loses the glyph. The Simulink/LabVIEW dictionary in the vault is thirty-one conventions that are silhouettes and reserved marks, never fonts. So the closed style set should be <i>defaulted by kind</i> — the same move as the title-size rung being a type role — with overrides limited to the set and no kind growing controls of its own.</p>
+<h3>3.7 · The cost of nesting is shape count, and the win is the registries</h3>
+<p>Your Type becomes three shapes (Block, attributes member, Code) instead of one; with 43 Types across your boards that is small, but every occurrence of a definition replicates its descendants and every stack change runs a settle pass, so the per-kind contract should say how many members a kind may have (a Type: exactly one Code member). The win is measured on the other side: a kind on Block registers nothing in the six shape-util lists, and today one of those lists is already wrong — see <a href="#measured">measured</a>.</p>
+<h3>3.8 · Where you actually are on "write it twice, abstract the third time"</h3>
+<p>Two third instances exist. The text seam — Code block, Type body, Type Mapping body, port line, port lane — produced <code>CodeField</code> plus grammars this morning; that abstraction is done. The container anatomy — Expanded Block, Branch, Loop, Behavior Tree, Async frame — has a 27-line base for hit-testing and nothing for painting, which is why four header heights disagree. The 2026-09-06 audit said the same thing in dispatcher terms: the primitives are sound, the seams are not, and only Block signs every registry. Your thesis is that finding seen from the anatomy side. The plan you deferred then — a <code>PrimitiveKind</code> contract beside <code>DetachableKind</code> — is the <code>kind</code> this page is asking for; un-defer only that part.</p>
+<h3>3.9 · Migration is cheap where the thesis is right and impossible where it is wrong</h3>
+<p>43 Type Blocks store <code>attributeSource</code>; a migration creates one Code member from the text and leaves the old prop as the down-migration shadow the existing migration already strips. Branch (65 on your boards), Loop (32) and Behavior Tree regions do not migrate at all — they keep their models behind the contract. The one true story in the tree is a warning: two agents wrote the same <code>attributeSource</code> migration independently for the same feature (the comment is still in <code>blockShapeMigrations.ts</code>) — a clean merge, one mechanism twice — which is exactly what a written contract prevents.</p>
+
+<h2 id="prior">4 · Prior art, with specifics</h2>
+<table><thead><tr><th>Reference</th><th>What it actually does</th><th>What it says about "one primitive + styles"</th></tr></thead><tbody><tr><td><b>Notion — the block model</b></td><td>Everything is a block <i>and</i> every block has a <code>type</code> with a typed payload keyed by that type (paragraph, heading, to_do, code, child_database…); children hang off any block; synced blocks share one body across pages.</td><td>Exactly the surviving frame: one anatomy, explicit kinds, per-kind schema. Their synced block is your definition linking.</td></tr><tr><td><b>Figma — frames, auto layout, components</b></td><td>Every node has a <code>type</code> (FRAME, GROUP, COMPONENT, INSTANCE, TEXT). Auto layout is a set of style numbers on a frame — direction, spacing, padding, hug/fill/fixed — which are your gap, gutter and Fill | Own. Components add properties and variants: semantics on top of anatomy.</td><td>Anatomy unified under FRAME; meaning via type + component properties. A GROUP is not a FRAME — the engine keeps the distinction you are tempted to erase.</td></tr><tr><td><b>tldraw — the engine under you</b></td><td>Every record is a TLShape with a <code>type</code> and a per-type props validator; containment is <code>parentId</code>; order is the child <code>index</code>; frame-likeness is a ShapeUtil answer.</td><td>The engine is already "one anatomy + explicit kinds". A Block-with-a-kind reproduces that one level up — fine, as long as the kind is as explicit as tldraw's <code>type</code>.</td></tr><tr><td><b>Godot — &quot;everything is a Node&quot;</b></td><td>One base class, a deep class hierarchy (Node2D, Control, Sprite2D…), composition by the scene tree. Theme/styling is separate from class.</td><td>The slogan people quote is the anatomy half; the class hierarchy is the kind half. Nobody builds a Sprite by styling a Node.</td></tr><tr><td><b>Unreal Blueprints</b></td><td>One graph-node anatomy (SGraphNode) with a class per node kind (call function, branch, macro instance…), typed pins, and collapse-to-subgraph as containment.</td><td>Shared anatomy, explicit kinds, containment for grouping only. Control flow is pins and exec wires, never nesting.</td></tr><tr><td><b>HTML — &quot;everything is a div&quot;</b></td><td>The spec says a div "has no special meaning at all". Semantic elements and ARIA roles were added because screen readers, crawlers, forms and default keyboard behaviour all need the kind; a div styled like a button is not focusable and does not fire on Enter.</td><td>Div soup works for layout and fails for every machine reader. The fix was adding kinds (<code>&lt;button&gt;</code>, <code>role=</code>), not removing divs. Your machine readers are the Python projection and definition linking.</td></tr><tr><td><b>JetBrains MPS — projectional</b></td><td>A <i>concept</i> declares structure; an <i>editor</i> declares its projection; behaviour and constraints hang off the concept. Text is not canonical.</td><td>The cleanest statement of one-anatomy-per-kind with projection separate — and the cautionary pole: no plain-text storage. Keep text canonical where it is text today.</td></tr><tr><td><b>Enso · Neva · unit (already in the vault)</b></td><td>All three are languages that own their semantics end to end, so they may derive signatures, refuse graphs and infer kinds.</td><td>SystemSketch does not own its semantics. A kind must be authored, never derived from how something is nested or styled — the same boundary that rejected derived Branch ports.</td></tr><tr><td><b>Simulink · LabVIEW (vault dictionary, 13 + 18 conventions)</b></td><td>Meaning rides on silhouettes, port glyphs and a few reserved marks: a subsystem and an enabled subsystem differ by one extra port and one mark, never by a font.</td><td>The glyph-level distinctions readers rely on are reserved and closed. A style vocabulary that can mean anything means nothing; each kind must own its look.</td></tr></tbody></table>
+<p class="dim">Notion, Figma, Godot, Unreal, HTML and MPS are described from their public models as I know them and were not re-fetched for this page; the tldraw row, the vault dictionary and the Enso / Neva / unit reading are checked against the tree and the vault.</p>
+
+<h2 id="frame">5 · The frame that survives</h2>
+<div class="callout"><b>One anatomy, one tree, one text seam, one closed style set — and an explicit kind.</b> A Block is the anatomy: header band (glyph · title · kind label · chips), an optional divider, a body that is some mix of a text seam, a port lane and a member stack, an optional footer. Containment is tldraw's tree, order is its child index. Text is edited through one CodeField and a grammar per kind. Style is the closed set, defaulted per kind. And <code>kind</code> is a closed enum whose contract has six columns: body's canonical form (text | props | children), what it may contain, what edges it accepts, what it projects to in Python, which relations ride on props/meta/edges rather than nesting, and its style defaults.</div>
+<div class='scroll'><table class='matrix'><thead><tr><th>Kind</th><th>Anatomy pieces</th><th>Body's canonical form</th><th>May contain</th><th>Edges it accepts</th><th>Python projection</th><th>Unified</th><th>Stays explicit in the contract</th></tr></thead><tbody><tr><td>Block (call · def)</td><td>header · ports · footer · members</td><td>props — the port triple; members are children</td><td>any box shape as a member; body free or a live stack</td><td>cables on ports, polarity decided at the landing</td><td>a call, or a def with occurrences</td><td>anatomy ✓ — it is the anatomy</td><td>the triple stays props; definition sharing is by title</td></tr><tr><td>Pill (value)</td><td>capsule — the Block's <code>value</code> view</td><td>props — one literal</td><td>none</td><td>one outgoing cable</td><td>a literal argument</td><td>✓ already a Block view</td><td>never a definition (<code>blockDefinitionId</code> returns '')</td></tr><tr><td>Type</td><td>header · body</td><td><b>text → a Code member</b> with the attributes grammar</td><td>exactly one Code member</td><td>none (go-to-definition is a scan, not a cable)</td><td>NamedTuple / dataclass / TypedDict — the kind option decides</td><td>✓ anatomy, ✓ body (this is the tracer)</td><td>which class form it projects to is authored, never read off the text</td></tr><tr><td>Type Mapping</td><td>header · body</td><td><b>text → a Code member</b> with the alias grammar</td><td>one Code member</td><td>none</td><td><code>Name = expr</code> aliases</td><td>✓ same move as Type</td><td>targets are references resolved by name; nesting the target would copy it</td></tr><tr><td>Code</td><td>body only</td><td>text</td><td>none (it is a leaf)</td><td>none</td><td>verbatim source</td><td>✓ becomes a member of anything</td><td>language / width / line numbers are StyleProps, not kind</td></tr><tr><td>Port (floating)</td><td>dot · text slot</td><td>props — the triple</td><td>none</td><td>one cable end</td><td>a parameter</td><td>✓ the slot is a CodeField line</td><td>direction and semantic role are props</td></tr><tr><td>Members</td><td>children in a stack or free</td><td>children — tldraw child index</td><td>any box shape; annotations float</td><td>cables hidden while stacked</td><td>class members / body statements</td><td>✓ stock: parentId + index</td><td>order is the child index; nothing else to keep in sync</td></tr><tr><td>Loop</td><td>region header (an operator) · body</td><td>props — iterable/item ports, turn; the carried value is on a cable</td><td>Blocks, regions</td><td>header inlet and outlet; the back cable is <code>temporal: delayed</code></td><td>for / while with carried state</td><td>header painter only</td><td>the back-edge is an edge fact; seed | last is a receiver fact</td></tr><tr><td>Branch · arms</td><td>band · arm headers · arm bodies</td><td>props — <code>arms[]</code> (order, open, height) + <code>meta.branchArm</code></td><td>Blocks per arm, through invisible arm frames</td><td>control ports on the band only; cables straight to Blocks</td><td>if / elif / else; the join is a φ, drawn as a fade</td><td>band and arm-header painters</td><td>exclusivity, order and the active arm are props (PEP 0002)</td></tr><tr><td>Async region</td><td>a stock frame</td><td>meta — one stamp</td><td>anything</td><td>cables inside default to async</td><td>asynchronous delivery</td><td>✓ fully stock already</td><td>the stamp <i>is</i> the kind — the precedent for kind-on-a-stock-shape</td></tr><tr><td>Behavior Tree region</td><td>region · projected children</td><td>props — canonical BT.CPP XML</td><td>only projections (<code>meta.btRole</code>); authored Blocks pasted in lower with it</td><td>projected cables; owner resolved by containment, stamp repaired</td><td>the XML itself</td><td>leaf nodes are Blocks ✓</td><td>order, attributes and ids never live in children (PEP 0004)</td></tr><tr><td>BT node (leaf · control)</td><td>a Block (leaf) · a small control shape</td><td>a projection of one XML node</td><td>none</td><td>projected</td><td>one XML node</td><td>leaf anatomy ✓</td><td>its kind comes from the XML; today its subtitle is written into blockType</td></tr></tbody></table></div>
+<h3>The migration path, in order</h3>
+<div class="dg"><svg viewBox="0 0 980 214" width="100%" role="img" aria-label="The migration ladder: kind enum first, then the Type body as a Code member, then Type Mapping, then one shared header painter; and the things that never move into children.">
+<defs><marker id="l-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="dg-arrfill"/></marker></defs>
+<rect x="20" y="30" width="176" height="96" rx="8" class="dg-def"/>
+<text x="30" y="52" class="dg-h">0 · kind ≠ label</text>
+<text x="30" y="70" class="dg-dim">a closed enum + contract</text>
+<text x="30" y="84" class="dg-dim">migration fills it from</text>
+<text x="30" y="98" class="dg-dim">blockType's four values</text>
+<text x="30" y="112" class="dg-dim">the tracer bullet</text>
+<path d="M196 78 L 204 78" class="dg-arrow" marker-end="url(#l-ah)"/>
+<rect x="206" y="30" width="176" height="96" rx="8" class="dg-child"/>
+<text x="216" y="52" class="dg-h">1 · Type body → Code</text>
+<text x="216" y="70" class="dg-dim">attributes grammar on</text>
+<text x="216" y="84" class="dg-dim">CodeField; a migration</text>
+<text x="216" y="98" class="dg-dim">makes the child; share,</text>
+<text x="216" y="112" class="dg-dim">detach, embed come free</text>
+<path d="M382 78 L 390 78" class="dg-arrow" marker-end="url(#l-ah)"/>
+<rect x="392" y="30" width="176" height="96" rx="8" class="dg-child"/>
+<text x="402" y="52" class="dg-h">2 · Mapping → Code</text>
+<text x="402" y="70" class="dg-dim">alias grammar Name=Expr</text>
+<text x="402" y="84" class="dg-dim">targets stay references</text>
+<text x="402" y="98" class="dg-dim">(a scan), never children</text>
+<path d="M568 78 L 576 78" class="dg-arrow" marker-end="url(#l-ah)"/>
+<rect x="578" y="30" width="176" height="96" rx="8" class="dg-child"/>
+<text x="588" y="52" class="dg-h">3 · shared header</text>
+<text x="588" y="70" class="dg-dim">heights: 48/56/44/32</text>
+<text x="588" y="84" class="dg-dim">anatomy unified, models</text>
+<text x="588" y="98" class="dg-dim">untouched; Branch, Loop,</text>
+<text x="588" y="112" class="dg-dim">BT keep their ShapeUtils</text>
+<rect x="764" y="30" width="176" height="96" rx="8" class="dg-warnbox"/>
+<text x="774" y="52" class="dg-h">never</text>
+<text x="774" y="70" class="dg-dim">BT xml into children</text>
+<text x="774" y="84" class="dg-dim">arms into pure nesting</text>
+<text x="774" y="98" class="dg-dim">back-edge into a child</text>
+<text x="774" y="112" class="dg-dim">ports into free text</text>
+<text x="20" y="158" class="dg-c">Each rung is reversible on its own and leaves the boards loadable; rung 0 is a day, rung 1 is the first real deletion.</text>
+<text x="20" y="178" class="dg-dim">(1003 lines of Type UI today, 5352 more in babble/.) Rungs 1–2 are your own "attribute block = Block with a Code child";</text>
+<text x="20" y="196" class="dg-dim">rung 3 is the 2026-09-06 container-anatomy finding; the last column is PEPs 0002 and 0004 plus this morning's port ruling.</text>
+</svg></div>
+<p><b>The smallest tracer bullet:</b> the <code>kind</code> enum with its contract table and the migration that fills it from <code>blockType</code>, the four predicates reading the kind, and one test asserting no source file compares <code>blockType</code> to a literal outside the migration. Nothing paints differently; every board loads. The first visible change is rung 1, the Type body as a Code member, which is also the first deletion.</p>
+
+<h2 id="decisions">6 · What needs you</h2>
+<table><thead><tr><th></th><th>Decision</th><th>Recommendation</th><th>Reversible default if you say nothing</th></tr></thead><tbody><tr><td><b>D1</b></td><td>Split <code>kind</code> from <code>blockType</code></td><td>Yes. A closed enum prop with a contract table (<code>primitiveKind.ts</code> beside <code>detachableKind.ts</code>); the four predicates read it; <code>blockType</code> goes back to being the free label you type. A migration maps <code>blockType ∈ {type, typeMapping, unresolved, unbundle}</code> to the kind; a test forbids any other string comparison on the label.</td><td>Write the enum and the migration; nothing visible changes on any board.</td></tr><tr><td><b>D2</b></td><td>Type and Type Mapping bodies become a Code member</td><td>Yes — the text is already canonical there, so nothing is lost, and definition sharing, detach and the IDE embed all fall out of existing seams. The attributes grammar and the alias grammar are the next two CodeField grammars, which this morning's report already named as the follow-up.</td><td>Build the Type tracer behind the kind contract first; Type Mapping follows the same day.</td></tr><tr><td><b>D3</b></td><td>Which class form a Type projects to</td><td>An authored kind option — NamedTuple (your golden), dataclass, TypedDict, Protocol — chosen in the inspector, never inferred from the text. The whiteboard stays dumb; the Python side reads the option.</td><td>Default NamedTuple, matching the goldens.</td></tr><tr><td><b>D4</b></td><td>Regions keep their ShapeUtils; only the header painter is shared</td><td>Yes. Branch, Loop and Behavior Tree keep their models (arms, back-edge, XML) and their ShapeUtils behind the same kind contract; the drift in header heights becomes one ladder in one file. No rewrite — the 2026-09-06 audit already measured that the primitives are sound and the dispatchers are not.</td><td>No rewrite; the drift is made visible in one place and left as-is until you re-rung it.</td></tr><tr><td><b>D5</b></td><td>Style is reserved per kind</td><td>Yes. The closed set (footer, divider, inset | edge-to-edge, disclosure, size, glyph, background, gap, gutter, fill | own, free | stack) gets its <i>defaults</i> from the kind. Overrides stay inside that set; no kind grows its own controls. That is how "edge-to-edge with no footer" keeps meaning "an attributes body" and nothing else.</td><td>A kind → defaults table only; no new user-facing controls.</td></tr></tbody></table>
+<p><b>What I deliberately did not do:</b> touch <code>src/</code>, write a PEP (nothing has merged; the kind contract earns one at merge time), or re-run the seam-audit builder into the tree (its unmerged branch still builds and its matrix is quoted from the 2026-09-06 record, not re-published here).</p>
+
+<h2 id="measured">7 · Measured against the tree</h2>
+
+<h3>Shape utils, registries, tools</h3>
+<p>14 ShapeUtil classes in <code>src/</code>: <code>BehaviorTreeShapeUtil</code>, <code>BlockShapeUtil</code>, <code>BranchArmShapeUtil</code>, <code>BranchShapeUtil</code>, <code>BtControlShapeUtil</code>, <code>BtInsertGlyphShapeUtil</code>, <code>CodeShapeUtil</code>, <code>ConnectionShapeUtil</code>, <code>FloatingPortShapeUtil</code>, <code>LoopShapeUtil</code>, <code>RegionShapeUtil</code>, <code>SystemSketchArrowShapeUtil</code>, <code>SystemSketchTextShapeUtil</code>, <code>VariableRegistryShapeUtil</code>. The product canvas registers 10 of them by name (<code>BlockShapeUtil</code>, <code>BranchShapeUtil</code>, <code>BranchArmShapeUtil</code>, <code>LoopShapeUtil</code>, <code>BehaviorTreeShapeUtil</code>, <code>BtControlShapeUtil</code>, <code>CodeShapeUtil</code>, <code>BtInsertGlyphShapeUtil</code>, <code>FloatingPortShapeUtil</code>, <code>VariableRegistryShapeUtil</code>) plus 4 spread groups. 13 tools: <code>BlockTool</code>, <code>BranchTool</code>, <code>LoopTool</code>, <code>AsyncRegionTool</code>, <code>BehaviorTreeTool</code>, <code>CodeBlockTool</code>, <code>PillTool</code>, <code>TypeTool</code>, <code>FloatingPortTool</code>, <code>CalloutTool</code>, <code>CalloutAddLeaderTool</code>, <code>BtInsertGlyphTool</code>, <code>CommunicationLinkTool</code>. Of those, <code>PillTool</code> and <code>TypeTool</code> create a <b>Block</b> — a kind on the one anatomy — and <code>AsyncRegionTool</code> creates a stock <b>frame</b> with a meta stamp. So 3 of the palette's rungs are already "Block or frame + a kind" (a Type Mapping on this branch is a Block wearing a meta stamp, with no tool of its own yet), and only Branch, Loop, Behavior Tree, Code and Port own a ShapeUtil.</p>
+<table><thead><tr><th>File</th><th>Registry</th><th>Role</th><th>Block</th><th>Loop</th></tr></thead><tbody><tr><td><code>src/App.tsx</code></td><td><code>SYSTEMSKETCH_SHAPE_UTILS</code></td><td>the product canvas</td><td>✓</td><td>✓</td></tr><tr><td><code>src/App.tsx</code></td><td><code>BLOCK_DEVELOPMENT_SHAPE_UTILS</code></td><td>the Block development profile</td><td>✓</td><td>✓</td></tr><tr><td><code>src/store/createSystemSketchStore.ts</code></td><td><code>STORE_SHAPE_UTILS</code></td><td>the store&#x27;s validation schema</td><td>✓</td><td>✓</td></tr><tr><td><code>src/export/portableTldraw.ts</code></td><td><code>PORTABLE_SHAPE_UTILS</code></td><td>the portable .tldr export</td><td>✓</td><td>✓</td></tr><tr><td><code>src/embed/EmbeddedCanvas.tsx</code></td><td><code>EMBEDDED_SHAPE_UTILS</code></td><td>the VS Code / Cursor host canvas</td><td>✓</td><td><b class=bad>missing</b></td></tr><tr><td><code>src/compare/BoardRender.tsx</code></td><td><code>COMPARE_SHAPE_UTILS</code></td><td>the diff renderer</td><td>✓</td><td>✓</td></tr></tbody></table>
+<p><b class=bad>Live example of the registry cost:</b> <code>EMBEDDED_SHAPE_UTILS</code> do not list <code>LoopShapeUtil</code> today, which is the exact failure measured on 2026-09-06 (a Loop opened in the IDE pane paints the whole canvas blank). A kind that lives on Block has nothing to register in any of these lists.</p>
+<p>Detach is the one dimension already run as a registry: 7 kinds in <code>src/detach/registeredKinds.ts</code> (<code>connectionDetachable</code>, <code>blockDetachable</code>, <code>codeDetachable</code>, <code>branchDetachable</code>, <code>loopDetachable</code>, <code>behaviorTreeDetachable</code>, <code>floatingPortDetachable</code>). The inspector is still a subject switch with 8 arms (<code>block</code>, <code>branch</code>, <code>loop</code>, <code>behaviorTree</code>, <code>port</code>, <code>connection</code>, <code>shape</code>, <code>empty</code>) — Type and Type Mapping are not among them; they ride the Block arm.</p>
+<h3>Where the Type body and the kind are read</h3>
+<p><code>attributeSource</code> (the Type's whole body) is read by 3 files outside the babble variants, the schema and its migration: <code>src/blocks/portSignature.ts</code>, <code>src/blocks/typeAttributes.ts</code>, <code>src/blocks/ui/TypeAttributeRegion.tsx</code>. It is <b>not</b> in <code>sharedDefinitionProps</code>, so two occurrences of one Type do not share their attributes today, and it is not read by any detach reduction, so a detached Type keeps its header and loses its rows. <code>blockType</code>, by contrast, is read in 27 source files, is definition-shared, is switched on by 4 predicates (<code>isTypeBlock</code>, <code>isTypeMappingBlock</code>, <code>isUnresolvedBlock</code>, <code>isProjectionBlock</code>), is written by the Behavior Tree projection as a leaf's subtitle, and the pyblocks codec reads <code>props["blockType"]</code> and writes it out as <code>content["type"]</code> — a label, never a switch.</p>
+<h3>Weight</h3>
+<table><thead><tr><th>Directory</th><th>Lines (ts · tsx · css, tests excluded)</th><th>Modules</th></tr></thead><tbody><tr><td><code>src/blocks</code></td><td class='num'>44,004</td><td class='num'>151</td></tr><tr><td><code>src/behaviorTree</code></td><td class='num'>15,331</td><td class='num'>45</td></tr><tr><td><code>src/branch</code></td><td class='num'>3,572</td><td class='num'>19</td></tr><tr><td><code>src/loop</code></td><td class='num'>1,306</td><td class='num'>11</td></tr><tr><td><code>src/code</code></td><td class='num'>1,320</td><td class='num'>11</td></tr><tr><td><code>src/floatingPort</code></td><td class='num'>687</td><td class='num'>11</td></tr><tr><td><code>src/asyncRegion</code></td><td class='num'>191</td><td class='num'>5</td></tr><tr><td><code>src/detach</code></td><td class='num'>672</td><td class='num'>5</td></tr><tr><td><code>src/fields</code></td><td class='num'>827</td><td class='num'>5</td></tr></tbody></table>
+<p>The Type UI alone — region, parser, the shipped babble variant, the mapping variant and its shared resolver — is 1,003 lines, with 5,352 lines under <code>src/blocks/babble/</code> around it. The shared container base, <code>RegionShapeUtil</code>, is 27 lines and answers hit-testing and drag only; painting was never shared, which is why the header heights read Block 48, Loop 56, Behavior Tree 44, Branch arm 32. Block's own props: 40 keys — 22 style, 11 meaning, 3 lens, 4 geometry.</p>
+
+<h3>Your boards</h3>
+<p>65 boards under <code>/home/bam/SystemSketch</code>, 25,007 shapes: <code>block</code> 6,206, <code>connection</code> 5,908, <code>line</code> 4,542, <code>text</code> 2,853, <code>geo</code> 2,362, <code>image</code> 1,598, <code>arrow</code> 761, <code>group</code> 387, <code>branch-arm</code> 113, <code>frame</code> 88, <code>floating-port</code> 81, <code>branch</code> 65, <code>loop</code> 32, <code>code</code> 11. Nesting: depth 0: 9,916 · depth 1: 11,568 · depth 2: 2,759 · depth 3: 596 · depth 4: 132 · depth 5: 36. Block labels in use: <code>(blank)</code> 5763, <code>literal</code> 110, <code>class</code> 92, <code>skill</code> 81, <code>type</code> 43, <code>component</code> 37, <code>call</code> 25, <code>behaviour tree</code> 16, <code>sub tree</code> 14, <code>condition</code> 12, <code>system</code> 7, <code>dag</code> 2. 43 Type Blocks — 43 Types with 0 children.</p>
+<p>Read what the label column says: <code>class</code>, <code>component</code>, <code>system</code>, <code>call</code>, <code>dag</code> are words you typed; <code>type</code> is a machine switch; <code>skill</code>, <code>condition</code>, <code>sub tree</code> are what the Behavior Tree projection wrote. One column, three authors. A Block you label <i>Type</i> by hand becomes a Type primitive (<code>isTypeBlock</code> is a case-insensitive compare), and nothing in the store can tell the two apart afterwards. That is the concrete form of "nesting and style cannot carry the kind": today the kind is carried by the label, and the label is already ambiguous on your own boards.</p>
+<h3>What I could not verify</h3>
+<ul>
+<li>Your sketch reached me as a description of four panels, not the photo; the mapping in §1 is to that description.</li>
+<li>How many of the 43 <code>type</code> labels on your boards were typed by hand versus created by the Type tool — the store cannot say, which is the point of D1.</li>
+<li>The prior-art rows flagged above were not re-fetched; treat their specifics as leads.</li>
+<li>Performance at 200+ shapes with three-shape Types is reasoned from the settle pass and definition replication, not profiled.</li>
+</ul>
+</main>
