@@ -101,7 +101,7 @@ def implemented() -> dict | None:
         "vitest_files": len(tests),
         "vitest_cases": vitest_cases,
         "journey_checks": _journey_results().get("checks", 0),
-        "journey_first_paint_ms": _journey_results().get("firstPaintMs"),
+        "journey_first_paint_ms": round(_journey_results().get("firstPaintMs") or 0),
         "journey": journey.exists(),
         "fetch_endpoint": "/api/icon/fetch" in server,
         "triggers": sum(1 for f, token in [
