@@ -1,5 +1,5 @@
 import { completionStatus } from '@codemirror/autocomplete'
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import { copyLineDown, copyLineUp, defaultKeymap, history, historyKeymap, moveLineDown, moveLineUp } from '@codemirror/commands'
 import { python } from '@codemirror/lang-python'
 import { syntaxHighlighting } from '@codemirror/language'
 import { Annotation, Compartment, EditorState, Prec, type Extension } from '@codemirror/state'
@@ -155,7 +155,17 @@ export function CodeField({
               return true
             },
           })),
-          keymap.of([...defaultKeymap, ...historyKeymap]),
+          // A lane is a small IDE buffer, so the line keys people reach for
+          // all work: CodeMirror's own Alt+↑/↓ and Shift+Alt+↑/↓, plus the
+          // Ctrl forms for anyone whose window manager eats Alt+arrows.
+          keymap.of([
+            { key: 'Ctrl-ArrowUp', run: moveLineUp },
+            { key: 'Ctrl-ArrowDown', run: moveLineDown },
+            { key: 'Ctrl-Shift-ArrowUp', run: copyLineUp },
+            { key: 'Ctrl-Shift-ArrowDown', run: copyLineDown },
+            ...defaultKeymap,
+            ...historyKeymap,
+          ]),
           python(),
           syntaxHighlighting(classHighlighter),
           grammarCompartment.current.of(extensions),

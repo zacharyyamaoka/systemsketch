@@ -44,6 +44,11 @@ describe('port lanes', () => {
 		expect(placement.box.h).toBe(placement.linePitch! * 3)
 		expect(placement.box.y).toBe(first!.y - placement.linePitch! / 2)
 		expect(placement.align).toBe('left')
-		expect(portLanePlacement(props(), 'outputs')!.align).toBe('right')
+		// The outputs lane is typed the ordinary way, parked just past the
+		// right edge so its rows still line up with the dots.
+		const outputs = portLanePlacement(props(), 'outputs')!
+		expect(outputs.align).toBe('left')
+		expect(outputs.box.x).toBeGreaterThan(layout.bounds.w)
+		expect(outputs.box.y).toBe(placement.box.y)
 	})
 })

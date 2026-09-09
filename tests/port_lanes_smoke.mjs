@@ -4,8 +4,11 @@
  * view's inputs and outputs are two multi-line code fields, one line per
  * port. Clicking the left half of the Block opens the inputs lane with the
  * caret on the clicked port's line; the right half opens the outputs lane,
- * right-aligned. Moving a line (Alt+↑) reorders the ports and keeps their
- * ids, Enter adds a port, Shift+Alt+↓ duplicates one, Ctrl+Enter commits.
+ * parked just past the right edge and typed the ordinary way. Moving a line
+ * (Ctrl+↑, the Alt form is CodeMirror's own) reorders the ports and keeps
+ * their ids, Enter adds a port, Shift+Alt+↓ duplicates one, Ctrl+Enter
+ * commits, and every other way into a port (double-click, the + bead) opens
+ * the lane too — never the one-port editor.
  */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
@@ -21,6 +24,7 @@ import {
   key,
   localConsoleErrors,
   makeChecklist,
+  mouse,
   openApp,
   startApp,
   typeSlowly,
@@ -61,6 +65,7 @@ async function laneState(page, selector) {
       caretLine: anchorLine ? lines.indexOf(anchorLine) : null,
       focused: el.contains(document.activeElement),
       align: content ? getComputedStyle(content).textAlign : null,
+      left: el.getBoundingClientRect().left,
       lineHeights: lines.map((line) => Math.round(line.getBoundingClientRect().height)),
     }
   })())`))
@@ -146,14 +151,14 @@ async function main() {
     pass('a click on the left half opens the inputs lane: one line per port, caret on the clicked port')
 
     // ------------------------------------- Alt+Up moves a port, keeps its id ---
-    await key(page, 'ArrowUp', 'ArrowUp', ALT)
+    await key(page, 'ArrowUp', 'ArrowUp', CTRL)
     await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.inputs[0].id === 'in_2'`, 'the moved line to reorder the ports', 5000)
     assert.deepEqual(await storedPorts(page, 'inputs'), [
       ['in_2', 'frame', 'Frame', null], ['in_1', 'pose', 'Pose', 'None'], ['in_3', 'gain', 'float', '1.0'],
     ], 'ids travel with their lines, so cables stay attached')
     assert.deepEqual(await paintedNames(page, 'in'), ['frame', 'pose', 'gain'], 'the Block repaints in the new order while the lane is open')
     await shot(page, 'moved-up')
-    pass('Alt+↑ moves the port like a line in an IDE, and the port keeps its id')
+    pass('Ctrl+↑ moves the port like a line in an IDE, and the port keeps its id')
 
     // ------------------------------------------- Enter adds, typing fills ---
     await key(page, 'End', 'End')
@@ -191,13 +196,40 @@ async function main() {
     await waitFor(page, `document.querySelector(${JSON.stringify(OUTPUT_LANE)})`, 'the outputs lane editor', 5000)
     const outputs = await laneState(page, OUTPUT_LANE)
     assert.deepEqual(outputs.lines, ['pose: Pose', 'quality: float'])
-    assert.equal(outputs.align, 'right', 'the outputs lane reads from the right edge')
+    assert.notEqual(outputs.align, 'right', 'the outputs lane is typed left-to-right like any editor')
+    assert.ok(outputs.left >= box2.x + box2.width - 2, 'the outputs lane is parked past the Block\'s right edge, beside its dots')
     assert.equal(outputs.caretLine, 1, 'the caret opens on the clicked output')
     await shot(page, 'outputs-open')
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
     assert.deepEqual(await storedPorts(page, 'outputs'), [['out_1', 'pose', 'Pose', null], ['out_2', 'quality', 'float', null]])
-    pass('a click on the right half opens the outputs lane, right-aligned, and Escape leaves it untouched')
+    pass('a click on the right half opens the outputs lane outside the Block, typed normally, and Escape leaves it untouched')
+
+    // ------------------------------- every way in is the lane, never a box ---
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const gainLabel = await labelBox(page, 'in', 'gain')
+    await clickAt(page, gainLabel.x + 8, gainLabel.y + gainLabel.height / 2)
+    await waitFor(page, `document.querySelector('.BlockNode-inlineEditor')`, 'an editor from the painted label', 5000)
+    assert.equal(await evaluate(page, `document.querySelector('.BlockNode-inlineEditor')?.getAttribute('data-testid')`), 'block-inline-port-lane-inputs',
+      'a click on a painted port label opens the lane, not the one-port editor')
+    assert.equal((await laneState(page, INPUT_LANE)).caretLine, 4, 'with the caret on that port\'s line')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    await clickAt(page, EMPTY_CANVAS.x, EMPTY_CANVAS.y)
+    await delay(200)
+    const poseLabel = await labelBox(page, 'in', 'pose')
+    await mouse(page, 'mouseMoved', poseLabel.x + 8, poseLabel.y + poseLabel.height / 2)
+    for (const clickCount of [1, 2]) {
+      await mouse(page, 'mousePressed', poseLabel.x + 8, poseLabel.y + poseLabel.height / 2, { buttons: 1, clickCount })
+      await mouse(page, 'mouseReleased', poseLabel.x + 8, poseLabel.y + poseLabel.height / 2, { clickCount })
+    }
+    await waitFor(page, `document.querySelector('.BlockNode-inlineEditor')`, 'an editor from a double-click', 5000)
+    assert.equal(await evaluate(page, `document.querySelector('.BlockNode-inlineEditor')?.getAttribute('data-testid')`), 'block-inline-port-lane-inputs',
+      'a double-click on a port label opens the lane too — the prototype never falls back to the one-line box')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    pass('a single click, a double-click and the body all open the same lane — never the single-line editor')
 
     const errors = localConsoleErrors(page)
     assert.equal(errors.length, 0, `the journey emits no local console errors:\n${errors.join('\n')}`)
@@ -210,7 +242,6 @@ async function main() {
     throw error
   } finally {
     app.close()
-    void EMPTY_CANVAS
   }
 }
 

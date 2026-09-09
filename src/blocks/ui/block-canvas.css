@@ -157,10 +157,6 @@
   padding: 0;
 }
 
-.systemsketch-block-canvas .BlockNode-inlineEditor--lane-outputs .cm-content {
-  text-align: right;
-}
-
 /* Port and Expanded share the old white heading band. Expanded still names
  * the semantic type; the renderer never substitutes a literal "EXPANDED". */
 .systemsketch-block-canvas .NodeShape-heading {

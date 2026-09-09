@@ -41,10 +41,10 @@ CAPTURES = [
 
 LANE_CAPTURES = [
     ("port-lanes-inputs-open.png", "<code>?portLanes=1</code> · a click on the left half of the body opens ONE editor over all three inputs, one line per port, each line pinned to its dot's row; the caret opened on <code>frame</code>, the row that was clicked."),
-    ("port-lanes-moved-up.png", "Alt+↑ on that line: <code>frame</code> is now first. The store reads <code>in_2, in_1, in_3</code> — the ids moved with their lines, so a cable bound to <code>in_2</code> is still bound to <code>frame</code>."),
+    ("port-lanes-moved-up.png", "Ctrl+↑ (or Alt+↑) on that line: <code>frame</code> is now first. The store reads <code>in_2, in_1, in_3</code> — the ids moved with their lines, so a cable bound to <code>in_2</code> is still bound to <code>frame</code>."),
     ("port-lanes-duplicated.png", "Enter started <code>yaw: float = 0</code> as a new port in place; Shift+Alt+↓ then duplicated the line into a fifth port with its own id. The Block re-laid its rows under the editor as they were added."),
     ("port-lanes-committed.png", "Ctrl+Enter commits: the Block paints the five ports the lane described."),
-    ("port-lanes-outputs-open.png", "The right half opens the outputs lane, right-aligned to its labels. Escape leaves the outputs untouched."),
+    ("port-lanes-outputs-open.png", "The right half opens the outputs lane — parked just past the Block's right edge and typed the ordinary way, rows still one-to-one with the dots (your suggestion, applied as V1 below). Escape leaves the outputs untouched."),
     ("lanes-fixture.png", "The lanes' own guided board: cue 0 is the flag, then the three gestures and a PASS WHEN."),
 ]
 
@@ -148,6 +148,78 @@ def measured() -> dict:
     }
 
 
+def lane_mock(*, title: str, editor: str, inputs: list[str], outputs: list[str],
+              editor_side: str = "outputs", editor_x: int | None = None, editor_w: int = 150,
+              align: str = "left", clip: bool = False, both: bool = False, wide_block: bool = False,
+              modal: bool = False, sigils: bool = False, strip: bool = False) -> str:
+    """A small schematic of a Port-view Block with a lane editor, drawn from a few numbers."""
+    bw = 300 if wide_block else 220
+    rows = max(len(inputs), len(outputs))
+    pitch = 22
+    body_top = 40
+    h = body_top + rows * pitch + 18
+    x0 = 90
+    W = 480
+    # Room under the Block for the strip / modal mock and the caption line.
+    H = h + 30 + (60 if strip else 0) + (92 if modal else 0)
+    parts = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="{escape(title)}">']
+    parts.append(f'<rect x="{x0}" y="6" width="{bw}" height="{h}" rx="8" class="dg-parent"/>')
+    parts.append(f'<text x="{x0 + 12}" y="28" class="dg-h">estimate</text>')
+    parts.append(f'<line x1="{x0}" y1="{body_top - 4}" x2="{x0 + bw}" y2="{body_top - 4}" class="dg-rule"/>')
+    for i, name in enumerate(inputs):
+        y = body_top + i * pitch + 10
+        parts.append(f'<circle cx="{x0}" cy="{y}" r="4.5" class="dg-child"/>')
+        if not (editor_side in ("inputs", "both") and (both or editor_side == "inputs")):
+            parts.append(f'<text x="{x0 + 12}" y="{y + 4}" class="dg-c">{escape(name)}</text>')
+    for i, name in enumerate(outputs):
+        y = body_top + i * pitch + 10
+        parts.append(f'<circle cx="{x0 + bw}" cy="{y}" r="4.5" class="dg-child"/>')
+        if not (editor_side in ("outputs", "both")):
+            parts.append(f'<text x="{x0 + bw - 12}" y="{y + 4}" class="dg-c" text-anchor="end">{escape(name)}</text>')
+    def draw_editor(ex: int, ew: int, lines: list[str], anchor_end: bool) -> None:
+        ey = body_top - 2
+        eh = max(1, len(lines)) * pitch + 4
+        parts.append(f'<rect x="{ex}" y="{ey}" width="{ew}" height="{eh}" rx="5" class="dg-def"/>')
+        for i, line in enumerate(lines):
+            y = body_top + i * pitch + 14
+            if anchor_end:
+                parts.append(f'<text x="{ex + ew - 6}" y="{y}" class="dg-h" text-anchor="end">{escape(line)}</text>')
+            else:
+                text = line
+                if clip and len(text) > 18:
+                    text = text[:17] + "…"
+                parts.append(f'<text x="{ex + 6}" y="{y}" class="dg-h">{escape(text)}</text>')
+    if strip:
+        sy = h + 16
+        parts.append(f'<rect x="{x0}" y="{sy}" width="{bw}" height="44" rx="5" class="dg-def"/>')
+        parts.append(f'<text x="{x0 + 8}" y="{sy + 18}" class="dg-h">def estimate({", ".join(i.split(":")[0] for i in inputs)})</text>')
+        parts.append(f'<text x="{x0 + 8}" y="{sy + 36}" class="dg-h">  -&gt; ({", ".join(o.split(":")[0] for o in outputs)})</text>')
+    elif sigils:
+        draw_editor(x0 + 12, bw - 24, [f"&gt; {i}" for i in inputs] + [f"&lt; {o}" for o in outputs], False)
+    elif modal:
+        my = h + 14
+        parts.append(f'<rect x="{x0 - 40}" y="{my}" width="{bw + 80}" height="70" rx="8" class="dg-def"/>')
+        parts.append(f'<text x="{x0 - 30}" y="{my + 18}" class="dg-dim">⤢ estimate — ports</text>')
+        parts.append(f'<text x="{x0 - 30}" y="{my + 38}" class="dg-h">{escape(inputs[0])}   |   {escape(outputs[0])}</text>')
+        parts.append(f'<text x="{x0 - 30}" y="{my + 56}" class="dg-h">{escape(inputs[1])}   |   {escape(outputs[1])}</text>')
+        parts.append(f'<rect x="{x0 + bw - 22}" y="12" width="16" height="16" rx="3" class="dg-child"/><text x="{x0 + bw - 18}" y="24" class="dg-dim">⤢</text>')
+    else:
+        if editor_side in ("outputs", "both"):
+            ex = editor_x if editor_x is not None else x0 + bw + 10
+            draw_editor(ex, editor_w, outputs, align == "right")
+        if editor_side in ("inputs", "both") or both:
+            draw_editor(x0 + 12 if not both else x0 - 10 - editor_w, editor_w, inputs, False)
+    parts.append(f'<text x="8" y="{H - 6}" class="dg-dim">{escape(editor)}</text>')
+    parts.append('</svg>')
+    return "".join(parts)
+
+
+def variant_card(tag: str, title: str, svg: str, why: str, cost: str, applied: bool = False) -> str:
+    pill = '<span class="pill">applied</span>' if applied else ''
+    return (f'<div class="variant"><h4><b>{escape(tag)}</b> · {escape(title)} {pill}</h4>'
+            f'<div class="dg">{svg}</div><p><b>Why:</b> {why}</p><p><b>Cost:</b> {cost}</p></div>')
+
+
 def seam_svg() -> str:
     """The one seam: text ↔ triple, with the three editors on the text side and every reader on the triple side."""
     return """<svg viewBox="0 0 980 330" width="100%" role="img" aria-label="One line of text on the left, parsed by one function into the stored triple on the right, and every consumer reading the triple">
@@ -224,6 +296,11 @@ figcaption { font-size:13px; color:var(--mute); padding:8px 10px; }
 .pill { display:inline-block; padding:1px 8px; border-radius:10px; font-size:12px; font-weight:600; background:#e9f7ee; color:var(--ok); }
 .pill.no { background:#fdeeea; color:#b23a2c; }
 .tiers { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0; }
+.variants { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin:12px 0; }
+.variant { border:1px solid var(--line); border-radius:10px; padding:10px 12px; background:#fff; }
+.variant h4 { margin:0 0 6px; font-size:14px; }
+.variant .dg { margin:6px 0; }
+.variant p { font-size:13px; margin:4px 0; }
 .tier { border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--wash); }
 .tier h4 { margin:0 0 6px; font-size:14px; }
 .tier p { font-size:13px; color:var(--mute); margin:4px 0; }
@@ -240,7 +317,22 @@ def shots(names: list[tuple[str, str]]) -> str:
     return '<div class="shots">' + "".join(out) + "</div>"
 
 
+LANE_IN = ['pose: Pose = None', 'frame: Frame', 'gain: float = 1.0']
+LANE_OUT = ['pose: Pose', 'quality: float']
+LANE_LONG_OUT = ['pose: Pose', 'quality: float = estimate_quality(frame, pose)']
+
+
 def page(m: dict) -> str:
+    a1 = variant_card('A1', 'Park it outside, type it normally', lane_mock(title='A1', editor='outputs lane just past the right edge, left-aligned, rows aligned', inputs=LANE_IN, outputs=LANE_OUT), 'Rows still map one-to-one to the dots; the hands type left-to-right; the Block keeps painting the real labels underneath. Your own suggestion.', 'The mirror symmetry of the painted labels is lost while the lane is open; the editor can overlap whatever sits right of the Block.', applied=True)
+    a2 = variant_card('A2', 'Right-aligned, in place (the first cut)', lane_mock(title='A2', editor='outputs lane inside the Block, text anchored to the right edge', inputs=LANE_IN, outputs=LANE_OUT, editor_x=210, editor_w=100, align='right'), 'Perfect correspondence with the painted labels: the raw line sits exactly where the rendered one was.', 'The caret lives at the right edge and text grows leftward — this is the part that feels reverse. Rejected by driving it.')
+    a3 = variant_card('A3', 'Mirrored grammar for outputs', lane_mock(title='A3', editor='outputs typed as  Type name  reading toward the dot', inputs=LANE_IN, outputs=['Pose pose', 'float quality'], editor_x=210, editor_w=100, align='right'), 'What the labels already paint (type then name, toward the socket) becomes what you type, so the mirror is honest.', 'A second grammar to learn and to parse; Python never spells an output this way. Not recommended.')
+    a4 = variant_card('A4', 'Both lanes at once, both outside', lane_mock(title='A4', editor='inputs lane left of the Block, outputs lane right of it; the Block is pure render', inputs=LANE_IN, outputs=LANE_OUT, editor_side='both', both=True), 'The Block becomes the rendered view and the two lanes its source, side by side — the overlay picture literally.', 'Twice the surface for an edit that almost always touches one side; hides nothing but crowds the canvas. Not recommended.')
+    a5 = variant_card('A5', 'One signature strip under the Block', lane_mock(title='A5', editor='def estimate(pose, frame, gain) -> (pose, quality) in one editor below', inputs=LANE_IN, outputs=LANE_OUT, strip=True), 'It is the Python: one line, inputs then outputs, the arrow between them. Reads like the code it will become.', 'Loses the one-line-per-port correspondence with the dots, which is the whole point of the lane; better as the Code-block view of a Block than as its port editor.')
+    b1 = variant_card('B1', 'Run off into the page', lane_mock(title='B1', editor='a long line keeps going past the Block; nothing scrolls, nothing clips while typing', inputs=LANE_IN, outputs=LANE_LONG_OUT, editor_w=230), 'Nothing moves under your hands: no horizontal scroll, no ellipsis chasing the caret. The painted label clips as it always did once you leave.', 'A very long default can cross a neighbour on a busy board while the lane is open. Acceptable for a one-line grammar; that is what B5 is for.', applied=True)
+    b2 = variant_card('B2', 'Clip at the wall, scroll to the caret', lane_mock(title='B2', editor='the lane is as wide as its half of the Block; the line scrolls horizontally under the caret', inputs=LANE_IN, outputs=LANE_LONG_OUT, editor_x=210, editor_w=100, clip=True), 'The Block never grows and nothing leaks over the canvas.', 'Sliding text is the frustrating case you named; you lose the start of the line the moment you type the end.')
+    b3 = variant_card('B3', 'The Block grows while editing', lane_mock(title='B3', editor='the Block widens live to fit the longest line, snaps back on commit', inputs=LANE_IN, outputs=LANE_LONG_OUT, wide_block=True, editor_x=400, editor_w=70), 'Everything stays inside the Block and readable.', 'Layout thrash on every keystroke and cables re-route as the wall moves; the Block\'s width is a stored property you did not ask to change.')
+    b4 = variant_card('B4', 'Both lanes activate, both park outside', lane_mock(title='B4', editor='clicking either half opens both lanes outside the Block; the Block is untouched', inputs=LANE_IN, outputs=LANE_LONG_OUT, editor_side='both', both=True, editor_w=150), 'The width question disappears: the lanes are outside, the Block is pure render.', 'Same as A4 — the second lane is noise for a one-sided edit.')
+    b5 = variant_card('B5', 'A ⤢ button opens a bigger viewer', lane_mock(title='B5', editor='top-right ⤢ opens both lane documents side by side in a modal, wrapping on', inputs=LANE_IN, outputs=LANE_LONG_OUT, modal=True), 'Long definitions get room without the Block changing; wrapping is fine there because the modal is not row-aligned. The same two documents, so nothing to sync.', 'One more surface to build; the modal is where the per-line reveal would first be worth doing. The natural next step.')
     checks = "".join(f"<li>{escape(c)}</li>" for c in m["checks"]) or "<li>(journey results not found at build time — run <code>npm run test:port-signature</code>)</li>"
     return f"""<!doctype html>
 <meta charset="utf-8">
@@ -311,10 +403,22 @@ def page(m: dict) -> str:
 {shots(CAPTURES[4:])}
 
 <h2 id="lanes">Prototype · one line per port (<code>?portLanes=1</code>)</h2>
-<p class="lede">Built the same afternoon from your follow-up: instead of one line per field, <b>each lane of a Port view is one multi-line code text box</b> — the inputs lane on the left, the outputs lane on the right, right-aligned — and each line <i>is</i> a port. Clicking the left half of the Block opens the inputs lane with the caret on the row you clicked; the right half opens the outputs. Because the lane is a CodeMirror document, the IDE keys come for free and mean what you'd hope: <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> reorders a port, <kbd>Enter</kbd> adds one on the next line, <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>↓</kbd> duplicates one, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> commits, <kbd>Esc</kbd> leaves. Every keystroke reads the whole lane back into the same port records: <code>reconcilePortLane</code> diffs the lines, a line that still says what a port said keeps that port's id (so a <b>moved port keeps its cables</b>), a line edited in place keeps its id, a new line is a new port, a missing line is a removed one. Storage is still the triple; header ports and hidden ports are not lines and keep their place around the lane.</p>
+<p class="lede">Built the same afternoon from your follow-up: instead of one line per field, <b>each lane of a Port view is one multi-line code text box</b> — the inputs lane on the left, the outputs lane parked just outside the right edge so it is typed left-to-right — and each line <i>is</i> a port. Clicking the left half of the Block opens the inputs lane with the caret on the row you clicked; the right half opens the outputs. Because the lane is a CodeMirror document, the IDE keys come for free and mean what you'd hope: <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> reorders a port, <kbd>Enter</kbd> adds one on the next line, <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>↓</kbd> duplicates one, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> commits, <kbd>Esc</kbd> leaves. Every keystroke reads the whole lane back into the same port records: <code>reconcilePortLane</code> diffs the lines, a line that still says what a port said keeps that port's id (so a <b>moved port keeps its cables</b>), a line edited in place keeps its id, a new line is a new port, a missing line is a removed one. Storage is still the triple; header ports and hidden ports are not lines and keep their place around the lane.</p>
 <div class="callout"><b>What the lane taught about the overlay idea.</b> The Block itself is the rendered layer: while the lane is open the Block keeps painting dots, chips and labels from the store, so you are looking at source and projection at once, aligned row for row. That is the two-state field you described — rendered by default, source when you click in — with the cursor landing on the right line because the lines <i>are</i> the rows. What is still missing is the reveal rule inside the editor (raw only on the caret's line, rendered elsewhere); here the whole lane is raw while open, which is the "switch the whole thing" mode. The per-line reveal is the next step and is a decoration rule, not a second editor.</div>
 {shots(LANE_CAPTURES)}
 <p>Proof: <code>npm run test:port-lanes</code> ({len(m['lane_checks'])} real-browser checks) and {m['lane_tests']} unit tests over the reconciler and the hit-test (<code>portLane.test.ts</code>, <code>portLaneAtPoint.test.ts</code>); <code>portLane.ts</code> is {m['lane_lines']} lines. Behind the flag the shipped one-line editor and every journey are unchanged.</p>
+
+<h3 id="lane-ergonomics">Two questions you asked, five directions each</h3>
+<p><b>A · the outputs lane "feels reverse".</b> Typing into a right-anchored box is nothing anyone's hands know. The five ways out, with the one you suggested already applied:</p>
+<div class="variants">
+{a1}{a2}{a3}{a4}{a5}
+</div>
+<p><b>B · what the text box does with width.</b> A lane is a column of one-liners; the question is what happens when a line is longer than its half of the Block, and whether the box should own more space while it is open.</p>
+<div class="variants">
+{b1}{b2}{b3}{b4}{b5}
+</div>
+<div class="callout"><b>Recommendation, and what silence keeps.</b> A1 + B1 are live now: the outputs lane parks outside the right edge and types normally; while editing, a long line runs off into the page rather than scrolling or clipping, exactly as you reasoned ("it runs off into the page … if it must be one line"), and the painted label clips as it always did. Next, if you want it: B5's <code>⤢</code> button is the "bigger viewer" for genuinely long definitions — it is the same two lane documents shown side by side in a modal with wrapping on, so nothing new to keep in sync. A4 (both lanes at once, outside) is the one I would <i>not</i> do: it doubles the surface for a rare case and hides the Block's own render, which is the thing the lane is supposed to sit beside.</div>
+
 <h3>Rough edges, deliberately left</h3>
 <ul>
 <li><b>Rows and branches are not lines yet.</b> A moved port keeps its own row/branch; a new port takes its neighbour's. The Sep 5 port-text babble's <code>---</code> divider is the obvious grammar for a row break, and a lane with several rows will not line up with the row gaps until it exists.</li>

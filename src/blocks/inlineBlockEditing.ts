@@ -7,7 +7,8 @@
  */
 import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 
-import { blockHeaderAlign, type BlockShape, type BlockShapeProps } from './blockModel'
+import { blockHeaderAlign, isBlockShape, portInHeader, type BlockShape, type BlockShapeProps } from './blockModel'
+import { portLanesEnabled } from './portLanePrototype'
 import { isClockTriggerBlock } from './stockBlocks'
 import {
 	PORT_LABEL_INSET_PX,
@@ -71,6 +72,23 @@ export function isSameBlockInlineField(a: BlockInlineField, b: BlockInlineField)
 	return a.kind === b.kind
 }
 
+/**
+ * With the lane prototype on, a Port-view Block has no one-port editor: every
+ * way of asking for a port's name or type — click-to-edit, double-click, the
+ * `+` bead, the context menu — opens that side's lane with the caret on the
+ * port's line. Normalised HERE, at the one place a field is remembered, so
+ * the lane and the one-line editor can never alternate.
+ */
+function normalizeInlineField(editor: Editor, shapeId: TLShapeId, field: BlockInlineField): BlockInlineField {
+	if (field.kind !== 'portName' && field.kind !== 'portType') return field
+	if (!portLanesEnabled()) return field
+	const shape = editor.getShape(shapeId)
+	if (!shape || !isBlockShape(shape) || shape.props.view !== 'port') return field
+	const lane = shape.props[field.side].filter((port) => port.visible && !portInHeader(port))
+	const line = Math.max(0, lane.findIndex((port) => port.id === field.portId))
+	return { kind: 'portLane', side: field.side, line }
+}
+
 export function rememberBlockInlineField(
 	editor: Editor,
 	shapeId: TLShapeId,
@@ -78,8 +96,9 @@ export function rememberBlockInlineField(
 ): void {
 	const fields = fieldsFor(editor)
 	const current = fields.get().get(shapeId)
-	if (current && isSameBlockInlineField(current, field)) return
-	fields.update((previous) => new Map(previous).set(shapeId, field))
+	const next = normalizeInlineField(editor, shapeId, field)
+	if (current && isSameBlockInlineField(current, next)) return
+	fields.update((previous) => new Map(previous).set(shapeId, next))
 }
 
 export function ensureBlockInlineField(editor: Editor, shapeId: TLShapeId): void {
@@ -146,14 +165,20 @@ export function portLanePlacement(
 	const pitch = placed.length > 1 ? placed[1]!.y - placed[0]!.y : PORT_LANE_DEFAULT_PITCH_PX
 	const top = placed.length > 0 ? placed[0]!.y - pitch / 2 : layout.bodyTop
 	const laneWidth = Math.max(120, width / 2 - PORT_LABEL_INSET_PX - 8)
+	// WHY the outputs lane sits OUTSIDE the right edge, typed left-to-right:
+	// a right-aligned editor "feels reverse" (Zach, 2026-09-09) — nobody types
+	// with the caret anchored at the right. Parking the lane just past the
+	// dots keeps the rows aligned one-to-one with the ports while the text
+	// reads and edits the ordinary way; only the horizontal mirroring of the
+	// painted labels is given up, and only while the lane is open.
 	return {
 		box: {
-			x: side === 'inputs' ? PORT_LABEL_INSET_PX : width - PORT_LABEL_INSET_PX - laneWidth,
+			x: side === 'inputs' ? PORT_LABEL_INSET_PX : width + PORT_LABEL_INSET_PX,
 			y: top,
 			w: laneWidth,
 			h: Math.max(pitch, pitch * placed.length),
 		},
-		align: side === 'inputs' ? 'left' : 'right',
+		align: 'left',
 		linePitch: pitch,
 	}
 }

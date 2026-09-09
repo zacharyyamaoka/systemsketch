@@ -262,7 +262,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				cursorAt={cursorAt}
 				multiline
 				lineHeightPx={placement.linePitch}
-				align={field.side === 'outputs' ? 'right' : 'left'}
+				align={placement.align === 'right' ? 'right' : 'left'}
 				onViewReady={(view) => { codeViewRef.current = view }}
 				extensions={portExtensions}
 				onWrite={writeField}
