@@ -1,9 +1,6 @@
 import type { Editor, TLCameraOptions, TldrawOptions } from 'tldraw'
-import {
-  DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
-  getAppearancePreferences,
-  subscribeAppearancePreferences,
-} from './settings/appearancePreferences'
+import { getAppearancePreferences, subscribeAppearancePreferences } from './settings/appearancePreferences'
+import { DEFAULT_GESTURE_SETTINGS, getGestureSettings, subscribeGestureSettings } from './settings/gestureSettings'
 
 export const SYSTEMSKETCH_CAMERA_OPTIONS = {
   wheelBehavior: 'pan',
@@ -14,6 +11,15 @@ export const SYSTEMSKETCH_EDITOR_OPTIONS = {
   maxPages: 1,
   camera: SYSTEMSKETCH_CAMERA_OPTIONS,
 } satisfies Partial<TldrawOptions>
+
+/**
+ * Elements a canvas-wide wheel gesture must never intercept, shared between
+ * this file's Direct wheel zoom modifier listener and `canvasGestures.ts`'s
+ * rebinding listener — a single list so the two cannot drift apart on what
+ * "editable surface" means.
+ */
+export const WHEEL_GESTURE_EXCLUDED_SELECTOR =
+  'input, textarea, [contenteditable="true"], .cm-editor, .systemsketch-primitive-search, [data-systemsketch-chrome]'
 
 /**
  * Keep the canvas on one of two supported tldraw camera contracts.
@@ -30,13 +36,26 @@ export function enforceSystemSketchCanvasNavigation(
   directWheelZoom: boolean,
   scrollDownZoomsIn: boolean,
   wheelZoomSensitivityPercent: number,
+  // WHY a second, independent sensitivity rather than reusing the one above:
+  // that parameter is Direct wheel zoom's own control and only ever applies
+  // in that branch. Settings → Canvas → Sensitivity tunes the *stock*
+  // (non-direct) wheel/Ctrl+wheel gain instead — see gestureSettings.ts. This
+  // function stays the single place that decides zoomSpeed for both modes,
+  // so ownership can't split into two competing writers; it stays a pure
+  // projection (easy to unit test) by taking the value as a parameter rather
+  // than reaching into the gesture-settings store itself — the caller below
+  // does that read.
+  stockZoomSensitivityPercent: number = DEFAULT_GESTURE_SETTINGS.zoomSpeedPercent,
 ): void {
   if (!directWheelZoom) {
     editor.setCameraOptions({
       ...SYSTEMSKETCH_CAMERA_OPTIONS,
-      // Direct mode may have changed this; Ctrl/Cmd + wheel in normal mode
-      // deserves the same one-to-one stock gain as a first-run whiteboard.
-      zoomSpeed: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT / 100,
+      // Direct mode may have changed this. A hardcoded reset to 100% here
+      // used to be correct because nothing else could tune stock-mode zoom
+      // speed; now that Settings → Canvas → Sensitivity can, a fixed value
+      // would silently undo that tuning every time an unrelated appearance
+      // preference changed (this function reruns on every one of them).
+      zoomSpeed: stockZoomSensitivityPercent / 100,
     })
     const current = editor.user.getUserPreferences()
     if (current.inputMode !== 'trackpad') {
@@ -72,6 +91,7 @@ export function installSystemSketchCanvasNavigation(editor: Editor): () => void 
       preferences.directWheelZoom,
       preferences.scrollDownZoomsIn,
       preferences.wheelZoomSensitivityPercent,
+      getGestureSettings().zoomSpeedPercent,
     )
   }
   applyAppearance()
@@ -85,7 +105,7 @@ export function installSystemSketchCanvasNavigation(editor: Editor): () => void 
       || (!event.ctrlKey && !event.metaKey)
       || !(event.target instanceof Element)
       || !event.target.closest('.tl-canvas')
-      || event.target.closest('input, textarea, [contenteditable="true"], .cm-editor, .systemsketch-primitive-search, [data-systemsketch-chrome]')
+      || event.target.closest(WHEEL_GESTURE_EXCLUDED_SELECTOR)
     ) {
       return
     }
@@ -121,8 +141,14 @@ export function installSystemSketchCanvasNavigation(editor: Editor): () => void 
   container.addEventListener('wheel', onDirectModifierWheel, { capture: true, passive: false })
 
   const stopAppearanceSubscription = subscribeAppearancePreferences(applyAppearance)
+  // Settings → Canvas → Sensitivity lives in the gesture-settings store, not
+  // this one — re-applying here too is what lets dragging that slider move
+  // the live camera without an unrelated appearance preference having to
+  // change first.
+  const stopGestureSubscription = subscribeGestureSettings(applyAppearance)
   return () => {
     stopAppearanceSubscription()
+    stopGestureSubscription()
     container.removeEventListener('wheel', onDirectModifierWheel, { capture: true })
   }
 }

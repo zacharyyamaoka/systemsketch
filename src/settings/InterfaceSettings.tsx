@@ -50,6 +50,19 @@ import {
   useAppearancePreferences,
   WHEEL_ZOOM_SENSITIVITY_STEP,
 } from './appearancePreferences'
+import {
+  DEFAULT_GESTURE_SETTINGS,
+  MAX_SPEED_PERCENT,
+  MIN_SPEED_PERCENT,
+  updateGestureSettings,
+  useGestureSettings,
+  WHEEL_COMMAND_LABELS,
+  WHEEL_GESTURE_LABELS,
+  type WheelCommand,
+  type WheelGesture,
+} from './gestureSettings'
+import { PercentInput } from './PercentInput'
+import { setGestureTuningOpen } from './gestureTuningStore'
 import { TOOL_SEARCH_ALIAS_ITEMS, type ToolSearchAliasItem } from '../library/toolSearchCatalog'
 import {
   addToolAlias,
@@ -147,7 +160,7 @@ export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
   category?: SettingsCategoryId
 }
 
-export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSettingsDialogProps) {
+export function SystemSketchSettingsDialog({ category: initial, onClose }: SystemSketchSettingsDialogProps) {
   const [category, setCategory] = useState<SettingsCategoryId>(initial ?? 'interface')
 
   return (
@@ -192,7 +205,7 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
           : category === 'appearance'
           ? <AppearancePanel />
           : category === 'canvas'
-          ? <CanvasPanel />
+          ? <CanvasPanel onClose={onClose} />
           : category === 'connections'
           ? <ConnectionsPanel />
           : category === 'shortcuts'
@@ -301,15 +314,16 @@ function ToolAliasesPanel() {
 }
 
 /**
- * Off by default. Enabling this defeats the fence in workspace_store.py that
- * confines every board open/save/rename/reveal to the configured workspace
- * root — the same fence a hostile web page would need to escape, so the
- * toggle is explained rather than buried, and persisted on the local
- * SystemSketch server (not this browser) since Stable and Preview both
- * enforce it independently and both need to see the same choice immediately.
+ * On by default (see FileAccessSettings in release_lib.py). Disabling this
+ * restores the fence in workspace_store.py that confines every board
+ * open/save/rename/reveal to the configured workspace root — the same fence
+ * a hostile web page would need to escape, so the toggle is explained rather
+ * than buried, and persisted on the local SystemSketch server (not this
+ * browser) since Stable and Preview both enforce it independently and both
+ * need to see the same choice immediately.
  */
 function GeneralPanel() {
-  const [allowAnyPath, setAllowAnyPath] = useState(false)
+  const [allowAnyPath, setAllowAnyPath] = useState(true)
   const [loaded, setLoaded] = useState(false)
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -352,7 +366,7 @@ function GeneralPanel() {
       <div className="systemsketch-settings__intro">
         <div>
           <h2 id="file-access-title">File access</h2>
-          <p>SystemSketch normally only opens, saves, and browses boards inside your workspace folder.</p>
+          <p>SystemSketch can open, save, and browse boards anywhere on this computer, not just your workspace folder.</p>
         </div>
       </div>
 
@@ -361,8 +375,9 @@ function GeneralPanel() {
           <h3 id="allow-any-path-title">Allow opening files anywhere</h3>
           <p>
             Lets a board link (<code>?board=</code>), Save As, or Rename reach any path on this
-            computer — not just your workspace folder. Turn this on only if you need to open a
-            board from somewhere else, like an agent worktree; leave it off otherwise.
+            computer — not just your workspace folder. On by default, since boards routinely come
+            from an agent worktree or another drive. Turn this off to confine SystemSketch to your
+            workspace folder only.
           </p>
         </div>
         <button
@@ -376,7 +391,7 @@ function GeneralPanel() {
         >
           <span>
             <strong>Allow opening files anywhere</strong>
-            <small>Off by default. Takes effect immediately, in both Stable and Preview.</small>
+            <small>On by default. Takes effect immediately, in both Stable and Preview.</small>
           </span>
           <i aria-hidden="true"><span /></i>
         </button>
@@ -807,7 +822,7 @@ function InterfacePanel() {
   )
 }
 
-function CanvasPanel() {
+function CanvasPanel({ onClose }: { onClose(): void }) {
   const {
     directWheelZoom,
     modifierWheelZoomsOppositely,
@@ -815,6 +830,7 @@ function CanvasPanel() {
     scrollDownZoomsIn,
     wheelZoomSensitivityPercent,
   } = useAppearancePreferences()
+  const gestures = useGestureSettings()
 
   return (
     <section className="systemsketch-settings__panel" aria-labelledby="canvas-navigation-title">
@@ -825,6 +841,27 @@ function CanvasPanel() {
           <p>Choose how the canvas responds to a wheel and how its zoom controls appear.</p>
         </div>
       </div>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="pointer-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="pointer-title">Pointer</h3>
+          <p>Where a paste or duplicate lands.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={gestures.pasteUnderCursor}
+          data-testid="systemsketch-paste-under-cursor"
+          onClick={() => updateGestureSettings({ pasteUnderCursor: !gestures.pasteUnderCursor })}
+        >
+          <span>
+            <strong>Copy/paste under cursor</strong>
+            <small>On: paste and duplicate land at the pointer. Off: they land at the viewport centre.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
 
       <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-behavior-title">
         <div className="systemsketch-settings__appearance-heading">
@@ -846,6 +883,83 @@ function CanvasPanel() {
           <i aria-hidden="true"><span /></i>
         </button>
       </section>
+
+      {/*
+        Gated on `!directWheelZoom`, the exact mirror of `canvasGestures.ts`'s
+        own runtime gate: Direct wheel zoom is a different input contract
+        (tldraw's `inputMode: 'mouse'`, wheel always zooms) with its own
+        sensitivity just below. Showing both sets of controls at once would
+        make it unclear which one is live; hiding this half keeps the UI
+        honest about which system currently owns the wheel.
+      */}
+      {!directWheelZoom ? (
+        <>
+          <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-gestures-title">
+            <div className="systemsketch-settings__appearance-heading">
+              <h3 id="wheel-gestures-title">Wheel gestures</h3>
+              <p>What each wheel gesture does. Leaving a row on its stock command lets tldraw handle it natively.</p>
+            </div>
+            {GESTURE_ORDER.map((gesture) => (
+              <GestureBindingRow
+                key={gesture}
+                gesture={gesture}
+                value={gestures.bindings[gesture]}
+                onChange={(command) => updateGestureSettings({
+                  bindings: { ...gestures.bindings, [gesture]: command },
+                })}
+              />
+            ))}
+          </section>
+
+          <section className="systemsketch-settings__appearance-section" aria-labelledby="gesture-sensitivity-title">
+            <div className="systemsketch-settings__appearance-heading">
+              <h3 id="gesture-sensitivity-title">Sensitivity</h3>
+              <p>How far one wheel notch moves the board. 100% matches the standard feel.</p>
+            </div>
+            <GestureSpeedRow
+              label="Scroll"
+              testId="systemsketch-gesture-pan-speed"
+              value={gestures.panSpeedPercent}
+              onChange={(panSpeedPercent) => updateGestureSettings({ panSpeedPercent })}
+            />
+            <GestureSpeedRow
+              label="Zoom"
+              testId="systemsketch-gesture-zoom-speed"
+              value={gestures.zoomSpeedPercent}
+              onChange={(zoomSpeedPercent) => updateGestureSettings({ zoomSpeedPercent })}
+            />
+            <div className="systemsketch-settings__gesture-actions">
+              <button
+                type="button"
+                className="systemsketch-settings__sensitivity-reset"
+                disabled={
+                  gestures.panSpeedPercent === DEFAULT_GESTURE_SETTINGS.panSpeedPercent
+                  && gestures.zoomSpeedPercent === DEFAULT_GESTURE_SETTINGS.zoomSpeedPercent
+                  && gestures.pasteUnderCursor === DEFAULT_GESTURE_SETTINGS.pasteUnderCursor
+                  && GESTURE_ORDER.every((gesture) => gestures.bindings[gesture] === DEFAULT_GESTURE_SETTINGS.bindings[gesture])
+                }
+                data-testid="systemsketch-gesture-reset"
+                onClick={() => updateGestureSettings(DEFAULT_GESTURE_SETTINGS)}
+              >
+                Reset
+              </button>
+              {/* WHY this closes the dialog rather than opening a panel beside
+                  it: a sensitivity is judged by FEEL, and feel needs the
+                  board. Leaving the modal up would keep the canvas blocked —
+                  the exact complaint this button answers (see
+                  `gestureTuningStore.ts`). */}
+              <button
+                type="button"
+                className="systemsketch-settings__sensitivity-reset"
+                data-testid="systemsketch-gesture-tune-live"
+                onClick={() => { setGestureTuningOpen(true); onClose() }}
+              >
+                Tune live…
+              </button>
+            </div>
+          </section>
+        </>
+      ) : null}
 
       {directWheelZoom ? <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
         <div className="systemsketch-settings__appearance-heading">
@@ -941,6 +1055,84 @@ function CanvasPanel() {
         </button>
       </section>
     </section>
+  )
+}
+
+const GESTURE_ORDER: readonly WheelGesture[] = ['wheelDown', 'wheelUp', 'ctrlWheelDown', 'ctrlWheelUp']
+const COMMAND_ORDER: readonly WheelCommand[] = [
+  'none', 'pan-up', 'pan-down', 'pan-left', 'pan-right', 'zoom-in', 'zoom-out', 'undo', 'redo',
+]
+
+function GestureBindingRow({ gesture, value, onChange }: {
+  gesture: WheelGesture
+  value: WheelCommand
+  onChange(command: WheelCommand): void
+}) {
+  const id = `systemsketch-gesture-binding-${gesture}`
+  return (
+    <div className="systemsketch-settings__gesture-row">
+      <label htmlFor={id}>{WHEEL_GESTURE_LABELS[gesture]}</label>
+      <select
+        id={id}
+        data-testid={`systemsketch-gesture-binding-${gesture}`}
+        value={value}
+        onChange={(event) => onChange(event.currentTarget.value as WheelCommand)}
+      >
+        {COMMAND_ORDER.map((command) => (
+          <option key={command} value={command}>{WHEEL_COMMAND_LABELS[command]}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+/**
+ * A slider for feel and a number box for an exact value, kept in sync — the
+ * same pairing as the existing "Wheel zoom sensitivity" row above, but with a
+ * far wider range (5–400% against that row's 50–150%) and an exact-value
+ * field: Zach, after using the slider, asked to "set the scroll and zoom
+ * sensitivity exactly to a value that I want" rather than only drag toward
+ * one. See `PercentInput.tsx`.
+ */
+function GestureSpeedRow({ label, value, onChange, testId }: {
+  label: string
+  value: number
+  onChange(percent: number): void
+  testId: string
+}) {
+  const id = `${testId}-slider`
+  return (
+    <div className="systemsketch-settings__sensitivity" data-testid={`${testId}-control`}>
+      <div className="systemsketch-settings__sensitivity-heading">
+        <label htmlFor={id}>
+          <strong>{label}</strong>
+        </label>
+        <PercentInput
+          testId={testId}
+          value={value}
+          onCommit={onChange}
+          style={{
+            minWidth: 52, padding: '6px 8px', border: '1px solid var(--ss-border)', borderRadius: 7,
+            background: 'var(--ss-surface-sunken)', color: 'var(--ss-text)',
+            font: '760 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace', textAlign: 'center',
+          }}
+        />
+      </div>
+      <div className="systemsketch-settings__sensitivity-slider">
+        <span>Slower</span>
+        <input
+          id={id}
+          type="range"
+          min={MIN_SPEED_PERCENT}
+          max={MAX_SPEED_PERCENT}
+          step={5}
+          value={value}
+          aria-valuetext={`${value}% of standard ${label.toLowerCase()} speed`}
+          onChange={(event) => onChange(Number(event.currentTarget.value))}
+        />
+        <span>Faster</span>
+      </div>
+    </div>
   )
 }
 

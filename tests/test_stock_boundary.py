@@ -71,7 +71,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("...blockConnectionShapeUtils", source)
         self.assertIn("const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]", source)
         self.assertIn("registerExcalidrawPasteHandler(editor)", product_source)
-        self.assertIn("enablePasteAtCursor(editor)", product_source)
+        # The product lane's paste-at-cursor is user-settable (Settings →
+        # Canvas → Pointer), so it goes through installSystemSketchGestures
+        # rather than the unconditional call the development lane still uses.
+        self.assertIn("installSystemSketchGestures(editor)", product_source)
         self.assertIn("enablePasteAtCursor(editor)", development_source)
         self.assertIn("const stopWorkspace = attach(editor)", product_source)
         self.assertIn("const stopBlockConnections = installBlockConnections(editor)", product_source)

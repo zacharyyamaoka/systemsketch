@@ -78,6 +78,8 @@ import { installInstantTextEditing } from './instantTextEditing'
 import { installDevelopmentSeam } from './developmentSeam'
 import { installFlightRecorder } from './recorder/recorderStore'
 import { enablePasteAtCursor } from './pasteAtCursor'
+import { installSystemSketchGestures } from './canvasGestures'
+import { SystemSketchHelperButtons } from './settings/GestureTuningPanel'
 import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
@@ -100,6 +102,7 @@ const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
 const SYSTEMSKETCH_COMPONENTS = {
   ContextMenu: BlockContextMenu,
+  HelperButtons: SystemSketchHelperButtons,
   InFrontOfTheCanvas: SystemSketchSurfaceHost,
   MainMenu: SystemSketchMainMenu,
   MenuPanel: SystemSketchMenuPanel,
@@ -183,7 +186,13 @@ function SystemSketchCanvas() {
     seedDefaultLineStyle(editor)
     const stopStrokeWidthDefault = installStrokeWidthDefault(editor)
     const stopCanvasNavigation = installSystemSketchCanvasNavigation(editor)
-    enablePasteAtCursor(editor)
+    // WHY `installSystemSketchGestures` rather than the unconditional
+    // `enablePasteAtCursor` every other entry still uses: this is the one
+    // surface with a Settings dialog (Settings → Canvas → Pointer) that can
+    // turn paste-under-cursor back off, so paste-at-cursor here is owned by
+    // the gesture-settings store (default on, matching the old unconditional
+    // behavior) instead of hardcoded true on every mount.
+    const stopGestures = installSystemSketchGestures(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
 		const stopBlockAutoResize = installBlockAutoResize(editor)
 		const stopBlockMemberStack = installBlockMemberStack(editor)
@@ -230,6 +239,7 @@ function SystemSketchCanvas() {
       stopDrafts()
       stopWorkspace()
       stopCanvasNavigation()
+      stopGestures()
       stopStrokeWidthDefault()
       setMountedEditor(null)
     }
