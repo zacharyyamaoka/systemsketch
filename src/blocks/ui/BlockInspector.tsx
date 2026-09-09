@@ -16,7 +16,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { type Editor, useEditor, useValue } from 'tldraw'
+import { type Editor, useEditor, useMaybeEditor, useValue, type TLShape, type TLShapeId } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
@@ -30,15 +30,23 @@ import {
 	BLOCK_FOLD_CONTROL_SIDES,
   BLOCK_MEMBER_LAYOUTS,
 	BLOCK_INSET_BACKGROUNDS,
+  BLOCK_BODY_LAYOUTS,
+  BLOCK_MEMBER_WIDTHS,
   BLOCK_PRESENTATION_VIEWS,
 	blockHeaderAlign,
 	blockInsetBackground,
+  blockBodyLayout,
   blockMemberLayout,
+  blockMemberSpacing,
+  blockMemberSpacingPreset,
+  blockMemberWidth,
   isBlockShape,
   HEADER_ROW,
   type BlockPort,
   type BlockPortSide,
+  type BlockBodyLayout,
   type BlockMemberLayout,
+  type BlockMemberWidth,
   type BlockShapeProps,
   type BlockPresentationView,
   type SemanticPortRole,
@@ -106,6 +114,16 @@ import {
   type BlockDetailsPatch,
 } from '../commands/blockCommands'
 import { setBlockMemberLayout } from '../memberLayout'
+import { blockStackMembers } from '../memberStack'
+import {
+  addBlockMember,
+  moveBlockMember,
+  removeBlockMember,
+  setBlockBodyLayout,
+  setBlockMemberSpacing,
+  setBlockMemberWidth,
+  stepBlockMember,
+} from '../commands'
 import type { BlockPortSectionTarget } from '../ports/portAffordances'
 import {
   setBlockPortLayoutForSelection,
@@ -147,6 +165,22 @@ export interface BlockInspectorActions {
   setFolded?(folded: boolean): void
   setAutoResize?(autoResize: boolean): void
   setMemberLayout(memberLayout: BlockMemberLayout): void
+  /** Free frame or live stack; absent for an unplaced draft. */
+  setBodyLayout?(bodyLayout: BlockBodyLayout): void
+  /** Type a number; the preset buttons still write both through this. */
+  setMemberSpacing?(patch: { gap?: number; gutter?: number }): void
+  /** Fill the parent's inner width, or keep each member's own. */
+  setMemberWidth?(memberWidth: BlockMemberWidth): void
+  /** Add one blank member: last in a stack, centered in a free frame. */
+  addMember?(): void
+  /** Place a member before a neighbour (null = last), by id — never by position. */
+  moveMember?(memberId: TLShapeId, before: TLShapeId | null): void
+  /** One slot up or down — the ↑↓ keys on a member row's grip. */
+  stepMember?(memberId: TLShapeId, delta: -1 | 1): void
+  /** Leave the Block, keeping the page position; nothing is deleted. */
+  removeMember?(memberId: TLShapeId): void
+  /** Select a member the way clicking it on the board would. */
+  selectMember?(memberId: TLShapeId): void
   addPort(side: BlockPortSide): void
 	/** Add a stable named member-update row to the curated Set attributes Block. */
 	addSetAttributesMember?(): void
@@ -195,6 +229,12 @@ export interface BlockInspectorContentProps {
   onRequestClose?: () => void
   pill?: PillInspectorFacts
 	semanticTagsVisible?: boolean
+  /**
+   * The shape on the board, when there is one. The Members section reads its
+   * live children through this; an unplaced tool draft has none, so the
+   * section shows the model's Member layout controls but no member list.
+   */
+  shapeId?: TLShapeId
   /**
    * The element's own history panel, injected rather than built here.
    *
@@ -1070,6 +1110,343 @@ function SemanticRoleSettings({
 	)
 }
 
+type StackMemberShape = TLShape & { props: { w: number; h: number } }
+
+/** The drag handle for one member row. Same shape as `PortGrip` — see there for why dnd-kit gets only this. */
+function MemberGrip({
+  memberId,
+  disabled,
+  onStep,
+}: {
+  memberId: TLShapeId
+  disabled: boolean
+  onStep: (delta: -1 | 1) => void
+}) {
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: memberId,
+    disabled,
+  })
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className="block-inspector__grip"
+      disabled={disabled}
+      aria-label="Drag to reorder"
+      title="Drag to reorder · ↑↓ to step"
+      data-testid={`inspector-member-grip-${memberId}`}
+      {...attributes}
+      {...listeners}
+      onKeyDown={(event) => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+        event.preventDefault()
+        event.stopPropagation()
+        onStep(event.key === 'ArrowUp' ? -1 : 1)
+      }}
+    >
+      <GripIcon />
+    </button>
+  )
+}
+
+/** A Block's own title/type/view; a non-Block member only ever shows its shape type. */
+function memberSummary(shape: StackMemberShape): { title: string; muted: boolean; type: string; badge: string | null } {
+  if (isBlockShape(shape)) {
+    const badge = shape.props.view === 'simple' ? 'S' : shape.props.view === 'port' ? 'P' : shape.props.view === 'expanded' ? 'E' : null
+    return { title: shape.props.title || 'Untitled', muted: !shape.props.title, type: shape.props.blockType, badge }
+  }
+  return { title: shape.type.charAt(0).toUpperCase() + shape.type.slice(1), muted: false, type: '', badge: null }
+}
+
+interface MemberDrag {
+  memberId: TLShapeId
+  startY: number
+  pointerY: number
+  /** Where a release would put the member; null means last. */
+  before: TLShapeId | null
+}
+
+/** The member whose vertical midpoint is the first to sit below `clientY`, else last (null). */
+function memberDropTarget(list: HTMLUListElement, clientY: number, heldId: TLShapeId): TLShapeId | null {
+  for (const row of list.querySelectorAll<HTMLElement>(':scope > li[data-member-id]')) {
+    const id = row.dataset.memberId as TLShapeId
+    if (id === heldId) continue
+    const rect = row.getBoundingClientRect()
+    if (clientY < rect.top + rect.height / 2) return id
+  }
+  return null
+}
+
+/**
+ * The direct-member equivalent of `PortSection`: add, reorder, remove, select,
+ * and the parent's Free/Stack + spacing/width policy — placed right after View
+ * and before Inputs (this is what the Block *contains*, ahead of what it
+ * *takes and returns*).
+ *
+ * WHY its own small drag loop instead of `PortSection`'s: that one arbitrates
+ * ports across a row/branch table with a managed face and semantic tagging —
+ * none of which a flat member list has. Same rule though: dnd-kit owns the
+ * gesture, a plain reducer (`memberDropTarget`) owns where it lands, and
+ * nothing moves until release.
+ */
+function MembersSection({
+  props,
+  actions,
+  shapeId,
+}: {
+  props: BlockShapeProps
+  actions?: BlockInspectorActions
+  shapeId?: TLShapeId
+}) {
+  const editor = useMaybeEditor()
+  const members = useValue<StackMemberShape[]>(
+    'block inspector members',
+    () => (editor && shapeId ? blockStackMembers(editor, shapeId) : []),
+    [editor, shapeId],
+  )
+  const readOnly = !actions
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 3 } }))
+  const dragRef = useRef<MemberDrag | null>(null)
+  const [drag, setDrag] = useState<MemberDrag | null>(null)
+  const listRef = useRef<HTMLUListElement | null>(null)
+
+  const endDrag = () => {
+    dragRef.current = null
+    setDrag(null)
+  }
+
+  useEffect(() => endDrag, [])
+
+  useEffect(() => {
+    if (!drag) return
+    const list = listRef.current
+    const doc = list?.ownerDocument ?? document
+    const onMove = (event: PointerEvent) => {
+      if (!list) return
+      const next = { ...dragRef.current!, pointerY: event.clientY, before: memberDropTarget(list, event.clientY, drag.memberId) }
+      dragRef.current = next
+      setDrag(next)
+    }
+    doc.addEventListener('pointermove', onMove)
+    return () => doc.removeEventListener('pointermove', onMove)
+  }, [drag?.memberId])
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!actions?.moveMember) return
+    const memberId = event.active.id as TLShapeId
+    const activator = event.activatorEvent as PointerEvent
+    const startY = activator?.clientY ?? 0
+    const list = listRef.current
+    const next: MemberDrag = {
+      memberId,
+      startY,
+      pointerY: startY,
+      before: list ? memberDropTarget(list, startY, memberId) : null,
+    }
+    dragRef.current = next
+    setDrag(next)
+  }
+
+  const onDragEnd = () => {
+    const active = dragRef.current
+    endDrag()
+    if (active) actions?.moveMember?.(active.memberId, active.before)
+  }
+
+  return (
+    <section className="block-inspector__section" data-inspector-section="Members">
+      <div className="block-inspector__section-title">
+        <span>Members</span>
+        <span className="block-inspector__section-tools">
+          <span className="block-inspector__count-pill" data-testid="inspector-member-count">
+            {members.length} members
+          </span>
+          <button
+            type="button"
+            className="block-inspector__icon-button"
+            disabled={!actions?.addMember}
+            aria-label="Add member"
+            data-testid="inspector-member-add"
+            onClick={() => actions?.addMember?.()}
+          >
+            <PlusIcon />
+          </button>
+        </span>
+      </div>
+
+      {members.length === 0 ? (
+        <p className="block-inspector__hint">No members yet — Add member, or drop a Block into this one.</p>
+      ) : (
+        <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={endDrag}>
+          <ul
+            ref={listRef}
+            className={`block-inspector__members${drag && drag.before === null ? ' is-drop-last' : ''}`}
+            data-testid="inspector-members"
+          >
+            {members.map((shape) => {
+              const held = drag?.memberId === shape.id
+              const summary = memberSummary(shape)
+              const style = held
+                ? { transform: `translateY(${drag.pointerY - drag.startY}px)` }
+                : undefined
+              return (
+                <li
+                  key={shape.id}
+                  data-member-id={shape.id}
+                  data-testid={`inspector-member-row-${shape.id}`}
+                  className={`block-inspector__member-row${held ? ' is-dragging' : ''}${drag?.before === shape.id ? ' is-drop-before' : ''}`}
+                  style={style}
+                >
+                  <MemberGrip
+                    memberId={shape.id}
+                    disabled={!actions?.moveMember && !actions?.stepMember}
+                    onStep={(delta) => actions?.stepMember?.(shape.id, delta)}
+                  />
+                  <button
+                    type="button"
+                    className="block-inspector__member-body"
+                    disabled={!actions?.selectMember}
+                    onClick={() => actions?.selectMember?.(shape.id)}
+                  >
+                    <span className={`block-inspector__member-title${summary.muted ? ' is-muted' : ''}`}>
+                      {summary.title}
+                    </span>
+                    {summary.type ? <span className="block-inspector__member-type">{summary.type}</span> : null}
+                    {summary.badge ? <span className="block-inspector__member-view-badge">{summary.badge}</span> : null}
+                  </button>
+                  <button
+                    type="button"
+                    className="block-inspector__icon-button"
+                    disabled={!actions?.removeMember}
+                    aria-label="Remove member"
+                    data-testid={`inspector-member-remove-${shape.id}`}
+                    onClick={() => actions?.removeMember?.(shape.id)}
+                  >
+                    <XIcon />
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </DndContext>
+      )}
+
+      <div className="block-inspector__subcontrol" data-testid="block-member-layout-control">
+        <span className="block-inspector__subheading">Member layout</span>
+
+        <div className="block-inspector__choices" role="group" aria-label="Body layout">
+          {BLOCK_BODY_LAYOUTS.map((bodyLayout) => (
+            <button
+              key={bodyLayout}
+              type="button"
+              disabled={!actions?.setBodyLayout}
+              aria-pressed={blockBodyLayout(props) === bodyLayout}
+              data-testid={`block-body-layout-${bodyLayout}`}
+              onClick={() => actions?.setBodyLayout?.(bodyLayout)}
+            >
+              {bodyLayout === 'free' ? 'Free' : 'Stack'}
+            </button>
+          ))}
+        </div>
+        <p className="block-inspector__hint">
+          Free keeps members where they were dropped. Stack lays them out in order and hides the
+          cables between them; Add member lands at the bottom.
+        </p>
+
+        <div className="block-inspector__choices" role="group" aria-label="Member layout">
+          {BLOCK_MEMBER_LAYOUTS.map((memberLayout) => (
+            <button
+              key={memberLayout}
+              type="button"
+              disabled={readOnly}
+              aria-pressed={blockMemberSpacingPreset(props) === memberLayout}
+              data-testid={`block-member-layout-${memberLayout}`}
+              onClick={() => actions?.setMemberLayout(memberLayout)}
+            >
+              {memberLayout === 'inset' ? 'Inset' : 'Edge-to-edge'}
+            </button>
+          ))}
+        </div>
+        <p className="block-inspector__hint">
+          Inset separates member cards; edge-to-edge joins direct child Blocks into one stack.
+        </p>
+        {blockMemberLayout(props) === 'inset' ? (
+          <div className="block-inspector__subcontrol" data-testid="block-inset-background-control">
+            <span className="block-inspector__subheading">Inset background</span>
+            <div className="block-inspector__choices" role="group" aria-label="Inset background">
+              {BLOCK_INSET_BACKGROUNDS.map((background) => (
+                <button
+                  key={background}
+                  type="button"
+                  disabled={readOnly}
+                  aria-pressed={blockInsetBackground(props) === background}
+                  data-testid={`block-inset-background-${background}`}
+                  onClick={() => actions?.updateDetails({ insetBackground: background })}
+                >
+                  {background === 'white' ? 'White' : 'Soft gray'}
+                </button>
+              ))}
+            </div>
+            <p className="block-inspector__hint">
+              Soft gray differentiates the member well without assigning a semantic color.
+            </p>
+          </div>
+        ) : null}
+
+        <div className="block-inspector__member-spacing-row">
+          <label className="block-inspector__field">
+            <span>Gap</span>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              disabled={!actions?.setMemberSpacing}
+              data-testid="block-member-gap"
+              value={blockMemberSpacing(props).gap}
+              onChange={(event) => actions?.setMemberSpacing?.({ gap: Number(event.currentTarget.value) })}
+            />
+            <span>px</span>
+          </label>
+          <label className="block-inspector__field">
+            <span>Gutter</span>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              disabled={!actions?.setMemberSpacing}
+              data-testid="block-member-gutter"
+              value={blockMemberSpacing(props).gutter}
+              onChange={(event) => actions?.setMemberSpacing?.({ gutter: Number(event.currentTarget.value) })}
+            />
+            <span>px</span>
+          </label>
+          <div className="block-inspector__field">
+            <span>Width</span>
+            <div className="block-inspector__choices" role="group" aria-label="Member width">
+              {BLOCK_MEMBER_WIDTHS.map((memberWidth) => (
+                <button
+                  key={memberWidth}
+                  type="button"
+                  disabled={!actions?.setMemberWidth}
+                  aria-pressed={blockMemberWidth(props) === memberWidth}
+                  data-testid={`block-member-width-${memberWidth}`}
+                  onClick={() => actions?.setMemberWidth?.(memberWidth)}
+                >
+                  {memberWidth === 'fill' ? 'Fill' : 'Own'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <p className="block-inspector__hint">
+          Inset is 12 / 12, Edge-to-edge is 0 / 0 — edit a number and neither preset stays lit.
+          Fill gives every Port-view member the inner width; an Expanded member always keeps its own.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 function PortSection({
   side,
   props,
@@ -1806,6 +2183,7 @@ export function BlockInspectorContent({
   semanticTagsVisible = true,
   historyPanel,
   variableRegistry = EMPTY_VARIABLE_REGISTRY,
+  shapeId,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
@@ -1983,51 +2361,11 @@ export function BlockInspectorContent({
                     </p>
                   </>
                 ) : null}
-                {props.view === 'expanded' ? (
-                  <div className="block-inspector__subcontrol" data-testid="block-member-layout-control">
-                    <span className="block-inspector__subheading">Member layout</span>
-                    <div className="block-inspector__choices" role="group" aria-label="Member layout">
-                      {BLOCK_MEMBER_LAYOUTS.map((memberLayout) => (
-                        <button
-                          key={memberLayout}
-                          type="button"
-                          disabled={readOnly}
-                          aria-pressed={blockMemberLayout(props) === memberLayout}
-                          data-testid={`block-member-layout-${memberLayout}`}
-                          onClick={() => actions?.setMemberLayout(memberLayout)}
-                        >
-                          {memberLayout === 'inset' ? 'Inset' : 'Edge-to-edge'}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="block-inspector__hint">
-                      Inset separates member cards; edge-to-edge joins direct child Blocks into one stack.
-                    </p>
-                    {blockMemberLayout(props) === 'inset' ? (
-                      <div className="block-inspector__subcontrol" data-testid="block-inset-background-control">
-                        <span className="block-inspector__subheading">Inset background</span>
-                        <div className="block-inspector__choices" role="group" aria-label="Inset background">
-                          {BLOCK_INSET_BACKGROUNDS.map((background) => (
-                            <button
-                              key={background}
-                              type="button"
-                              disabled={readOnly}
-                              aria-pressed={blockInsetBackground(props) === background}
-                              data-testid={`block-inset-background-${background}`}
-                              onClick={() => actions?.updateDetails({ insetBackground: background })}
-                            >
-                              {background === 'white' ? 'White' : 'Soft gray'}
-                            </button>
-                          ))}
-                        </div>
-                        <p className="block-inspector__hint">
-                          Soft gray differentiates the member well without assigning a semantic color.
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
               </section>
+
+              {props.view === 'expanded' ? (
+                <MembersSection props={props} actions={actions} shapeId={shapeId} />
+              ) : null}
 
 						<section className="block-inspector__section" data-inspector-section="Chrome">
 							<div className="block-inspector__section-title">Chrome</div>
@@ -2289,6 +2627,14 @@ export function EditorBlockInspector({
 		setFolded: (folded) => void setBlockFolded(editor, id, folded),
 		setAutoResize: (autoResize) => void setBlockAutoResize(editor, id, autoResize),
         setMemberLayout: (memberLayout) => void setBlockMemberLayout(editor, id, memberLayout),
+        setBodyLayout: (bodyLayout) => void setBlockBodyLayout(editor, id, bodyLayout),
+        setMemberSpacing: (patch) => void setBlockMemberSpacing(editor, id, patch),
+        setMemberWidth: (memberWidth) => void setBlockMemberWidth(editor, id, memberWidth),
+        addMember: () => void addBlockMember(editor, id),
+        moveMember: (memberId, before) => void moveBlockMember(editor, id, memberId, before),
+        stepMember: (memberId, delta) => void stepBlockMember(editor, id, memberId, delta),
+        removeMember: (memberId) => void removeBlockMember(editor, id, memberId),
+        selectMember: (memberId) => void editor.select(memberId),
         addPort: (side) => void appendBlockPort(editor, id, side),
 		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
         addBundleMember: () => void appendBundleMember(editor, id),
@@ -2380,6 +2726,7 @@ export function EditorBlockInspector({
       props={shown}
       status={context.kind === 'selected' ? 'selected' : 'new'}
       actions={actions}
+      shapeId={context.kind === 'selected' ? context.shape.id : undefined}
       pill={pillFacts}
 		semanticTagsVisible={semanticTagsVisible}
       variableRegistry={variableRegistry}

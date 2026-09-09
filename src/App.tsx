@@ -11,6 +11,7 @@ import {
   TypeTool,
   getBlockShapeVisibility,
   installBlockAutoResize,
+  installBlockMemberStack,
   installBlockChildSelection,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
@@ -185,6 +186,7 @@ function SystemSketchCanvas() {
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
 		const stopBlockAutoResize = installBlockAutoResize(editor)
+		const stopBlockMemberStack = installBlockMemberStack(editor)
     const stopWorkspace = attach(editor)
     // Right after attach, same tick: a resumed draft must swap its content in
     // before the first paint, or reload flashes Main first. See DraftProvider.tsx.
@@ -222,7 +224,8 @@ function SystemSketchCanvas() {
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
-		stopBlockAutoResize()
+		stopBlockMemberStack()
+			stopBlockAutoResize()
       stopBoardTheme()
       stopDrafts()
       stopWorkspace()
@@ -304,6 +307,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
 		const stopBlockAutoResize = isBlockDevelopment
 			? installBlockAutoResize(editor)
 			: () => undefined
+		const stopBlockMemberStack = isBlockDevelopment
+			? installBlockMemberStack(editor)
+			: () => undefined
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
       : () => undefined
@@ -340,7 +346,8 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
-		stopBlockAutoResize()
+		stopBlockMemberStack()
+			stopBlockAutoResize()
       stopBoardTheme()
       stopCanvasNavigation()
     }

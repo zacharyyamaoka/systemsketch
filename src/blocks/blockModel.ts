@@ -123,6 +123,29 @@ export const BLOCK_INSET_BACKGROUNDS = ['white', 'soft-gray'] as const
 export type BlockInsetBackground = (typeof BLOCK_INSET_BACKGROUNDS)[number]
 
 /**
+ * How an Expanded Block owns its body.
+ *
+ * `free` is the frame: members sit wherever they were dropped, cables between
+ * them are drawn, and Inset / Edge-to-edge is a one-shot tidy command.
+ * `stack` lays members out continuously in their authored order (tldraw's own
+ * child index), hides the cables between them, and reads its spacing from the
+ * three member props below. WHY a toggle and not "the first Add member flips
+ * it": Zach's 2026-09-09 call — the toggle is what tells a person that Add
+ * member lands in the middle of a free Block and at the bottom of a stack.
+ */
+export const BLOCK_BODY_LAYOUTS = ['free', 'stack'] as const
+export type BlockBodyLayout = (typeof BLOCK_BODY_LAYOUTS)[number]
+
+/**
+ * Whether a stacked member takes the parent's inner width (Figma's Fill) or
+ * keeps its own (Fixed). Parent-level on purpose for V1; a per-member override
+ * is the documented follow-up. An Expanded member is always Own — see
+ * `stackMemberFillsWidth` — because its box is definition-shared.
+ */
+export const BLOCK_MEMBER_WIDTHS = ['fill', 'own'] as const
+export type BlockMemberWidth = (typeof BLOCK_MEMBER_WIDTHS)[number]
+
+/**
  * tldraw's documented seam for a prop that batches across a multi-selection.
  *
  * Registering a prop as a `StyleProp` is not decoration. It is what makes
@@ -442,6 +465,14 @@ export const BLOCK_SHAPE_PROPS = {
 	memberLayout: T.literalEnum(...BLOCK_MEMBER_LAYOUTS),
 	/** Theme-aware well behind inset direct-child cards; ignored by edge-to-edge. */
 	insetBackground: T.literalEnum(...BLOCK_INSET_BACKGROUNDS),
+	/** Free frame or live stack; absent on every board saved before members. */
+	bodyLayout: T.literalEnum(...BLOCK_BODY_LAYOUTS).optional(),
+	/** Vertical px between stacked members; absent = the memberLayout preset. */
+	memberGap: T.number.optional(),
+	/** Horizontal px either side of stacked members; absent = the preset. */
+	memberGutter: T.number.optional(),
+	/** Fill the parent's inner width or keep each member's own; absent = fill. */
+	memberWidth: T.literalEnum(...BLOCK_MEMBER_WIDTHS).optional(),
 	/**
 	 * The lens's verdict on this Block. `normal` in every ordinary document;
 	 * a style prop cannot be optional, so the migration makes it explicit.
@@ -506,6 +537,10 @@ declare module 'tldraw' {
 			portLayout: PortLayout
 			memberLayout: BlockMemberLayout
 			insetBackground: BlockInsetBackground
+			bodyLayout?: BlockBodyLayout
+			memberGap?: number
+			memberGutter?: number
+			memberWidth?: BlockMemberWidth
 			state: BlockState
 			fieldDiffs?: BlockFieldDiff[]
 			priorPose?: BlockPriorPose
@@ -613,6 +648,50 @@ export function blockInsetBackground(
 	props: Partial<Pick<BlockShapeProps, 'insetBackground'>>,
 ): BlockInsetBackground {
 	return props.insetBackground === 'soft-gray' ? 'soft-gray' : 'white'
+}
+
+/** Every board saved before members reads as the free frame it always was. */
+export function blockBodyLayout(props: Partial<Pick<BlockShapeProps, 'bodyLayout'>>): BlockBodyLayout {
+	return props.bodyLayout === 'stack' ? 'stack' : 'free'
+}
+
+export const BLOCK_MEMBER_PRESET_PX = 12
+
+export interface BlockMemberSpacing {
+	gap: number
+	gutter: number
+}
+
+/**
+ * The effective stack spacing. The preset seeds both numbers (Inset 12/12,
+ * Edge-to-edge 0/0); a typed override wins. WHY the presets are not a third
+ * enum value: the numbers are the truth and the preset buttons only write
+ * them, so the inspector can light a preset exactly when the numbers match and
+ * never has to lie about hidden state.
+ */
+export function blockMemberSpacing(
+	props: Partial<Pick<BlockShapeProps, 'memberLayout' | 'memberGap' | 'memberGutter'>>,
+): BlockMemberSpacing {
+	const preset = blockMemberLayout(props) === 'edge-to-edge' ? 0 : BLOCK_MEMBER_PRESET_PX
+	const clamp = (value: number | undefined) => (
+		typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.round(value)) : preset
+	)
+	return { gap: clamp(props.memberGap), gutter: clamp(props.memberGutter) }
+}
+
+/** The preset whose numbers the effective spacing equals, if any. */
+export function blockMemberSpacingPreset(
+	props: Partial<Pick<BlockShapeProps, 'memberLayout' | 'memberGap' | 'memberGutter'>>,
+): BlockMemberLayout | null {
+	const { gap, gutter } = blockMemberSpacing(props)
+	if (gap === 0 && gutter === 0) return 'edge-to-edge'
+	if (gap === BLOCK_MEMBER_PRESET_PX && gutter === BLOCK_MEMBER_PRESET_PX) return 'inset'
+	return null
+}
+
+/** Today's behaviour — the one-shot command already stretched members — stays the default. */
+export function blockMemberWidth(props: Partial<Pick<BlockShapeProps, 'memberWidth'>>): BlockMemberWidth {
+	return props.memberWidth === 'own' ? 'own' : 'fill'
 }
 
 /** The one reader for optional expanded divider weights. */

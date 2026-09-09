@@ -817,6 +817,7 @@
 
 .block-inspector__port-row:hover .block-inspector__grip,
 .block-inspector__managed-row:hover .block-inspector__grip,
+.block-inspector__member-row:hover .block-inspector__grip,
 .block-inspector__grip:focus-visible {
   opacity: 1;
 }
@@ -860,6 +861,135 @@
   background: var(--ss-accent-soft);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-accent) 22%, transparent);
   pointer-events: none;
+}
+
+/* Members: a flat list, unlike the port table's row/branch sections — one
+ * grip, one clickable body, one remove. The drop rule is a border rather than
+ * an absolutely-positioned bar, since there is no row/branch geometry to
+ * offset it against. */
+.block-inspector__members {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.block-inspector__member-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) 22px;
+  gap: 6px;
+  align-items: center;
+}
+
+.block-inspector__member-row.is-drop-before::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  border-top: 2px solid var(--ss-accent);
+}
+
+.block-inspector__members.is-drop-last::after {
+  content: '';
+  display: block;
+  margin-top: 2px;
+  border-top: 2px solid var(--ss-accent);
+}
+
+.block-inspector__member-row.is-dragging {
+  z-index: 4;
+  border-radius: 6px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+}
+
+.block-inspector__member-body {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ss-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.block-inspector__member-body:hover:not(:disabled) {
+  background: var(--ss-surface-active);
+}
+
+.block-inspector__member-body:disabled {
+  cursor: default;
+}
+
+.block-inspector__member-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ss-text);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-inspector__member-title.is-muted {
+  color: var(--ss-text-faint);
+}
+
+.block-inspector__member-type {
+  flex: none;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+}
+
+.block-inspector__member-view-badge {
+  display: grid;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--ss-surface-active);
+  color: var(--ss-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* Gap / Gutter / Width, side by side — the numbers are the truth (see
+ * `blockMemberSpacingPreset`), so this row stays visible beside the presets
+ * rather than hidden behind a details toggle. */
+.block-inspector__member-spacing-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Name on its own line; the input and its "px" share the next — a column flex
+ * put the suffix under the field. */
+.block-inspector__member-spacing-row .block-inspector__field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 6px;
+  margin-bottom: 0;
+}
+
+.block-inspector__member-spacing-row .block-inspector__field > span:first-child {
+  grid-column: 1 / -1;
+}
+
+.block-inspector__member-spacing-row .block-inspector__field > input {
+  min-width: 0;
+  width: 100%;
 }
 
 /* The lines of the burger, as the canvas draws them: a full line for a row,

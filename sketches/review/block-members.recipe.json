@@ -1,0 +1,144 @@
+{
+  "feature": "Block members",
+  "viewport": {
+    "width": 1680,
+    "height": 980
+  },
+  "pages": [
+    {
+      "id": "review",
+      "name": "Review"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "class",
+      "type": "block",
+      "x": 560,
+      "y": 100,
+      "props": {
+        "title": "Class",
+        "description": "Stack mode: members in authored order",
+        "blockType": "Definition",
+        "view": "expanded",
+        "w": 600,
+        "h": 640,
+        "bodyLayout": "stack",
+        "memberLayout": "inset",
+        "insetBackground": "white",
+        "autoResize": true,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "init",
+      "type": "block",
+      "parentId": "class",
+      "x": 12,
+      "y": 60,
+      "props": {
+        "title": "__init__()",
+        "description": "Initialize the instance",
+        "blockType": "Function",
+        "view": "port",
+        "w": 576,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "self",
+            "name": "self",
+            "type": "Class",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "call",
+      "type": "block",
+      "parentId": "class",
+      "x": 12,
+      "y": 262,
+      "props": {
+        "title": "__call__()",
+        "description": "Run the instance",
+        "blockType": "Function",
+        "view": "port",
+        "w": 576,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "self",
+            "name": "self",
+            "type": "Class",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "result",
+            "name": "result",
+            "type": "Any",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Select Class. In the inspector's new Members section press + . A blank Port-view member lands at the bottom of the stack.",
+      "x": 20,
+      "y": 110,
+      "w": 420,
+      "h": 130,
+      "target": {
+        "shapeId": "class",
+        "anchor": "left",
+        "dy": -180
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 Drag the grip of __call__() above __init__() in the list, or press \u2191 on it. The cards swap on the canvas.",
+      "x": 20,
+      "y": 330,
+      "w": 420,
+      "h": 120,
+      "target": {
+        "shapeId": "class",
+        "anchor": "left",
+        "dy": 0
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 On the canvas, drag a member card below its neighbour and release. It snaps into that slot. Then set Gap to 4 or press Edge-to-edge.",
+      "x": 20,
+      "y": 540,
+      "w": 420,
+      "h": 130,
+      "target": {
+        "shapeId": "class",
+        "anchor": "left",
+        "dy": 200
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 members always sit in one tidy column in the order the list shows, the parent hugs the stack, presets light only when the numbers match, and Free puts the cards back under your control.",
+      "x": 1200,
+      "y": 110,
+      "w": 440,
+      "h": 210
+    }
+  ]
+}

@@ -16,7 +16,7 @@ import {
 	type TLShapeId,
 } from 'tldraw'
 
-import { isBlockShape, isExpandedBlockShape, type BlockShape } from './blockModel'
+import { blockBodyLayout, isBlockShape, isExpandedBlockShape, type BlockShape } from './blockModel'
 
 /**
  * A shared inset gives the header enough air above its first child as well as
@@ -69,7 +69,10 @@ export function isBlockAutoResizeGestureActive(editor: Pick<Editor, 'inputs' | '
 }
 
 function isAutoResizeBlock(shape: TLShape | undefined): shape is BlockShape {
-	return isExpandedBlockShape(shape) && shape.props.autoResize
+	// WHY a stacked Block is excluded: its own pass hugs the stack exactly (header,
+	// members, gaps, footer). Stock fitFrameToContent's uniform padding would fight
+	// that every settle. See memberStack.ts.
+	return isExpandedBlockShape(shape) && shape.props.autoResize && blockBodyLayout(shape.props) !== 'stack'
 }
 
 /**

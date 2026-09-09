@@ -56,6 +56,7 @@ import { BlockInlineEditor } from '../BlockInlineEditor'
 import { blockTitleAppearance, type BlockTitleAppearance } from '../titleAppearance'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
+import { memberStackDragState } from '../memberStackDragState'
 import {
   blockInlineFieldAttribute,
   parseBlockInlineFieldAttribute,
@@ -1423,6 +1424,11 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
   )
   const titleAppearance = blockTitleAppearance(editor, shape.props)
 	const insetBackground = blockInsetBackground(shape.props)
+  const memberDragging = useValue(
+    'Block member dragging',
+    () => memberStackDragState.get(editor)?.memberId === shape.id,
+    [editor, shape.id],
+  )
   const parentMemberLayout = useValue(
     'Block parent member layout',
     () => {
@@ -1510,6 +1516,7 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
 			? insetBackground
 			: undefined}
 		data-parent-member-layout={parentMemberLayout ?? undefined}
+		data-member-dragging={memberDragging || undefined}
 		data-variadic-prototype={variadicPrototype ?? undefined}
 		data-header-divider={shape.props.showHeaderDivider === false ? 'hidden' : 'shown'}
 		data-block-folded={folded || undefined}

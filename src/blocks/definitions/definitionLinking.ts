@@ -376,6 +376,16 @@ function bodySignature(editor: Editor, root: BlockShape): unknown {
 	return visit(root.id)
 }
 
+/** No ports, no description, no notes, no body: nothing a Draft could preserve. */
+function isEmptyDefinition(editor: Editor, block: BlockShape): boolean {
+	const props = block.props
+	return props.inputs.length === 0
+		&& props.outputs.length === 0
+		&& !props.description.trim()
+		&& !(props.notes ?? '').trim()
+		&& editor.getSortedChildIdsForParent(block.id).length === 0
+}
+
 function definitionContentSignature(editor: Editor, block: BlockShape): string {
 	return JSON.stringify({ ...sharedDefinitionProps(block.props), body: bodySignature(editor, block) })
 }
@@ -453,9 +463,16 @@ export function commitBlockDefinitionName(editor: Editor, shapeId: TLShapeId): v
 		blockDefinitionId(block.props) !== source.props.definitionId
 		&& normalizedDefinitionName(block.props.title) === name
 	))
+	// WHY an empty Block adopts rather than drafts: a blank member that is
+	// merely NAMED after an existing definition has no content of its own to
+	// diverge with, so "Draft 2" would be noise. It becomes another occurrence
+	// and the body sync fills it in — Zach's 2026-09-09 exception. Prefer the
+	// canonical (non-draft) definition when several share the title.
 	const matching = candidates.find((candidate) => (
 		definitionContentSignature(editor, candidate) === definitionContentSignature(editor, source)
-	))
+	)) ?? (isEmptyDefinition(editor, source)
+		? candidates.find((candidate) => candidate.props.draftOrdinal === undefined) ?? candidates[0]
+		: undefined)
 	if (matching) {
 		updateDefinitionGroup(editor, group, {
 			definitionId: matching.props.definitionId,
