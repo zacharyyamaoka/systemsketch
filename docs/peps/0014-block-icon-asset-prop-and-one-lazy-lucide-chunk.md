@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-09-09
-- **Merge:** merge of `track/icon-picker-proposal` (lane HEAD `722bbf8c`, judge PASS round 5)
+- **Merge:** `5ef7088a` — merge of `track/icon-picker-proposal` (lane HEAD `ab8dbed5`, judge PASS round 5)
 
 ## Context
 
