@@ -113,6 +113,46 @@ const resolvedField = StateField.define<DecorationSet>({
 	provide: (field) => EditorView.decorations.from(field),
 })
 
+class EllipsisWidget extends WidgetType {
+	override eq(): boolean {
+		return true
+	}
+	override toDOM(): HTMLElement {
+		const span = document.createElement('span')
+		span.className = 'ss-lane-ellipsis'
+		span.textContent = '…'
+		return span
+	}
+	override ignoreEvent(): boolean {
+		return false
+	}
+}
+
+/**
+ * Live-preview style folding for a lane: a line the caret is NOT on shows at
+ * most `maxChars` characters and then an ellipsis, the caret's own line shows
+ * everything. Moving onto a folded line unfolds it, because the decoration
+ * is recomputed from the selection. This is the per-line reveal rule Zach
+ * described — rendered by default, source under the caret — applied to
+ * width rather than markup.
+ */
+export function laneEllipsis(maxChars: number): Extension {
+	return EditorView.decorations.compute(['doc', 'selection'], (state) => {
+		const builder = new RangeSetBuilder<Decoration>()
+		const active = new Set<number>()
+		for (const range of state.selection.ranges) {
+			active.add(state.doc.lineAt(range.head).number)
+			active.add(state.doc.lineAt(range.anchor).number)
+		}
+		for (let number = 1; number <= state.doc.lines; number += 1) {
+			const line = state.doc.line(number)
+			if (active.has(number) || line.length <= maxChars) continue
+			builder.add(line.from + maxChars, line.to, Decoration.replace({ widget: new EllipsisWidget() }))
+		}
+		return builder.finish()
+	})
+}
+
 /** A completion tooltip's kind pill — the same visual vocabulary the Type block's completion uses. */
 function kindPill(kind: AutocompleteKind): HTMLElement {
 	const pill = document.createElement('span')

@@ -1,5 +1,7 @@
+import type { Extension } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import { useEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { useEditor, useValue } from 'tldraw'
 
 import { isBlockShape, type BlockShape, type BlockShapeProps } from './blockModel'
@@ -14,12 +16,59 @@ import { formatPortLane, lanePorts, reconcilePortLane } from './portLane'
 import { formatPortSignature, parsePortSignature, portSignaturePatch } from './portSignature'
 import { blockTitleAppearance } from './titleAppearance'
 import { BLOCK_ICONS } from './ui/blockIcons'
-import { portSignatureExtensions } from './ui/PortSignatureField'
+import { portLanesRagged } from './portLanePrototype'
+import { laneEllipsis, portSignatureExtensions } from './ui/PortSignatureField'
 import { useVariableRegistry } from '../expression/useVariableRegistry'
 import { CodeField } from '../fields/CodeField'
 import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
+/** Characters a lane shows of a line the caret is not on before folding it to an ellipsis. */
+const LANE_FOLD_CHARS = 32
+
+/**
+ * The bigger viewer behind a lane's ⤢: the same document, wrapped, with room.
+ * Closing it ends the editing session, the way Ctrl+Enter does on the lane.
+ */
+function LaneViewer({
+	title,
+	value,
+	extensions,
+	onWrite,
+	onClose,
+}: {
+	title: string
+	value: string
+	extensions: Extension[]
+	onWrite(value: string): void
+	onClose(): void
+}) {
+	return createPortal(
+		<div className="BlockNode-laneViewer" role="dialog" aria-label={`${title} lane viewer`} data-testid="block-lane-viewer">
+			<div className="BlockNode-laneViewer__panel">
+				<header>
+					<span>{title}</span>
+					<button type="button" aria-label="Close the lane viewer" onClick={onClose}>×</button>
+				</header>
+				<CodeField
+					className="BlockNode-laneViewer__field"
+					value={value}
+					placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
+					ariaLabel={`${title} lane, expanded`}
+					autoFocus
+					multiline
+					wrap
+					extensions={extensions}
+					onWrite={onWrite}
+					onEnter={onClose}
+					onEscape={onClose}
+				/>
+				<p>One line per port · Enter adds · Ctrl+Enter or Esc closes</p>
+			</div>
+		</div>,
+		document.body,
+	)
+}
 
 function currentBlock(editor: ReturnType<typeof useEditor>, shapeId: BlockShape['id']) {
 	const current = editor.getShape(shapeId)
@@ -195,6 +244,23 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 		() => portSignatureExtensions({ editor, excludeBlockId: shape.id, registryNames: registryKey ? registryKey.split(' ') : [] }),
 		[editor, shape.id, registryKey],
 	)
+	// A lane folds every line the caret is not on past LANE_FOLD_CHARS with
+	// an ellipsis; the caret's line always shows everything.
+	const laneExtensions = useMemo(() => [portExtensions, laneEllipsis(LANE_FOLD_CHARS)], [portExtensions])
+	const [viewerOpen, setViewerOpen] = useState(false)
+
+	// A later, more precise landing on the same open lane (a second handler
+	// reporting the clicked character) moves the caret without remounting.
+	const laneLine = field.kind === 'portLane' ? field.line : undefined
+	const laneColumn = field.kind === 'portLane' ? field.column : undefined
+	useEffect(() => {
+		const view = codeViewRef.current
+		if (!view || field.kind !== 'portLane' || laneColumn === undefined) return
+		const lineNumber = Math.min((laneLine ?? 0) + 1, view.state.doc.lines)
+		const line = view.state.doc.line(lineNumber)
+		const anchor = line.from + Math.min(laneColumn, line.length)
+		if (view.state.selection.main.head !== anchor) view.dispatch({ selection: { anchor } })
+	}, [field.kind, laneLine, laneColumn])
 
 	/**
 	 * Writing every keystroke straight into the shape is what makes on-canvas
@@ -244,16 +310,23 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	const style = editorStyle(editor, shape.props, field, placement.box, placement.align)
 
 	if (field.kind === 'portLane') {
-		// The lane sits exactly over its rows: the box is the rows' union and
-		// each line is pinned to the row pitch, so what you type lands beside
-		// the dot it belongs to. The caret opens on the line that was clicked.
+		// The lane sits exactly over its rows: each line is pinned to the row
+		// pitch, so what you type lands beside the dot it belongs to. The caret
+		// opens on the line — and at the character — that was clicked.
 		const lines = value.split('\n')
-		const cursorAt = lines.slice(0, Math.min(field.line ?? 0, lines.length - 1)).reduce((sum, line) => sum + line.length + 1, 0)
-		return (
+		const lineIndex = Math.min(field.line ?? 0, Math.max(0, lines.length - 1))
+		const lineStart = lines.slice(0, lineIndex).reduce((sum, line) => sum + line.length + 1, 0)
+		const cursorAt = lineStart + Math.min(field.column ?? 0, lines[lineIndex]?.length ?? 0)
+		const ragged = portLanesRagged()
+		const lane = (
 			<CodeField
 				key={`lane:${field.side}`}
-				className={`BlockNode-inlineEditor BlockNode-inlineEditor--lane BlockNode-inlineEditor--lane-${field.side}`}
-				style={{ ...style, left: placement.box.x, top: placement.box.y, width: placement.box.w, height: placement.box.h, textAlign: undefined }}
+				className={`BlockNode-inlineEditor BlockNode-inlineEditor--lane BlockNode-inlineEditor--lane-${field.side}${ragged ? ' is-ragged' : ''}`}
+				// WHY min-width, not width: the box hugs its longest visible line
+				// and grows to the right as the active line is typed — the
+				// whiteboard-text feel Zach asked for — while folded lines keep
+				// it from growing for text nobody is looking at.
+				style={{ ...style, left: placement.box.x, top: placement.box.y, width: 'max-content', minWidth: placement.box.w, height: placement.box.h, textAlign: undefined }}
 				value={value}
 				placeholder={EMPTY_FIELD_GUIDANCE.block.portSignature}
 				ariaLabel={`Edit ${field.side} lane`}
@@ -264,11 +337,44 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				lineHeightPx={placement.linePitch}
 				align={placement.align === 'right' ? 'right' : 'left'}
 				onViewReady={(view) => { codeViewRef.current = view }}
-				extensions={portExtensions}
+				extensions={laneExtensions}
 				onWrite={writeField}
 				onEnter={() => editor.complete()}
 				onEscape={() => editor.cancel()}
+				trailing={(
+					<button
+						type="button"
+						className="BlockNode-laneExpand"
+						title="Open in a bigger viewer"
+						aria-label={`Open the ${field.side} lane in a bigger viewer`}
+						data-testid={`block-inline-port-lane-expand-${field.side}`}
+						onPointerDown={(event) => event.stopPropagation()}
+						onClick={(event) => {
+							event.stopPropagation()
+							setViewerOpen(true)
+						}}
+					>
+						⤢
+					</button>
+				)}
 			/>
+		)
+		return (
+			<>
+				{lane}
+				{viewerOpen ? (
+					<LaneViewer
+						title={`${shape.props.title || 'Block'} · ${field.side}`}
+						value={value}
+						extensions={portExtensions}
+						onWrite={writeField}
+						onClose={() => {
+							setViewerOpen(false)
+							editor.complete()
+						}}
+					/>
+				) : null}
+			</>
 		)
 	}
 

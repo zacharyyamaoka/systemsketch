@@ -102,7 +102,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4zzepV",
+      "index": "a4gQyV",
       "typeName": "shape"
     },
     {
@@ -115,7 +115,7 @@
     },
     {
       "x": 1120,
-      "y": 375,
+      "y": 395,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -137,7 +137,7 @@
         },
         "end": {
           "x": -100,
-          "y": 55
+          "y": 35
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -154,7 +154,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5ktW",
+      "index": "a5XoW",
       "typeName": "shape"
     },
     {
@@ -168,51 +168,6 @@
       "type": "geo",
       "props": {
         "w": 480,
-        "h": 150,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 2,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "0 · PROTOTYPE SWITCH — in the bottom-right corner, set the Prototype drop-down to 'lanes'. It sticks in this browser; 'one line per port' is today's shipped editor."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a2OBv",
-      "typeName": "shape"
-    },
-    {
-      "x": 40,
-      "y": 300,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-step-1",
-      "type": "geo",
-      "props": {
-        "w": 460,
         "h": 190,
         "geo": "rectangle",
         "dash": "draw",
@@ -236,7 +191,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Select estimate, then click the LEFT half of its body on the frame row. One editor opens over all three inputs — a line per port — with the caret on frame's line."
+                  "text": "0 · Multi-line lanes are ON by default (Settings › Canvas › Port editor toggles it; the bottom-right Prototype drop-down also picks solid vs ragged lines)."
                 }
               ]
             }
@@ -244,7 +199,52 @@
         }
       },
       "parentId": "page:page",
-      "index": "a32v6",
+      "index": "a2zRR",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 300,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 230,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Select estimate, then click on the 'a' of frame. One editor opens over all three inputs — a line per port — with the caret right after the 'a'. Its ⤢ opens a bigger viewer."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3vGn",
       "typeName": "shape"
     },
     {
@@ -289,7 +289,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6YPr",
+      "index": "a6KIr",
       "typeName": "shape"
     },
     {
@@ -334,7 +334,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4zOH",
+      "index": "a4HWb",
       "typeName": "shape"
     },
     {
@@ -356,7 +356,7 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 150,
+        "h": 190,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -379,7 +379,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Click the RIGHT half of the body: the outputs lane opens, right-aligned. Escape leaves it as it was."
+                  "text": "3 · Click the RIGHT half of the body: the outputs lane opens just past the Block's edge, typed normally; its painted labels step aside. Escape leaves it as it was."
                 }
               ]
             }
@@ -387,8 +387,16 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5Su6",
+      "index": "a52M6",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:4a-cpyaGVnVWr2W5GNSrg",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -557,7 +565,7 @@
         "memberLayout": "inset",
         "insetBackground": "white",
         "state": "normal",
-        "definitionId": "zCBVJ8uwKjdJ-1A7FozpY",
+        "definitionId": "ue2ao6ZRa3ViI2WYgjQTM",
         "inputs": [
           {
             "id": "in_1",
@@ -597,16 +605,8 @@
         "definitionKey": "estimate"
       },
       "parentId": "page:page",
-      "index": "a1qpb",
+      "index": "a1UeW",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#11B3A3",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:WYNR_EV0CCgQozmLG7ZNf",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -674,7 +674,7 @@
     },
     {
       "x": 500,
-      "y": 395,
+      "y": 415,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -696,7 +696,7 @@
         },
         "end": {
           "x": 100,
-          "y": 35
+          "y": 15
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -713,7 +713,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3yBJ",
+      "index": "a3ybRS",
       "typeName": "shape"
     }
   ]

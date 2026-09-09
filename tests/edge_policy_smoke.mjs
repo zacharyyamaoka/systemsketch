@@ -234,7 +234,8 @@ async function main() {
   try {
     // A scratch board, never Zach's: the app autosaves into whatever it opens.
     const board = join(filesRoot, 'SystemSketch', 'edge-policy.systemsketch')
-    await openApp(page, port, `?board=${encodeURIComponent(board)}`)
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, port, `?board=${encodeURIComponent(board)}&portLanes=0`)
     await waitFor(page, `document.querySelector('.tl-container')`, 'the board canvas')
     await delay(1200)
 

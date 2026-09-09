@@ -162,7 +162,8 @@ async function main() {
   const app = await startApp({ label: 'unknown-projection', width: 1440, height: 960 })
   try {
     const { page } = app
-    await openApp(page, app.port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, app.port, '?preset=block-dev&portLanes=0')
     await waitFor(page,
       `document.querySelector('[data-development-profile="block-dev"] .tl-container')`,
       'Block Dev canvas')

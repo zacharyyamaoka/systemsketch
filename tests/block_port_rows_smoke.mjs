@@ -251,7 +251,8 @@ async function main() {
   const { page, port, filesRoot } = app
 
   try {
-    await openApp(page, port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, port, '?preset=block-dev&portLanes=0')
     await waitFor(page,
       `document.querySelector('[data-development-profile="block-dev"] .tl-container')`,
       'Block Dev canvas')
@@ -430,7 +431,7 @@ async function main() {
     // -------------------------------------------------------- product ---
     const board = join(filesRoot, 'SystemSketch', 'port-rows-proof.systemsketch')
     await page.send('Page.navigate', {
-      url: `http://127.0.0.1:${port}/?board=${encodeURIComponent(board)}`,
+      url: `http://127.0.0.1:${port}/?board=${encodeURIComponent(board)}&portLanes=0`,
     })
     await waitFor(page, 'document.readyState === "complete"', 'product page load')
     await waitFor(page,

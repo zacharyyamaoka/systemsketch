@@ -5,7 +5,7 @@ import { syntaxHighlighting } from '@codemirror/language'
 import { Annotation, Compartment, EditorState, Prec, type Extension } from '@codemirror/state'
 import { EditorView, keymap, placeholder as placeholderExtension, tooltips } from '@codemirror/view'
 import { classHighlighter } from '@lezer/highlight'
-import { useEffect, useLayoutEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 
 import { FieldGesture } from './fieldCommit'
 import '../theme/pythonTokens.css'
@@ -52,6 +52,10 @@ export interface CodeFieldProps {
   /** Pin every line to this height so lines can sit on a host's own rows. */
   lineHeightPx?: number
   align?: 'left' | 'right'
+  /** Soft-wrap long lines (a viewer), instead of letting them run. */
+  wrap?: boolean
+  /** Extra chrome rendered inside the field's frame, positioned by the host's CSS. */
+  trailing?: ReactNode
   /**
    * Enter and Escape both end the gesture by leaving the field (the value is
    * never discarded — Ctrl+Z is the retract). A host that owns an editing
@@ -94,6 +98,8 @@ export function CodeField({
   multiline = false,
   lineHeightPx,
   align = 'left',
+  wrap = false,
+  trailing,
   onEnter,
   onEscape,
   onViewReady,
@@ -108,10 +114,13 @@ export function CodeField({
   const latest = useRef({ onWrite, beginEdit, onEditEnd, onEnter, onEscape, value, disabled, multiline })
   latest.current = { onWrite, beginEdit, onEditEnd, onEnter, onEscape, value, disabled, multiline }
 
-  const metrics = (): Extension => EditorView.theme({
-    ...(lineHeightPx ? { '.cm-line': { lineHeight: `${lineHeightPx}px`, height: `${lineHeightPx}px` } } : {}),
-    ...(align === 'right' ? { '.cm-content': { textAlign: 'right' } } : {}),
-  })
+  const metrics = (): Extension => [
+    EditorView.theme({
+      ...(lineHeightPx ? { '.cm-line': { lineHeight: `${lineHeightPx}px`, height: `${lineHeightPx}px` } } : {}),
+      ...(align === 'right' ? { '.cm-content': { textAlign: 'right' } } : {}),
+    }),
+    ...(wrap ? [EditorView.lineWrapping] : []),
+  ]
 
   const gestureRef = useRef<FieldGesture | null>(null)
   if (!gestureRef.current) {
@@ -274,7 +283,7 @@ export function CodeField({
   useEffect(() => {
     viewRef.current?.dispatch({ effects: metricsCompartment.current.reconfigure(metrics()) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineHeightPx, align])
+  }, [lineHeightPx, align, wrap])
 
   useEffect(() => {
     viewRef.current?.dispatch({
@@ -318,6 +327,8 @@ export function CodeField({
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}
-    />
+    >
+      {trailing}
+    </div>
   )
 }

@@ -59,6 +59,7 @@ import { getBlockPortConnections } from '../connections/blockPorts'
 import { memberStackDragState } from '../memberStackDragState'
 import {
   blockInlineFieldAttribute,
+  getBlockInlineField,
   parseBlockInlineFieldAttribute,
   rememberBlockInlineField,
   requestBlockInlineEdit,
@@ -1116,16 +1117,24 @@ function PortLabels({
   ports,
   drag,
   connectedIds,
+  hiddenSide = null,
 }: {
   ports: readonly LaidOutBlockPort[]
   drag: BlockPortDragState | null
   /** A wired input dims its definition-default chip: the cable overrides it. */
   connectedIds: ReadonlySet<string>
+  /**
+   * While a lane is open over one side, that side's painted labels step
+   * aside: the lane IS the text, and two copies of it side by side is the
+   * distraction Zach named. The dots stay, so the rows still read.
+   */
+  hiddenSide?: 'input' | 'output' | null
 }) {
   return (
     <>
       {ports.map((placed) => {
         if (!placed.label) return null
+        if (hiddenSide && placed.side === hiddenSide) return null
 			// One DEF-owned label per run. The individual source expressions are
 			// still explicit as cable endpoints, just not redundantly named here.
 			if (placed.side === 'input' && placed.port.variadic) return null
@@ -1406,6 +1415,17 @@ export interface BlockCanvasProps {
  */
 export function BlockCanvas({ shape, communicationProjected = false }: BlockCanvasProps) {
   const editor = useEditor()
+  // Which side's lane is open on THIS Block, if any — its painted labels hide.
+  const laneOpenSide = useValue(
+    'open port lane side',
+    () => {
+      if (editor.getEditingShapeId() !== shape.id) return null
+      const field = getBlockInlineField(editor, shape.id)
+      if (field.kind !== 'portLane') return null
+      return field.side === 'inputs' ? 'input' : 'output'
+    },
+    [editor, shape.id],
+  )
   const autoFitPresentation = useValue(
     'Block continuous auto-fit presentation',
     () => blockAutoResizePresentation(editor, shape),
@@ -1608,7 +1628,7 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
                   />
                 ) : null)
               : null}
-			    <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
+			    <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} hiddenSide={laneOpenSide} />
 						<HiddenPortSummaries summaries={layout.hiddenPortSummaries} />
 						<LinkedPortRuns ports={layout.ports} />
 						<VariadicRuns ports={layout.ports} prototype={variadicPrototype} />

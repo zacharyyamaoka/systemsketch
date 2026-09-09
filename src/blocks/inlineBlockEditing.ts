@@ -7,8 +7,10 @@
  */
 import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 
-import { blockHeaderAlign, isBlockShape, portInHeader, type BlockShape, type BlockShapeProps } from './blockModel'
+import { caretOffsetFromPoint } from './babble/caretGeometry'
+import { blockHeaderAlign, isBlockShape, isEffectPort, portInHeader, type BlockShape, type BlockShapeProps } from './blockModel'
 import { portLanesEnabled } from './portLanePrototype'
+import { formatPortSignature, parsePortSignature } from './portSignature'
 import { isClockTriggerBlock } from './stockBlocks'
 import {
 	PORT_LABEL_INSET_PX,
@@ -25,16 +27,19 @@ export type BlockInlineField =
 			kind: 'portName' | 'portType'
 			side: 'inputs' | 'outputs'
 			portId: string
+			/** Character offset inside the clicked span, when the click hit painted text. */
+			column?: number
 	  }
 	| {
 			/**
-			 * The port-lane prototype (`?portLanes=1`): one multi-line editor
-			 * over a whole lane, one line per port. `line` is where the click
-			 * landed, so the caret opens on the port that was clicked.
+			 * The port-lane prototype: one multi-line editor over a whole lane,
+			 * one line per port. `line` and `column` are where the click landed,
+			 * so the caret opens beside the character that was clicked.
 			 */
 			kind: 'portLane'
 			side: 'inputs' | 'outputs'
 			line?: number
+			column?: number
 	  }
 
 const DEFAULT_FIELD: BlockInlineField = { kind: 'title' }
@@ -84,9 +89,24 @@ function normalizeInlineField(editor: Editor, shapeId: TLShapeId, field: BlockIn
 	if (!portLanesEnabled()) return field
 	const shape = editor.getShape(shapeId)
 	if (!shape || !isBlockShape(shape) || shape.props.view !== 'port') return field
-	const lane = shape.props[field.side].filter((port) => port.visible && !portInHeader(port))
-	const line = Math.max(0, lane.findIndex((port) => port.id === field.portId))
-	return { kind: 'portLane', side: field.side, line }
+	const lane = shape.props[field.side].filter((port) => port.visible && !portInHeader(port) && !isEffectPort(port))
+	const line = lane.findIndex((port) => port.id === field.portId)
+	// A header port is not a lane line (it lives in the header band), so it
+	// keeps its own one-port editor — the round-2 judge found the header `+`
+	// bead typing into line 0's port instead.
+	if (line < 0) return field
+	const port = lane[line]
+	// The clicked character travels with the click: an offset inside the
+	// painted name is that column; inside the painted type it is the type
+	// slot's start plus the offset.
+	let column: number | undefined
+	if (port && field.column !== undefined) {
+		const { spans } = parsePortSignature(formatPortSignature(port))
+		column = field.kind === 'portType' && spans.type
+			? spans.type.start + Math.min(field.column, spans.type.end - spans.type.start)
+			: spans.name.start + Math.min(field.column, spans.name.end - spans.name.start)
+	}
+	return { kind: 'portLane', side: field.side, line, column }
 }
 
 export function rememberBlockInlineField(
@@ -97,7 +117,20 @@ export function rememberBlockInlineField(
 	const fields = fieldsFor(editor)
 	const current = fields.get().get(shapeId)
 	const next = normalizeInlineField(editor, shapeId, field)
-	if (current && isSameBlockInlineField(current, next)) return
+	if (current && isSameBlockInlineField(current, next)) {
+		// The same lane, but a more precise landing: two handlers see one
+		// click (tldraw's own and click-to-edit's), and whichever carries the
+		// character wins. Same editor, only the caret moves.
+		if (
+			next.kind === 'portLane' && current.kind === 'portLane'
+			&& (next.column !== undefined || next.line !== undefined)
+			&& (next.column !== current.column || next.line !== current.line)
+			&& !(next.column === undefined && current.column !== undefined && next.line === current.line)
+		) {
+			fields.update((previous) => new Map(previous).set(shapeId, next))
+		}
+		return
+	}
 	fields.update((previous) => new Map(previous).set(shapeId, next))
 }
 
@@ -433,5 +466,11 @@ export function blockInlineFieldFromClientPoint(
 		?.closest<HTMLElement>('[data-pb-inline-field]')
 	if (!hit) return null
 	if (hit.closest<HTMLElement>('[data-shape-id]')?.dataset.shapeId !== shapeId) return null
-	return parseBlockInlineFieldAttribute(hit.dataset.pbInlineField)
+	const field = parseBlockInlineFieldAttribute(hit.dataset.pbInlineField)
+	if (field && (field.kind === 'portName' || field.kind === 'portType')) {
+		// Per-character: which character of the painted span was under the
+		// pointer, so the editor can open with the caret right there.
+		return { ...field, column: caretOffsetFromPoint(hit, clientPoint.x, clientPoint.y) }
+	}
+	return field
 }

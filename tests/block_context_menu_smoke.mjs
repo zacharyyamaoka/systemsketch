@@ -76,7 +76,8 @@ async function main() {
   const { page, port, filesRoot } = app
 
   try {
-    await openApp(page, port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, port, '?preset=block-dev&portLanes=0')
     await waitFor(page,
       `document.querySelector('[data-development-profile="block-dev"] .tl-container')`,
       'Block Dev canvas')
@@ -182,7 +183,7 @@ async function main() {
     // component registry that becomes Stable—not only in the isolated lab.
     const productBoard = join(filesRoot, 'SystemSketch', 'context-menu-proof.tldr')
     await page.send('Page.navigate', {
-      url: `http://127.0.0.1:${port}/?board=${encodeURIComponent(productBoard)}`,
+      url: `http://127.0.0.1:${port}/?board=${encodeURIComponent(productBoard)}&portLanes=0`,
     })
     await waitFor(page, 'document.readyState === "complete"', 'product page load')
     await waitFor(page,

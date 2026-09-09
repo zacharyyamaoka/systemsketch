@@ -154,7 +154,8 @@ async function main() {
   const { page, port } = app
 
   try {
-    await openApp(page, port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, port, '?preset=block-dev&portLanes=0')
     await waitFor(page,
       `document.querySelector('[data-development-profile="block-dev"] .tl-container')`,
       'Block Dev canvas')
@@ -270,7 +271,7 @@ async function main() {
     // 8. The product composition mounts this from a second `installBlockClickToEdit`
     //    call site in App.tsx, behind the full chrome, workspace, and selection
     //    menu. Proving it only in the isolated lab would leave that site unproven.
-    await openApp(page, port, '')
+    await openApp(page, port, '?portLanes=0')
     await waitFor(page,
       `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`,
       'product canvas')

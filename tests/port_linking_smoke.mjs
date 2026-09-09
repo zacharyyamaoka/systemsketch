@@ -68,7 +68,8 @@ async function capture(page, destination) {
 }
 
 async function openInspector(page, app, board, prototype) {
-  await openApp(page, app.port, `?board=${encodeURIComponent(board)}&portLinkPrototype=${prototype}`)
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+  await openApp(page, app.port, `?board=${encodeURIComponent(board)}&portLinkPrototype=${prototype}&portLanes=0`)
   await waitFor(page, 'window.__systemsketch?.editor', `V${prototype} editor`)
   await evaluate(page, `(() => {
     const editor = window.__systemsketch.editor

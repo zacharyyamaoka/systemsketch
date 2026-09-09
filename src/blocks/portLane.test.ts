@@ -61,6 +61,15 @@ describe('port lane', () => {
 		expect(next.inputs[1]).toMatchObject({ id: 'in_2', name: 'frames', type: 'Frame' })
 	})
 
+	it('keeps a derived effect output out of the lane and in place through an edit', () => {
+		const effect: BlockPort = { id: 'effect:in_1', name: 'buf', type: 'list', visible: true, effect: true }
+		const ok: BlockPort = { id: 'out_1', name: 'ok', type: 'bool', visible: true }
+		const props: BlockShapeProps = { ...getDefaultBlockProps(), view: 'port', inputs: [{ id: 'in_1', name: 'buf', type: 'list', visible: true, mutates: true } as BlockPort], outputs: [effect, ok] }
+		expect(lanePorts(props, 'outputs').map((port) => port.id)).toEqual(['out_1'])
+		const next = reconcilePortLane(props, 'outputs', 'ok: boolX')
+		expect(next.outputs.map((port) => [port.id, port.type])).toEqual([['out_1', 'boolX'], ['effect:in_1', 'list']])
+	})
+
 	it('reads an empty document as an empty lane', () => {
 		const next = reconcilePortLane(block([pose, frame]), 'inputs', '')
 		expect(next.inputs).toEqual([])

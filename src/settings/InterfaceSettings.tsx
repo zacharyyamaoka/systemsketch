@@ -63,6 +63,7 @@ import {
 } from './gestureSettings'
 import { PercentInput } from './PercentInput'
 import { setGestureTuningOpen } from './gestureTuningStore'
+import { updatePortEditorPreference, usePortEditorPreference } from '../blocks/portLanePrototype'
 import { TOOL_SEARCH_ALIAS_ITEMS, type ToolSearchAliasItem } from '../library/toolSearchCatalog'
 import {
   addToolAlias,
@@ -831,6 +832,7 @@ function CanvasPanel({ onClose }: { onClose(): void }) {
     wheelZoomSensitivityPercent,
   } = useAppearancePreferences()
   const gestures = useGestureSettings()
+  const portEditor = usePortEditorPreference()
 
   return (
     <section className="systemsketch-settings__panel" aria-labelledby="canvas-navigation-title">
@@ -858,6 +860,29 @@ function CanvasPanel({ onClose }: { onClose(): void }) {
           <span>
             <strong>Copy/paste under cursor</strong>
             <small>On: paste and duplicate land at the pointer. Off: they land at the viewport centre.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="port-editor-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="port-editor-title">Port editor</h3>
+          <p>How a Block's ports are typed: one text box per side, or one field per port.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={portEditor.portEditor === 'multi-line'}
+          data-testid="systemsketch-multi-line-port-editor"
+          onClick={() => updatePortEditorPreference({
+            portEditor: portEditor.portEditor === 'multi-line' ? 'single-line' : 'multi-line',
+          })}
+        >
+          <span>
+            <strong>Multi-line port editor</strong>
+            <small>On: each side is one text box, a line per port — Alt/Ctrl+↑↓ reorder, Enter adds, IDE keys throughout. Off: one field per port with drag-and-drop rows.</small>
           </span>
           <i aria-hidden="true"><span /></i>
         </button>

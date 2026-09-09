@@ -94,7 +94,8 @@ async function main() {
   const app = await startApp({ label: 'bundle-unbundle-copy-quick-insert', width: 1440, height: 940 })
   try {
     const { page } = app
-    await openApp(page, app.port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, app.port, '?preset=block-dev&portLanes=0')
     await waitFor(page, `document.querySelector('[data-development-profile="block-dev"] .tl-container')`, 'Block Dev canvas')
     await waitFor(page, 'Boolean(window.__systemsketch?.editor)', 'editor')
     await seed(page)

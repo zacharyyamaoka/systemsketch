@@ -20,6 +20,7 @@
  */
 import {
 	FIRST_BODY_ROW,
+	isEffectPort,
 	normalizeBlockPortRows,
 	portInHeader,
 	portSection,
@@ -32,9 +33,19 @@ import {
 import { canonicalizeInputPortLinks } from './commands/blockCommands'
 import { formatPortSignature, parsePortSignature } from './portSignature'
 
-/** The ports a lane's lines stand for: visible body ports of one side, in lane order. */
+/**
+ * The ports a lane's lines stand for: visible, authored body ports of one
+ * side, in lane order. Header ports live in the header band and effect
+ * ports are derived from a mutated input (painted on the top edge, no
+ * label) — neither is a line, and both are kept around the lane untouched.
+ */
 export function lanePorts(props: BlockShapeProps, side: BlockPortSide): BlockPort[] {
-	return props[side].filter((port) => port.visible && !portInHeader(port))
+	return props[side].filter((port) => port.visible && !portInHeader(port) && !isEffectPort(port))
+}
+
+/** Whether a port is one of the lane's lines at all (a header or effect port is not). */
+export function portInLane(props: BlockShapeProps, side: BlockPortSide, portId: string): boolean {
+	return lanePorts(props, side).some((port) => port.id === portId)
 }
 
 export function formatPortLane(ports: readonly BlockPort[]): string {
@@ -147,12 +158,13 @@ export function reconcilePortLane(props: BlockShapeProps, side: BlockPortSide, t
 		lane.push(fresh)
 	}
 
-	// 4. Header ports first, then the lane, then whatever was hidden, so the
-	//    two kinds of port that are not lines keep the place they had.
-	const laneIds = new Set(lane.map((port) => port.id))
-	const header = props[side].filter((port) => portInHeader(port) && port.visible)
-	const hidden = props[side].filter((port) => !port.visible && !laneIds.has(port.id))
-	const ports = [...header, ...lane, ...hidden]
+	// 4. Header ports first, then the lane, then whatever is not a line —
+	//    hidden ports and derived effect ports — so every port that is not a
+	//    line keeps the place it had and `reconcileEffectPorts` finds its own.
+	const wasLine = new Set(before.map((port) => port.id))
+	const header = props[side].filter((port) => portInHeader(port) && port.visible && !isEffectPort(port))
+	const others = props[side].filter((port) => !wasLine.has(port.id) && !header.includes(port))
+	const ports = [...header, ...lane, ...others]
 	const withLinks = side === 'inputs' ? canonicalizeInputPortLinks(ports) : ports
 	return reconcileEffectPorts(normalizeBlockPortRows({ ...props, [side]: withLinks }))
 }

@@ -61,20 +61,20 @@
     {
       "id": "step-0",
       "kind": "step",
-      "text": "0 \u00b7 PROTOTYPE SWITCH \u2014 in the bottom-right corner, set the Prototype drop-down to 'lanes'. It sticks in this browser; 'one line per port' is today's shipped editor.",
+      "text": "0 \u00b7 Multi-line lanes are ON by default (Settings \u203a Canvas \u203a Port editor toggles it; the bottom-right Prototype drop-down also picks solid vs ragged lines).",
       "x": 20,
       "y": 60,
       "w": 480,
-      "h": 150
+      "h": 190
     },
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 \u00b7 Select estimate, then click the LEFT half of its body on the frame row. One editor opens over all three inputs \u2014 a line per port \u2014 with the caret on frame's line.",
+      "text": "1 \u00b7 Select estimate, then click on the 'a' of frame. One editor opens over all three inputs \u2014 a line per port \u2014 with the caret right after the 'a'. Its \u2922 opens a bigger viewer.",
       "x": 40,
       "y": 300,
       "w": 460,
-      "h": 190,
+      "h": 230,
       "target": {
         "shapeId": "subject",
         "anchor": "left"
@@ -96,11 +96,11 @@
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 \u00b7 Click the RIGHT half of the body: the outputs lane opens, right-aligned. Escape leaves it as it was.",
+      "text": "3 \u00b7 Click the RIGHT half of the body: the outputs lane opens just past the Block's edge, typed normally; its painted labels step aside. Escape leaves it as it was.",
       "x": 1120,
       "y": 300,
       "w": 420,
-      "h": 150,
+      "h": 190,
       "target": {
         "shapeId": "subject",
         "anchor": "right"

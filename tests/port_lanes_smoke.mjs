@@ -17,6 +17,7 @@ import { join } from 'node:path'
 import {
   ROOT,
   clickAt,
+  clickElement,
   delay,
   elementBox,
   ensureDir,
@@ -26,6 +27,7 @@ import {
   makeChecklist,
   mouse,
   openApp,
+  shortcut,
   startApp,
   typeSlowly,
   waitFor,
@@ -85,6 +87,18 @@ async function paintedNames(page, lane) {
 
 async function blockBox(page) {
   return elementBox(page, `[data-shape-id=${JSON.stringify(BLOCK)}] .systemsketch-block-canvas`)
+}
+
+/** The painted NAME span of one port, for a per-character click. */
+async function nameBox(page, lane, name) {
+  const box = JSON.parse(await evaluate(page, `JSON.stringify((() => {
+    const spans = Array.from(document.querySelectorAll('[data-shape-id=${JSON.stringify(BLOCK)}] .BlockNode-portLabel--${lane} .BlockNode-portName'))
+    const span = spans.find((node) => node.textContent === ${JSON.stringify(name)})
+    const rect = span?.getBoundingClientRect()
+    return rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null
+  })())`))
+  assert.ok(box, `a painted ${lane} name span reading ${name}`)
+  return box
 }
 
 /** The painted label of one port, found by its name (nth-of-type counts other siblings). */
@@ -164,8 +178,78 @@ async function main() {
     assert.equal(opened.focused, true, 'the lane takes focus')
     assert.equal(opened.caretLine, 1, 'the caret opens on the line of the port that was clicked')
     assert.ok(opened.lineHeights.every((height) => Math.abs(height - opened.lineHeights[0]) <= 1), 'every line has the same pinned height')
+    assert.deepEqual(await paintedNames(page, 'in'), [], 'the painted input labels step aside while their lane is open')
+    assert.deepEqual(await paintedNames(page, 'out'), ['pose', 'quality'], 'the other side keeps its labels')
     await shot(page, 'inputs-open')
-    pass('a click on the left half opens the inputs lane: one line per port, caret on the clicked port')
+    pass('a click on the left half opens the inputs lane: one line per port, caret on the clicked port, painted labels hidden')
+
+    // ------------------------------------------ the caret lands on the character ---
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const gainName = await nameBox(page, 'in', 'gain')
+    // Click just past the 'g' of "gain": the nearest caret boundary is 1.
+    const charWidth = gainName.width / 4
+    await clickAt(page, gainName.x + charWidth * 1.3, gainName.y + gainName.height / 2)
+    await waitFor(page, `document.querySelector(${JSON.stringify(INPUT_LANE)})`, 'the inputs lane again', 5000)
+    const caret = await evaluate(page, `(() => {
+      const view = document.querySelector(${JSON.stringify(INPUT_LANE)} + ' .cm-content')?.cmView?.view
+      if (!view) return null
+      const head = view.state.selection.main.head
+      const line = view.state.doc.lineAt(head)
+      return JSON.stringify({ line: line.number - 1, column: head - line.from })
+    })()`)
+    assert.deepEqual(JSON.parse(caret), { line: 2, column: 1 }, `the caret opens beside the character that was clicked, not at the line start — got ${caret}`)
+    pass('per-character: the caret lands next to the clicked character of the clicked port')
+
+    // ------------------------------------------- a long line folds when left ---
+    await key(page, 'End', 'End')
+    await typeSlowly(page, ' + some_very_long_expression_that_keeps_going(frame, pose)')
+    const longLine = (await laneState(page, INPUT_LANE)).lines[2]
+    assert.ok(longLine.length > 40, 'the active line shows everything while it is typed')
+    await key(page, 'ArrowUp', 'ArrowUp')
+    await delay(150)
+    const folded = await laneState(page, INPUT_LANE)
+    assert.ok(folded.lines[2].endsWith('…') && folded.lines[2].length < 40, `a line the caret left folds to an ellipsis, got ${JSON.stringify(folded.lines[2])}`)
+    assert.ok(await evaluate(page, `Boolean(document.querySelector(${JSON.stringify(INPUT_LANE)} + ' .ss-lane-ellipsis'))`), 'the fold is the ellipsis widget')
+    await key(page, 'ArrowDown', 'ArrowDown')
+    await delay(150)
+    assert.ok(!(await laneState(page, INPUT_LANE)).lines[2].endsWith('…'), 'moving back onto the line unfolds it')
+    await shot(page, 'folded')
+    // Put the line back so the rest of the journey reads as before.
+    await shortcut(page, 'a', 'KeyA', 2)
+    await typeSlowly(page, 'pose: Pose = None')
+    await key(page, 'Enter', 'Enter')
+    await typeSlowly(page, 'frame: Frame')
+    await key(page, 'Enter', 'Enter')
+    await typeSlowly(page, 'gain: float = 1.0')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.inputs.length === 3 && window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.inputs[2].defaultValue === '1.0'`, 'the lane restored')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
+    pass('a long line runs to the right while active and folds to … once the caret leaves it')
+
+    // ------------------------------------------------ the ⤢ opens a viewer ---
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const frameAgain = await labelBox(page, 'in', 'frame')
+    await clickAt(page, frameAgain.x + 16, frameAgain.y + frameAgain.height / 2)
+    await waitFor(page, `document.querySelector('[data-testid="block-inline-port-lane-expand-inputs"]')`, 'the ⤢ button', 5000)
+    await clickElement(page, '[data-testid="block-inline-port-lane-expand-inputs"]')
+    await waitFor(page, `document.querySelector('[data-testid="block-lane-viewer"] .cm-content')`, 'the lane viewer', 5000)
+    const viewerText = await evaluate(page, `document.querySelector('[data-testid="block-lane-viewer"] .cm-content')?.textContent`)
+    assert.equal(viewerText, 'pose: Pose = Noneframe: Framegain: float = 1.0', 'the viewer shows the same lane document')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('[data-testid="block-lane-viewer"]') && !document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the viewer and the lane')
+    pass('the ⤢ in the lane\'s corner opens the same document in a bigger wrapped viewer')
+
+    // Re-open for the rest of the journey exactly where it was.
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const frameLabel2 = await labelBox(page, 'in', 'frame')
+    const box1 = await blockBox(page)
+    await clickAt(page, box1.x + box1.width * 0.35, frameLabel2.y + frameLabel2.height / 2)
+    await waitFor(page, `document.querySelector(${JSON.stringify(INPUT_LANE)})`, 'the inputs lane once more', 5000)
 
     // ------------------------------------- Alt+Up moves a port, keeps its id ---
     await key(page, 'ArrowUp', 'ArrowUp', CTRL)
@@ -173,7 +257,7 @@ async function main() {
     assert.deepEqual(await storedPorts(page, 'inputs'), [
       ['in_2', 'frame', 'Frame', null], ['in_1', 'pose', 'Pose', 'None'], ['in_3', 'gain', 'float', '1.0'],
     ], 'ids travel with their lines, so cables stay attached')
-    assert.deepEqual(await paintedNames(page, 'in'), ['frame', 'pose', 'gain'], 'the Block repaints in the new order while the lane is open')
+    assert.deepEqual(await paintedNames(page, 'in'), [], 'the painted labels stay hidden while the lane is open — the lane is the text')
     await shot(page, 'moved-up')
     pass('Ctrl+↑ moves the port like a line in an IDE, and the port keeps its id')
 
@@ -185,7 +269,7 @@ async function main() {
     const after = await storedPorts(page, 'inputs')
     assert.deepEqual(after.map((entry) => entry[0]), ['in_2', 'in_4', 'in_1', 'in_3'], 'a new line is a new port with a fresh id, in place')
     assert.deepEqual(after[1], ['in_4', 'yaw', 'float', '0'])
-    assert.deepEqual(await paintedNames(page, 'in'), ['frame', 'yaw', 'pose', 'gain'])
+    assert.equal(await evaluate(page, `document.querySelectorAll('[data-shape-id=${JSON.stringify(BLOCK)}] .BlockNode-portLabel--in').length`), 0, 'still no painted input labels while the lane is open')
     pass('Enter starts a new port on the next line and it paints as you type')
 
     // ---------------------------------------- Shift+Alt+Down duplicates ---
@@ -248,6 +332,60 @@ async function main() {
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the lane')
     pass('a single click, a double-click and the body all open the same lane — never the single-line editor')
 
+    // ------------------------ a header port is not a line: its own editor ---
+    await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
+    await delay(200)
+    const namesBefore = await storedPorts(page, 'inputs')
+    await clickElement(page, `[data-shape-id=${JSON.stringify(BLOCK)}] [title="Add header port"]`)
+    await waitFor(page, `document.querySelector('.BlockNode-inlineEditor')`, 'an editor for the new header port', 5000)
+    const headerEditor = await evaluate(page, `document.querySelector('.BlockNode-inlineEditor')?.getAttribute('data-testid')`)
+    assert.match(headerEditor ?? '', /^block-inline-port-name-inputs-/, 'the header bead opens the header port\'s own one-line editor, not the body lane')
+    await typeSlowly(page, 'fn')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(BLOCK)}).props.inputs.some((port) => port.row === 0 && port.name === 'fn')`, 'the header port to be named')
+    const namesAfter = await storedPorts(page, 'inputs')
+    assert.deepEqual(namesAfter.filter((entry) => entry[1] !== 'fn'), namesBefore, 'no body port was touched by naming the header port')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the editor')
+    pass('the header + bead names the header port — never line 0 of the lane')
+
+    // -------------------- an empty Block: click a half, type, a port is born ---
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.createShapes([{ id: 'shape:blank', type: 'block', x: 520, y: 620, props: { title: 'blank', view: 'port', w: 360, h: 200, inputs: [], outputs: [] } }])
+      editor.select('shape:blank')
+      return true
+    })()`)
+    await delay(250)
+    const blank = await elementBox(page, '[data-shape-id="shape:blank"] .systemsketch-block-canvas')
+    await clickAt(page, blank.x + blank.width * 0.7, blank.y + blank.height * 0.5)
+    await waitFor(page, `document.querySelector(${JSON.stringify(OUTPUT_LANE)})`, 'an empty outputs lane on a Block with no ports', 5000)
+    const emptyLane = await laneState(page, OUTPUT_LANE)
+    // CodeMirror paints the placeholder inside .cm-content, so ask the document itself.
+    assert.equal(await evaluate(page, `document.querySelector(${JSON.stringify(OUTPUT_LANE)} + ' .cm-content')?.cmView?.view.state.doc.length`), 0, 'the lane opens empty')
+    assert.equal(emptyLane.focused, true, 'with the caret ready at the top')
+    assert.equal(await evaluate(page, `Boolean(document.querySelector(${JSON.stringify(OUTPUT_LANE)} + ' .cm-placeholder'))`), true, 'and the grammar as its placeholder')
+    await typeSlowly(page, 'result: Pose')
+    await waitFor(page, `window.__systemsketch.editor.getShape('shape:blank').props.outputs.length === 1`, 'the first output to be born from the first line', 5000)
+    assert.deepEqual(JSON.parse(await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getShape('shape:blank').props.outputs.map((port) => [port.id, port.name, port.type]))`)),
+      [['out_1', 'result', 'Pose']], 'typing into the empty lane creates the port, no inspector needed')
+    await key(page, 'Enter', 'Enter', CTRL)
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Ctrl+Enter to close the lane')
+    await evaluate(page, `(() => { window.__systemsketch.editor.select('shape:blank'); return true })()`)
+    await delay(200)
+    await clickAt(page, blank.x + blank.width * 0.3, blank.y + blank.height * 0.5)
+    await waitFor(page, `document.querySelector(${JSON.stringify(INPUT_LANE)})`, 'an empty inputs lane on the same Block', 5000)
+    await typeSlowly(page, 'frame: Frame')
+    await key(page, 'Enter', 'Enter')
+    await typeSlowly(page, 'gain: float = 1.0')
+    await waitFor(page, `window.__systemsketch.editor.getShape('shape:blank').props.inputs.length === 2`, 'two inputs from two lines', 5000)
+    await shot(page, 'blank-block')
+    await key(page, 'Enter', 'Enter', CTRL)
+    await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Ctrl+Enter to close the lane')
+    assert.deepEqual(JSON.parse(await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getShape('shape:blank').props.inputs.map((port) => [port.id, port.name, port.type, port.defaultValue ?? null]))`)),
+      [['in_1', 'frame', 'Frame', null], ['in_2', 'gain', 'float', '1.0']])
+    await evaluate(page, `(() => { window.__systemsketch.editor.deleteShapes(['shape:blank']); return true })()`)
+    pass('a Block with no ports: click either half, type, and the ports are created line by line — no inspector needed')
+
     // ----------------------------------- the switch flips back, live ---
     await choosePrototype(page, 'one-line')
     await evaluate(page, `(() => { window.__systemsketch.editor.select(${JSON.stringify(BLOCK)}); return true })()`)
@@ -259,7 +397,7 @@ async function main() {
       'with the switch back on the shipped editor, the same click opens the one-line field again')
     await key(page, 'Escape', 'Escape')
     await waitFor(page, `!document.querySelector('.BlockNode-inlineEditor')`, 'Escape to close the editor')
-    assert.equal(await evaluate(page, `localStorage.getItem('systemsketch.prototype.portEditor')`), 'one-line', 'the choice is remembered in this browser')
+    assert.equal(await evaluate(page, `JSON.parse(localStorage.getItem('systemsketch.portEditor.v1') ?? '{}').portEditor ?? null`), 'single-line', 'the choice is remembered in this browser (the same preference Settings › Canvas shows)')
     pass('the bottom-right drop-down switches the port editor live, no URL editing, and remembers the choice')
 
     const errors = localConsoleErrors(page)

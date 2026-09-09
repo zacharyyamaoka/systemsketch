@@ -9,15 +9,16 @@ import {
 import './prototype-switch.css'
 
 const LABEL: Record<PortEditorMode, string> = {
-	'one-line': 'Port editor · one line per port (shipped)',
-	lanes: 'Port editor · lanes, one line per port (prototype)',
+	'one-line': 'Port editor · single line per port, drag-and-drop rows',
+	lanes: 'Port editor · multi-line lanes, one solid box',
+	'lanes-ragged': 'Port editor · multi-line lanes, ragged lines (prototype)',
 }
 
 /**
- * Temporary prototype chrome in the bottom-right corner: a drop-down that
- * flips the port editor between the shipped one-line field and the lane
- * prototype, remembered in this browser. Exists so a variant can be tried
- * without editing the URL; goes away with the prototype it switches.
+ * Temporary prototype chrome in the bottom-right corner: a drop-down over
+ * the same port-editor preference Settings › Canvas exposes, plus the lane
+ * style still being prototyped. Exists so a variant can be tried without
+ * editing the URL; goes away when the lane style is settled.
  */
 export function PrototypeSwitch() {
 	const editor = useEditor()

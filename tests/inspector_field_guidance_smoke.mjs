@@ -88,7 +88,8 @@ async function main() {
   const { page, port, filesRoot } = app
 
   try {
-    await openApp(page, port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, port, '?preset=block-dev&portLanes=0')
     await waitFor(page, 'window.__systemsketch?.editor', 'SystemSketch editor')
     await delay(400)
 
@@ -127,7 +128,7 @@ async function main() {
     const fixtureCopy = join(filesRoot, 'SystemSketch', 'inspector-field-guidance-review-copy.systemsketch')
     await mkdir(join(filesRoot, 'SystemSketch'), { recursive: true })
     await copyFile(FIXTURE, fixtureCopy)
-    await openApp(page, port, `?board=${encodeURIComponent(fixtureCopy)}`)
+    await openApp(page, port, `?board=${encodeURIComponent(fixtureCopy)}&portLanes=0`)
     await waitFor(page,
       `document.querySelector('[data-shape-id="shape:blank-block"] .systemsketch-block-canvas')`,
       'saved blank Block review target',

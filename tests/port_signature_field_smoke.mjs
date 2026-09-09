@@ -135,7 +135,8 @@ async function main() {
   const { page, port, filesRoot } = app
   try {
     const board = join(filesRoot, 'SystemSketch', 'port-signature-field.systemsketch')
-    await openApp(page, port, `?board=${encodeURIComponent(board)}`)
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, port, `?board=${encodeURIComponent(board)}&portLanes=0`)
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`, 'the SystemSketch product canvas')
     await waitFor(page, `Boolean(window.__systemsketch?.editor)`, 'editor seam')
     await seedBoard(page)

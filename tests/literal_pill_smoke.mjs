@@ -165,7 +165,8 @@ async function main() {
   const app = await startApp({ label: 'literal-pill', width: 1440, height: 960 })
   try {
     const { page } = app
-    await openApp(page, app.port, '?preset=block-dev')
+    // portLanes=0 pins the single-line port editor this journey drives (multi-line lanes are the default).
+    await openApp(page, app.port, '?preset=block-dev&portLanes=0')
     await waitFor(page,
       `document.querySelector('[data-development-profile="block-dev"] .tl-container')`,
       'Block Dev canvas')
@@ -454,7 +455,7 @@ async function main() {
     check('CLEAN-DEV', 'the Block Dev journey raised no local console errors', localConsoleErrors(page), [])
 
     // ---- the product composition: the Pill slot beside Block, and P ----------
-    await openApp(page, app.port, '')
+    await openApp(page, app.port, '?portLanes=0')
     await waitFor(page, `document.querySelector('.tl-container')`, 'product canvas')
     await waitFor(page, `Boolean(window.__systemsketch?.editor)`, 'product seam')
     await delay(600)
