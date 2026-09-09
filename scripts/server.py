@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import ipaddress
 import json
 import os
@@ -126,21 +127,77 @@ def _icon_fetch_opener() -> OpenerDirector:
 _ICON_FETCH_OPENER = _icon_fetch_opener()
 
 
-def _reject_unsafe_icon_host(url: str) -> None:
-    """SSRF guard: refuse a target whose *resolved* address is loopback,
-    link-local, private (RFC1918), multicast, reserved, or unspecified —
-    e.g. `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254` (the cloud metadata
+def _pinned_icon_opener(pinned_ip: str) -> OpenerDirector:
+    """Like `_icon_fetch_opener()`, except the HTTP(S) connection dials
+    `pinned_ip` — the exact address `_reject_unsafe_icon_host` already
+    vetted — instead of asking the resolver to look the hostname up again.
+    The request still carries the real hostname everywhere a server or a
+    certificate would check it: the `Host` header (unchanged, since these
+    connection classes never touch `self.host`) and, over TLS, SNI and
+    certificate verification (`server_hostname=self.host` below). Built
+    fresh per hop, since the pinned address changes with the target.
+    """
+
+    class _PinnedHTTPConnection(http.client.HTTPConnection):
+        def connect(self) -> None:
+            self.sock = self._create_connection(
+                (pinned_ip, self.port), self.timeout, self.source_address
+            )
+
+    class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+        def connect(self) -> None:
+            sock = self._create_connection(
+                (pinned_ip, self.port), self.timeout, self.source_address
+            )
+            if self._tunnel_host:
+                self.sock = sock
+                self._tunnel()
+                server_hostname = self._tunnel_host
+            else:
+                server_hostname = self.host
+            self.sock = self._context.wrap_socket(sock, server_hostname=server_hostname)
+
+    class _PinnedHTTPHandler(HTTPHandler):
+        def http_open(self, req):
+            return self.do_open(_PinnedHTTPConnection, req)
+
+    class _PinnedHTTPSHandler(HTTPSHandler):
+        def https_open(self, req):
+            return self.do_open(_PinnedHTTPSConnection, req)
+
+    opener = OpenerDirector()
+    for handler_class in (ProxyHandler, _PinnedHTTPHandler, _PinnedHTTPSHandler):
+        opener.add_handler(handler_class())
+    return opener
+
+
+def _reject_unsafe_icon_host(url: str) -> str | None:
+    """SSRF guard AND the one DNS lookup `fetch_icon_bytes` connects with.
+
+    Refuses a target whose *resolved* address is loopback, link-local,
+    private (RFC1918), multicast, reserved, or unspecified — e.g.
+    `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254` (the cloud metadata
     endpoint). Checked by IP, not by hostname string, so `localtest.me` or a
     bare decimal/hex IP literal cannot smuggle a loopback address past a
     naive host-name blocklist.
 
+    Returns the vetted IP so the caller can pin its connection to the exact
+    address checked here, rather than asking the resolver again later.
+    WHY that matters: a plain check-then-connect guard resolves twice — once
+    here, once inside the socket connect a moment later — and a host that
+    answers a public address to the first lookup and a loopback/private one
+    to the second sails straight through. Returning the address turns this
+    from an advisory check into the address the request actually dials.
+
     WHY `os.environ` and not a parameter: see `ICON_FETCH_ALLOW_LOCAL_ENV`.
     The local `http.server` fixture every test in `tests/test_icon_fetch.py`
     fetches from is itself `127.0.0.1` — this is the one escape hatch, and it
-    is off unless a human or a test explicitly opts in.
+    is off unless a human or a test explicitly opts in. It returns `None`:
+    nothing was vetted, so there is nothing to pin, and the caller falls
+    back to an ordinary (re-resolving) connection.
     """
     if os.environ.get(ICON_FETCH_ALLOW_LOCAL_ENV) == "1":
-        return
+        return None
     hostname = urlparse(url).hostname
     if not hostname:
         raise ValueError("the URL is missing a host")
@@ -148,6 +205,8 @@ def _reject_unsafe_icon_host(url: str) -> None:
         resolved = socket.getaddrinfo(hostname, None)
     except OSError as cause:
         raise ValueError(f"could not resolve the URL's host: {cause}") from cause
+    if not resolved:
+        raise ValueError("could not resolve the URL's host")
     for info in resolved:
         address = ipaddress.ip_address(info[4][0])
         if (
@@ -159,6 +218,7 @@ def _reject_unsafe_icon_host(url: str) -> None:
             or address.is_unspecified
         ):
             raise ValueError("the URL resolves to a local or private address")
+    return resolved[0][4][0]
 
 
 def fetch_icon_bytes(url: str) -> tuple[bytes, str]:
@@ -186,10 +246,11 @@ def fetch_icon_bytes(url: str) -> tuple[bytes, str]:
             raise ValueError("only http and https URLs are supported")
         if not parsed.netloc:
             raise ValueError("the URL is missing a host")
-        _reject_unsafe_icon_host(target)
+        pinned_ip = _reject_unsafe_icon_host(target)
+        opener = _pinned_icon_opener(pinned_ip) if pinned_ip is not None else _ICON_FETCH_OPENER
         request = Request(target, headers={"User-Agent": "SystemSketch-icon-fetch/1"})
         try:
-            response = _ICON_FETCH_OPENER.open(request, timeout=ICON_FETCH_TIMEOUT_SECONDS)
+            response = opener.open(request, timeout=ICON_FETCH_TIMEOUT_SECONDS)
         except URLError as cause:
             raise ValueError(f"could not fetch the URL: {cause.reason}") from cause
         except TimeoutError as cause:

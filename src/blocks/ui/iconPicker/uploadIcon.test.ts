@@ -55,7 +55,7 @@ describe('prepareIconImage', () => {
 		)}</svg>`
 		expect(oversized.length).toBeGreaterThan(ICON_MAX_SVG_BYTES)
 		const file = new File([oversized], 'huge.svg', { type: 'image/svg+xml' })
-		await expect(prepareIconImage(file)).rejects.toThrow(/1\.0 MB/)
+		await expect(prepareIconImage(file)).rejects.toThrow(/^this SVG is [\d,]+ KB; the limit is 1,024 KB$/)
 	})
 
 	it('accepts an SVG right at the size cap', async () => {

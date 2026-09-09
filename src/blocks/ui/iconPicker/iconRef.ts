@@ -16,11 +16,13 @@ import type { TLAssetId } from 'tldraw'
  * WHY the `asset` marker in `icon` as well: an older build's validator
  * throws `Unexpected property` on any record carrying an `assetId` key at
  * all, so a board with an uploaded icon is never loadable there regardless
- * of what `icon` says — `assetId` is written only for an actual upload, and
- * never in defaults, to keep every other board readable. The `asset` marker
- * just keeps a name-only reader (one still running with no `assetId` prop
- * declared) from drawing a stale Lucide glyph once the upload it names is
- * gone.
+ * of what `icon` says — that incompatibility is inherent, not something a
+ * migration can bridge, since the previous build has no such prop to
+ * receive it. `assetId` is written only for an actual upload, and never in
+ * defaults, so every OTHER board stays loadable on the previous build same
+ * as always. The `asset` marker just keeps a name-only reader (one still
+ * running with no `assetId` prop declared) from drawing a stale Lucide
+ * glyph once the upload it names is gone.
  */
 export type BlockIconRef =
 	| { kind: 'none' }

@@ -326,6 +326,10 @@ describe('blockIconRef', () => {
 
 		const withAsset = { ...getDefaultBlockProps(), icon: 'asset', assetId: ASSET_ID }
 		expect(() => validator.validate(withAsset)).not.toThrow()
+
+		// A stray `assetId: null` (this feature's short-lived original
+		// default) validates too — no migration is needed to clean it up.
+		expect(() => validator.validate({ ...getDefaultBlockProps(), assetId: null })).not.toThrow()
 	})
 
 	it('stays loadable on the build before assetId existed, for every icon kind except an upload', () => {

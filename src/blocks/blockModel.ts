@@ -420,16 +420,19 @@ export const BLOCK_SHAPE_PROPS = {
 	 * carries an asset with a shape when the prop is literally `assetId`. Any
 	 * other name pastes a Block whose image silently never arrives.
 	 *
-	 * WHY optional and never nullable: a plain `T.object` validator (this
-	 * one, on an older build with no `assetId` line here at all) throws
-	 * `Unexpected property` for any key it does not declare — `null`
-	 * included. The write path (`iconRef.ts` + `patchBlockDetailsProps` in
-	 * `commands/blockCommands.ts`) omits the key entirely for every Block
-	 * that has never had an upload, so those boards stay loadable on the
-	 * previous build; `blockShapeMigrations.ts`'s `AssetIcon` step strips
-	 * the key going down for the boards that do carry a real one.
+	 * WHY optional AND nullable, with no migration bridging the two builds:
+	 * the key is written only for an actual upload — `iconRef.ts` +
+	 * `patchBlockDetailsProps` in `commands/blockCommands.ts` omit it
+	 * entirely for every other Block — so a board with no uploaded icon
+	 * opens on the previous build same as always. A board that does carry
+	 * one does not; that incompatibility is inherent, not a bug this schema
+	 * can migrate away — the previous build has no such prop to receive it.
+	 * `.nullable()` exists only so a stray `assetId: null` (this feature's
+	 * short-lived original default, never shipped to Zach's own boards)
+	 * still validates on this build without needing a migration to clean it
+	 * up first.
 	 */
-	assetId: assetIdValidator.optional(),
+	assetId: assetIdValidator.nullable().optional(),
 	view: BlockViewStyle,
 	views: T.object({
 		simple: BlockViewSize,
@@ -510,7 +513,7 @@ declare module 'tldraw' {
 			foldControlSide?: BlockFoldControlSide
 			autoResize: boolean
 			icon?: string
-			assetId?: TLAssetId
+			assetId?: TLAssetId | null
 			view: BlockView
 			views: {
 				simple: BlockViewSize
@@ -567,9 +570,12 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		folded: false,
 		autoResize: false,
 		icon: '',
-		// WHY no `assetId` key here at all: see the prop doc above. A default
-		// of `null` (the pre-fix behaviour) still fails an older validator,
-		// which throws on any unknown key regardless of its value.
+		// WHY no `assetId` key here at all: see the prop doc above. The
+		// validator accepts `null` now, but a default still has to be a
+		// genuinely absent key, not `null` — an older build with no
+		// `assetId` line at all throws `Unexpected property` on any key it
+		// does not declare, value irrelevant, so every Block that has never
+		// had an upload stays loadable there only by never writing the key.
 		view: 'simple',
 		views,
 		showDescription: true,

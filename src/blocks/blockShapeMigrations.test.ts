@@ -21,7 +21,6 @@ import {
 	downgradeBlockPropsV10ToV9,
 	downgradeBlockPropsV11ToV10,
 	downgradeBlockPropsV12ToV11,
-	downgradeBlockPropsV13ToV12,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -34,7 +33,6 @@ import {
 	upgradeBlockPropsV9ToV10,
 	upgradeBlockPropsV10ToV11,
 	upgradeBlockPropsV11ToV12,
-	upgradeBlockPropsV12ToV13,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -115,32 +113,6 @@ describe('Block shape migrations', () => {
 		expect(throughPureStep(v12, downgradeBlockPropsV12ToV11)).toEqual(v11)
 		expect(upgradeBlockPropsV11ToV12({ ...v11, insetBackground: 'soft-gray' }))
 			.toEqual({ ...v11, insetBackground: 'soft-gray' })
-	})
-
-	it('strips a stored null assetId to genuinely absent, and drops a real upload for older readers', () => {
-		// SPEC-BREAKING finding 1(c): the feature's original build wrote
-		// `assetId: null` into every Block's defaults; a plain `T.object`
-		// validator on an older reader throws `Unexpected property` on that
-		// key regardless of its value, so the up-migration has to delete it,
-		// not merely leave it null.
-		const v12WithNull = { title: 'Class', assetId: null, inputs: [], outputs: [] }
-		const v13 = throughPureStep(v12WithNull, upgradeBlockPropsV12ToV13)
-		expect(v13).toEqual({ title: 'Class', inputs: [], outputs: [] })
-		expect(v13).not.toHaveProperty('assetId')
-
-		// A Block that never had the key at all is untouched.
-		const v12Bare = { title: 'Class', inputs: [], outputs: [] }
-		expect(upgradeBlockPropsV12ToV13(v12Bare)).toBe(v12Bare)
-
-		// A real uploaded asset passes through the up-migration unchanged...
-		const v12WithAsset = { title: 'Class', icon: 'asset', assetId: 'asset:icon1', inputs: [], outputs: [] }
-		expect(upgradeBlockPropsV12ToV13(v12WithAsset)).toBe(v12WithAsset)
-
-		// ...but an older reader does not know the prop at all, so the
-		// down-migration must remove it even though it holds real data —
-		// exactly the documented incompatibility for an uploaded icon.
-		expect(throughPureStep(v12WithAsset, downgradeBlockPropsV13ToV12))
-			.toEqual({ title: 'Class', icon: 'asset', inputs: [], outputs: [] })
 	})
 
 	it('keeps a Type attribute source opaque across the V8 boundary', () => {
@@ -249,10 +221,6 @@ describe('Block shape migrations', () => {
 		const v12 = throughPureStep(v11, upgradeBlockPropsV11ToV12)
 		expect(v12.insetBackground).toBe('white')
 
-		const v13 = throughPureStep(v12, upgradeBlockPropsV12ToV13)
-		expect(v13).toBe(v12)
-		expect(v13).not.toHaveProperty('assetId')
-
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
 	})
@@ -297,7 +265,7 @@ describe('Block shape migrations', () => {
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
 		expect(migrated.props.insetBackground).toBe('white')
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(13)
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(12)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))

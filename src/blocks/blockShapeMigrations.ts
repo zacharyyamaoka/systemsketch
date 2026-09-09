@@ -57,7 +57,6 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	FoldAndAutoResize: 10,
 	MemberLayout: 11,
 	InsetBackground: 12,
-	AssetIcon: 13,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -334,27 +333,6 @@ export function downgradeBlockPropsV12ToV11(props: BlockMigrationProps): BlockMi
 }
 
 /**
- * v12 → v13: strip a stored `assetId: null` down to genuinely absent.
- *
- * `null` was this feature's original, mistaken default (see blockModel.ts's
- * `assetId` prop doc); a real uploaded value is left untouched. Nothing
- * needs adding for a Block that never had the key at all — `assetId` is
- * optional and was never given an up-migration default.
- */
-export function upgradeBlockPropsV12ToV13(props: BlockMigrationProps): BlockMigrationProps {
-	if (!('assetId' in props) || props.assetId != null) return props
-	const { assetId: _assetId, ...rest } = props
-	return rest
-}
-
-/** v13 → v12: older readers do not know the uploaded-icon asset prop at all. */
-export function downgradeBlockPropsV13ToV12(props: BlockMigrationProps): BlockMigrationProps {
-	if (!('assetId' in props)) return props
-	const { assetId: _assetId, ...rest } = props
-	return rest
-}
-
-/**
  * v8 → v9: preserve the old painted face when chrome becomes configurable.
  *
  * Older boards always had both marks. Explicit `true` values make that visual
@@ -457,9 +435,5 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.InsetBackground,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV11ToV12),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV12ToV11),
-	}, {
-		id: blockVersions.AssetIcon,
-		up: (props) => applyPureMigration(props, upgradeBlockPropsV12ToV13),
-		down: (props) => applyPureMigration(props, downgradeBlockPropsV13ToV12),
 	}],
 })

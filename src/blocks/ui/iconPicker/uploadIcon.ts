@@ -95,7 +95,16 @@ export async function prepareIconImage(file: File): Promise<PreparedIconImage> {
 	const originalBytes = file.size
 	if (isSvg(file)) {
 		if (originalBytes > ICON_MAX_SVG_BYTES) {
-			throw new Error(`this SVG is ${formatIconBytes(originalBytes)} — the largest an icon can be is ${formatIconBytes(ICON_MAX_SVG_BYTES)}`)
+			// WHY exact KB here and not formatIconBytes' MB rounding: MB at
+			// one decimal collapses anything from ~1,000 KB to ~1,098 KB down
+			// to "1.0 MB" — a 1,075 KB file reads back as "this SVG is 1.0 MB
+			// — the largest an icon can be is 1.0 MB", which looks like the
+			// check is broken. KB is fine-grained enough that the file's
+			// size and the limit are never printed the same when they
+			// differ.
+			const fileKb = Math.round(originalBytes / 1024).toLocaleString()
+			const limitKb = Math.round(ICON_MAX_SVG_BYTES / 1024).toLocaleString()
+			throw new Error(`this SVG is ${fileKb} KB; the limit is ${limitKb} KB`)
 		}
 		const text = await file.text()
 		const { width, height } = svgDimensions(text)

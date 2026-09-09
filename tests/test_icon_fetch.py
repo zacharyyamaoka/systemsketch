@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import socket
 import sys
 import tempfile
 import threading
@@ -186,6 +187,74 @@ class IconFetchSsrfGuardTests(unittest.TestCase):
                 body, content_type = fetch_icon_bytes(f"{origin}/mark.png")
                 self.assertEqual(body, TINY_PNG)
                 self.assertEqual(content_type, "image/png")
+
+
+class IconFetchDnsRebindingTests(unittest.TestCase):
+    """RISK finding 2, the DNS-rebinding half: a check-then-connect guard
+    resolves the host twice — once to vet it, once inside the connection a
+    moment later — and a host that answers a public address to the first
+    lookup and a loopback one to the second sails straight through. Proves
+    the fix instead: the resolver is consulted exactly once per hop, and the
+    connection dials the address that one lookup returned, never asking
+    again. Never touches the real internet — `socket.create_connection`
+    itself is replaced, so nothing here needs a route to `8.8.8.8` to work,
+    only the record of what address the connection layer was told to dial."""
+
+    def test_a_rebinding_host_never_reaches_the_address_its_second_answer_names(self) -> None:
+        hit_count = 0
+
+        class _CountingHandler(BaseHTTPRequestHandler):
+            def log_message(self, format: str, *args) -> None:  # noqa: A002 - stdlib signature
+                pass
+
+            def do_GET(self) -> None:
+                nonlocal hit_count
+                hit_count += 1
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(TINY_PNG)))
+                self.end_headers()
+                self.wfile.write(TINY_PNG)
+
+        # A loopback origin that would happily answer the fetch — the target
+        # a rebinding attack actually wants — which must never be dialed.
+        server = ThreadingHTTPServer(("127.0.0.1", 0), _CountingHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            getaddrinfo_call_count = 0
+
+            def rebinding_getaddrinfo(host, *args, **kwargs):
+                nonlocal getaddrinfo_call_count
+                getaddrinfo_call_count += 1
+                # What a rebinding DNS host answers its FIRST (and, if the
+                # fix holds, only) lookup — public-looking, so the guard's
+                # address checks let it through.
+                return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+
+            dialed: list[tuple[str, int]] = []
+
+            def recording_create_connection(address, *args, **kwargs):
+                dialed.append(address)
+                # The loopback origin above is what a SECOND, re-resolving
+                # lookup would have handed this call in the pre-fix code —
+                # refusing here, rather than actually connecting to
+                # anything, keeps the test off the network either way.
+                raise OSError("connection refused (test double, no real socket opened)")
+
+            with mock.patch("server.socket.getaddrinfo", side_effect=rebinding_getaddrinfo), \
+                    mock.patch("server.socket.create_connection", side_effect=recording_create_connection):
+                with self.assertRaisesRegex(ValueError, "could not fetch"):
+                    fetch_icon_bytes(f"http://rebinding.example.test:{server.server_address[1]}/mark.png")
+
+            self.assertEqual(getaddrinfo_call_count, 1, "the resolver must be consulted only once per hop")
+            self.assertEqual(dialed, [("8.8.8.8", server.server_address[1])],
+                              "the connection must dial the ONE address the guard vetted")
+            self.assertEqual(hit_count, 0, "the loopback origin must never receive the request")
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
+            server.server_close()
 
 
 class IconFetchEndpointTests(unittest.TestCase):

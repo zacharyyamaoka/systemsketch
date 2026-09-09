@@ -61,7 +61,7 @@ type PickerTab = 'emoji' | 'icons' | 'upload'
  */
 type UploadStage =
 	| { kind: 'empty' }
-	| { kind: 'preview'; prepared: PreparedIconImage; previewUrl: string; addToLibrary: boolean }
+	| { kind: 'preview'; prepared: PreparedIconImage; previewUrl: string }
 	| { kind: 'saving'; prepared: PreparedIconImage; previewUrl: string }
 	| { kind: 'error'; message: string; prepared?: PreparedIconImage; previewUrl?: string }
 
@@ -284,7 +284,7 @@ export function BlockIconPicker({
 	const stageFile = async (file: File) => {
 		try {
 			const prepared = await prepareIconImage(file)
-			setUpload({ kind: 'preview', prepared, previewUrl: URL.createObjectURL(prepared.file), addToLibrary: false })
+			setUpload({ kind: 'preview', prepared, previewUrl: URL.createObjectURL(prepared.file) })
 			setTab('upload')
 		} catch (cause) {
 			setUpload({ kind: 'error', message: cause instanceof Error ? cause.message : String(cause) })
@@ -446,11 +446,6 @@ export function BlockIconPicker({
 								onBack={() => setUpload({ kind: 'empty' })}
 								onCancel={() => setOpen(false)}
 								onSave={() => void saveUpload()}
-								onToggleAddToLibrary={() =>
-									setUpload((current) =>
-										current.kind === 'preview' ? { ...current, addToLibrary: !current.addToLibrary } : current,
-									)
-								}
 							/>
 						) : (
 							<>
@@ -762,7 +757,6 @@ function UploadPanel({
 	onBack,
 	onCancel,
 	onSave,
-	onToggleAddToLibrary,
 }: {
 	title: string
 	stage: UploadStage
@@ -770,7 +764,6 @@ function UploadPanel({
 	onBack(): void
 	onCancel(): void
 	onSave(): void
-	onToggleAddToLibrary(): void
 }) {
 	const fileInputRef = useRef<HTMLInputElement | null>(null)
 	const dropTargetRef = useRef<HTMLButtonElement | null>(null)
@@ -805,15 +798,6 @@ function UploadPanel({
 						<div className="BlockIconPicker-previewMeta">{describeUpload(stage.prepared)}</div>
 					)}
 				</div>
-				<label className="BlockIconPicker-check">
-					<input
-						type="checkbox"
-						checked={stage.kind === 'preview' && stage.addToLibrary}
-						disabled
-						onChange={onToggleAddToLibrary}
-					/>
-					Add to workspace library <span className="BlockIconPicker-checkNote">(phase 2)</span>
-				</label>
 				<div className="BlockIconPicker-actions">
 					<button type="button" onClick={onBack} disabled={stage.kind === 'saving'}>Back</button>
 					<button type="button" className="BlockIconPicker-save" onClick={onSave} disabled={stage.kind === 'saving'}>

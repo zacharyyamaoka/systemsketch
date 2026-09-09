@@ -44,6 +44,12 @@ const SHOT_INSPECTOR = join(ROOT, 'docs', 'assets', 'icon-picker-inspector.png')
 const SHOT_UPLOAD_PREVIEW = join(ROOT, 'docs', 'assets', 'icon-picker-upload-preview.png')
 const SHOT_ASSET_ON_CANVAS = join(ROOT, 'docs', 'assets', 'icon-picker-asset-on-canvas.png')
 const SHOT_DARK = join(ROOT, 'docs', 'assets', 'icon-picker-dark.png')
+// WHY a results file, not a regex over this source: the report builder used
+// to count `add(`/`pass(` call sites statically and came out 69 against a
+// real run's 70 — a loop-generated check the static count can't see. This
+// is the run's own tally, same pattern as workspace_browser_smoke.mjs's
+// results file.
+const RESULTS = join(ROOT, 'docs', 'assets', 'icon-picker-results.json')
 
 const iconBoxSelector = (shapeId) => `[data-shape-id="${shapeId}"] [data-pb-inline-field='{"kind":"icon"}']`
 const shapeSelector = (shapeId) => `[data-shape-id="${shapeId}"]`
@@ -807,8 +813,15 @@ async function main() {
     add(`12. zero local console errors across the journey (got ${consoleErrors.length})`, consoleErrors.length === 0)
     if (consoleErrors.length) process.stderr.write(`  console errors:\n${consoleErrors.join('\n')}\n`)
 
-    report('icon picker')
+    const passedCount = report('icon picker')
     process.stdout.write(`  ${SHOT_INSPECTOR}\n  ${SHOT_UPLOAD_PREVIEW}\n  ${SHOT_ASSET_ON_CANVAS}\n  ${SHOT_DARK}\n`)
+    await ensureDir(join(RESULTS, '..'))
+    await writeFile(RESULTS, JSON.stringify({
+      checks: passedCount,
+      passed: passedCount,
+      firstPaintMs: perfResult.elapsedMs,
+      recordedAt: new Date().toISOString(),
+    }, null, 1))
   } catch (error) {
     const diagnostics = page.events
       .filter((event) => event.method === 'Runtime.exceptionThrown' || event.method === 'Log.entryAdded')
