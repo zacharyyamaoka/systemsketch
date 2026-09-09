@@ -7,7 +7,7 @@
  * Rendering uses lucide's own default SVG attributes so a glyph drawn from this
  * JSON is pixel-identical to the same icon drawn by lucide-react.
  *
- * WHY one lazy JSON chunk and not `lucide-react/dynamic`: DynamicIcon emits one
+ * WHY one lazy JSON chunk and not `lucide-react/dynamic` — see docs/peps/0014-block-icon-asset-prop-and-one-lazy-lucide-chunk.md: DynamicIcon emits one
  * chunk per icon (1,800+ files in the build and the VSIX). One chunk loads once
  * per session, and only when a board or the picker needs it.
  */

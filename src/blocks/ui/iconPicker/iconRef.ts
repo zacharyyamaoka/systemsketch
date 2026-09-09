@@ -8,7 +8,7 @@ import type { TLAssetId } from 'tldraw'
  * marker `asset`. `assetId` is a separate prop, and it is named exactly
  * `assetId` on purpose.
  *
- * WHY `assetId` and not `iconAssetId`: tldraw's copy / export scan
+ * WHY `assetId` and not `iconAssetId` — see docs/peps/0014-block-icon-asset-prop-and-one-lazy-lucide-chunk.md: tldraw's copy / export scan
  * (`Editor.getContentFromCurrentPage`) only carries an asset record along with
  * a shape when the prop is literally called `assetId`. A prettier name would
  * paste a Block whose image silently never arrives.
