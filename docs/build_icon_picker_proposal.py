@@ -94,7 +94,7 @@ def implemented() -> dict | None:
     vitest_cases = sum(len(re.findall(r"^\s*(?:it|test)\(", t.read_text(encoding="utf-8"), re.M)) for t in tests)
     server = read("scripts/server.py")
     model = read("src/blocks/blockModel.ts")
-    need(model, "assetId: assetIdValidator.optional()", "the assetId prop")
+    need(model, "assetId: assetIdValidator.nullable().optional()", "the assetId prop")
     return {
         "picker_lines": picker.read_text(encoding="utf-8").count("\n"),
         "css_lines": (ROOT / "src/blocks/ui/iconPicker/block-icon-picker.css").read_text(encoding="utf-8").count("\n"),
@@ -712,6 +712,26 @@ def main() -> None:
     <tr><th>Preview at two sizes</th><td>At {m['simple_px']} px and {m['header_px']} px, the exact sizes the Block draws.</td><td>picker</td></tr>
     <tr><th>Add to workspace emoji library</th><td>Phase 2: saves the asset into the workspace Library panel (shipped 2026-09-06) so other boards can pick it. Notion’s “+” custom emoji flow is the same thing.</td><td><code>src/library/</code></td></tr>
     <tr><th>Opens from the page icon</th><td>Opens from all three places a Block’s icon is reachable: the inspector well, the icon on the canvas (today a bare <code>&lt;select&gt;</code>), and the context menu.</td><td>see diagram</td></tr>
+  </tbody></table>
+</section>
+
+<section id="stock">
+  <h2>Stock parts, element by element</h2>
+  <p>What each piece of the picker stands on, by the exported name it uses, and the behaviour that had to survive the swap. Beside the captures above, not instead of them.</p>
+  <table><thead><tr><th>Element</th><th>Today (before)</th><th>Off-the-shelf part</th><th>Behaviour that must survive</th></tr></thead><tbody>
+    <tr><th>Popover shell</th><td>Absolutely-positioned <code>div</code> with hand-rolled outside-click and Escape listeners</td><td>Radix <code>Popover.Root / Anchor / Trigger / Portal / Content</code> from <code>radix-ui</code>, portalled into tldraw's <code>useContainer()</code> (the <code>BtInsertMenu</code> pattern)</td><td>Escape and outside click close; focus returns to the well; opens from three anchors (well, on-canvas icon, context menu); Ctrl+Z inside does nothing to the canvas</td></tr>
+    <tr><th>Context-menu trigger</th><td>none</td><td>Radix <code>ContextMenu.Content onCloseAutoFocus</code> (in <code>ReliableContextMenu.tsx</code>)</td><td>the menu's focus return must not dismiss the popover it just opened</td></tr>
+    <tr><th>Icon glyphs (curated {m['curated']})</th><td><code>lucide-react</code> named components</td><td>unchanged: <code>lucide-react</code> {m['lucide_next']} named components</td><td>static, no chunk load; same stroke defaults</td></tr>
+    <tr><th>Icon glyphs (the other {m['lucide_count'] - m['curated']})</th><td>not available</td><td><code>lucide-static</code> <code>icon-nodes.json</code> + <code>tags.json</code>, rendered by <code>LucideNodeSvg</code> with lucide's default SVG attributes; lazy <code>import()</code></td><td>pixel-identical to lucide-react; unknown names still render nothing; one chunk, loaded once</td></tr>
+    <tr><th>Search index</th><td>none</td><td>Lucide's own per-icon <code>tags</code> (the same data <code>shadcn-iconpicker</code> feeds Fuse.js), plain substring ranking in <code>searchLucide</code></td><td>every typed word must match; Enter picks the first hit</td></tr>
+    <tr><th>Emoji</th><td>none</td><td><code>unicode-emoji-json</code> names + <code>emojibase-data</code> keywords, drawn by the system colour-emoji font (<code>EMOJI_FONT_FAMILY</code>)</td><td>Unicode group order; six Fitzpatrick tones; stored as <code>emoji:&lt;glyph&gt;</code></td></tr>
+    <tr><th>Upload → asset</th><td>none</td><td>tldraw <code>Editor.getAssetForExternalContent({{type:'file'}})</code> → <code>Editor.createAssets</code>; bytes inlined by tldraw's default <code>inlineBase64AssetStore</code>; validated by <code>assetIdValidator</code></td><td>the board stays one self-contained file; tldraw sanitises SVG; copy/paste and export carry the asset because the prop is literally <code>assetId</code></td></tr>
+    <tr><th>Downscale</th><td>none</td><td>browser <code>createImageBitmap</code> + canvas <code>toBlob('image/png')</code></td><td>≤256 px on the long edge, SVG untouched (1 MB cap)</td></tr>
+    <tr><th>Paste / drop</th><td>none</td><td>DOM <code>paste</code> in the capture phase + <code>DataTransfer</code>; tldraw's own paste handler is bubble-phase and never sees it</td><td>a paste meant for the picker never drops an image shape on the canvas; a URL pasted into the filter stays text</td></tr>
+    <tr><th>URL fetch</th><td>none</td><td>Python host <code>POST /api/icon/fetch</code> (<code>urllib</code> + <code>ipaddress</code>, pinned IP, ≤3 manual redirects)</td><td>only http(s), only image/*, 5 MB cap before the body is read, no private/loopback targets, JSON-only + same-origin</td></tr>
+    <tr><th>Grid windowing</th><td>none (39 cells)</td><td>own 60-line <code>useWindowedGrid</code> over a fixed 12-column grid (no dependency; Virtua/TanStack were the alternatives)</td><td>count line stays truthful; Enter, hover titles, section labels and Recent rows keep working</td></tr>
+    <tr><th>Library loading</th><td>static import</td><td>React <code>useSyncExternalStore</code> over one module-level promise</td><td>placeholder box until the chunk lands; boards with only curated icons never request it</td></tr>
+    <tr><th><b>Unchanged (stock seam)</b></th><td colspan="3">tldraw stays at 5.3.2 with no engine change: the Block shape util, its layout (<code>SIMPLE_ICON_PX</code> / <code>HEADER_ICON_PX</code> boxes), undo history, selection, the <code>.systemsketch</code> envelope and the workspace autosave are untouched; the only model change is one optional prop written solely for uploads, so a board without an upload still opens on the previous build.</td></tr>
   </tbody></table>
 </section>
 
