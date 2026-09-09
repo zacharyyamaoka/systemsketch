@@ -254,6 +254,13 @@ export function BlockIconPicker({
 	const saveUpload = async () => {
 		if (upload.kind !== 'preview' || !editor) return
 		setUpload({ kind: 'saving', prepared: upload.prepared, previewUrl: upload.previewUrl })
+		// WHY the asset is created outside the Block command's undo step: tldraw
+		// writes assets with `history: 'ignore'` (Editor.createAssets), so no
+		// undo ever removes an asset record — the same as undoing one of its own
+		// pasted images. One undo therefore restores the Block's previous icon in
+		// a single step and the asset stays in the board as an orphan, exactly
+		// like stock tldraw. Reclaiming orphans is a save-time sweep for later,
+		// not an undo concern.
 		const assetId = await createIconAsset(editor, upload.prepared)
 		if (!assetId) {
 			setUpload({ kind: 'error', message: 'the editor declined this file — try a different image' })
@@ -263,12 +270,12 @@ export function BlockIconPicker({
 		choose({ kind: 'asset', assetId })
 	}
 
-	// Capture phase, and both calls fired before either the browser's default
-	// paste or tldraw's own document-level paste handler runs: without this a
-	// paste meant for the picker also drops a second image shape onto the
-	// canvas behind it (tldraw's own paste-to-canvas listener is also
-	// capture-phase, so only stopping propagation here — not just
-	// preventDefault — keeps it from ever seeing the event).
+	// WHY a capture-phase listener on the document: tldraw registers its own
+	// paste-to-canvas handler on the document in the BUBBLE phase (no capture
+	// flag in useClipboardEvents), so a capture listener here runs first for
+	// any paste targeting an element, and stopImmediatePropagation keeps
+	// tldraw from ever seeing it. Without this a paste meant for the picker
+	// also drops a second image shape onto the canvas behind it.
 	useEffect(() => {
 		if (!open) return
 		const onPaste = (event: ClipboardEvent) => {

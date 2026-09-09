@@ -286,6 +286,25 @@ async function main() {
     const imageShapesAfterSave = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((s) => s.type === 'image').length`)
     add(`4. saving the uploaded icon still never drops an image shape on the canvas (count=${imageShapesAfterSave})`, imageShapesAfterSave === imageShapesBeforePaste)
 
+    // 4b. Save is ONE undo step for the Block. The asset record itself sits
+    // outside history by tldraw design (Editor.createAssets runs with
+    // history 'ignore', exactly as for its own pasted images), so it must
+    // survive the undo — a Block that redoes must find its image again.
+    await evaluate(page, `window.__systemsketch.editor.undo(); undefined`)
+    const afterUploadUndo = await blockIcon(page)
+    const assetAfterUndo = await evaluate(page, `window.__systemsketch.editor.getAsset(${JSON.stringify(uploadedAssetId)}) ? 'present' : 'gone'`)
+    add(
+      `4. one undo after Save restores the previous icon (assetId=${JSON.stringify(afterUploadUndo.assetId)}, icon=${JSON.stringify(afterUploadUndo.icon)})`,
+      afterUploadUndo.assetId === null && afterUploadUndo.icon !== 'asset',
+    )
+    add(`4. the asset record survives the undo like tldraw's own images (asset=${assetAfterUndo})`, assetAfterUndo === 'present')
+    await evaluate(page, `window.__systemsketch.editor.redo(); undefined`)
+    const afterUploadRedo = await blockIcon(page)
+    add(
+      `4. one redo restores the uploaded icon (assetId=${JSON.stringify(afterUploadRedo.assetId)})`,
+      afterUploadRedo.assetId === uploadedAssetId,
+    )
+
     // ------------------------------------------------------------------
     // 5. Disk round trip
     // ------------------------------------------------------------------
