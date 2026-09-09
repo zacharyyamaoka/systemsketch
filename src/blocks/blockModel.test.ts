@@ -1,10 +1,12 @@
-import { createShapeId, type TLShape } from 'tldraw'
+import { T, createShapeId, type TLAssetId, type TLShape } from 'tldraw'
 import { describe, expect, it } from 'vitest'
 import {
 	appendBlockPortToProps,
 	blockMemberLayout,
 	blockInsetBackground,
 	blockIcon,
+	blockIconRef,
+	BLOCK_SHAPE_PROPS,
 	blockFoldControlSide,
 	BLOCK_PRESENTATION_VIEWS,
 	blockNotes,
@@ -294,5 +296,33 @@ describe('the value view', () => {
 
 	it('never contains children', () => {
 		expect(canBlockContainChildren('value')).toBe(false)
+	})
+})
+
+describe('blockIconRef', () => {
+	const ASSET_ID = 'asset:test1' as TLAssetId
+
+	it('decodes a curated or otherwise bare icon name as lucide', () => {
+		const props = { ...getDefaultBlockProps(), icon: 'SquareFunction' }
+		expect(blockIconRef(props)).toEqual({ kind: 'lucide', name: 'SquareFunction' })
+	})
+
+	it('decodes the emoji: prefix', () => {
+		const props = { ...getDefaultBlockProps(), icon: 'emoji:🔥' }
+		expect(blockIconRef(props)).toEqual({ kind: 'emoji', char: '🔥' })
+	})
+
+	it('decodes an uploaded asset, assetId winning over the icon string', () => {
+		const props = { ...getDefaultBlockProps(), icon: 'asset', assetId: ASSET_ID }
+		expect(blockIconRef(props)).toEqual({ kind: 'asset', assetId: ASSET_ID })
+	})
+
+	it('validates a Block record with and without an uploaded icon asset', () => {
+		const validator = T.object(BLOCK_SHAPE_PROPS)
+		const withoutAsset = getDefaultBlockProps()
+		expect(() => validator.validate(withoutAsset)).not.toThrow()
+
+		const withAsset = { ...getDefaultBlockProps(), icon: 'asset', assetId: ASSET_ID }
+		expect(() => validator.validate(withAsset)).not.toThrow()
 	})
 })

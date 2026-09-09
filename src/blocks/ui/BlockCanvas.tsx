@@ -28,6 +28,7 @@ import {
   blockHeaderAlign,
 	blockFoldControlSide,
   blockIcon,
+  blockIconRef,
   blockIsFolded,
 	blockInsetBackground,
   blockMemberLayout,
@@ -78,7 +79,7 @@ import {
   type BlockPortAddAffordance,
   type BlockPortDragState,
 } from '../ports'
-import { BlockIconGlyph } from './blockIcons'
+import { BlockIconRefGlyph } from './blockIcons'
 import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNavigation'
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
@@ -759,7 +760,11 @@ function SimpleFace({
   titleAppearance: BlockTitleAppearance
 }) {
   const layout = layoutBlock(shape.props)
+  // WHY: gate stays on the raw `icon` prop (what `layoutBlock` also reads),
+  // not the decoded kind — an emoji/asset encoding is always a non-empty
+  // string, so this box-existence decision is unchanged for every kind.
   const icon = blockIcon(shape.props)
+  const iconRef = blockIconRef(shape.props)
   return (
     <>
       {layout.title ? (
@@ -773,7 +778,7 @@ function SimpleFace({
               className="BlockNode-simpleIcon"
               data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
             >
-              <BlockIconGlyph name={icon} size={SIMPLE_ICON_PX} />
+              <BlockIconRefGlyph icon={iconRef} size={SIMPLE_ICON_PX} />
             </span>
           ) : null}
           <span
@@ -1056,6 +1061,7 @@ function BlockHeading({
   titleAppearance: BlockTitleAppearance
 }) {
   const icon = blockIcon(shape.props)
+  const iconRef = blockIconRef(shape.props)
   const foldable = canBlockFold(shape.props)
 	const foldSide = blockFoldControlSide(shape.props)
   const centered = blockHeaderAlign(shape.props) === 'center'
@@ -1091,7 +1097,7 @@ function BlockHeading({
               className="BlockNode-headingIcon"
               data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
             >
-              <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+              <BlockIconRefGlyph icon={iconRef} size={HEADER_ICON_PX} />
             </span>
           ) : null}
           <span
