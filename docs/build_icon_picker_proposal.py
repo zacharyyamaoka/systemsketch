@@ -77,6 +77,12 @@ IMPL_CAPTURES = [
 ]
 
 
+def _journey_results() -> dict:
+    """The journey's own tally, written by tests/icon_picker_smoke.mjs on its last run."""
+    path = ROOT / "docs/assets/icon-picker-results.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
 def implemented() -> dict | None:
     """Facts about the implementation, measured from the tree; None until it exists."""
     picker = ROOT / "src/blocks/ui/iconPicker/BlockIconPicker.tsx"
@@ -94,7 +100,8 @@ def implemented() -> dict | None:
         "css_lines": (ROOT / "src/blocks/ui/iconPicker/block-icon-picker.css").read_text(encoding="utf-8").count("\n"),
         "vitest_files": len(tests),
         "vitest_cases": vitest_cases,
-        "journey_checks": len(re.findall(r"^\s*(?:pass|add)\(", journey_text, re.M)) if journey_text else 0,
+        "journey_checks": _journey_results().get("checks", 0),
+        "journey_first_paint_ms": _journey_results().get("firstPaintMs"),
         "journey": journey.exists(),
         "fetch_endpoint": "/api/icon/fetch" in server,
         "triggers": sum(1 for f, token in [
@@ -604,10 +611,10 @@ def implemented_html(impl: dict | None, fig) -> str:
     rows = "".join(f"<tr><th>{escape(k)}</th><td>{v}</td></tr>" for k, v in [
         ("Picker", f"<code>src/blocks/ui/iconPicker/BlockIconPicker.tsx</code> · {impl['picker_lines']} lines, {impl['css_lines']} lines of CSS on <code>--ss-*</code> tokens"),
         ("Triggers wired", f"{impl['triggers']} of 3 — inspector well, on-canvas icon (inline editor), context menu “Icon…”"),
-        ("Model", "<code>assetId</code> beside <code>icon</code>, written only for uploads so older builds still open boards without one; migration v13; <code>blockIconRef()</code> decodes none · lucide · emoji · asset"),
+        ("Model", "<code>assetId</code> beside <code>icon</code>, written only for uploads so older builds still open boards without one (no schema bump); <code>blockIconRef()</code> decodes none · lucide · emoji · asset"),
         ("Host", "<code>POST /api/icon/fetch</code> " + ("present" if impl["fetch_endpoint"] else "<b>missing</b>") + " — 8 s timeout, 5 MB cap, image/* only"),
         ("Unit tests", f"{impl['vitest_cases']} vitest cases in {impl['vitest_files']} files under <code>iconPicker/</code>, plus model, upload and Python endpoint tests"),
-        ("Browser journey", (f"<code>tests/icon_picker_smoke.mjs</code> · {impl['journey_checks']} checks · <code>npm run test:icon-picker</code>" if impl["journey"] else "<b>not yet written</b>")),
+        ("Browser journey", (f"<code>tests/icon_picker_smoke.mjs</code> · {impl['journey_checks'] or '?'} checks on its last run" + (f" · first paint {impl['journey_first_paint_ms']} ms" if impl.get('journey_first_paint_ms') else "") + " · <code>npm run test:icon-picker</code>" if impl["journey"] else "<b>not yet written</b>")),
         ("Review board", "<code>sketches/review/icon-picker.systemsketch</code>" if impl["board"] else "<b>not yet seeded</b>"),
     ])
     return f"""
@@ -695,12 +702,12 @@ def main() -> None:
   <h3>Element by element</h3>
   <table><thead><tr><th>Notion</th><th>SystemSketch</th><th>Where</th></tr></thead><tbody>
     <tr><th>Emoji · Icons · Upload tabs, Remove at right</th><td>Same three tabs, same order. Remove clears <code>icon</code> and <code>assetId</code>.</td><td>new <code>src/blocks/ui/iconPicker/BlockIconPicker.tsx</code></td></tr>
-    <tr><th>Filter…</th><td>Substring over icon name and Lucide tags, ranked name › tag. Emoji: name, slug and emojibase keywords. Enter picks the first hit. No fuzzy library — Notion doesn’t fuzz either.</td><td><code>iconSearch.ts</code> + vitest</td></tr>
+    <tr><th>Filter…</th><td>Substring over icon name and Lucide tags, ranked name › tag. Emoji: name, slug and emojibase keywords. Enter picks the first hit. No fuzzy library — Notion doesn’t fuzz either.</td><td><code>lucideLibrary.ts</code> <code>searchLucide</code> + vitest</td></tr>
     <tr><th>Shuffle</th><td>Random pick from the current filter (so “animal” + shuffle is a random animal).</td><td>picker</td></tr>
     <tr><th>Colour dot</th><td>Phase 2: an <code>iconColor</code> StyleProp over tldraw’s twelve solids. V1: the icon follows the Block’s text colour, as today.</td><td><code>blockModel.ts</code></td></tr>
     <tr><th>Skin-tone hand</th><td>Same six tones, applied to emoji that support them; persisted as a user preference, not on the Block.</td><td>picker</td></tr>
     <tr><th>Recent section</th><td>Last 12 picks, per user, first in the grid when the filter is empty.</td><td><code>localStorage</code></td></tr>
-    <tr><th>Dense 12-column grid</th><td>Same. All {m['lucide_count']} icons render as inline SVG in one pass; the mock measures the build time in its footer. If it stays under ~100 ms no virtualisation is needed.</td><td>picker</td></tr>
+    <tr><th>Dense 12-column grid</th><td>Same. The mock rendered all {m['lucide_count']} icons in one pass (~75 ms as innerHTML); in the app React needed 473 ms for 11,000 nodes, so the shipped grid windows its rows (258 ms to first paint) while the count line still reads the full set.</td><td>picker · <code>useWindowedGrid.ts</code></td></tr>
     <tr><th>Upload an image · “or Ctrl+V to paste an image or link”</th><td>File dialog, drop, and a document-level paste while the picker is open. Image bytes → downscale to ≤256 px PNG (SVG kept as vector) → <code>editor.createAssets</code> → <code>assetId</code>. A pasted URL is fetched by the Python host so the bytes can be inlined without a CORS taint.</td><td><code>uploadIcon.ts</code>, <code>scripts/server.py</code></td></tr>
     <tr><th>Preview at two sizes</th><td>At {m['simple_px']} px and {m['header_px']} px, the exact sizes the Block draws.</td><td>picker</td></tr>
     <tr><th>Add to workspace emoji library</th><td>Phase 2: saves the asset into the workspace Library panel (shipped 2026-09-06) so other boards can pick it. Notion’s “+” custom emoji flow is the same thing.</td><td><code>src/library/</code></td></tr>
