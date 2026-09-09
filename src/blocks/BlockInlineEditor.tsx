@@ -1,8 +1,8 @@
 import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react'
 import { useEditor, useValue } from 'tldraw'
 
-import { isBlockShape, type BlockShape, type BlockShapeProps } from './blockModel'
-import { patchBlockPortProps } from './commands/blockCommands'
+import { blockIconRef, isBlockShape, type BlockShape, type BlockShapeProps } from './blockModel'
+import { patchBlockPortProps, updateBlockDetails } from './commands/blockCommands'
 import {
 	blockInlineEditorPlacement,
 	getBlockInlineField,
@@ -10,7 +10,8 @@ import {
 } from './inlineBlockEditing'
 import { VALUE_FONT_PX } from './layoutBlock'
 import { blockTitleAppearance } from './titleAppearance'
-import { BLOCK_ICONS } from './ui/blockIcons'
+import { BlockIconPicker } from './ui/iconPicker/BlockIconPicker'
+import { encodeBlockIcon } from './ui/iconPicker/iconRef'
 import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
@@ -217,17 +218,36 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	}
 
 	if (field.kind === 'icon') {
+		// WHY this doesn't spread `common`: that shape is built for a text
+		// input/textarea/select (a `value`, an `onKeyDown` for Escape/Enter).
+		// The picker owns Escape (Radix's dismissable layer → `onOpenChange`)
+		// and Enter (picks the first visible cell) itself, and there is no text
+		// value to show — only an invisible box at the on-canvas icon's
+		// position for `BlockIconPicker` to anchor its popover against. `open`
+		// is always true here: this branch only renders while tldraw's own
+		// editing lifecycle already has the icon field active, so closing the
+		// popover (Escape, an outside click, or a pick) is what should end
+		// that lifecycle, not the other way around.
 		return (
-			<select
-				{...common}
-				aria-label="Edit block icon"
-				onChange={(event) => writeField(event.target.value)}
+			<BlockIconPicker
+				value={blockIconRef(shape.props)}
+				title={shape.props.title}
+				open
+				onOpenChange={(next) => {
+					if (!next) editor.cancel()
+				}}
+				onChange={(icon) => {
+					const { icon: iconValue, assetId } = encodeBlockIcon(icon)
+					updateBlockDetails(editor, shape.id, { icon: iconValue, assetId }, { historyLabel: 'edit block icon' })
+					editor.complete()
+				}}
 			>
-				<option value="">No icon</option>
-				{BLOCK_ICONS.map(({ name, label }) => (
-					<option key={name} value={name}>{label}</option>
-				))}
-			</select>
+				<span
+					aria-hidden="true"
+					data-testid={testIdFor(field)}
+					style={{ position: 'absolute', left: style.left, top: style.top, width: style.width, height: style.height, pointerEvents: 'none' }}
+				/>
+			</BlockIconPicker>
 		)
 	}
 

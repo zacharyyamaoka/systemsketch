@@ -21,7 +21,9 @@ from functools import partial
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.error import URLError
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.request import Request, urlopen
 
 from release_lib import (
     PRODUCT,
@@ -91,6 +93,41 @@ def _post_failure_status(cause: BaseException) -> HTTPStatus:
     if isinstance(cause, (WorkspaceStorageError, OSError)):
         return HTTPStatus.SERVICE_UNAVAILABLE
     return HTTPStatus.CONFLICT
+
+
+ICON_FETCH_TIMEOUT_SECONDS = 8
+ICON_FETCH_MAX_BYTES = 5 * 1024 * 1024
+
+
+def fetch_icon_bytes(url: str) -> tuple[bytes, str]:
+    """Fetch an image URL for the icon picker's Upload tab paste-a-link path.
+
+    WHY the host fetches this, not the browser: `fetch(url)` straight from the
+    picker taints any `<canvas>` drawn from a cross-origin image, and the
+    downscale step in `uploadIcon.ts` needs `canvas.toBlob` to actually work —
+    exactly the images someone pastes a link to. Restricted to http/https, an
+    `image/*` response, and a byte cap so this can't be turned into a generic
+    open proxy or a way to pull down an arbitrarily large file.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("only http and https URLs are supported")
+    if not parsed.netloc:
+        raise ValueError("the URL is missing a host")
+    request = Request(url, headers={"User-Agent": "SystemSketch-icon-fetch/1"})
+    try:
+        with urlopen(request, timeout=ICON_FETCH_TIMEOUT_SECONDS) as response:
+            content_type = (response.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+            if not (content_type.startswith("image/")):
+                raise ValueError(f"the URL did not return an image (got {content_type or 'no content type'})")
+            body = response.read(ICON_FETCH_MAX_BYTES + 1)
+            if len(body) > ICON_FETCH_MAX_BYTES:
+                raise ValueError(f"the image is larger than {ICON_FETCH_MAX_BYTES // (1024 * 1024)} MB")
+            return body, content_type
+    except URLError as cause:
+        raise ValueError(f"could not fetch the URL: {cause.reason}") from cause
+    except TimeoutError as cause:
+        raise ValueError(f"fetching the URL timed out after {ICON_FETCH_TIMEOUT_SECONDS}s") from cause
 
 
 def _validated_promoted_workspace(payload: object, files_root: Path) -> dict:
@@ -255,6 +292,26 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    def _bytes(self, payload: bytes, content_type: str, status: HTTPStatus = HTTPStatus.OK) -> None:
+        """Same event-log bookkeeping as `_json`, for the one route (icon
+        fetch) whose successful response is raw image bytes, not JSON."""
+        parsed_path = urlparse(self.path).path
+        if parsed_path.startswith("/api/"):
+            started = getattr(self, "_request_started", time.perf_counter())
+            self.app.host_events.append({
+                "method": self.command,
+                "path": parsed_path,
+                "status": int(status),
+                "durationMs": round((time.perf_counter() - started) * 1000, 1),
+                "level": "info",
+                "summary": f"{self.command} {parsed_path} → {int(status)}",
+            })
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
     def _record_exception(self, cause: BaseException) -> None:
         path = urlparse(self.path).path
         self.app.host_events.append({
@@ -380,6 +437,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             "/api/workspace/reveal",
             "/api/settings/file-access",
             "/api/expression/evaluate",
+            "/api/icon/fetch",
         }:
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
             return
@@ -422,6 +480,13 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 ):
                     raise ValueError("registry must be an object mapping names to expression strings")
                 self._json(evaluate_expression(expr, raw_registry))
+                return
+            if path == "/api/icon/fetch":
+                url = payload.get("url")
+                if not isinstance(url, str) or not url:
+                    raise ValueError("url must be a non-empty string")
+                body, content_type = fetch_icon_bytes(url)
+                self._bytes(body, content_type)
                 return
             if path == "/api/settings/file-access":
                 raw_allow_any_path = payload.get("allowAnyPath")

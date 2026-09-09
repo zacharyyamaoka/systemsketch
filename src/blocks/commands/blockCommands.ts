@@ -96,6 +96,11 @@ export type BlockDetailsPatch = Partial<
 		| 'showFooter'
 		| 'showHeaderDivider'
     | 'icon'
+    // WHY paired with `icon` here: an uploaded icon is decoded from both
+    // props together (see `ui/iconPicker/iconRef.ts`), so a picker choice
+    // has to write them as one patch or an intermediate render sees a
+    // stale asset next to a fresh Lucide name (or vice versa).
+    | 'assetId'
     | 'notes'
 		| 'portLayout'
 		| 'insetBackground'
