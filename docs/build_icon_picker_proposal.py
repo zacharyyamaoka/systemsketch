@@ -46,7 +46,7 @@ def measured() -> dict:
     pkg = json.loads(read("package.json"))
     need(icons_src, "export const BLOCK_ICONS", "the curated registry")
     need(model, "icon: T.string.optional()", "the icon prop")
-    need(inspector, "function IconPicker(", "the inspector picker")
+    need(inspector, "IconPicker", "the inspector picker")
     curated = len(re.findall(r"^\s*\{ name: '", icons_src, re.M))
     simple_px = re.search(r"SIMPLE_ICON_PX = (\d+)", layout).group(1)
     header_px = re.search(r"HEADER_ICON_PX = (\d+)", layout).group(1)
@@ -66,6 +66,44 @@ def measured() -> dict:
         "emoji_groups": len({e["g"] for e in emoji["emoji"]}),
         "lucide_json_kb": (MEDIA / "lucide-1.43.0.json").stat().st_size // 1024,
         "emoji_json_kb": (MEDIA / "emoji-0.9.0.json").stat().st_size // 1024,
+    }
+
+
+IMPL_CAPTURES = [
+    ("icon-picker-inspector.png", "Journey · the inspector well opens the picker; filter “data”, first cell picked, header glyph drawn."),
+    ("icon-picker-upload-preview.png", "Journey · a PNG pasted with Ctrl+V lands in the Upload preview at 40 px and 22 px."),
+    ("icon-picker-asset-on-canvas.png", "Journey · after Save the Block header draws the uploaded asset."),
+    ("icon-picker-dark.png", "Journey · the same picker on the dark theme."),
+]
+
+
+def implemented() -> dict | None:
+    """Facts about the implementation, measured from the tree; None until it exists."""
+    picker = ROOT / "src/blocks/ui/iconPicker/BlockIconPicker.tsx"
+    if not picker.exists():
+        return None
+    journey = ROOT / "tests/icon_picker_smoke.mjs"
+    journey_text = journey.read_text(encoding="utf-8") if journey.exists() else ""
+    tests = sorted((ROOT / "src/blocks/ui/iconPicker").glob("*.test.ts"))
+    vitest_cases = sum(len(re.findall(r"^\s*(?:it|test)\(", t.read_text(encoding="utf-8"), re.M)) for t in tests)
+    server = read("scripts/server.py")
+    model = read("src/blocks/blockModel.ts")
+    need(model, "assetId: assetIdValidator.nullable().optional()", "the assetId prop")
+    return {
+        "picker_lines": picker.read_text(encoding="utf-8").count("\n"),
+        "css_lines": (ROOT / "src/blocks/ui/iconPicker/block-icon-picker.css").read_text(encoding="utf-8").count("\n"),
+        "vitest_files": len(tests),
+        "vitest_cases": vitest_cases,
+        "journey_checks": len(re.findall(r"\bcheck\(", journey_text)) if journey_text else 0,
+        "journey": journey.exists(),
+        "fetch_endpoint": "/api/icon/fetch" in server,
+        "triggers": sum(1 for f, token in [
+            ("src/blocks/ui/BlockInspector.tsx", "BlockIconPicker"),
+            ("src/blocks/BlockInlineEditor.tsx", "BlockIconPicker"),
+            ("src/blocks/ui/BlockContextMenu.tsx", "Icon"),
+        ] if token in read(f)),
+        "captures": [c for c in IMPL_CAPTURES if (ROOT / "docs/assets" / c[0]).exists()],
+        "board": (ROOT / "sketches/review/icon-picker.systemsketch").exists(),
     }
 
 
@@ -554,8 +592,41 @@ def architecture_svg(m: dict) -> str:
 </svg>"""
 
 
+def implemented_html(impl: dict | None, fig) -> str:
+    if not impl:
+        return ""
+    caps = "".join(fig(name, cap) for name, cap in impl["captures"])
+    board = ""
+    for name, cap in [("review-board.png", "The review board: numbered gestures and the PASS WHEN card."),
+                      ("review-board-picker-open.png", "The review board driven once in the app, picker open on the no-icon Block.")]:
+        if (MEDIA / name).exists():
+            board += fig(name, cap)
+    rows = "".join(f"<tr><th>{escape(k)}</th><td>{v}</td></tr>" for k, v in [
+        ("Picker", f"<code>src/blocks/ui/iconPicker/BlockIconPicker.tsx</code> · {impl['picker_lines']} lines, {impl['css_lines']} lines of CSS on <code>--ss-*</code> tokens"),
+        ("Triggers wired", f"{impl['triggers']} of 3 — inspector well, on-canvas icon (inline editor), context menu “Icon…”"),
+        ("Model", "<code>assetId</code> beside <code>icon</code>; <code>blockIconRef()</code> decodes none · lucide · emoji · asset"),
+        ("Host", "<code>POST /api/icon/fetch</code> " + ("present" if impl["fetch_endpoint"] else "<b>missing</b>") + " — 8 s timeout, 5 MB cap, image/* only"),
+        ("Unit tests", f"{impl['vitest_cases']} vitest cases in {impl['vitest_files']} files under <code>iconPicker/</code>, plus model, upload and Python endpoint tests"),
+        ("Browser journey", (f"<code>tests/icon_picker_smoke.mjs</code> · {impl['journey_checks']} checks · <code>npm run test:icon-picker</code>" if impl["journey"] else "<b>not yet written</b>")),
+        ("Review board", "<code>sketches/review/icon-picker.systemsketch</code>" if impl["board"] else "<b>not yet seeded</b>"),
+    ])
+    return f"""
+<section id="implemented">
+  <h2>Implemented — what landed on the lane</h2>
+  <p>The proposal below was built as specified, defaults D1–D6 taken. Everything in this section is measured from the committed tree the review runtime pinned; the captures come from the real app driven by the journey.</p>
+  <table><tbody>{rows}</tbody></table>
+  <div class="refs">{caps}{board}</div>
+</section>"""
+
+
 def main() -> None:
     m = measured()
+    impl = implemented()
+    if impl:
+        import shutil
+        MEDIA.mkdir(parents=True, exist_ok=True)
+        for name, _ in impl["captures"]:
+            shutil.copyfile(ROOT / "docs/assets" / name, MEDIA / name)
     stills = sorted(p.name for p in MEDIA.glob("mock-*.png"))
 
     def fig(name: str, cap: str) -> str:
@@ -600,16 +671,17 @@ def main() -> None:
 <div class="hero">
   <div class="eyebrow">SystemSketch · proposal · {date.today().isoformat()}</div>
   <h1>Block icon picker: copy Notion’s, fill it with all of Lucide</h1>
-  <p class="lead">Today a Block chooses from <b>{m['curated']} curated icons</b> in a fixed grid. The proposal is Notion’s picker, element for element — <b>Emoji · Icons · Upload</b>, a filter bar, shuffle, Remove, and Ctrl+V to paste an image or a link — over the <b>whole Lucide set ({m['lucide_count']} icons, searchable by Lucide’s own tags)</b>, with uploads stored as tldraw assets inside the board file. Nothing is implemented yet; the mock below is real data and real behaviour so it can be judged before it is built.</p>
+  <p class="lead">Today a Block chooses from <b>{m['curated']} curated icons</b> in a fixed grid. The proposal is Notion’s picker, element for element — <b>Emoji · Icons · Upload</b>, a filter bar, shuffle, Remove, and Ctrl+V to paste an image or a link — over the <b>whole Lucide set ({m['lucide_count']} icons, searchable by Lucide’s own tags)</b>, with uploads stored as tldraw assets inside the board file. {'It is now built — see “Implemented” just below; the mock further down is the design it was built from.' if impl else 'Nothing is implemented yet; the mock below is real data and real behaviour so it can be judged before it is built.'}</p>
   <div class="verdict"><b>Recommendation.</b> Build it ourselves on the Radix popover already in the app; take from the shadcn pickers only the idea (Lucide tags as the search index). Reasons:
     <ul>
       <li>None of the three shadcn pickers has an Emoji or Upload tab — they are Icons-only, on a Tailwind/shadcn stack we do not run. Copying them buys the smallest third of the feature and a second styling system.</li>
       <li>Everything hard is already in the tree: lucide-react (bump {m['lucide_pinned']} → {m['lucide_next']}), a Radix popover inside tldraw’s container (<code>BtInsertMenu</code>), and tldraw’s inline asset store for uploads.</li>
       <li>The one genuinely new artefact is the lazy library chunk ({BUNDLE['gz_kb']} KB gz) — loaded on first open, and by the canvas only for a board that uses a non-curated icon.</li>
     </ul></div>
-  <div class="quiet">Scope: a proposal with a working mock. Not built into the app, so nothing here is verified in-app; the mock proves the data, the search, the paste pipeline and the look — not the tldraw integration.</div>
+  <div class="quiet">{'Scope: proposal plus implementation on branch track/icon-picker-proposal, nothing merged.' if impl else 'Scope: a proposal with a working mock. Not built into the app, so nothing here is verified in-app; the mock proves the data, the search, the paste pipeline and the look — not the tldraw integration.'}</div>
 </div>
 
+{implemented_html(impl, fig)}
 <section id="mock">
   <h2>The picker, live</h2>
   <p>Notion’s design, in the app’s dark and light tones. Type to filter, press Enter for the first hit, click the shuffle for a random one, paste an image or an <code>https://…</code> link while it is open. The Blocks on the left draw what would be stored.</p>
