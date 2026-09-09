@@ -141,6 +141,16 @@ describe('block command integration surface', () => {
     expect(fixture.history).toEqual(['edit block', 'edit block', 'show block as expanded'])
   })
 
+  it('keeps a required prop when a patch sets it to undefined, deleting only optional ones', () => {
+    const fixture = mockEditor(blockShape())
+    const titleBefore = fixture.current().props.title
+    // A required prop explicitly unset must NOT become absent (the validator
+    // would reject the record); the call reports nothing changed.
+    expect(updateBlockDetails(fixture.editor, fixture.current().id, { title: undefined })).toMatchObject({ ok: false })
+    expect(fixture.current().props.title).toBe(titleBefore)
+    expect(Object.prototype.hasOwnProperty.call(fixture.current().props, 'title')).toBe(true)
+  })
+
   it('deletes a stored assetId once an upload no longer applies, not just leaves it undefined', () => {
     // The bug this proves fixed: tldraw's real updateShape merges `props`
     // key-by-key onto the stored record and only ever adds or overwrites a

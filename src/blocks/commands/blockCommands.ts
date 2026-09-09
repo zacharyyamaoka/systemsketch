@@ -10,6 +10,7 @@ import {
   type BlockPortSection,
   type BlockPortSide,
   type BlockShape,
+  BLOCK_SHAPE_PROPS,
   type BlockShapeProps,
   type BlockPresentationView,
   blockPortSections,
@@ -275,6 +276,18 @@ export function updateBlockProps(
   return { ok: true, shapeId: shape.id, props }
 }
 
+/** True when the Block validator accepts the prop being absent. */
+function isOptionalBlockProp(key: keyof BlockShapeProps): boolean {
+  const validator = (BLOCK_SHAPE_PROPS as Record<string, { validate(value: unknown): unknown }>)[key as string]
+  if (!validator) return false
+  try {
+    validator.validate(undefined)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function updateBlockDetails(
   editor: Editor,
   shapeId: TLShapeId,
@@ -303,8 +316,13 @@ export function patchBlockDetailsProps(
   // what the key holds. This is the one seam that already merges a full props
   // object before it reaches the store, so it is where an explicit "unset"
   // becomes real absence rather than a still-present `undefined`.
+  // Only an OPTIONAL prop may become absent; an explicit `undefined` for a
+  // required prop (`title: undefined`) keeps the current value instead of
+  // deleting a key the validator demands.
   for (const key of Object.keys(patch) as (keyof BlockDetailsPatch)[]) {
-    if (next[key] === undefined) delete next[key]
+    if (next[key] !== undefined) continue
+    if (isOptionalBlockProp(key)) delete next[key]
+    else (next as Record<string, unknown>)[key] = props[key]
   }
   return Object.keys(patch).every((key) => {
     const detail = key as keyof BlockDetailsPatch
